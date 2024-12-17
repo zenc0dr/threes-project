@@ -1,0 +1,24 @@
+# ===================================
+# Filter Scope Definitions
+# ===================================
+
+scopes:
+    status:
+        label: Status
+        type: dropdown
+        emptyOption: Status
+        modelScope: applyStatusCode
+        options:
+            active: [Activated, 'var(--bs-green)']
+            inactive: [Inactivated, 'var(--bs-orange)']
+            deleted: [Deleted, 'var(--bs-red)']
+
+    created_at:
+        label: Join Date
+        type: date
+
+    groups:
+        label: Group
+        modelClass: RainLab\User\Models\UserGroup
+        nameFrom: name
+        scope: applyGroups

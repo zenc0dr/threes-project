@@ -1,0 +1,33 @@
+v1.0.1: First version of User
+v1.0.2:
+    - Set up database tables
+    - 000001_create_users.php
+    - 000002_create_password_resets.php
+    - 000003_create_user_groups.php
+    - 000004_create_user_preferences.php
+    - 000005_create_user_logs.php
+v1.0.3:
+    - Seed all database tables
+    - seed_tables.php
+v1.1.0: Profile fields and Locations have been removed.
+v1.2.0: Users can now deactivate their own accounts.
+v1.3.0: Introduced guest user accounts.
+v1.4.0: The Notifications tab in User Settings has been removed.
+v1.5.0: Required password length is now a minimum of 8 characters. Previous passwords will not be affected until the next password change.
+v1.6.0: Apply persistence settings on activation and registration. Fixes last seen touched when impersonating. Fixes user suspension not clearing.
+v1.7.0: Add password policy
+v1.7.1: Fixes compatibility with legacy sites
+v2.0.0: Compatibility with October v3 only
+v2.1.0: Adds bearer token (JWT) support to session component
+v3.0.0:
+    - Major Upgrade to User Plugin
+    - migrate_v3_0_0.php
+v3.0.4: Fixes bug in JWT authentication check
+v3.0.5: Adds permission for viewing user activity log
+v3.0.7: Fixes missing notification variables in mail templates
+v3.1.0:
+    - New email verification logic
+    - migrate_v3_1_0.php
+v3.1.1: Fixes compatibility with Mall plugin
+v3.1.3: Translation updates
+v3.2.0: Fixes events with 2FA, requires October v3.7 or above

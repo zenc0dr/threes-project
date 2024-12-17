@@ -1,0 +1,30 @@
+# ===================================
+#  Column Definitions
+# ===================================
+
+columns:
+    id:
+        label: ID
+        invisible: true
+
+    name:
+        label: Name
+        searchable: true
+
+    description:
+        label: Description
+        searchable: true
+
+    users_count:
+        label: Users
+        relation: users_count
+        valueFrom: count
+        default: 0
+        sortable: false
+
+    code:
+        label: Code
+
+    created_at:
+        label: Created
+        type: datetime

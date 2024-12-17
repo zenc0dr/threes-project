@@ -1,0 +1,110 @@
+# ===================================
+#  Field Definitions
+# ===================================
+
+fields:
+
+    first_name:
+        label: First Name
+        span: auto
+
+    last_name:
+        label: Last Name
+        span: auto
+
+tabs:
+    fields:
+        username:
+            label: Username
+            tab: Account
+            hidden: true
+            span: left
+
+        email:
+            label: Email
+            tab: Account
+            span: full
+
+        send_invite:
+            type: checkbox
+            label: Send invitation by email
+            comment: Sends a welcome message containing login and password information.
+            tab: Account
+            default: true
+            context: create
+
+        is_mail_blocked:
+            label: Block all outgoing mail sent to this user
+            tab: Account
+            type: checkbox
+            span: full
+            cssClass: field-align-above
+            context: update
+
+        _password_ruler:
+            type: ruler
+            tab: Account
+            cssClass: pb-3 my-2
+
+        password@create:
+            label: Create Password
+            commentAbove: Enter a new password used for signing in.
+            tab: Account
+            type: password
+            span: left
+
+        password@update:
+            label: Reset Password
+            commentAbove: To reset this users password, enter a new password here.
+            tab: Account
+            type: password
+            span: left
+
+        password_confirmation:
+            label: Password Confirmation
+            commentAbove: Enter the password again to confirm it.
+            tab: Account
+            type: password
+            span: right
+            context: [create, update]
+
+        is_two_factor_enabled:
+            label: Two-factor authentication is enabled
+            tab: Account
+            type: checkbox
+            span: full
+            cssClass: field-align-above
+            context: update
+
+        _group_ruler:
+            type: ruler
+            tab: Account
+            cssClass: pb-3 my-2
+
+        primary_group:
+            label: Primary Group
+            tab: Account
+            type: relation
+            scope: withoutGuest
+
+        groups:
+            label: Secondary Groups
+            tab: Account
+            type: relation
+            emptyOption: There are no user groups available.
+            scope: withoutGuest
+
+secondaryTabs:
+    fields:
+
+        avatar:
+            label: Avatar
+            type: fileupload
+            mode: image
+            imageHeight: 260
+            imageWidth: 260
+
+        notes:
+            label: Notes
+            type: textarea
+            size: small

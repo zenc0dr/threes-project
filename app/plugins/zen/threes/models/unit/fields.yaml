@@ -1,0 +1,5 @@
+fields:
+    name:
+        label: 'Название юнита'
+        span: full
+        type: text

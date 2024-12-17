@@ -1,0 +1,17 @@
+# ===================================
+#  Field Definitions
+# ===================================
+
+fields:
+    name:
+        label: Name
+
+    description:
+        label: Description
+        type: textarea
+        size: small
+
+    code:
+        label: Code
+        comment: Enter a unique code used to identify this group.
+        preset: name

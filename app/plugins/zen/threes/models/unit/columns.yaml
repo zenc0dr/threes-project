@@ -1,0 +1,16 @@
+columns:
+    name:
+        label: Nname
+        type: text
+        searchable: true
+        sortable: true
+    active:
+        label: Active
+        type: switch
+        searchable: true
+        sortable: true
+    sort_order:
+        label: Order
+        type: text
+        searchable: true
+        sortable: true

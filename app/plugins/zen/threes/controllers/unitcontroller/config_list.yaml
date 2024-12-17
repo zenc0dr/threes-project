@@ -1,0 +1,15 @@
+list: $/zen/threes/models/unit/columns.yaml
+modelClass: Zen\Threes\Models\Unit
+title: UnitController
+noRecordsMessage: 'backend::lang.list.no_records'
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: 'backend::lang.list.search_prompt'
+recordUrl: 'zen/threes/unitcontroller/update/:id'
+structure:
+    showTree: false
+    showReorder: true
