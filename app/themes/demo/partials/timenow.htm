@@ -1,0 +1,12 @@
+[viewBag]
+snippetCode = "timenow"
+snippetName = "Время сейчас"
+==
+<?php
+function onStart()
+{
+    $this['time_now'] = now()->format('d.m.Y H:i:s');
+}
+?>
+==
+Сейчас: {{ time_now }}

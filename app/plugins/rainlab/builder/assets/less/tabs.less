@@ -1,0 +1,331 @@
+.builder-tabs {
+    > .tabs {
+        position: relative;
+
+        .tab-control {
+            position: absolute;
+            display: block;
+
+            &.inspector-trigger {
+                font-size: 14px;
+                padding-left: 5px;
+                padding-right: 5px;
+                cursor: pointer;
+
+                span {
+                    display: block;
+                    width: 3px;
+                    height: 3px;
+                    margin-bottom: 2px;
+                    background: #95a5a6;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+
+                &:hover, &.inspector-open {
+                    span {
+                        background: @link-color;
+                    }
+                }
+
+                &.global  {
+                    top: 5px;
+                    right: 0;
+                    padding-right: 10px;
+                    background: @body-bg;
+                    z-index: 110;
+                    border-radius: 3px;
+
+                    > div {
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 3px;
+                        background: @toolbar-bg;
+                        padding-left: 10px;
+                        padding-top: 5px;
+
+                        &:active {
+                            background: @toolbar-focus-bg;
+                        }
+                    }
+                }
+            }
+        }
+
+        > ul.tabs {
+            margin: 0;
+            padding-right: 50px;
+            list-style: none;
+            font-size: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+
+            > li {
+                user-select: none;
+                display: inline-block;
+                font-size: 13px;
+                white-space: nowrap;
+                position: relative;
+                cursor: pointer;
+
+                > div.tab-container {
+                    position: relative;
+                    color: @tab-color !important;
+
+                    > div {
+                        transition: padding .1s;
+                        position: relative;
+                    }
+                }
+
+                &:hover > div {
+                    color: @tab-active-color !important;
+                }
+
+                .tab-control {
+                    display: none;
+
+                    &.close-btn {
+                        font-size: 15px;
+                        top: 7px;
+                        right: 18px;
+                        line-height: 15px;
+                        height: 15px;
+                        width: 15px;
+                        text-align: center;
+                        cursor: pointer;
+                        color: #95a5a6;
+
+                        &:hover {
+                            color: @link-color !important;
+                        }
+                    }
+
+                    &.inspector-trigger{
+                        right: 34px;
+                        top: 10px;
+                    }
+                }
+
+                &.active {
+                    > div.tab-container {
+                        color: @tab-active-color !important;
+                    }
+
+                    .tab-control {
+                        display: block;
+                    }
+                }
+            }
+        }
+
+        > ul.panels {
+            padding: 0;
+            list-style: none;
+
+            > li {
+                display: none;
+
+                &.active {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    &.primary {
+        > .tabs {
+            > ul.tabs {
+                padding: 0 40px 0 40px;
+                height: 31px;
+
+                &:after {
+                    position: absolute;
+                    content: '';
+                    display: block;
+                    height: 2px;
+                    left: 0;
+                    bottom: 0;
+                    width: 100%;
+                    // background: #bdc3c7;
+                    background: transparent linear-gradient(90deg, #bdc3c7 90%, transparent 100%);
+                    z-index: 106;
+                }
+
+                > li {
+                    bottom: -3px;
+                    margin-left: -20px;
+                    z-index: 105;
+
+                    > div.tab-container {
+                        padding: 0 21px 0 21px;
+                        height: 27px;
+
+                        > div {
+                            padding: 5px 5px 0 5px;
+                            background: white;
+
+                            > span {
+                                position: relative;
+                                top: -4px;
+                                transition: top .1s;
+                            }
+                        }
+                    }
+
+                    &.active {
+                        z-index: 107;
+                        color: var(--oc-tab-active-color);
+
+                        > div.tab-container {
+
+                            &:before, &:after {
+                                content: '';
+                                display: block;
+                                position: absolute;
+                                top: 0;
+                                height: 27px;
+                                width: 21px;
+                                background: transparent url(../images/tab.png) no-repeat;
+                            }
+
+                            &:before {
+                                left: 0;
+                                background-position: 0 0;
+                            }
+
+                            &:after {
+                                right: 0;
+                                background-position: -75px 0;
+                            }
+
+                            > div {
+                                padding-right: 30px;
+                                border-top: 2px solid #bdc3c7;
+
+                                > span {
+                                    top: 0;
+                                }
+                            }
+                        }
+
+                        &:before {
+                            position: absolute;
+                            content: '';
+                            display: block;
+                            height: 3px;
+                            left: 0;
+                            bottom: 0;
+                            width: 100%;
+                            background: white;
+                        }
+                    }
+
+                    &.new-tab {
+                        background: transparent url(../images/tab.png) no-repeat;
+                        background-position: -24px 0;
+                        width: 27px;
+                        height: 22px;
+
+                        margin-left: -11px;
+                        top: 4px;
+                        position: relative;
+                        cursor: pointer;
+
+                        &:hover {
+                            background-position: -24px -32px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &.secondary {
+        > .tabs {
+            ul.tabs {
+                margin-left: 12px;
+                padding-left: 0;
+
+                > li {
+                    border-right: 1px solid #bdc3c7;
+                    padding-right: 1px;
+
+                    > div.tab-container {
+                        > div {
+                            padding: 4px 10px;
+
+                            span {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+
+                    .tab-control {
+                        right: 23px;
+                        top: 7px;
+
+                        &.close-btn {
+                            right: 6px;
+                            top: 5px;
+                        }
+                    }
+
+                    &.new-tab {
+                        background: transparent;
+                        border: 2px solid #e4e4e4;
+                        width: 27px;
+                        height: 22px;
+                        left: 9px;
+                        top: 7px;
+                        position: relative;
+                        cursor: pointer;
+                        .border-radius(4px);
+
+                        &:hover {
+                            background-color: #2581b8;
+                            border-color: #2581b8;
+                        }
+                    }
+
+                    &.active {
+                        padding-right: 10px;
+
+                        > div.tab-container {
+                            > div {
+                                color: var(--oc-builder-control-color);
+                                padding-right: 30px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// html.gecko {
+//     .builder-tabs.primary > .tabs > ul.tabs > li {
+//         // Fixes a visual glitch in FireFox, noticed in v. 42 on Mac.
+//         bottom: -3px;
+//         > div.tab-container > div {
+//             padding-top: 5px;
+//         }
+//     }
+// }
+
+
+[data-bs-theme="dark"] {
+    .builder-tabs.primary > .tabs > ul.tabs > li.active:before,
+    .builder-tabs.primary > .tabs > ul.tabs > li > div.tab-container > div {
+        background: #202124;
+    }
+
+    .builder-tabs.primary > .tabs > ul.tabs > li.active > div.tab-container:before,
+    .builder-tabs.primary > .tabs > ul.tabs > li.active > div.tab-container:after {
+        background-image: url(../images/tab-dark.png);
+    }
+}
