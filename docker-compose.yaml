@@ -4,6 +4,7 @@ services:
     user: "1000:1000"
     environment:
       - APP_URL=http://threes.dc
+      - BACKEND_URI=/console
       - DB_CONNECTION=pgsql
       - DB_HOST=threes-db
       - DB_PORT=5432
