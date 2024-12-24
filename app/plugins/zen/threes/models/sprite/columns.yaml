@@ -1,0 +1,27 @@
+columns:
+    id:
+        label: id
+        type: text
+        sortable: true
+    code:
+        label: 'Код спрайта'
+        type: text
+        searchable: true
+        sortable: true
+    name:
+        label: Наименование
+        type: text
+        searchable: true
+        sortable: true
+    sort_order:
+        label: Порядок
+        type: text
+        sortable: true
+    active:
+        label: Активность
+        type: switch
+        sortable: true
+    updated_at:
+        label: Обновление
+        type: datetime
+        sortable: true

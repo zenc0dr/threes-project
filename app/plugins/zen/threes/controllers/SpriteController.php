@@ -4,7 +4,7 @@ use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
 
-class UnitController extends Controller
+class SpriteController extends Controller
 {
     public $implement = [
         \Backend\Behaviors\FormController::class,
@@ -14,14 +14,10 @@ class UnitController extends Controller
     public $formConfig = 'config_form.yaml';
     public $listConfig = 'config_list.yaml';
 
-    public $requiredPermissions = [
-        'zen.threes.main',
-        'zen.threes.units'
-    ];
-
     public function __construct()
     {
         parent::__construct();
-        BackendMenu::setContext('Zen.Threes', 'main', 'units');
+        BackendMenu::setContext('Zen.Threes', 'main', 'sprites');
     }
+
 }

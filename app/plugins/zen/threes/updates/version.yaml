@@ -1,5 +1,8 @@
 v1.0.1:
     - 'Initialize plugin'
 v1.0.2:
-    - 'Created units'
+    - 'Create units'
     - builder_table_create_zen_threes_units.php
+v1.0.3:
+    - 'Create sprites'
+    - builder_table_create_zen_threes_sprites.php

@@ -4,13 +4,14 @@ columns:
         type: text
         searchable: true
         sortable: true
+        width: 100%
     active:
         label: Active
         type: switch
         searchable: true
         sortable: true
-    sort_order:
-        label: Order
+    code:
+        label: Code
         type: text
         searchable: true
         sortable: true

@@ -9,18 +9,17 @@ class BuilderTableCreateZenThreesUnits extends Migration
     {
         Schema::create('zen_threes_units', function($table)
         {
-            $table->bigIncrements('id')->unsigned();
-            $table->string('uuid');
+            $table->string('tid')->primary();
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
             $table->smallInteger('active')->unsigned()->default(1);
-            $table->bigInteger('sort_order')->unsigned()->default(0);
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
+
+            $table->unique('tid', 'tid_unique');
         });
     }
-    
+
     public function down()
     {
         Schema::dropIfExists('zen_threes_units');

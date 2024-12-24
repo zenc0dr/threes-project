@@ -15,6 +15,11 @@ services:
       context: ./scripts
     restart: always
     privileged: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.threes.rule=Host(`threes.dc`) && PathPrefix(`/`)"

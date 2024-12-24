@@ -2,15 +2,16 @@
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use October\Rain\Database\Traits\Sortable;
 
 class Unit extends Model
 {
     use Validation;
-    use Sortable;
 
     public $table = 'zen_threes_units';
     public $rules = [];
+    protected $primaryKey = 'tid';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'name',
@@ -18,10 +19,17 @@ class Unit extends Model
         'active',
     ];
 
-    public array $sortable = ['sort_order'];
+    protected $guarded = [
+        'tid',
+    ];
 
     public function beforeCreate()
     {
-        $this->attributes['uuid'] = \Str::uuid();
+
+        //  dd($this->tid, $this->attributes);
+
+        if (!$this->tid && !isset($this->attributes['tid'])) {
+            $this->attributes['tid'] = \Str::uuid();
+        }
     }
 }

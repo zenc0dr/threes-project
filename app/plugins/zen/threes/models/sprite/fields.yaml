@@ -1,14 +1,14 @@
 fields:
-    name:
-        label: 'Название юнита'
+    code:
+        label: 'Код спрайта'
         span: auto
         type: text
-    tid:
-        label: 'Адрес юнита'
+    name:
+        label: 'Название спрайта'
         span: auto
         type: text
     description:
         label: Описание
-        size: large
         span: full
+        size: large
         type: richeditor

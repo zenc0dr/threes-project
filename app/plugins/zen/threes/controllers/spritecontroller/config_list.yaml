@@ -1,6 +1,6 @@
-list: $/zen/threes/models/unit/columns.yaml
-modelClass: Zen\Threes\Models\Unit
-title: UnitController
+list: $/zen/threes/models/sprite/columns.yaml
+modelClass: Zen\Threes\Models\Sprite
+title: SpriteController
 noRecordsMessage: 'backend::lang.list.no_records'
 showSetup: true
 showCheckboxes: true
@@ -9,4 +9,4 @@ toolbar:
     buttons: list_toolbar
     search:
         prompt: 'backend::lang.list.search_prompt'
-recordUrl: 'zen/threes/unitcontroller/update/:tid'
+recordUrl: 'zen/threes/spritecontroller/update/:id'

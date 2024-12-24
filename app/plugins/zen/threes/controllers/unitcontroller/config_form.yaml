@@ -3,7 +3,7 @@ form: $/zen/threes/models/unit/fields.yaml
 modelClass: Zen\Threes\Models\Unit
 defaultRedirect: zen/threes/unitcontroller
 create:
-    redirect: 'zen/threes/unitcontroller/update/:id'
+    redirect: 'zen/threes/unitcontroller/update/:tid'
     redirectClose: zen/threes/unitcontroller
 update:
     redirect: zen/threes/unitcontroller

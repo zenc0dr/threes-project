@@ -8,10 +8,31 @@ permissions:
     zen.threes.main:
         tab: Threes
         label: 'Main access'
+    zen.threes.units:
+        tab: Threes
+        label: 'Units control'
+    zen.threes.sprites:
+        tab: Threes
+        label: 'Sprites control'
 navigation:
     main:
         label: Threes
-        url: zen/threes/unitcontroller
+        url: zen/threes/spritecontroller
         icon: icon-cubes
         permissions:
             - zen.threes.main
+        sideMenu:
+            sprites:
+                label: Спрайты
+                url: zen/threes/spritecontroller
+                icon: icon-play
+                permissions:
+                    - zen.threes.main
+                    - zen.threes.sprites
+            units:
+                label: Юниты
+                url: zen/threes/unitcontroller
+                icon: icon-square
+                permissions:
+                    - zen.threes.main
+                    - zen.threes.units
