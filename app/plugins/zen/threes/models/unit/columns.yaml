@@ -1,17 +1,17 @@
 columns:
     name:
-        label: Nname
+        label: Название
         type: text
         searchable: true
         sortable: true
         width: 100%
     active:
-        label: Active
+        label: Активность
         type: switch
         searchable: true
         sortable: true
-    code:
-        label: Code
+    tid:
+        label: Tid
         type: text
         searchable: true
         sortable: true
