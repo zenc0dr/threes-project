@@ -8,6 +8,9 @@ permissions:
     zen.threes.main:
         tab: Threes
         label: 'Main access'
+    zen.threes.options:
+        tab: Threes
+        label: 'Threes Options'
     zen.threes.units:
         tab: Threes
         label: 'Units control'

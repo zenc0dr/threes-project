@@ -33,5 +33,15 @@ class Plugin extends PluginBase
      */
     public function registerSettings()
     {
+        return [
+            'options' => [
+                'label'       => 'Threes',
+                'description' => 'Threes Options',
+                'icon'        => 'icon-cubes',
+                'permissions' => ['zen.threes.options'],
+                'class' => 'Zen\Threes\Models\Settings',
+                'order' => 100,
+            ]
+        ];
     }
 }

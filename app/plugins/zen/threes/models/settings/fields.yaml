@@ -1,0 +1,6 @@
+fields:
+    author_token:
+        label: 'Токен автора'
+        span: auto
+        default: project
+        type: text
