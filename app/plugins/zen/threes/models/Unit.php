@@ -26,7 +26,7 @@ class Unit extends Model
     public function beforeCreate()
     {
 
-        //  dd($this->tid, $this->attributes);
+
 
         if (!$this->tid && !isset($this->attributes['tid'])) {
             $this->attributes['tid'] = \Str::uuid();
