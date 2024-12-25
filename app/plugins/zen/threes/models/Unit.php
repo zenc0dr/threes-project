@@ -43,4 +43,79 @@ class Unit extends Model
         $author_token = ths()->settings('author_token') ?? 'project';
         return $author_token . '.';
     }
+
+    public function getDataAttribute(?string $record): array
+    {
+        if ($record) {
+            return ths()->fromJson($record) ?? [];
+        }
+        return [];
+    }
+
+    public function setDataAttribute(?array $record): void
+    {
+        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
+    }
+
+    public function getFieldsAttribute()
+    {
+        $data = $this->data ?? [];
+        return $data['fields'] ?? [];
+    }
+
+    public function setFieldsAttribute(?array $fields = null): void
+    {
+        $data = $this->data ?? [];
+        $data['fields'] = $fields ?? [];
+        $this->attributes['data'] = ths()->toJson($data, true);
+    }
+
+    public function getSpanOptions()
+    {
+        return [
+            'auto' => 'Авто',
+            'full' => '100%',
+            'left' => 'Влево',
+            'right' => 'Вправо',
+        ];
+    }
+
+    public function getTypeOptions()
+    {
+        return [
+            'text' => 'String',
+            'textarea' => 'Textarea',
+            'number' => 'Number',
+            'password' => 'Password',
+            'dropdown' => 'Dropdown',
+            'checkbox' => 'Checkbox',
+            'switch' => 'Switch',
+            'email' => 'Email',
+            'radio' => 'Radio',
+            'balloon-selector' => 'Balloon selector',
+            'checkboxlist' => 'Checkboxlist',
+            'codeeditor' => 'Code editor',
+            'colorpicker' => 'Colorpicker',
+            'datatable' => 'Datatable',
+            'datepicker' => 'Datepicker',
+            'fileupload' => 'File upload',
+            'markdown' => 'Markdown editor',
+            'mediafinder' => 'Media finder',
+            'repeater' => 'Repeater',
+            'richeditor' => 'Richeditor',
+            'taglist' => 'Taglist',
+        ];
+    }
+
+    public function getSizeOptions()
+    {
+        return [
+            null => ' -- ',
+            'tiny' => 'Tiny',
+            'small' => 'Small',
+            'large' => 'Large',
+            'huge' => 'Huge',
+            'giant' => 'Giant',
+        ];
+    }
 }

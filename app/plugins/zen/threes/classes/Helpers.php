@@ -1,9 +1,9 @@
 <?php
 
-namespace Zen\Threes\classes;
+namespace Zen\Threes\Classes;
 
-use Zen\Threes\classes\helpers\Files;
-use Zen\Threes\classes\helpers\Json;
+use Zen\Threes\Classes\Helpers\Files;
+use Zen\Threes\Classes\Helpers\Json;
 use Zen\Threes\Classes\Helpers\Yaml;
 
 class Helpers
