@@ -12,53 +12,56 @@ fields:
         size: large
         span: full
         type: richeditor
+tabs:
     fields:
-        label: 'Интерфейс юнита'
-        prompt: 'Добавить поле'
-        displayMode: accordion
-        span: full
-        type: repeater
-        form:
-            fields:
-                field:
-                    label: Поле
-                    span: auto
-                    type: text
-                label:
-                    label: Заголовок
-                    span: auto
-                    type: text
-                type:
-                    label: Тип
-                    showSearch: true
-                    span: auto
-                    type: dropdown
-                tab:
-                    label: Таб
-                    span: auto
-                    type: text
-                span:
-                    label: Ширина
-                    showSearch: true
-                    span: auto
-                    default: auto
-                    type: dropdown
-                size:
-                    label: Размер
-                    showSearch: true
-                    span: auto
-                    type: dropdown
-                additional:
-                    label: 'Дополнительные правила'
-                    prompt: 'Добавить правило'
-                    displayMode: accordion
-                    span: full
-                    type: repeater
-                    form:
-                        fields:
-                            rule:
-                                label: ''
-                                size: small
-                                language: plain_text
-                                span: full
-                                type: codeeditor
+        fields:
+            label: ''
+            prompt: 'Добавить поле'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Интерфейс
+            form:
+                fields:
+                    field:
+                        label: Поле
+                        span: auto
+                        type: text
+                    label:
+                        label: Заголовок
+                        span: auto
+                        type: text
+                    type:
+                        label: Тип
+                        showSearch: true
+                        span: auto
+                        type: dropdown
+                    tab:
+                        label: Таб
+                        span: auto
+                        type: text
+                    span:
+                        label: Ширина
+                        showSearch: true
+                        span: auto
+                        default: auto
+                        type: dropdown
+                    size:
+                        label: Размер
+                        showSearch: true
+                        span: auto
+                        type: dropdown
+                    additional:
+                        label: 'Дополнительные правила'
+                        prompt: 'Добавить правило'
+                        displayMode: accordion
+                        span: full
+                        type: repeater
+                        form:
+                            fields:
+                                rule:
+                                    label: ''
+                                    size: small
+                                    language: plain_text
+                                    span: full
+                                    type: codeeditor

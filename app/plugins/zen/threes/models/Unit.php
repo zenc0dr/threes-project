@@ -8,30 +8,71 @@ class Unit extends Model
     use Validation;
 
     public $table = 'zen_threes_units';
+
     public $rules = [
         'tid' => 'unique:zen_threes_units,tid',
     ];
+
     protected $primaryKey = 'tid';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
+        'tid',
         'name',
         'description',
         'active',
     ];
 
-    protected $guarded = [
-        'tid',
-    ];
+    protected array $dynamic_attributes = [];
+    protected array $additional_fields = [];
+
+    public function __set($name, $value)
+    {
+        if (!$this->hasAttribute($name)) {
+            $this->dynamic_attributes[$name] = $value;
+        } else {
+            parent::__set($name, $value);
+        }
+    }
+
+    private function hasAttribute(string $key): bool
+    {
+        return array_key_exists($key, $this->fillable);
+    }
 
     public function beforeCreate()
     {
-        $tid = $this->tid ?? $this->attributes['tid'] ?? null;
-
-        if (!$tid) {
-            $this->attributes['tid'] = \Str::uuid();
+        if (empty($this->tid)) {
+            $this->tid = \Str::uuid();
         }
+    }
+
+    public function afterFetch()
+    {
+        $settings = $this->data['settings'] ?? null;
+//        $this->additional_fields = collect($this->fields)
+//            ->pluck('field')
+//            ->toArray();
+
+        if ($settings) {
+            foreach ($settings as $field => $value) {
+                $this->attributes[$field] = $value;
+            }
+        }
+    }
+
+    public function beforeSave()
+    {
+        $this->saveSettings();
+    }
+
+    public function saveSettings()
+    {
+        $attributes = $this->dynamic_attributes;
+        $data = $this->data ?? [];
+        $data['settings'] = $attributes ?? [];
+        $this->attributes['data'] = ths()->toJson($data, true);
     }
 
     public function getTidAttribute($value)
@@ -68,6 +109,34 @@ class Unit extends Model
         $data = $this->data ?? [];
         $data['fields'] = $fields ?? [];
         $this->attributes['data'] = ths()->toJson($data, true);
+    }
+
+    public function getAdditionalFieldsAttribute()
+    {
+        if ($this->fields) {
+            $add_fields = [];
+            foreach ($this->fields as $field) {
+                $add_fields[$field['field']] = [
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'tab' => $field['tab'],
+                    'span' => $field['span'],
+                ];
+
+                if ($size = $field['size'] ?? null) {
+                    $add_fields[$field['field']]['size'] = $size;
+                }
+
+                if ($additional = $field['additional'] ?? null) {
+                    foreach ($additional as $batch) {
+                        $batch = ths()->fromYaml($batch['rule']);
+                        $add_fields[$field['field']] = array_merge($add_fields[$field['field']], $batch);
+                    }
+                }
+            }
+            return $add_fields;
+        }
+        return [];
     }
 
     public function getSpanOptions()

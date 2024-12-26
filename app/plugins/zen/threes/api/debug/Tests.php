@@ -8,20 +8,13 @@ class Tests
     # http://threes.dc/zen/threes/api/debug.Tests:debug
     public function debug()
     {
-        ths()->toYamlFile(
-            storage_path('test.yaml'),
-            [
-                'foo' => [
-                    'bar' => 1,
-                    'baz' => 2,
-                    'faz' => 3
-                ]
-            ]
-        );
+        $unit = new Unit();
+        $unit->tid = 'zen.test.unit';
+        $unit->name = 'Test unit';
+        //$unit->zen_name = 'Имя тестового юнита';
+        $unit->save();
 
-//        dd(
-//            ths()->settings('author_token')
-//        );
+        dd($unit->toArray());
     }
 
     # http://threes.dc/zen/threes/api/debug.Tests:test
