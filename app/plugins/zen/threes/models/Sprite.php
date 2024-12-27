@@ -1,11 +1,14 @@
 <?php namespace Zen\Threes\Models;
 
 use Model;
+use Zen\Threes\Traits\SimpleTree;
 use October\Rain\Database\Traits\Validation;
+
 
 class Sprite extends Model
 {
     use Validation;
+    use SimpleTree;
 
     public $table = 'zen_threes_sprites';
     protected $primaryKey = 'sid';
@@ -22,7 +25,7 @@ class Sprite extends Model
 
     public function getParentSidOptions()
     {
-        return ['name' => '--'] + self::all()->lists('name', 'sid');
+        return [null => '--'] + self::all()->lists('name', 'sid');
     }
 
     public function getDataAttribute(?string $record): array
