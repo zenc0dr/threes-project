@@ -13,6 +13,10 @@
             <?= $this->formRender() ?>
         </div>
 
+        <div class="layout-row">
+            <?= $this->relationRender('units') ?>
+        </div>
+
         <div class="form-buttons">
             <div class="loading-indicator-container">
                 <button

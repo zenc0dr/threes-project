@@ -19,4 +19,22 @@ class Sprite extends Model
     public $rules = [
     ];
 
+    protected $fillable = [
+        'sid',
+        'name',
+        'description',
+        'active',
+    ];
+
+    public $belongsToMany = [
+        'units' => [
+            Unit::class,
+            'table' => 'zen_threes_schema',
+            'key' => 'sprite_sid',
+            'otherKey' => 'unit_tid',
+            'order' => 'sort_order',
+            'pivot' => ['sort_order', 'settings'],
+        ],
+    ];
+
 }

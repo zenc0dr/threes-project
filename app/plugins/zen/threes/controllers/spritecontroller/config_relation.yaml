@@ -1,0 +1,8 @@
+units:
+    label: 'Юниты'
+    view:
+        list: $/zen/threes/models/unit/columns.yaml
+        toolbarButtons: add|remove
+    manage:
+        form: $/zen/threes/models/unit/settings_fields.yaml
+        recordOnClick: 'spritecontroller/openUnitForm/:id'

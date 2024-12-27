@@ -1,0 +1,14 @@
+fields:
+    name:
+        label: 'Название юнита'
+        span: auto
+        type: text
+    tid:
+        label: 'Адрес юнита'
+        span: auto
+        type: text
+    description:
+        label: Описание
+        size: large
+        span: full
+        type: richeditor

@@ -28,6 +28,9 @@ class UnitController extends Controller
 
     public function formExtendFields($form)
     {
+        if (!isset($this->params[0]) || !$unit = Unit::find($this->params[0])) {
+            return;
+        }
         $unit = Unit::find($this->params[0]);
         if ($unit && $unit->additional_fields) {
             $form->addFields($unit->additional_fields, 'primary');

@@ -36,17 +36,27 @@ class Unit extends Model
         }
     }
 
+    public $belongsToMany = [
+        'sprites' => [
+            Sprite::class,
+            'table' => 'zen_threes_schema',
+            'key' => 'unit_tid',
+            'otherKey' => 'sprite_sid',
+            'order' => 'sort_order',
+            'pivot' => ['sort_order', 'settings'],
+        ],
+    ];
+
     private function hasAttribute(string $key): bool
     {
-        return array_key_exists($key, $this->fillable);
+        return in_array($key, $this->fillable);
+        //return array_key_exists($key, $this->fillable);
     }
 
-    public function beforeCreate()
-    {
-        if (empty($this->tid)) {
-            $this->tid = \Str::uuid();
-        }
-    }
+//    public function beforeCreate()
+//    {
+//
+//    }
 
     public function afterFetch()
     {
@@ -64,6 +74,12 @@ class Unit extends Model
 
     public function beforeSave()
     {
+        $tid = $this->tid ?? $this->attributes['tid'] ?? null;
+
+        if (!$tid) {
+            $this->attributes['tid'] = \Str::uuid();
+        }
+
         $this->saveSettings();
     }
 
