@@ -127,6 +127,10 @@ class Unit extends Model
         $this->attributes['data'] = ths()->toJson($data, true);
     }
 
+    /**
+     * Генерирует схему интерфейса юнита
+     * @return array
+     */
     public function getAdditionalFieldsAttribute()
     {
         if ($this->fields) {

@@ -32,6 +32,9 @@ class UnitController extends Controller
             return;
         }
         $unit = Unit::find($this->params[0]);
+
+        //dd($unit, $unit->additional_fields);
+
         if ($unit && $unit->additional_fields) {
             $form->addFields($unit->additional_fields, 'primary');
         }
