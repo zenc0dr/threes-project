@@ -9,11 +9,18 @@ class Tests
     public function debug()
     {
         $unit = new Unit();
-        $unit->tid = 'zen.test.unit';
+        $unit->tid = 'zen.test.' . uniqid();
         $unit->name = 'Test unit';
-        //$unit->zen_name = 'Имя тестового юнита';
+        $unit->zen_name = 'Имя тестового юнита';
         $unit->save();
 
+        dd($unit->toArray());
+    }
+
+    # http://threes.dc/zen/threes/api/debug.Tests:loadUnit?tid=
+    public function loadUnit()
+    {
+        $unit = Unit::find(request('tid'));
         dd($unit->toArray());
     }
 

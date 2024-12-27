@@ -2,59 +2,56 @@
 
 use Model;
 use October\Rain\Database\Traits\Validation;
+use Log;
 
+/**
+ * @property bool $active
+ */
 class Unit extends Model
 {
     use Validation;
 
     public $table = 'zen_threes_units';
-
+    protected $primaryKey = 'tid';
+    protected $keyType = 'string';
+    public $incrementing = false;
     public $rules = [
         'tid' => 'unique:zen_threes_units,tid',
     ];
-
-    protected $primaryKey = 'tid';
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
         'tid',
         'name',
         'description',
         'active',
+        'fields',
     ];
 
     protected array $dynamic_attributes = [];
-    protected array $additional_fields = [];
 
     public function __set($name, $value)
     {
         if (!$this->hasAttribute($name)) {
             $this->dynamic_attributes[$name] = $value;
+            unset($this->attributes[$name]);
         } else {
             parent::__set($name, $value);
         }
     }
 
-    private function hasAttribute(string $key): bool
+    public function scopeActive($query)
     {
-        return array_key_exists($key, $this->fillable);
+        return $query->where('active', 1);
     }
 
-    public function beforeCreate()
+    private function hasAttribute(string $key): bool
     {
-        if (empty($this->tid)) {
-            $this->tid = \Str::uuid();
-        }
+        return in_array($key, $this->fillable);
     }
 
     public function afterFetch()
     {
         $settings = $this->data['settings'] ?? null;
-//        $this->additional_fields = collect($this->fields)
-//            ->pluck('field')
-//            ->toArray();
-
         if ($settings) {
             foreach ($settings as $field => $value) {
                 $this->attributes[$field] = $value;

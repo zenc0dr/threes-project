@@ -1,14 +1,19 @@
 fields:
-    code:
-        label: 'Код спрайта'
-        span: auto
-        type: text
     name:
         label: 'Название спрайта'
         span: auto
         type: text
+    sid:
+        label: 'Код спрайта'
+        span: auto
+        type: text
+    parent_sid:
+        label: 'Родительский спрайт'
+        showSearch: true
+        span: auto
+        type: dropdown
     description:
         label: Описание
-        span: full
         size: large
+        span: full
         type: richeditor

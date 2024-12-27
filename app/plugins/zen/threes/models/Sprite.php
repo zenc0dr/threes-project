@@ -1,24 +1,53 @@
 <?php namespace Zen\Threes\Models;
 
 use Model;
+use October\Rain\Database\Traits\Validation;
 
-/**
- * Model
- */
 class Sprite extends Model
 {
-    use \October\Rain\Database\Traits\Validation;
+    use Validation;
 
-
-    /**
-     * @var string table in the database used by the model.
-     */
     public $table = 'zen_threes_sprites';
-
-    /**
-     * @var array rules for validation.
-     */
+    protected $primaryKey = 'sid';
+    protected $keyType = 'string';
+    public $incrementing = false;
     public $rules = [
+        'sid' => 'unique:zen_threes_sprites,sid',
     ];
 
+//    public function getUnitsOptions()
+//    {
+//        return Unit::active()->lists('name', 'tid');
+//    }
+
+    public function getParentSidOptions()
+    {
+        return ['name' => '--'] + self::all()->lists('name', 'sid');
+    }
+
+    public function getDataAttribute(?string $record): array
+    {
+        if ($record) {
+            return ths()->fromJson($record) ?? [];
+        }
+        return [];
+    }
+
+    public function setDataAttribute(?array $record): void
+    {
+        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
+    }
+
+    public function getUnitsAttribute()
+    {
+        $data = $this->data ?? [];
+        return $data['units'] ?? [];
+    }
+
+    public function setUnitsAttribute(?array $fields = null): void
+    {
+        $data = $this->data ?? [];
+        $data['units'] = $fields ?? [];
+        $this->attributes['data'] = ths()->toJson($data, true);
+    }
 }

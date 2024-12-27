@@ -9,15 +9,15 @@ class BuilderTableCreateZenThreesSprites extends Migration
     {
         Schema::create('zen_threes_sprites', function($table)
         {
-            $table->bigIncrements('id')->unsigned();
-            $table->string('code');
+            $table->string('sid')->primary();
+            $table->string('parent_sid')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
-            $table->bigInteger('sort_order')->unsigned()->default(0);
-            $table->smallInteger('active')->unsigned()->default(0);
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->smallInteger('active')->unsigned()->default(1);
+            $table->timestamps();
+
+            $table->unique('sid', 'sid_unique');
         });
     }
     

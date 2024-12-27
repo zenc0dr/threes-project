@@ -1,10 +1,6 @@
 columns:
-    id:
-        label: id
-        type: text
-        sortable: true
-    code:
-        label: 'Код спрайта'
+    sid:
+        label: Sid
         type: text
         searchable: true
         sortable: true
@@ -12,10 +8,6 @@ columns:
         label: Наименование
         type: text
         searchable: true
-        sortable: true
-    sort_order:
-        label: Порядок
-        type: text
         sortable: true
     active:
         label: Активность
