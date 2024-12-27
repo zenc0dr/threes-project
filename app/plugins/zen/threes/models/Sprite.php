@@ -1,23 +1,21 @@
 <?php namespace Zen\Threes\Models;
 
 use Model;
+use October\Rain\Database\Traits\NestedTree;
+use October\Rain\Database\Traits\Sortable;
+use October\Rain\Database\Traits\Validation;
 
 /**
  * Model
  */
 class Sprite extends Model
 {
-    use \October\Rain\Database\Traits\Validation;
+    use Validation;
+    use NestedTree;
+    use Sortable;
 
-
-    /**
-     * @var string table in the database used by the model.
-     */
     public $table = 'zen_threes_sprites';
 
-    /**
-     * @var array rules for validation.
-     */
     public $rules = [
     ];
 

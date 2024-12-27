@@ -1,11 +1,20 @@
 fields:
-    code:
-        label: 'Код спрайта'
-        span: auto
-        type: text
+    active:
+        label: Активность
+        span: full
+        default: 1
+        type: switch
     name:
         label: 'Название спрайта'
         span: auto
+        type: text
+    sid:
+        label: 'Код спрайта'
+        span: auto
+        required: 1
+        preset:
+            field: name
+            type: file
         type: text
     description:
         label: Описание

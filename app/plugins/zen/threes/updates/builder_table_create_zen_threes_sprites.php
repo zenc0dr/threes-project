@@ -10,12 +10,19 @@ class BuilderTableCreateZenThreesSprites extends Migration
         Schema::create('zen_threes_sprites', function($table)
         {
             $table->bigIncrements('id')->unsigned();
-            $table->string('code');
+            
+            $table->string('sid');
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
-            $table->bigInteger('sort_order')->unsigned()->default(0);
             $table->smallInteger('active')->unsigned()->default(0);
+            
+            $table->string('parent_id')->nullable();
+            $table->integer('nest_left')->nullable();
+            $table->integer('nest_right')->nullable();
+            $table->integer('nest_depth')->nullable();
+            $table->bigInteger('sort_order')->unsigned()->default(0);
+ 
             $table->timestamp('created_at')->nullable();
             $table->timestamp('updated_at')->nullable();
         });

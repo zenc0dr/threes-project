@@ -1,21 +1,13 @@
 columns:
-    id:
-        label: id
+    name:
+        label: Спрайт
         type: text
+        searchable: true
         sortable: true
-    code:
+    sid:
         label: 'Код спрайта'
         type: text
         searchable: true
-        sortable: true
-    name:
-        label: Наименование
-        type: text
-        searchable: true
-        sortable: true
-    sort_order:
-        label: Порядок
-        type: text
         sortable: true
     active:
         label: Активность
