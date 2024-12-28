@@ -1,6 +1,7 @@
 <?php namespace Zen\Threes;
 
 use System\Classes\PluginBase;
+use Zen\Threes\Console\Vector;
 
 /**
  * Plugin class
@@ -10,8 +11,9 @@ class Plugin extends PluginBase
     /**
      * register method, called when the plugin is first registered.
      */
-    public function register()
+    public function register(): void
     {
+        $this->registerConsoleCommand('threes:vector', Vector::class);
     }
 
     /**
@@ -31,7 +33,7 @@ class Plugin extends PluginBase
     /**
      * registerSettings used by the backend.
      */
-    public function registerSettings()
+    public function registerSettings(): array
     {
         return [
             'options' => [

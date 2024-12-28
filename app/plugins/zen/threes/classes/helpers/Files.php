@@ -2,6 +2,9 @@
 
 namespace Zen\Threes\Classes\Helpers;
 
+use Illuminate\Support\Collection;
+use File;
+
 trait Files
 {
     /**
@@ -17,5 +20,26 @@ trait Files
             mkdir($dirname, $permissions, true);
         }
         return $dir_path;
+    }
+
+    /**
+     * Возвращает коллекцию со списком файлов в указанной папке
+     * @param string $dir_path - Путь к папке
+     * @param bool $recursive - Рекурсивное сканирование (отключено по умолчанию)
+     * @return Collection
+     */
+    public function filesList(string $dir_path, bool $recursive = false): Collection
+    {
+        $files = $recursive ? File::allFiles($dir_path) : File::files($dir_path);
+        $output = [];
+        foreach ($files as $file) {
+            $output[] = [
+                'name' => $file->getFilename(),
+                'extension' => $file->getExtension(),
+                'path' => $file->getRealPath(),
+                'size' => $file->getSize()
+            ];
+        }
+        return collect($output);
     }
 }
