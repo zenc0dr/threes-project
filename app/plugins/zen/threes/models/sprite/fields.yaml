@@ -1,4 +1,9 @@
 fields:
+    schema:
+        label: Схема
+        span: full
+        path: $/zen/threes/controllers/spritecontroller/partials/schema.php
+        type: partial
     name:
         label: 'Название спрайта'
         span: auto

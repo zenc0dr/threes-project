@@ -16,7 +16,8 @@ class Vector extends Command
     public function handle()
     {
         $exclude = [
-            'plugins/zen/threes/api/debug'
+            'plugins/zen/threes/api/debug',
+            'plugins/zen/threes/node_modules'
         ];
 
         $allow_extensions = [
