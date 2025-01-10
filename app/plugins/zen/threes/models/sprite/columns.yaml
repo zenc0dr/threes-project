@@ -1,11 +1,11 @@
 columns:
-    sid:
-        label: Sid
+    name:
+        label: Наименование
         type: text
         searchable: true
         sortable: true
-    name:
-        label: Наименование
+    sid:
+        label: Sid
         type: text
         searchable: true
         sortable: true
