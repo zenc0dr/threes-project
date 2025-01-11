@@ -10,20 +10,7 @@
     <?= Form::open(['class' => 'layout']) ?>
 
         <div class="layout-row">
-            <div class="layout-cell" style="width: 500px; padding-right: 10px;">
-                <!-- Левая часть с формой -->
-                <?= $this->formRender() ?>
-            </div>
-            <div class="layout-cell" style="width: auto; padding-left: 10px;">
-                <!-- Правая часть для дополнительного контента -->
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <h3>Дополнительный контент</h3>
-                        <p>Здесь можно разместить текст, изображения или любую другую информацию.</p>
-                        <!-- Можно вставить виджет или вывод других данных -->
-                    </div>
-                </div>
-            </div>
+            <?= $this->formRender() ?>
         </div>
 
         <div class="form-buttons">

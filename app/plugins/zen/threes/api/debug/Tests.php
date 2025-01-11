@@ -3,18 +3,14 @@
 namespace Zen\Threes\Api\debug;
 
 use Zen\Threes\Models\Unit;
+use Zen\Threes\Console\Vector;
 class Tests
 {
     # http://threes.dc/zen/threes/api/debug.Tests:debug
     public function debug()
     {
-        $unit = new Unit();
-        $unit->tid = 'zen.test.' . uniqid();
-        $unit->name = 'Test unit';
-        $unit->zen_name = 'Имя тестового юнита';
-        $unit->save();
-
-        dd($unit->toArray());
+        $vector = new Vector();
+        $vector->handle();
     }
 
     # http://threes.dc/zen/threes/api/debug.Tests:loadUnit?tid=

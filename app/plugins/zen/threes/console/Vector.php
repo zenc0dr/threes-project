@@ -16,8 +16,9 @@ class Vector extends Command
     public function handle()
     {
         $exclude = [
-            'plugins/zen/threes/api/debug',
-            'plugins/zen/threes/node_modules'
+            '/app/plugins/zen/threes/node_modules',
+            '/app/plugins/zen/threes/package-lock.json',
+            '/app/plugins/zen/threes/assets'
         ];
 
         $allow_extensions = [
@@ -39,16 +40,19 @@ class Vector extends Command
                 continue;
             }
 
-            $this->output->writeln("Render file: $path");
-            $code = file_get_contents($path);
-            $path = preg_replace('/^\/app\//', '', $path);
-
             foreach ($exclude as $item) {
                 if (str_starts_with($path, $item)) {
                     continue 2;
                 }
             }
 
+            if (str_contains($path, 'node_modules')) {
+                dd('stop', $path);
+            }
+
+            $this->output->writeln("Render file: $path");
+            $code = file_get_contents($path);
+            $path = preg_replace('/^\/app\//', '', $path);
             $output[] = "`$path`" . PHP_EOL . '```' . $code . PHP_EOL . '```';
         }
 

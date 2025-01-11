@@ -18,6 +18,7 @@ class SpriteController extends Controller
     {
         parent::__construct();
         BackendMenu::setContext('Zen.Threes', 'main', 'sprites');
+        $this->addCss(mix('css/threes.css', 'plugins/zen/threes/assets'));
+        $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);
     }
-
 }
