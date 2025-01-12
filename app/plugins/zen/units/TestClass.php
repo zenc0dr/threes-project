@@ -9,4 +9,17 @@ class TestClass
     {
         return 'is works! String: ' . $input_string;
     }
+
+    /**
+     * Вызов: Zen.Units.TestClass.adder
+     * @param int|null $value
+     * @return int|null
+     */
+    public function adder(int $value = null): ?int
+    {
+        if ($value === null) {
+            return 0;
+        }
+        return $value + 1;
+    }
 }

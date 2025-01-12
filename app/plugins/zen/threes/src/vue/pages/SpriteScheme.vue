@@ -1,6 +1,6 @@
 <template>
 <div class="sprite">
-    ok sid: {{ sid }}
+
 </div>
 </template>
 <script>
@@ -9,12 +9,15 @@ export default {
     data() {
         return {
             sid: null,
-            test: null
+            scheme: [
+                {
+                    
+                }
+            ]
         }
     },
     mounted() {
         this.sid = this.$route.params.sid
-        console.log('Идентификатор', this.sid)
 
         this.testLoadContent()
     },
