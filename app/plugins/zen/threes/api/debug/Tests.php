@@ -9,8 +9,9 @@ class Tests
     # http://threes.dc/zen/threes/api/debug.Tests:debug
     public function debug()
     {
-        $vector = new Vector();
-        $vector->handle();
+        $unit = new Unit();
+        $unit->name = '';
+        $unit->save();
     }
 
     # http://threes.dc/zen/threes/api/debug.Tests:loadUnit?tid=

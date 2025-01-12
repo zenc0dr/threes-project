@@ -21,6 +21,7 @@ class Unit extends Model
 
     protected $fillable = [
         'tid',
+        'io',
         'name',
         'description',
         'active',
@@ -28,6 +29,7 @@ class Unit extends Model
     ];
 
     protected array $dynamic_attributes = [];
+    protected array $data_dump = [];
 
     public function __set($name, $value)
     {
@@ -49,28 +51,20 @@ class Unit extends Model
         return in_array($key, $this->fillable);
     }
 
+    ### Events
     public function afterFetch()
     {
-        $settings = $this->data['settings'] ?? null;
-        if ($settings) {
-            foreach ($settings as $field => $value) {
-                $this->attributes[$field] = $value;
-            }
-        }
+        $this->data_dump = $this->data;
+        $this->fillSettings();
     }
 
     public function beforeSave()
     {
-        $this->saveSettings();
+        $this->saveData();
     }
 
-    public function saveSettings()
-    {
-        $attributes = $this->dynamic_attributes;
-        $data = $this->data ?? [];
-        $data['settings'] = $attributes ?? [];
-        $this->attributes['data'] = ths()->toJson($data, true);
-    }
+
+    ### Getters and setters
 
     public function getTidAttribute($value)
     {
@@ -82,30 +76,37 @@ class Unit extends Model
         return $author_token . '.';
     }
 
-    public function getDataAttribute(?string $record): array
+    public function getSettingsAttribute()
     {
-        if ($record) {
-            return ths()->fromJson($record) ?? [];
+        return $this->data_dump['settings'] ?? [];
+    }
+
+    public function setIoAttribute($io)
+    {
+        $this->data_dump['io'] = $io ?? [];
+    }
+
+    public function getIoAttribute()
+    {
+        return $this->data_dump['io'] ?? [];
+    }
+
+    public function getDataAttribute(?string $data): array
+    {
+        if ($data) {
+            return ths()->fromJson($data) ?? [];
         }
         return [];
     }
 
-    public function setDataAttribute(?array $record): void
-    {
-        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
-    }
-
     public function getFieldsAttribute()
     {
-        $data = $this->data ?? [];
-        return $data['fields'] ?? [];
+        return $this->data_dump['fields'] ?? [];
     }
 
     public function setFieldsAttribute(?array $fields = null): void
     {
-        $data = $this->data ?? [];
-        $data['fields'] = $fields ?? [];
-        $this->attributes['data'] = ths()->toJson($data, true);
+        $this->data_dump['fields'] = $fields ?? [];
     }
 
     public function getAdditionalFieldsAttribute()
@@ -135,6 +136,8 @@ class Unit extends Model
         }
         return [];
     }
+
+    ### Options methods
 
     public function getSpanOptions()
     {
@@ -183,5 +186,53 @@ class Unit extends Model
             'huge' => 'Huge',
             'giant' => 'Giant',
         ];
+    }
+
+    public function getIoTypeOptions()
+    {
+        return [
+            'string' => 'Строка',
+            'bool' => 'Булево',
+            'int' => 'Целое число',
+            'float' => 'Дробное число',
+            'array' => 'Массив',
+            'object' => 'Объект'
+        ];
+    }
+
+    public function getIoDirectionOptions()
+    {
+        return [
+            'input' => 'Вход',
+            'output' => 'Выход',
+            'event' => 'Событие'
+        ];
+    }
+
+    ### Inner methods
+
+
+    /**
+     * Заполняет поля из настроек при загрузке fillSettings()
+     * @return void
+     */
+    private function fillSettings(): void
+    {
+        $settings = $this->data_dump['settings'] ?? null;
+        if ($settings) {
+            foreach ($settings as $field => $value) {
+                $this->attributes[$field] = $value;
+            }
+        }
+    }
+
+    public function saveData()
+    {
+        if (empty($this->attributes['tid'])) {
+            $this->attributes['tid'] = $this->tid ?? ths()->settings('author_token') ?? 'project';
+        }
+        $settings = $this->dynamic_attributes;
+        $this->data_dump['settings'] = $settings;
+        $this->attributes['data'] = ths()->toJson($this->data_dump, true);
     }
 }

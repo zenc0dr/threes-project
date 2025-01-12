@@ -4,8 +4,9 @@ namespace Zen\Units;
 
 class TestClass
 {
-    public function testMethod()
+    # Вызов: Zen.Units.TestClass.testMethod
+    public function testMethod(string $input_string)
     {
-        return 'is works!';
+        return 'is works! String: ' . $input_string;
     }
 }

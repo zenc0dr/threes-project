@@ -18,16 +18,6 @@ class Sprite extends Model
         'sid' => 'unique:zen_threes_sprites,sid',
     ];
 
-//    public function getUnitsOptions()
-//    {
-//        return Unit::active()->lists('name', 'tid');
-//    }
-
-    public function getParentSidOptions()
-    {
-        return [null => '--'] + self::all()->lists('name', 'sid');
-    }
-
     public function getDataAttribute(?string $record): array
     {
         if ($record) {
