@@ -14,6 +14,12 @@ class Tests
         $unit->save();
     }
 
+    # http://threes.dc/zen/threes/api/debug.Tests:apiTest
+    public function apiTest()
+    {
+        return 'Отлично, ajax работает!';
+    }
+
     # http://threes.dc/zen/threes/api/debug.Tests:loadUnit?tid=
     public function loadUnit()
     {

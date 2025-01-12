@@ -1,19 +1,19 @@
 fields:
+    scheme:
+        label: ''
+        span: full
+        path: $/zen/threes/controllers/spritecontroller/partials/scheme.php
+        type: partial
     name:
         label: 'Название спрайта'
-        span: left
+        span: auto
         type: text
     sid:
         label: 'Код спрайта'
-        span: left
+        span: auto
         type: text
     description:
         label: Описание
         size: large
-        span: left
+        span: auto
         type: richeditor
-    scheme:
-        label: ''
-        span: right
-        path: $/zen/threes/controllers/spritecontroller/partials/scheme.php
-        type: partial

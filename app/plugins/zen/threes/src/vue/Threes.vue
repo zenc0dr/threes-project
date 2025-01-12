@@ -1,9 +1,11 @@
 <template>
-    <h3>Threes</h3>
-    <div class="body">
+    <div class="threes">
         <router-view />
     </div>
 </template>
-<script>
-
-</script>
+<style lang="css">
+.threes {
+    min-height: 300px;
+    background-color: #e9edf3;
+}
+</style>
