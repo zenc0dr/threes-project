@@ -9,9 +9,9 @@ class Tests
     # http://threes.dc/zen/threes/api/debug.Tests:debug
     public function debug()
     {
-        $unit = new Unit();
-        $unit->name = '';
-        $unit->save();
+        dd(
+            ths()->units()->list()
+        );
     }
 
     # http://threes.dc/zen/threes/api/debug.Tests:apiTest

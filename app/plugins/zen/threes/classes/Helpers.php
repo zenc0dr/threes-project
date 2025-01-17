@@ -11,4 +11,14 @@ class Helpers
     use Files;
     use Json;
     use Yaml;
+
+    public function units(): Units
+    {
+        return Units::getInstance();
+    }
+
+    public function sprites()
+    {
+        return Sprites::getInstance();
+    }
 }
