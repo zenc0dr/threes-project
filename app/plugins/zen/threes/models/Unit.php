@@ -20,6 +20,7 @@ class Unit extends Model
     ];
 
     protected $fillable = [
+        'icon',
         'tid',
         'io',
         'name',
@@ -79,6 +80,16 @@ class Unit extends Model
     public function getSettingsAttribute()
     {
         return $this->data_dump['settings'] ?? [];
+    }
+
+    public function getIconAttribute($svg)
+    {
+        if (!$svg) {
+            return file_get_contents(
+                base_path('plugins/zen/threes/assets/images/icons/default-icon.svg')
+            );
+        }
+        return $svg;
     }
 
     public function setIoAttribute($io)

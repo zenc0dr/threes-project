@@ -97,3 +97,12 @@ fields:
         size: large
         span: full
         type: richeditor
+secondaryTabs:
+    fields:
+        icon:
+            label: 'SVG Иконка'
+            span: full
+            size: large
+            language: php
+            type: codeeditor
+            tab: Иконка

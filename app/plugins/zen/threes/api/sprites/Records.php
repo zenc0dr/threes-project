@@ -8,10 +8,10 @@ class Records
      * http://threes.dc/zen/threes/api/Sprites.Records:get
      * @return void
      */
-    public function get()
+    public function get(): array
     {
-        dd(
-            ths()->sprites()->getRecords()
-        );
+        return [
+            'nodes' => ths()->sprites()->getRecords()
+        ];
     }
 }

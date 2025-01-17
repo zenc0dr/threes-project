@@ -10,6 +10,7 @@ class BuilderTableCreateZenThreesUnits extends Migration
         Schema::create('zen_threes_units', function($table)
         {
             $table->string('tid')->primary();
+            $table->text('icon')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
