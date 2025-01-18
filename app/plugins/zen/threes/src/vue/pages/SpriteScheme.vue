@@ -6,6 +6,9 @@
                 <div class="ths-node__header__name">
                     {{ node.name }} ({{ node.nid }})
                 </div>
+                <div class="ths-node__header__settings">
+                    <div @click="openNodeSettings(node)" class="ths-node__header__btn"></div>
+                </div>
             </div>
             <div class="ths-node__body">
                 <div class="ths-node__io">
@@ -20,18 +23,24 @@
             </div>
         </div>
     </div>
+    <ThreesModal :heading="node ? `[ ${node.nid} ]: ` + node.name : null" :show="node" @close="node = null">
+        <pre>{{ node }}</pre>
+    </ThreesModal>
 </div>
 </template>
 <script>
 import ThreesNodeIo from "../components/ThreesNodeIo.vue";
+import ThreesModal from "../components/ThreesModal.vue";
 export default {
     name: "SpriteScheme",
     components: {
-        ThreesNodeIo
+        ThreesNodeIo,
+        ThreesModal
     },
     data() {
         return {
             sid: null,
+            node: null,
             nodes: [],
             scheme: [
                 {
@@ -56,6 +65,9 @@ export default {
                     this.nodes = response.nodes
                 }
             })
+        },
+        openNodeSettings(node) {
+            this.node = node
         }
     },
 }
@@ -85,7 +97,34 @@ $border_radius: 4px;
     flex-direction: column;
 
     &__header {
+        display: flex;
+        flex-direction: row;
         padding: 6px 12px;
+        justify-content: space-between;
+
+        &__name {
+
+        }
+
+        &__settings {
+
+        }
+
+        &__btn {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            background-image: url("/plugins/zen/threes/assets/images/icons/cog.svg");
+            background-size: contain;
+            background-repeat: no-repeat;
+            transition: 200ms;
+            &:hover {
+                transform: scale(1.3);
+            }
+            &:active {
+                transform: scale(0.8);
+            }
+        }
     }
 
     &__body {
