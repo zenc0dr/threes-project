@@ -13,7 +13,8 @@ trait Records
                 'scheme' => [
                     [
                         'type' => 'unit',
-                        'uid' => 'Zen.Stack.'
+                        'uid' => 'Zen.Units.TestClass.adder',
+                        'data' => $this->getUnitData('Zen.Units.TestClass.adder')
                     ]
                 ]
             ],
@@ -38,5 +39,12 @@ trait Records
                 'scheme' => []
             ],
         ];
+    }
+
+    private function getUnitData(string $uid)
+    {
+        dd(
+            ths()->units()
+        );
     }
 }
