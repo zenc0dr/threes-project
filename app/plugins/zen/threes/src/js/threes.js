@@ -20,6 +20,9 @@ window.ths = {
             api_url = domain + '/zen/threes/api/' + opts.api
         }
 
+        // For debug
+        console.log('Threes query [' + request_key + ']: ' + api_url)
+
         if (this.auth_token) {
             axios_options = {
                 withCredentials: true,
@@ -32,7 +35,7 @@ window.ths = {
         if (!data) {
             axios.get(api_url, axios_options)
                 .then((response) => {
-                    console.log(response.data) // todo:debug
+                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
                     this.afterResponse(response.data, opts.then, request_key)
                 })
                 .catch((error) => {
@@ -43,7 +46,7 @@ window.ths = {
         } else {
             axios.post(api_url, data, axios_options)
                 .then((response) => {
-                    console.log(response.data) // todo:debug
+                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
                     this.afterResponse(response.data, opts.then, request_key)
                 })
                 .catch((error) => {

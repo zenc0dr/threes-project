@@ -48,7 +48,7 @@ export default {
     methods: {
         testLoadContent() {
             ths.api({
-                api: 'Sprites.Records:get',
+                api: 'Sprites.Nodes:getNodes',
                 data: {
                     sid: this.sid
                 },

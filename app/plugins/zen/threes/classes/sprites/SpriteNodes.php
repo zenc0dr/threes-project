@@ -2,9 +2,9 @@
 
 namespace Zen\Threes\Classes\Sprites;
 
-trait SpriteRecords
+trait SpriteNodes
 {
-    public function getRecords(): array
+    public function getNodes(): array
     {
         $scheme = [
             [
