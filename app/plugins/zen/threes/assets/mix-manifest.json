@@ -1,5 +1,11 @@
 {
     "/js/threes.js": "/js/threes.js",
     "/css/threes.css": "/css/threes.css",
-    "/images/icons/default-icon.svg": "/images/icons/default-icon.svg"
+    "/images/icons/default-icon.svg": "/images/icons/default-icon.svg",
+    "/images/icons/input.svg": "/images/icons/input.svg",
+    "/images/icons/io_type_array.svg": "/images/icons/io_type_array.svg",
+    "/images/icons/io_type_bool.svg": "/images/icons/io_type_bool.svg",
+    "/images/icons/io_type_int.svg": "/images/icons/io_type_int.svg",
+    "/images/icons/io_type_object.svg": "/images/icons/io_type_object.svg",
+    "/images/icons/io_type_string.svg": "/images/icons/io_type_string.svg"
 }

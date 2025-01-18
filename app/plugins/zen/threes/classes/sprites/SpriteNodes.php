@@ -11,20 +11,16 @@ trait SpriteNodes
                 'nid' => 'node1',
                 'name' => 'Тестовый нод, реализующий спрайт',
                 'scheme' => [
-                    [
-                        'type' => 'unit',
-                        'uid' => 'zen.units.adder',
-                    ]
+                    'type' => 'unit',
+                    'uid' => 'zen.units.adder'
                 ]
             ],
             [
                 'nid' => 'node2',
                 'name' => 'Node 2',
                 'scheme' => [
-                    [
-                        'type' => 'unit',
-                        'uid' => 'zen.units.test',
-                    ]
+                    'type' => 'unit',
+                    'uid' => 'zen.units.test',
                 ]
             ],
             [
@@ -46,19 +42,17 @@ trait SpriteNodes
 
         # Тут каждый нод облагораживается данными из юнита
         foreach ($scheme as &$item) {
-            foreach ($item['scheme'] as &$item_scheme) {
-                if ($item_scheme['type'] === 'unit' && isset($item_scheme['uid'])) {
-                    $item_scheme['data'] = ths()->units()->getUnitData($item_scheme['uid']);
 
-                    if (isset($item_scheme['data']['io'])) {
-                        foreach ($item_scheme['data']['io'] as &$item_io) {
-                            unset($item_io['io_description']);
-                        }
+            if (!empty($item['scheme']) && $item['scheme']['type'] === 'unit' && isset($item['scheme']['uid'])) {
+                $item['scheme']['data'] = ths()->units()->getUnitData($item['scheme']['uid']);
+
+                if (isset($item['scheme']['data']['io'])) {
+                    foreach ($item['scheme']['data']['io'] as &$item_io) {
+                        unset($item_io['io_description']);
                     }
                 }
             }
         }
-
         return $scheme;
     }
 }

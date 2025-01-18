@@ -9,13 +9,13 @@
             </div>
             <div class="ths-node__body">
                 <div class="ths-node__io">
-                    io
+                    <ThreesNodeIo io_direction="input" :node="node"/>
                 </div>
                 <div class="ths-node__ui">
                     UI
                 </div>
                 <div class="ths-node__io">
-                    io
+                    <ThreesNodeIo io_direction="output" :node="node"/>
                 </div>
             </div>
         </div>
@@ -89,7 +89,6 @@ $border_radius: 4px;
     }
 
     &__body {
-        background-color: #63a2ff;
         display: flex;
         flex-direction: row;
     }
@@ -100,8 +99,7 @@ $border_radius: 4px;
     }
 
     &__io {
-        background-color: #22e4f6;
-        width: 150px;
+        width: 300px;
     }
 }
 </style>

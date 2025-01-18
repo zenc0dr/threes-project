@@ -7,7 +7,10 @@ class TestClass
     # Вызов: Zen.Units.TestClass.testMethod
     public function testMethod(string $input_string)
     {
-        return 'is works! String: ' . $input_string;
+        return [
+            'output' => $input_string . ' from output',
+            'output2' => $input_string . ' from output2'
+        ];
     }
 
     /**
