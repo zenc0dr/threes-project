@@ -2,7 +2,7 @@
 
 namespace Zen\Threes\Classes\Units;
 
-trait Records
+trait UnitRecords
 {
     public function getRecords()
     {

@@ -2,11 +2,11 @@
 
 namespace Zen\Threes\Classes;
 
-use Zen\Threes\Classes\Sprites\Records;
+use Zen\Threes\Classes\Sprites\SpriteRecords;
 use Zen\Threes\Traits\SingletonTrait;
 
 class Sprites
 {
     use SingletonTrait;
-    use Records;
+    use SpriteRecords;
 }
