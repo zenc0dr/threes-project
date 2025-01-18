@@ -23,8 +23,12 @@
 </div>
 </template>
 <script>
+import ThreesNodeIo from "../components/ThreesNodeIo.vue";
 export default {
     name: "SpriteScheme",
+    components: {
+        ThreesNodeIo
+    },
     data() {
         return {
             sid: null,
@@ -81,7 +85,7 @@ $border_radius: 4px;
     flex-direction: column;
 
     &__header {
-        padding: 15px;
+        padding: 6px 12px;
     }
 
     &__body {

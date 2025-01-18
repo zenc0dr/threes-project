@@ -1,6 +1,6 @@
 <?php
 
-namespace Zen\Threes\Classes\sprites;
+namespace Zen\Threes\Classes\Sprites;
 
 trait Records
 {
@@ -10,7 +10,12 @@ trait Records
             [
                 'nid' => 'node1',
                 'name' => 'Тестовый нод, реализующий спрайт',
-                'scheme' => []
+                'scheme' => [
+                    [
+                        'type' => 'unit',
+                        'uid' => 'Zen.Stack.'
+                    ]
+                ]
             ],
             [
                 'nid' => 'node2',
