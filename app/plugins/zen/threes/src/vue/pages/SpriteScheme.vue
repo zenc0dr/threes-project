@@ -22,9 +22,7 @@
                 </div>
             </div>
         </div>
-        <div @click="addNode" class="ths-add">
-            +
-        </div>
+        <div @click="addNode" class="ths-add">+</div>
     </div>
     <ThreesModal :show="!!node" @close="closeNodeSettings">
         <template #heading>
@@ -37,6 +35,7 @@
             />
         </template>
         <template #footer>
+            <ControlPanel :scheme="node_controls" />
         </template>
     </ThreesModal>
 </div>
@@ -44,11 +43,13 @@
 <script>
 import ThreesNodeIo from "../components/ThreesNodeIo.vue";
 import ThreesModal from "../components/ThreesModal.vue";
+import ControlPanel from "../components/ux/forms/ControlPanel.vue";
 export default {
     name: "SpriteScheme",
     components: {
         ThreesNodeIo,
-        ThreesModal
+        ThreesModal,
+        ControlPanel
     },
     data() {
         return {
@@ -57,6 +58,15 @@ export default {
             sid: null,
             node: null,
             nodes: [],
+            node_controls: [
+                {
+                    name: 'Сохранить',
+                    icon: 'bi bi-cloud-upload',
+                    click: () => {
+                        this.saveNode()
+                    }
+                }
+            ],
         }
     },
     mounted() {
@@ -64,14 +74,14 @@ export default {
         this.loadNodes()
     },
     watch: {
-        node_data: {
-            handler(value, precursor) {
-                if (precursor) {
-                    console.log('Изменил настройки нода')
-                }
-            },
-            deep: true
-        },
+        // node_data: {
+        //     handler(value, precursor) {
+        //         if (precursor) {
+        //             console.log('Изменил настройки нода')
+        //         }
+        //     },
+        //     deep: true
+        // },
     },
     methods: {
         loadNodes() {
@@ -85,11 +95,50 @@ export default {
                 }
             })
         },
+        saveNodes() {
+            ths.api({
+                api: 'Sprites.Nodes:saveNodes',
+                data: {
+                    sid: this.sid,
+                    nodes: this.nodes,
+                },
+                then: response => {
+
+                }
+            })
+        },
+        saveNode() {
+            let data = {
+                old_nid: this.node.nid,
+                new_nid: this.node_data.nid,
+                old_type: this.node.type,
+                new_type: this.node_data.type,
+                name: this.node_data.name,
+            }
+
+            if (data.new_type === 'unit') {
+                data.scheme = {
+                    uid: this.node_data.uid
+                }
+            }
+            ths.api({
+                api: 'Sprites.Nodes:saveNode',
+                data: {
+                    sid: this.sid,
+                    data
+                },
+                then: response => {
+                    this.loadNodes()
+                    this.closeNodeSettings()
+                }
+            })
+        },
         addNode() {
             ths.api({
                 api: 'Sprites.Nodes:addNode',
                 then: response => {
                     this.nodes.push(response.node)
+                    this.saveNodes()
                 }
             })
         },

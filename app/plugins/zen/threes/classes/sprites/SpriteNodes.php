@@ -77,4 +77,61 @@ trait SpriteNodes
         }
         return $nodes;
     }
+
+    public function saveNodes(string $sprite_id, array $nodes): bool
+    {
+        $sprite = Sprite::find($sprite_id);
+
+        if (!$sprite) {
+            return false;
+        }
+
+        $sprite->nodes = $nodes;
+        $sprite->save();
+
+        return true;
+    }
+
+    /**
+     * Сохранить настройки нода
+     * @param string $sprite_id
+     * @param array $data
+     * @return bool
+     */
+    public function saveNode(string $sprite_id, array $data): bool
+    {
+        $sprite = Sprite::find($sprite_id);
+
+        if (!$sprite) {
+            return false;
+        }
+
+        $nodes = $sprite->nodes;
+
+        if (!count($nodes)) {
+            return false;
+        }
+
+        $old_nid = $data['old_nid'];
+        $new_nid = $data['new_nid'];
+        #$old_type = $data['old_type'];
+        $new_type = $data['new_type'];
+        $name = $data['name'];
+        $scheme = $data['scheme'];
+
+        foreach ($nodes as &$node) {
+            if ($node['nid'] === $old_nid) {
+                $node['nid'] = $new_nid;
+                $node['type'] = $new_type;
+                $node['name'] = $name;
+                $node['scheme'] = $scheme;
+                break;
+            }
+        }
+
+        $sprite->nodes = $nodes;
+        $sprite->save();
+
+        return true;
+    }
 }

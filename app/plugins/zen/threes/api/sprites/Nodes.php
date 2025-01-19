@@ -27,4 +27,34 @@ class Nodes
             'node' => ths()->sprites()->addNode()
         ];
     }
+
+    /**
+     * http://threes.dc/zen/threes/api/Sprites.Nodes:saveNodes
+     * @return true[]
+     */
+    public function saveNodes(): array
+    {
+        $sid = request('sid');
+        $nodes = request('nodes');
+
+        ths()->sprites()->saveNodes($sid, $nodes);
+        return [
+            'success' => true
+        ];
+    }
+
+    /**
+     * http://threes.dc/zen/threes/api/Sprites.Nodes:saveNode
+     * @return true[]
+     */
+    public function saveNode(): array
+    {
+        $sid = request('sid');
+        $data = request('data');
+        ths()->sprites()->saveNode($sid, $data);
+
+        return [
+            'success' => true
+        ];
+    }
 }

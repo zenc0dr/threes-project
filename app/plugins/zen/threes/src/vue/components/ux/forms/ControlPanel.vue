@@ -1,17 +1,17 @@
 <template>
-    <div v-if="buttons !== null" class="control-panel" :class="float">
-        <template v-for="button in buttons">
+    <div v-if="scheme !== null" class="control-panel" :class="float">
+        <template v-for="button in scheme">
             <div class="control-panel__separator" v-if="button.type === 'separator'">
                 |
             </div>
-            <button v-else v-show="show(button)"
+            <div v-else v-show="show(button)"
                     :class="`btn btn-${ type(button) }`"
                     @click="button.click()"
                     :disabled="disabled(button)"
             >
                 <i v-if="button.icon" :class="icon(button)"></i>
                 {{ name(button) }}
-            </button>
+            </div>
         </template>
     </div>
 </template>
@@ -20,7 +20,7 @@
 export default {
     name: "ControlPanel",
     props: {
-        buttons: {
+        scheme: {
             type: Array,
             default: null
         },
@@ -75,9 +75,16 @@ export default {
 
 <style lang="scss">
 .control-panel {
+    display: flex;
+    width: 100%;
+
+    > button:not(:last-child) {
+        margin-right: 10px;
+    }
+
     &__separator {
-        color: #d3d3d3;
         display: flex;
+        color: #d3d3d3;
         margin-left: 6px;
         margin-right: 16px;
         align-items: center;
@@ -90,16 +97,11 @@ export default {
             margin-right: 5px;
         }
     }
-    display: flex;
-    width: 100%;
     &.right {
         justify-content: flex-end;
     }
     &.left {
         width: auto;
-    }
-    > button:not(:last-child) {
-        margin-right: 10px;
     }
 }
 </style>
