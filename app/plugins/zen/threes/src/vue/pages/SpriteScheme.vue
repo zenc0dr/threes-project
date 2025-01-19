@@ -22,9 +22,22 @@
                 </div>
             </div>
         </div>
+        <div @click="addNode" class="ths-add">
+            +
+        </div>
     </div>
-    <ThreesModal :heading="node ? `[ ${node.nid} ]: ` + node.name : null" :show="node" @close="node = null">
-        <pre>{{ node }}</pre>
+    <ThreesModal :show="!!node" @close="closeNodeSettings">
+        <template #heading>
+            {{ node ? `[ ${node.nid} ]: ` + node.name : null }}
+        </template>
+        <template #default>
+            <FormFitter
+                :scheme="node_scheme"
+                v-model="node_data"
+            />
+        </template>
+        <template #footer>
+        </template>
     </ThreesModal>
 </div>
 </template>
@@ -39,23 +52,29 @@ export default {
     },
     data() {
         return {
+            node_scheme: null,
+            node_data: null,
             sid: null,
             node: null,
             nodes: [],
-            scheme: [
-                {
-                    code: null,
-
-                }
-            ]
         }
     },
     mounted() {
         this.sid = this.$route.params.sid
-        this.testLoadContent()
+        this.loadNodes()
+    },
+    watch: {
+        node_data: {
+            handler(value, precursor) {
+                if (precursor) {
+                    console.log('Изменил настройки нода')
+                }
+            },
+            deep: true
+        },
     },
     methods: {
-        testLoadContent() {
+        loadNodes() {
             ths.api({
                 api: 'Sprites.Nodes:getNodes',
                 data: {
@@ -66,8 +85,69 @@ export default {
                 }
             })
         },
+        addNode() {
+            ths.api({
+                api: 'Sprites.Nodes:addNode',
+                then: response => {
+                    this.nodes.push(response.node)
+                }
+            })
+        },
         openNodeSettings(node) {
+            this.buildNodeScheme(node)
             this.node = node
+        },
+        closeNodeSettings() {
+            this.node = null
+            this.node_scheme = null
+            this.node_data = null
+        },
+        buildNodeScheme(node)
+        {
+            let node_scheme = [
+                {
+                    field: 'name',
+                    type: 'string',
+                    label: 'Название нода',
+                    size: 'half',
+                },
+                {
+                    field: 'nid',
+                    type: 'string',
+                    label: 'Код нода',
+                    size: 'quarter',
+                },
+                {
+                    field: 'type',
+                    type: 'select',
+                    label: 'Тип нода',
+                    size: 'quarter',
+                    options: [
+                        {
+                            id: 'unit',
+                            name: 'unit'
+                        }
+                    ],
+                },
+            ]
+            let node_data = {
+                nid: node.nid,
+                name: node.name,
+                type: node.type,
+            }
+
+            if (node.type === 'unit') {
+                node_scheme.push({
+                    field: 'uid',
+                    type: 'string',
+                    label: 'Код юнита',
+                    size: 'half',
+                })
+                node_data.uid = node.scheme.uid
+            }
+
+            this.node_data = node_data
+            this.node_scheme = node_scheme
         }
     },
 }
@@ -141,4 +221,20 @@ $border_radius: 4px;
         width: 300px;
     }
 }
+
+.ths-add {
+    background: #d1d1d1;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    color: #7a7a7a;
+    transition: 200ms;
+    cursor: pointer;
+    &:hover {
+        background: #efc7ff;
+    }
+}
+
 </style>

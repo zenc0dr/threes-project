@@ -2,57 +2,79 @@
 
 namespace Zen\Threes\Classes\Sprites;
 
+use Zen\Threes\Models\Sprite;
+
 trait SpriteNodes
 {
-    public function getNodes(): array
+    public function addNode(): array
     {
-        $scheme = [
+        return [
+            'nid' => ths()->createToken(),
+            'name' => 'Новый node',
+            'type' => 'unit',
+            'scheme' => []
+        ];
+    }
+
+    public function getNodes(string $sprite_id): array
+    {
+        $sprite = Sprite::find($sprite_id);
+
+        if (!$sprite) {
+            return [];
+        }
+
+        $nodes = $sprite->nodes ?? [];
+
+        $nodes_ex = [
             [
                 'nid' => 'node1',
                 'name' => 'Тестовый нод, реализующий спрайт',
+                'type' => 'unit',
                 'scheme' => [
-                    'type' => 'unit',
                     'uid' => 'zen.units.adder'
                 ]
             ],
             [
                 'nid' => 'node2',
-                'name' => 'Node 2',
+                'name' => 'Тестовый нод, реализующий спрайт',
+                'type' => 'unit',
                 'scheme' => [
-                    'type' => 'unit',
-                    'uid' => 'zen.units.test',
+                    'uid' => 'zen.units.adder'
                 ]
             ],
             [
                 'nid' => 'node3',
                 'name' => 'Node 3',
-                'scheme' => []
+                'type' => 'unit',
+                'scheme' => [
+                    'uid' => 'zen.units.test',
+                ]
             ],
             [
                 'nid' => 'node4',
                 'name' => 'Node 4',
+                'type' => 'other',
                 'scheme' => []
-            ],
-            [
-                'nid' => 'node5',
-                'name' => 'Node 5',
-                'scheme' => []
-            ],
+            ]
         ];
 
         # Тут каждый нод облагораживается данными из юнита
-        foreach ($scheme as &$item) {
+        foreach ($nodes as &$node) {
+            if (empty($node['scheme'])) {
+                continue;
+            }
 
-            if (!empty($item['scheme']) && $item['scheme']['type'] === 'unit' && isset($item['scheme']['uid'])) {
-                $item['scheme']['data'] = ths()->units()->getUnitData($item['scheme']['uid']);
+            if ($node['type'] === 'unit' && isset($node['scheme']['uid'])) {
+                $node['scheme']['data'] = ths()->units()->getUnitData($node['scheme']['uid']);
 
-                if (isset($item['scheme']['data']['io'])) {
-                    foreach ($item['scheme']['data']['io'] as &$item_io) {
+                if (isset($node['scheme']['data']['io'])) {
+                    foreach ($node['scheme']['data']['io'] as &$item_io) {
                         unset($item_io['io_description']);
                     }
                 }
             }
         }
-        return $scheme;
+        return $nodes;
     }
 }

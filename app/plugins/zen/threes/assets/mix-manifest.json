@@ -1,6 +1,7 @@
 {
     "/js/threes.js": "/js/threes.js",
     "/css/threes.css": "/css/threes.css",
+    "/images/icons/cog.svg": "/images/icons/cog.svg",
     "/images/icons/default-icon.svg": "/images/icons/default-icon.svg",
     "/images/icons/input.svg": "/images/icons/input.svg",
     "/images/icons/io_type_array.svg": "/images/icons/io_type_array.svg",
@@ -8,5 +9,10 @@
     "/images/icons/io_type_int.svg": "/images/icons/io_type_int.svg",
     "/images/icons/io_type_object.svg": "/images/icons/io_type_object.svg",
     "/images/icons/io_type_string.svg": "/images/icons/io_type_string.svg",
-    "/images/icons/cog.svg": "/images/icons/cog.svg"
+    "/images/vendor/primevue/resources/color.png": "/images/vendor/primevue/resources/color.png",
+    "/images/vendor/primevue/resources/hue.png": "/images/vendor/primevue/resources/hue.png",
+    "/fonts/vendor/primeicons/primeicons.eot": "/fonts/vendor/primeicons/primeicons.eot",
+    "/fonts/vendor/primeicons/primeicons.svg": "/fonts/vendor/primeicons/primeicons.svg",
+    "/fonts/vendor/primeicons/primeicons.ttf": "/fonts/vendor/primeicons/primeicons.ttf",
+    "/fonts/vendor/primeicons/primeicons.woff": "/fonts/vendor/primeicons/primeicons.woff"
 }

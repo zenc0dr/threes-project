@@ -1,7 +1,10 @@
-import {createApp} from 'vue';
-import router from './routes';
+
 const axios = require('axios');
 const md5 = require('md5');
+
+import {createApp} from 'vue';
+import router from './routes';
+import PrimeVue from 'primevue/config';
 
 import Threes from '../vue/Threes.vue'
 
@@ -74,6 +77,12 @@ window.ths = {
     },
 }
 
-const app = createApp(Threes)
-app.use(router)
-app.mount("#threes")
+import FormFitter from "../vue/components/ux/forms/FormFitter.vue";
+import FormSection from "../vue/components/ux/forms/FormSection.vue";
+
+const app = createApp(Threes);
+app.use(router);
+app.use(PrimeVue, {ripple: true});
+app.component('FormFitter', FormFitter);
+app.component('FormSection', FormSection);
+app.mount("#threes");

@@ -10,8 +10,21 @@ class Nodes
      */
     public function getNodes(): array
     {
+        $sid = request('sid');
+
         return [
-            'nodes' => ths()->sprites()->getNodes()
+            'nodes' => ths()->sprites()->getNodes($sid)
+        ];
+    }
+
+    /**
+     * http://threes.dc/zen/threes/api/Sprites.Nodes:addNode
+     * @return array
+     */
+    public function addNode(): array
+    {
+        return [
+            'node' => ths()->sprites()->addNode()
         ];
     }
 }

@@ -10,7 +10,7 @@ class Tests
     public function debug()
     {
         dd(
-            ths()->units()->list()
+            ths()->createToken()
         );
     }
 

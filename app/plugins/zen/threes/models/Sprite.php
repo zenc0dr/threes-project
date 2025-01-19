@@ -18,6 +18,38 @@ class Sprite extends Model
         'sid' => 'unique:zen_threes_sprites,sid',
     ];
 
+    protected $fillable = [
+        'sid',
+        'parent_sid',
+        'name',
+        'description',
+        'data',
+        'active',
+    ];
+
+    protected array $data_dump = [];
+
+    ### begin:Events
+    public function afterFetch(): void
+    {
+        $this->data_dump = $this->data;
+    }
+
+    public function beforeSave(): void
+    {
+        $this->saveData();
+    }
+
+    ### end:Events
+
+    public function saveData(): void
+    {
+        if (empty($this->attributes['sid'])) {
+            $this->attributes['sid'] = $this->sid ?? 's_'. ths()->createToken();
+        }
+        $this->attributes['data'] = ths()->toJson($this->data_dump, true);
+    }
+
     public function getDataAttribute(?string $record): array
     {
         if ($record) {
@@ -31,16 +63,13 @@ class Sprite extends Model
         $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
     }
 
-    public function getUnitsAttribute()
+    public function getNodesAttribute()
     {
-        $data = $this->data ?? [];
-        return $data['units'] ?? [];
+        return $this->data_dump['nodes'] ?? [];
     }
 
-    public function setUnitsAttribute(?array $fields = null): void
+    public function setNodesAttribute(?array $fields = null): void
     {
-        $data = $this->data ?? [];
-        $data['units'] = $fields ?? [];
-        $this->attributes['data'] = ths()->toJson($data, true);
+        $this->data_dump['nodes'] = $fields ?? [];
     }
 }
