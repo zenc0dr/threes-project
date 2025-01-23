@@ -14,7 +14,7 @@ class Tests
         $sid = $data['sprite_id'];
         $data = $data['data'];
 
-        ths()->sprites()->saveNode($sid, $data);
+        //ths()->sprites()->saveNode($sid, $data);
     }
 
     # http://threes.dc/zen/threes/api/debug.Tests:apiTest
