@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-        <SelectUnit v-if="selected_type === 'unit'"/>
+        <SelectUnit v-if="selected_type === 'unit'" @fetch="makeNode"/>
 
     </div>
 </template>
@@ -55,6 +55,9 @@ export default {
         },
         selectType(type) {
             this.selected_type = type
+        },
+        makeNode(node) {
+            this.$emit('fetch', node)
         }
     }
 }

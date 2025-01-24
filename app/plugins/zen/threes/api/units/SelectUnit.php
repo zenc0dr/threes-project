@@ -36,11 +36,19 @@ class SelectUnit
     {
         $tid = request('tid');
         $unit = Unit::find($tid);
+        if (!$unit) {
+            return [
+                'success' => false
+            ];
+        }
         return [
-            'tid' => $tid,
-            'name' => $unit->name,
-            'icon' => $unit->icon_path,
-            'io' => $unit->io,
+            'success' => true,
+            'node' => [
+                'tid' => $tid,
+                'name' => $unit->name,
+                'icon' => $unit->icon_path,
+                'io' => $unit->io,
+            ]
         ];
     }
 }

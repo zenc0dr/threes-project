@@ -1,10 +1,13 @@
 <template>
     <div class="threes-coder">
-        <div v-for="(line, n) in program" class="threes-coder__line">
-            <div class="threes-coder__line_info">{{ n }}</div>
+        <div v-for="(nodes, line) in program" class="threes-coder__line">
+            <div class="threes-coder__line_info">{{ line }}</div>
             <div class="threes-coder__line_items">
+                <div v-for="node in nodes" class="threes-node">
+                    {{ node.tid }}
+                </div>
                 <div class="threes-coder__add_node">
-                    <div @click="openCreateNodeModal" class="threes-coder__add_node__btn">
+                    <div @click="openCreateNodeModal(line)" class="threes-coder__add_node__btn">
                         +
                     </div>
                 </div>
@@ -16,7 +19,7 @@
             Выбор нода
         </template>
         <template #default>
-            <SelectNode />
+            <SelectNode @fetch="makeNode"/>
         </template>
     </ThreesModal>
 </template>
@@ -35,25 +38,27 @@ export default {
     data() {
         return {
             new_node: null,
+            active_line: null,
             program: [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
+                [],
+                [],
+                [],
+                [],
+                [],
             ]
         }
     },
     methods: {
-        openCreateNodeModal() {
+        openCreateNodeModal(line) {
             this.new_node = true
+            this.active_line = line
+            console.log('line', line)
         },
         closeCreateNodeModal() {
             this.new_node = false
+        },
+        makeNode(node) {
+            this.program[this.active_line].push(node)
         }
     }
 }
@@ -115,6 +120,14 @@ export default {
         &:hover &__btn {
             opacity: 1;
         }
+    }
+    .threes-node {
+        background-color: #ffffff;
+        border: 1px solid #d9d9d9;
+        padding: 10px;
+        border-radius: 4px;
+        min-height: 80px;
+        margin: 0 4px;
     }
 }
 </style>

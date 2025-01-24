@@ -76,12 +76,12 @@ export default {
         },
         makeNode(unit) {
             ths.api({
-                api: 'Units.SelectUnit.makeNode',
+                api: 'Units.SelectUnit:makeNode',
                 data: {
                     tid: unit.tid
                 },
                 then: response => {
-                    this.$emit('fetch', response.unit)
+                    this.$emit('fetch', response.node)
                 }
             })
         }
