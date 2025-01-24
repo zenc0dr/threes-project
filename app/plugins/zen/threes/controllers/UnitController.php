@@ -24,6 +24,7 @@ class UnitController extends Controller
     {
         parent::__construct();
         BackendMenu::setContext('Zen.Threes', 'main', 'units');
+        $this->addCss('/plugins/zen/threes/controllers/unitcontroller/assets/css/unitcontroller.css');
     }
 
     /**

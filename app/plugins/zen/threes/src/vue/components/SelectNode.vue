@@ -1,10 +1,14 @@
 <template>
     <div class="select-node">
-        <div class="select-node__title">
+        <div class="threes-global__note">
             Выберите тип нода
         </div>
         <div class="select-node__types">
-            <div @click="selectType(item.type)" v-for="item in node_types" class="select-node__type">
+            <div @click="selectType(item.type)"
+                 v-for="item in node_types"
+                 class="select-node__type"
+                 :class="{active:item.type === selected_type}"
+            >
                 <div class="select-node__type__head">
                     <img
                         :src="`/plugins/zen/threes/assets/images/node_types/` + item.icon" :alt="item.name"
@@ -19,14 +23,18 @@
                 </div>
             </div>
         </div>
-        <div style="font-size: 50px" v-if="selected_type">
-            Выбран тип: {{ selected_type }}
-        </div>
+        <SelectUnit v-if="selected_type === 'unit'"/>
+
     </div>
 </template>
 <script>
+import SelectUnit from "./SelectUnit.vue";
 export default {
     name: "SelectNode",
+    emits: ['fetch'],
+    components: {
+        SelectUnit
+    },
     mounted() {
         this.getTypes()
     },
@@ -57,15 +65,7 @@ export default {
     &__types {
         display: flex;
         margin: 0 -5px;
-    }
-
-    &__title {
-        font-size: 18px;
-        background: #e3ebf8;
-        color: #7b7b7b;
-        padding: 5px 13px;
-        margin-bottom: 8px;
-        border-radius: 4px;
+        margin-bottom: 15px;
     }
 
     &__type {
@@ -78,6 +78,11 @@ export default {
         background-color: #f5f5f5;
         user-select: none;
         width: 150px;
+
+        &.active {
+            background-color: #adffb5;
+            border-color: #80ce88;
+        }
 
         &__head {
             display: flex;

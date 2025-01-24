@@ -27,7 +27,13 @@ class SelectNode
                 'type' => 'if',
                 'name' => 'Условие',
                 'icon' => 'if.svg',
-                'desc' => 'Условие Если',
+                'desc' => 'Условие ЕСЛИ',
+            ],
+            [
+                'type' => 'else',
+                'name' => 'Условие',
+                'icon' => 'else.svg',
+                'desc' => 'Условие ИЛИ',
             ],
         ];
 

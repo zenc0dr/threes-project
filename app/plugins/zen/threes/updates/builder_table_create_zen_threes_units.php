@@ -11,6 +11,7 @@ class BuilderTableCreateZenThreesUnits extends Migration
         {
             $table->string('tid')->primary();
             $table->text('icon')->nullable();
+            $table->string('icon_name')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();

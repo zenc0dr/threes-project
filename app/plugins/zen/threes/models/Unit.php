@@ -2,10 +2,18 @@
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use Log;
 
 /**
- * @property bool $active
+ * @property bool $active - Активность юнита
+ * @property string $tid - ThreesID (Уникальный код юнита)
+ * @property string $name - Имя юнита
+ * @property string $description - Описание юнита
+ * @property string $icon - SVG-иконка из базы данных
+ * @property string $icon_path - Путь до SVG иконки
+ * @property array $io - Массив соединений (пинов)
+ * @property array $fields - Поля настроек юнита
+ * @method static active - Активные юниты
+ * @method static find(string $tid)
  */
 class Unit extends Model
 {
@@ -21,6 +29,7 @@ class Unit extends Model
 
     protected $fillable = [
         'icon',
+        'icon_path',
         'tid',
         'io',
         'name',
@@ -52,18 +61,55 @@ class Unit extends Model
         return in_array($key, $this->fillable);
     }
 
-    ### Events
-    public function afterFetch()
+    //region События модели
+    /**
+     * Событие после загрузки данных в экземпляр
+     * @return void
+     */
+    public function afterFetch(): void
     {
         $this->data_dump = $this->data;
         $this->fillSettings();
     }
 
-    public function beforeSave()
+    /**
+     * Событие перед сохранением экземпляра
+     * @return void
+     */
+    public function beforeSave(): void
     {
         $this->saveData();
+        $this->saveSvgIcon();
     }
 
+    /**
+     * Событие после сохранения экземпляра
+     * @return void
+     */
+    /*
+    public function afterSave()
+    {
+    }
+    */
+    //endregion
+
+    /**
+     * Сохраняет иконку в специальное место и возвращает её имя
+     * @return string|null
+     */
+    private function saveSvgIcon(): void
+    {
+        if (!$this->icon) {
+            return;
+        }
+        $icon_name = md5($this->icon) . '.svg';
+        $path = ths()->checkDir(storage_path('app/uploads/public/threes/icons/' . $icon_name));
+        file_put_contents(
+            $path,
+            $this->icon
+        );
+        $this->attributes['icon_name'] = $icon_name;
+    }
 
     ### Getters and setters
 
@@ -90,6 +136,15 @@ class Unit extends Model
             );
         }
         return $svg;
+    }
+
+    public function getIconPathAttribute()
+    {
+        if (!$this->icon) {
+            return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
+        }
+
+        return '/storage/app/uploads/public/threes/icons/' . $this->icon_name;
     }
 
     public function setIoAttribute($io)

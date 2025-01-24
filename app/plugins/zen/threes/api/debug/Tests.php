@@ -9,12 +9,7 @@ class Tests
     # http://threes.dc/zen/threes/api/debug.Tests:debug
     public function debug()
     {
-        $data = ths()->fromJsonFile(storage_path('test.json'));
 
-        $sid = $data['sprite_id'];
-        $data = $data['data'];
-
-        //ths()->sprites()->saveNode($sid, $data);
     }
 
     # http://threes.dc/zen/threes/api/debug.Tests:apiTest
