@@ -3,9 +3,7 @@
         <div v-for="(nodes, line) in program" class="threes-coder__line">
             <div class="threes-coder__line_info">{{ line }}</div>
             <div class="threes-coder__line_items">
-                <div v-for="node in nodes" class="threes-node">
-                    {{ node.tid }}
-                </div>
+                <ThreesNode v-for="node in nodes" :node="node" />
                 <div class="threes-coder__add_node">
                     <div @click="openCreateNodeModal(line)" class="threes-coder__add_node__btn">
                         +
@@ -27,13 +25,15 @@
 import ThreesModal from "../components/ThreesModal.vue";
 import ControlPanel from "../components/ux/forms/ControlPanel.vue";
 import SelectNode from "../components/SelectNode.vue";
+import ThreesNode from "../components/ThreesNode.vue";
 export default {
     name: "ThreesProgram",
     props: ['backend', 'sid'],
     components: {
         ThreesModal,
         ControlPanel,
-        SelectNode
+        SelectNode,
+        ThreesNode
     },
     data() {
         return {
@@ -46,6 +46,17 @@ export default {
                 [],
                 [],
             ]
+        }
+    },
+    watch: {
+        program: {
+            handler(program) {
+                const last_line = program[program.length - 1]
+                if (last_line.length) {
+                    program.push([])
+                }
+            },
+            deep: true
         }
     },
     methods: {
@@ -120,14 +131,6 @@ export default {
         &:hover &__btn {
             opacity: 1;
         }
-    }
-    .threes-node {
-        background-color: #ffffff;
-        border: 1px solid #d9d9d9;
-        padding: 10px;
-        border-radius: 4px;
-        min-height: 80px;
-        margin: 0 4px;
     }
 }
 </style>
