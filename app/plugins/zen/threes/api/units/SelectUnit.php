@@ -46,7 +46,7 @@ class SelectUnit
             'node' => [
                 'tid' => $tid,
                 'name' => $unit->name,
-                'icon' => $unit->icon_path,
+                'icon' => env('APP_URL') . $unit->icon_path,
                 'io' => $unit->io,
             ]
         ];

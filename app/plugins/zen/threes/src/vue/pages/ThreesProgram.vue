@@ -11,6 +11,7 @@
                 </div>
             </div>
         </div>
+        <pre>{{ program }}</pre>
     </div>
     <ThreesModal :show="new_node" max-width="1000px" @close="closeCreateNodeModal">
         <template #heading>

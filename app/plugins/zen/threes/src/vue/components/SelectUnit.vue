@@ -15,7 +15,7 @@
             <div v-for="unit in filtered_units" class="select-unit__list__item">
                 <div class="select-unit__list__item__info">
                     <div class="select-unit__list__item__head">
-                        <div class="select-unit__list__item__icon" :style="icon(unit)"></div>
+                        <icon class="select-unit__list__item__icon" :src="unit.icon"/>
                         <div class="select-unit__list__item__name">
                             {{ unit.name }}
                         </div>
@@ -33,8 +33,12 @@
     </div>
 </template>
 <script>
+import icon from "./ux/elements/icon.vue";
 export default {
     name: "SelectUnit",
+    components: {
+        icon
+    },
     emits: ['fetch'],
     mounted() {
         this.getUnits()
