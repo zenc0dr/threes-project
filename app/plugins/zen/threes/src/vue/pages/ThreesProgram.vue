@@ -61,6 +61,21 @@ export default {
         }
     },
     methods: {
+        loadProgram() {
+
+        },
+        saveProgram() {
+            ths.api({
+                api: 'Sprites.Program:save',
+                data: {
+                    sid: this.sid,
+                    program: this.program
+                },
+                then: response => {
+                    this.program = response.program
+                }
+            })
+        },
         openCreateNodeModal(line) {
             this.new_node = true
             this.active_line = line
@@ -71,6 +86,7 @@ export default {
         },
         makeNode(node) {
             this.program[this.active_line].push(node)
+            this.saveProgram()
         }
     }
 }

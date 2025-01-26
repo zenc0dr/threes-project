@@ -20,7 +20,7 @@ window.ths = {
         let axios_options = null
 
         if (opts.api) {
-            api_url = domain + '/zen/threes/api/' + opts.api
+            api_url = domain + '/threes.api/' + opts.api
         }
 
         // For debug

@@ -1,3 +1,5 @@
+@use "threes-global" as *;
+
 @import "~primevue/resources/themes/saga-blue/theme.css";
 @import "~primevue/resources/primevue.min.css";
 @import "~primeicons/primeicons.css";
@@ -13,5 +15,3 @@
     font-weight: normal;
     font-style: normal;
 }
-
-@import "threes-global";

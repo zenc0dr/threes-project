@@ -4,6 +4,9 @@ namespace Zen\Threes\Classes\Sprites;
 
 use Zen\Threes\Models\Sprite;
 
+/**
+ * todo: deprecated
+ */
 trait SpriteNodes
 {
     public function addNode(): array

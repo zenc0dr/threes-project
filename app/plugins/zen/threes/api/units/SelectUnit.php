@@ -7,7 +7,7 @@ use Zen\Threes\Models\Unit;
 class SelectUnit
 {
     /**
-     * http://threes.dc/zen/threes/api/Units.SelectUnit:records
+     * http://threes.dc/threes.api/Units.SelectUnit:records
      */
     public function records()
     {
@@ -29,7 +29,7 @@ class SelectUnit
     }
 
     /**
-     * http://threes.dc/zen/threes/api/Units.SelectUnit:makeNode
+     * http://threes.dc/threes.api/Units.SelectUnit:makeNode
      * @return array
      */
     public function makeNode(): array

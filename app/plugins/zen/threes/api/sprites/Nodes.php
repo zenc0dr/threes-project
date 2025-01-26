@@ -5,7 +5,7 @@ namespace Zen\Threes\Api\Sprites;
 class Nodes
 {
     /**
-     * http://threes.dc/zen/threes/api/Sprites.Nodes:getNodes
+     * http://threes.dc/threes.api/Sprites.Nodes:getNodes
      * @return void
      */
     public function getNodes(): array
@@ -18,7 +18,7 @@ class Nodes
     }
 
     /**
-     * http://threes.dc/zen/threes/api/Sprites.Nodes:addNode
+     * http://threes.dc/threes.api/Sprites.Nodes:addNode
      * @return array
      */
     public function addNode(): array
@@ -29,7 +29,7 @@ class Nodes
     }
 
     /**
-     * http://threes.dc/zen/threes/api/Sprites.Nodes:saveNodes
+     * http://threes.dc/threes.api/Sprites.Nodes:saveNodes
      * @return true[]
      */
     public function saveNodes(): array
@@ -44,7 +44,7 @@ class Nodes
     }
 
     /**
-     * http://threes.dc/zen/threes/api/Sprites.Nodes:saveNode
+     * http://threes.dc/threes.api/Sprites.Nodes:saveNode
      * @return true[]
      */
     public function saveNode(): array

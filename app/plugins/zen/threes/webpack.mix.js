@@ -12,6 +12,9 @@ mix.sass('src/scss/threes.scss', 'css')
             chunkFilename: 'js/[name].app.js',
             publicPath: '/plugins/zen/threes/assets/', // Указывает базовый путь для публичных файлов
         },
+        // stats: {
+        //     children: true // Раскомментировать только если будут ошибки сборки
+        // },
         devtool: mix.inProduction() ? false : 'inline-source-map',
         module: {
             rules: [

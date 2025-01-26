@@ -5,7 +5,7 @@ namespace Zen\Threes\Api\Sprites;
 class SelectNode
 {
     /**
-     * http://threes.dc/zen/threes/api/Sprites.SelectNode:records
+     * http://threes.dc/threes.api/Sprites.SelectNode:records
      * @return array[]
      */
     public function records(): array

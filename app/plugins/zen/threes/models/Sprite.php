@@ -25,6 +25,7 @@ class Sprite extends Model
         'description',
         'data',
         'active',
+        'program',
     ];
 
     protected array $data_dump = [];
@@ -63,13 +64,13 @@ class Sprite extends Model
         $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
     }
 
-    public function getNodesAttribute()
+    public function getProgramAttribute()
     {
-        return $this->data_dump['nodes'] ?? [];
+        return $this->data_dump['program'] ?? [];
     }
 
-    public function setNodesAttribute(?array $fields = null): void
+    public function setProgramAttribute(?array $fields = null): void
     {
-        $this->data_dump['nodes'] = $fields ?? [];
+        $this->data_dump['program'] = $fields ?? [];
     }
 }

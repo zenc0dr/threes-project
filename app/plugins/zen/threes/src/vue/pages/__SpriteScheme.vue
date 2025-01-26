@@ -1,4 +1,4 @@
-<template>
+<template type="DEPRECATED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!">
 <div class="ths-sprite">
     <div class="ths-nodes">
         <div v-for="node in nodes" class="ths-node">
@@ -8,17 +8,6 @@
                 </div>
                 <div class="ths-node__header__settings">
                     <div @click="openNodeSettings(node)" class="ths-node__header__btn"></div>
-                </div>
-            </div>
-            <div class="ths-node__body">
-                <div class="ths-node__io">
-                    <ThreesNodeIo io_direction="input" :node="node"/>
-                </div>
-                <div class="ths-node__ui">
-                    UI
-                </div>
-                <div class="ths-node__io">
-                    <ThreesNodeIo io_direction="output" :node="node"/>
                 </div>
             </div>
         </div>
@@ -41,13 +30,12 @@
 </div>
 </template>
 <script>
-import ThreesNodeIo from "../components/ThreesNodeIo.vue";
+// todo: Это черновой вариант который нужно будет удалить, он существует только для примеров кода
 import ThreesModal from "../components/ThreesModal.vue";
 import ControlPanel from "../components/ux/forms/ControlPanel.vue";
 export default {
-    name: "SpriteScheme",
+    name: "__SpriteScheme",
     components: {
-        ThreesNodeIo,
         ThreesModal,
         ControlPanel
     },

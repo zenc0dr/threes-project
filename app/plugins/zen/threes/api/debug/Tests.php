@@ -6,26 +6,26 @@ use Zen\Threes\Models\Unit;
 use Zen\Threes\Console\Vector;
 class Tests
 {
-    # http://threes.dc/zen/threes/api/debug.Tests:debug
+    # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
+        ths()->requestDebug();
     }
 
-    # http://threes.dc/zen/threes/api/debug.Tests:apiTest
+    # http://threes.dc/threes.api/debug.Tests:apiTest
     public function apiTest()
     {
         return 'Отлично, ajax работает!';
     }
 
-    # http://threes.dc/zen/threes/api/debug.Tests:loadUnit?tid=
+    # http://threes.dc/threes.api/debug.Tests:loadUnit?tid=
     public function loadUnit()
     {
         $unit = Unit::find(request('tid'));
         dd($unit->toArray());
     }
 
-    # http://threes.dc/zen/threes/api/debug.Tests:test
+    # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
         dd('Threes api works!');

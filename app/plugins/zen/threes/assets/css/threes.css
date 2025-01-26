@@ -6411,14 +6411,6 @@
     content: "\e926";
 }
 
-@font-face {
-  font-family: "primeicons";
-  font-display: block;
-  src: url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.eot");
-  src: url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.eot?#iefix") format("embedded-opentype"), url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.ttf") format("truetype"), url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.woff") format("woff"), url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.svg?#primeicons") format("svg");
-  font-weight: normal;
-  font-style: normal;
-}
 .threes-global__note {
   font-size: 18px;
   background: #e3ebf8;
@@ -6426,4 +6418,13 @@
   padding: 5px 13px;
   margin-bottom: 8px;
   border-radius: 4px;
+}
+
+@font-face {
+  font-family: "primeicons";
+  font-display: block;
+  src: url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.eot");
+  src: url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.eot?#iefix") format("embedded-opentype"), url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.ttf") format("truetype"), url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.woff") format("woff"), url("/plugins/zen/threes/assets/fonts/vendor/primeicons/primeicons.svg?#primeicons") format("svg");
+  font-weight: normal;
+  font-style: normal;
 }

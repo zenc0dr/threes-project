@@ -2,7 +2,7 @@
 
 Route::match(
     ['get', 'post'],
-    '/zen/threes/api/{path}:{method}',
+    'threes.api/{path}:{method}',
     function (string $path, string $method) {
         $response = ths()->api($path, $method);
         if (is_null($response)) {
