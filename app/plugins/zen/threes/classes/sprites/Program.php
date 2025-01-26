@@ -6,8 +6,12 @@ use Zen\Threes\Models\Sprite;
 
 trait Program
 {
-    public function programSave(array $program)
+    public function programSave(string $sid, array $program)
     {
-
+        dd(
+            'OKAY',
+            $sid,
+            $program,
+        );
     }
 }

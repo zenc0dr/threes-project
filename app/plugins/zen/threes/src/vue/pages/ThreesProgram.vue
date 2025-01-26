@@ -72,7 +72,7 @@ export default {
                     program: this.program
                 },
                 then: response => {
-                    this.program = response.program
+                    //this.program = response.program
                 }
             })
         },

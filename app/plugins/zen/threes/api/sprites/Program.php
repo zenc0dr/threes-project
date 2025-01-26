@@ -14,13 +14,7 @@ class Program
         $sid = request('sid');
         $program = request('program');
 
-
-        dd(
-            $sid,
-            $program
-        );
-
-        ths()->sprites($sid)->programSave($program);
+        ths()->sprites($sid)->programSave($sid, $program);
 
         return [
             'success' => true
