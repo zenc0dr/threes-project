@@ -4,6 +4,9 @@ use Model;
 use Zen\Threes\Traits\SimpleTree;
 use October\Rain\Database\Traits\Validation;
 
+/**
+ * @method static find(string $tid)
+ */
 
 class Sprite extends Model
 {

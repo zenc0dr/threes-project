@@ -6,12 +6,29 @@ use Zen\Threes\Models\Sprite;
 
 trait Program
 {
-    public function programSave(string $sid, array $program)
+    /**
+     * Сохранить программу спрайта
+     * @param string $sid
+     * @param array $program
+     * @return string[]
+     */
+    public function programSave(string $sid, array $program): array
     {
-        dd(
-            'OKAY',
-            $sid,
-            $program,
-        );
+        $sprite = Sprite::find($sid);
+        $sprite->program = $program;
+        $sprite->save();
+
+        return [
+            'success' => 'true',
+        ];
+    }
+
+    public function programLoad(string $sid): array
+    {
+        $sprite = Sprite::find($sid);
+        return [
+            'success' => true,
+            'program' => $sprite,
+        ];
     }
 }

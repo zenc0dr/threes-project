@@ -9,8 +9,6 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:save
     public function save(): array
     {
-        ths()->requestDebug();
-
         $sid = request('sid');
         $program = request('program');
 
@@ -18,6 +16,16 @@ class Program
 
         return [
             'success' => true
+        ];
+    }
+
+    # http://threes.dc/threes.api/Sprites.Program:load?sid=acme
+    public function load(): array
+    {
+        $sid = request('sid');
+        return [
+            'success' => true,
+            'program' => Sprite::find($sid)?->program
         ];
     }
 }

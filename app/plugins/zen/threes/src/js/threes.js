@@ -12,6 +12,11 @@ window.ths = {
     requests_register: {},
     auth_token: null,
 
+    // Объект для хранения глобальных данных
+    data: {
+        sprite_pins: [], // Соединения в спрайте
+    },
+
     api(opts) {
         let domain = location.origin
         let data = (opts.data) ? opts.data : null

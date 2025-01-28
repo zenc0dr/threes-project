@@ -1,7 +1,7 @@
 <template>
     <div class="threes-node">
         <div class="threes-node__io">
-            <node_io io_direction="input" :io="io(node.io, 'input')" />
+            <node_io :nid="nid" io_direction="input" :io="io(node.io, 'input')" />
         </div>
         <div class="threes-node__wrap">
             <div class="threes-node__header">
@@ -13,7 +13,7 @@
             <div class="threes-node__body"></div>
         </div>
         <div class="threes-node__io">
-            <node_io io_direction="output" :io="io(node.io, 'output')" />
+            <node_io :nid="nid" io_direction="output" :io="io(node.io, 'output')" />
         </div>
     </div>
 </template>
@@ -27,7 +27,8 @@ export default {
         node_io
     },
     props: {
-        node: null
+        node: null,
+        nid: null, // Вид 0.0, {индекс линии}.{индекс нода}
     },
     methods: {
         io(io, direction) {
