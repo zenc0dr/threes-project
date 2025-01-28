@@ -3,7 +3,14 @@
         <div v-for="(nodes, line_index) in program" class="threes-coder__line">
             <div class="threes-coder__line_info">{{ line_index }}</div>
             <div class="threes-coder__line_items">
-                <ThreesNode v-for="(node, node_index) in nodes" :node="node" :nid="`${line_index}.${node_index}`" />
+                <ThreesNode
+                    v-for="(node, node_index) in nodes"
+                    :node="node"
+                    :nid="`${line_index}.${node_index}`"
+                    @mousedown="captureNodeStart"
+                    @mouseup="captureNodeEnd"
+                    @mouseleave="captureNodeEnd"
+                />
                 <div class="threes-coder__add_node">
                     <div @click="openCreateNodeModal(line_index)" class="threes-coder__add_node__btn">
                         +
@@ -48,6 +55,10 @@ export default {
             new_node: null,
             active_line: null,
             debug_panel: false,
+
+            push_timer: null,
+            push_interval: 1000,
+
             program: [
                 [],
                 [],
@@ -143,6 +154,26 @@ export default {
         makeNode(node) {
             this.program[this.active_line].push(node)
             this.saveProgram()
+        },
+        captureNodeStart() {
+            console.log('Хватаем нод')
+            if (!this.push_timer) {
+                this.push_timer = setInterval(this.moveNodeStart, this.push_interval)
+            }
+        },
+        captureTimerStop() {
+            if (this.push_timer) {
+                clearInterval(this.push_timer)
+                this.push_timer = null
+            }
+        },
+        captureNodeEnd() {
+            this.captureTimerStop()
+            console.log('Отпустили нод')
+        },
+        moveNodeStart() {
+            this.captureTimerStop()
+            console.log('Двигаем нод')
         }
     }
 }

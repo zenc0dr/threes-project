@@ -53,6 +53,14 @@ export default {
     margin: 0 4px;
     justify-content: space-between;
     align-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    transition: 200ms;
+
+    &:hover {
+        border-color: #3e8fe8;
+        background-color: #f1f5fa;
+    }
 
     &__wrap {
         padding: 5px;
