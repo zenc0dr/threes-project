@@ -1,5 +1,5 @@
 <template>
-    <div class="threes-node">
+    <div class="threes-node" :style="style">
         <div class="threes-node__io">
             <node_io :nid="nid" io_direction="input" :io="io(node.io, 'input')" />
         </div>
@@ -29,6 +29,10 @@ export default {
     props: {
         node: null,
         nid: null, // Вид 0.0, {индекс линии}.{индекс нода}
+        hovering: { // Объект содержащий данные о перемещении
+            type: Object,
+            default: {}
+        }
     },
     methods: {
         io(io, direction) {
@@ -39,6 +43,16 @@ export default {
                 'background-image':`url(${src})`
             }
         },
+        style() {
+            if (this.hovering === {}) {
+                return {}
+            }
+            return {
+                position: 'absolute',
+                left: this.hovering.x,
+                top: this.hovering.y
+            }
+        }
     }
 }
 </script>

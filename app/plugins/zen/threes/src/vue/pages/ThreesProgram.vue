@@ -7,6 +7,7 @@
                     v-for="(node, node_index) in nodes"
                     :node="node"
                     :nid="`${line_index}.${node_index}`"
+                    :hovering="node_hovering"
                     @mousedown="captureNodeStart"
                     @mouseup="captureNodeEnd"
                     @mouseleave="captureNodeEnd"
@@ -58,6 +59,8 @@ export default {
 
             push_timer: null,
             push_interval: 1000,
+
+            node_hovering: {}, // Объект для перемещения нода
 
             program: [
                 [],
@@ -163,26 +166,29 @@ export default {
             this.program[this.active_line].push(node)
             this.saveProgram()
         },
-        // Фиксировать нажатие мыши с последсвующим удержанием
+        // Фиксировать нажатие мыши с последующим удержанием
         captureNodeStart() {
             console.log('Хватаем нод')
             if (!this.push_timer) {
                 this.push_timer = setInterval(this.moveNodeStart, this.push_interval)
             }
         },
+        // Остановить таймер захвата нода
         captureTimerStop() {
             if (this.push_timer) {
                 clearInterval(this.push_timer)
                 this.push_timer = null
             }
         },
+        // Завершение захвата нода, отпускание нода
         captureNodeEnd() {
             this.captureTimerStop()
             console.log('Отпустили нод')
         },
+        // Начало процесса перемещения нода
         moveNodeStart() {
             this.captureTimerStop()
-            console.log('Двигаем нод')
+            //this.node_hovering
         }
     }
 }
