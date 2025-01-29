@@ -83,6 +83,7 @@ export default {
         }
     },
     methods: {
+        // Загрузить программу
         loadProgram() {
             ths.api({
                 api: 'Sprites.Program:load',
@@ -96,7 +97,13 @@ export default {
                 }
             })
         },
+        // Обработать программу
         handleProgram(program) {
+            program = this.generatePinTable(program)
+            return program
+        },
+        // Генерировать таблицу пинов для программы
+        generatePinTable(program) {
             let io_pins = []
             for (let line_index in program) {
                 let line = program[line_index]
@@ -131,30 +138,32 @@ export default {
             ths.data.sprite_pins = io_pins
             return program
         },
+        // Сохранить программу
         saveProgram() {
             ths.api({
                 api: 'Sprites.Program:save',
                 data: {
                     sid: this.sid,
                     program: this.program
-                },
-                then: response => {
-                    //this.program = response.program
                 }
             })
         },
+        // Открыть окно создания нода
         openCreateNodeModal(line) {
             this.new_node = true
             this.active_line = line
             console.log('line', line)
         },
+        // Закрыть окно создания нода
         closeCreateNodeModal() {
             this.new_node = false
         },
+        // Создать нод из объекта
         makeNode(node) {
             this.program[this.active_line].push(node)
             this.saveProgram()
         },
+        // Фиксировать нажатие мыши с последсвующим удержанием
         captureNodeStart() {
             console.log('Хватаем нод')
             if (!this.push_timer) {
