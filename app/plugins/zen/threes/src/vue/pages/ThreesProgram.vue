@@ -265,8 +265,21 @@ export default {
         execNodeMenu(action) {
             let nid = this.popup_nid
             this.popup = false
-
-            console.log('action:' + nid, action)
+            if (action === 'copy') {
+                this.copyNodeAction(nid)
+            }
+        },
+        copyNodeAction(nid) {
+            ths.api({
+                api: 'Sprites.Program:copy',
+                data: {
+                    sid: this.sid,
+                    nid
+                },
+                then: response => {
+                    this.loadProgram()
+                }
+            })
         }
     }
 }

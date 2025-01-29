@@ -1,8 +1,8 @@
 <template>
 <div class="node-popup" :style="style" v-click-outside-element="handleClickOutside">
-    <div class="btn btn-primary">Копировать</div>
-    <div class="btn btn-primary">Удалить</div>
-    <div class="btn btn-primary">Настройки</div>
+    <div @click="select('copy')" class="btn btn-primary">Копировать</div>
+    <div @click="select('delete')" class="btn btn-primary">Удалить</div>
+    <div @click="select('settings')" class="btn btn-primary">Настройки</div>
 </div>
 </template>
 <script>

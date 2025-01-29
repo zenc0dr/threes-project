@@ -42,4 +42,18 @@ class Program
             'success' => true,
         ];
     }
+
+    # http://threes.dc/threes.api/Sprites.Program:copy
+    public function copy(): array
+    {
+        ths()->requestDebug('copy');
+        $sid = request('sid');
+        $nid = request('nid');
+
+        ths()->sprites()->copyNode($sid, $nid);
+
+        return [
+            'success' => true,
+        ];
+    }
 }

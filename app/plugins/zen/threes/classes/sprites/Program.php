@@ -39,7 +39,7 @@ trait Program
      * @param string $after_nid
      * @return void
      */
-    public function moveNode(string $sid, string $nid, string $after_nid)
+    public function moveNode(string $sid, string $nid, string $after_nid): void
     {
         $sprite = Sprite::find($sid);
         $program = $sprite->program;
@@ -86,5 +86,79 @@ trait Program
         $sprite->program = $program;
         $sprite->save();
     }
+
+    public function copyNode(string $sid, string $nid): void
+    {
+        $sprite = Sprite::find($sid);
+        $program = $sprite->program;
+
+        $node_copy = null;
+        $source_line_index = null;
+        $source_node_index = null;
+
+        // Найти узел, который нужно скопировать
+        foreach ($program as $line_index => $line) {
+            foreach ($line as $node_index => $node) {
+                if ($nid === $line_index . '.' . $node_index) {
+                    $node_copy = $node;
+                    $source_line_index = $line_index;
+                    $source_node_index = $node_index;
+                    break 2; // Выход из обоих циклов
+                }
+            }
+        }
+
+        // Если узел не найден, выходим
+        if ($node_copy === null) {
+            return;
+        }
+
+        // Создаём уникальный идентификатор для копии узла
+        $node_copy['id'] = uniqid('node_', true);
+
+        // Добавляем копию узла в конец той же строки
+        $program[$source_line_index][] = $node_copy;
+
+        // Сохраняем изменения обратно в базу данных
+        $sprite->program = $program;
+        $sprite->save();
+    }
+
+    /**
+     * Удалить узел из программы спрайта
+     *
+     * @param string $sid ID спрайта
+     * @param string $nid ID узла
+     * @return void
+     */
+    public function deleteNode(string $sid, string $nid): void
+    {
+        $sprite = Sprite::find($sid);
+        $program = $sprite->program;
+
+        $found = false;
+
+        // Найти и удалить узел с указанным nid
+        foreach ($program as $line_index => &$line) {
+            foreach ($line as $node_index => $node) {
+                if ($nid === $line_index . '.' . $node_index) {
+                    unset($line[$node_index]);
+                    $line = array_values($line); // Уплотняем индексы
+                    $found = true;
+                    break 2; // Выходим из обоих циклов
+                }
+            }
+        }
+
+        // Если узел не найден, выходим
+        if (!$found) {
+            return;
+        }
+
+        // Сохраняем обновлённую программу обратно в базу
+        $sprite->program = $program;
+        $sprite->save();
+    }
+
 
 }
