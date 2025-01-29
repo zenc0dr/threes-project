@@ -1,5 +1,5 @@
 <template>
-    <div class="threes-coder">
+    <div class="threes-coder" @mousemove="mousemove">
         <div v-for="(nodes, line_index) in program" class="threes-coder__line">
             <div class="threes-coder__line_info">{{ line_index }}</div>
             <div class="threes-coder__line_items">
@@ -53,15 +53,21 @@ export default {
     },
     data() {
         return {
-            new_node: null,
-            active_line: null,
-            debug_panel: false,
+            /* Контроль курсора и мыши */
+            mouse_x: null,
+            mouse_y: null,
 
-            push_timer: null,
-            push_interval: 1000,
-
+            /* Управление нодами */
+            new_node: null, // (object) Создание нового нода
+            active_line: null, // (int) Линия которая активировалась нажатием на "Создать нод"
+            debug_panel: false, // (bool) Панель отладки
+    
+            /* Перетаскивание нод */
+            push_timer: null, // Таймер задержки нажатия
+            push_interval: 1000, // Время задержки до активации
             node_hovering: {}, // Объект для перемещения нода
 
+            /* Программа спрайта */
             program: [
                 [],
                 [],
@@ -86,7 +92,12 @@ export default {
         }
     },
     methods: {
-        // Загрузить программу
+        /* Фиксировать движение мыши */
+        mousemove(event) {
+            this.mouse_x = event.pageX
+            this.mouse_y = event.pageY
+        },
+        /* Загрузить программу */
         loadProgram() {
             ths.api({
                 api: 'Sprites.Program:load',
@@ -100,12 +111,12 @@ export default {
                 }
             })
         },
-        // Обработать программу
+        /* Обработать программу */
         handleProgram(program) {
             program = this.generatePinTable(program)
             return program
         },
-        // Генерировать таблицу пинов для программы
+        /* Генерировать таблицу пинов для программы */
         generatePinTable(program) {
             let io_pins = []
             for (let line_index in program) {
@@ -141,7 +152,7 @@ export default {
             ths.data.sprite_pins = io_pins
             return program
         },
-        // Сохранить программу
+        /* Сохранить программу */
         saveProgram() {
             ths.api({
                 api: 'Sprites.Program:save',
@@ -151,41 +162,41 @@ export default {
                 }
             })
         },
-        // Открыть окно создания нода
+        /* Открыть окно создания нода */
         openCreateNodeModal(line) {
             this.new_node = true
             this.active_line = line
             console.log('line', line)
         },
-        // Закрыть окно создания нода
+        /* Закрыть окно создания нода */
         closeCreateNodeModal() {
             this.new_node = false
         },
-        // Создать нод из объекта
+        /* Создать нод из объекта */
         makeNode(node) {
             this.program[this.active_line].push(node)
             this.saveProgram()
         },
-        // Фиксировать нажатие мыши с последующим удержанием
+        /* Фиксировать нажатие мыши с последующим удержанием */
         captureNodeStart() {
             console.log('Хватаем нод')
             if (!this.push_timer) {
                 this.push_timer = setInterval(this.moveNodeStart, this.push_interval)
             }
         },
-        // Остановить таймер захвата нода
+        /* Остановить таймер захвата нода */
         captureTimerStop() {
             if (this.push_timer) {
                 clearInterval(this.push_timer)
                 this.push_timer = null
             }
         },
-        // Завершение захвата нода, отпускание нода
+        /* Завершение захвата нода, отпускание нода */
         captureNodeEnd() {
             this.captureTimerStop()
             console.log('Отпустили нод')
         },
-        // Начало процесса перемещения нода
+        /* Начало процесса перемещения нода */
         moveNodeStart() {
             this.captureTimerStop()
             //this.node_hovering
