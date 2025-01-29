@@ -95,17 +95,17 @@ export default {
     mounted() {
         this.loadProgram()
     },
-    watch: {
-        program: {
-            handler(program) {
-                const last_line = program[program.length - 1]
-                if (last_line.length) {
-                    program.push([])
-                }
-            },
-            deep: true
-        }
-    },
+    // watch: {
+    //     program: {
+    //         handler(program) {
+    //             const last_line = program[program.length - 1]
+    //             if (last_line.length) {
+    //                 program.push([])
+    //             }
+    //         },
+    //         deep: true
+    //     }
+    // },
     methods: {
         /* Фиксировать движение мыши */
         mousemove: throttle(function (event) {
@@ -121,9 +121,11 @@ export default {
                     sid: this.sid,
                 },
                 then: response => {
-                    this.program = this.handleProgram(
-                        response.program
-                    )
+                    if (response.program.length > 0) {
+                        this.program = this.handleProgram(
+                            response.program
+                        )
+                    }
                 }
             })
         },

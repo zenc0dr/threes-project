@@ -44,6 +44,15 @@ export default {
             selected_type: null,
         }
     },
+    watch: {
+        selected_type(selected_type) {
+            if (selected_type !== 'unit') {
+                this.$emit('fetch', {
+                    type: selected_type,
+                })
+            }
+        }
+    },
     methods: {
         getTypes() {
             ths.api({

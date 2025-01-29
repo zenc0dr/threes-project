@@ -1,20 +1,27 @@
 <template>
     <div class="threes-node" :style="style">
-        <div class="threes-node__io">
-            <node_io :nid="nid" io_direction="input" :io="io(node.io, 'input')" />
-        </div>
-        <div class="threes-node__wrap">
-            <div class="threes-node__header">
-                <icon class="threes-node__icon" width="25px" height="25px" :src="node.icon" />
-                <div class="threes-node__name">
-                    {{ node.name }}
-                </div>
+        <template v-if="!node.type">
+            <div class="threes-node__io">
+                <node_io :nid="nid" io_direction="input" :io="io(node.io, 'input')" />
             </div>
-            <div class="threes-node__body"></div>
-        </div>
-        <div class="threes-node__io">
-            <node_io :nid="nid" io_direction="output" :io="io(node.io, 'output')" />
-        </div>
+            <div class="threes-node__wrap">
+                <div class="threes-node__header">
+                    <icon class="threes-node__icon" width="25px" height="25px" :src="node.icon" />
+                    <div class="threes-node__name">
+                        {{ node.name }}
+                    </div>
+                </div>
+                <div class="threes-node__body"></div>
+            </div>
+            <div class="threes-node__io">
+                <node_io :nid="nid" io_direction="output" :io="io(node.io, 'output')" />
+            </div>
+        </template>
+        <template v-else-if="ifArchitectNode(node.type)">
+            <div class="threes-node__architect" :class="'node-type__' + node.type">
+                {{ node.type }}
+            </div>
+        </template>
     </div>
 </template>
 <script>
@@ -56,6 +63,9 @@ export default {
                 'background-image':`url(${src})`
             }
         },
+        ifArchitectNode(type) {
+            return ['if', 'else', 'do', 'input'].includes(type)
+        }
     }
 }
 </script>
@@ -65,13 +75,15 @@ export default {
     position: relative;
     flex-direction: row;
     background-color: #ffffff;
-    border: 2px solid #96abc3;
+    border: 1px solid #96abc3;
     border-radius: 4px;
     min-height: 80px;
     margin: 0 4px;
     justify-content: space-between;
     align-content: space-between;
     cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
     user-select: none;
     transition: 100ms;
 
@@ -112,6 +124,28 @@ export default {
         border-radius: 3px;
         padding: 3px 8px;
         min-height: 10px;
+    }
+
+    &__architect {
+        display: flex;
+        padding: 15px;
+        background: #dcdcdc;
+        color: #6e7987;
+        font-size: 27px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 4px;
+        align-items: center;
+
+        &.node-type_if {
+
+        }
+        &.node-type_else {
+
+        }
+        &.node-type_do {
+
+        }
     }
 }
 </style>
