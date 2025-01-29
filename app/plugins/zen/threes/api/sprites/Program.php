@@ -28,4 +28,18 @@ class Program
             'program' => Sprite::find($sid)?->program
         ];
     }
+
+    # http://threes.dc/threes.api/Sprites.Program:move
+    public function move(): array
+    {
+        //ths()->requestDebug('move');
+        $sid = request('sid');
+        $nid = request('nid');
+        $after_nid = request('after_nid');
+        ths()->sprites()->moveNode($sid, $nid, $after_nid);
+
+        return [
+            'success' => true,
+        ];
+    }
 }

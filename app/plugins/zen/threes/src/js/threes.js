@@ -2,20 +2,25 @@
 const axios = require('axios');
 const md5 = require('md5');
 
-import {createApp} from 'vue';
+import { createApp } from 'vue';
+import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
-
 import Threes from '../vue/Threes.vue'
 
+window._ = require('lodash');
 window.ths = {
     requests_register: {},
     auth_token: null,
 
     // Объект для хранения глобальных данных
-    data: {
+    data: reactive({
+        mouse: {
+            x: 0,
+            y: 0,
+        },
         sprite_pins: [], // Соединения в спрайте
-    },
+    }),
 
     api(opts) {
         let domain = location.origin
@@ -29,7 +34,7 @@ window.ths = {
         }
 
         // For debug
-        console.log('Threes query [' + request_key + ']: ' + api_url)
+        console.log('Threes query [' + request_key + ']: ' + api_url, data)
 
         if (this.auth_token) {
             axios_options = {

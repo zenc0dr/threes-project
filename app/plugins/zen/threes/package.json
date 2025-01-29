@@ -20,6 +20,7 @@
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
+        "lodash": "^4.17.21",
         "md5": "^2.3.0",
         "primeicons": "^5.0.0",
         "primevue": "^3.10.0",

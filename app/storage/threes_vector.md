@@ -92,24 +92,203 @@ use Zen\Threes\Models\Unit;
 use Zen\Threes\Console\Vector;
 class Tests
 {
-    # http://threes.dc/zen/threes/api/debug.Tests:debug
+    # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $vector = new Vector();
-        $vector->handle();
+        ths()->requestDebug();
     }
 
-    # http://threes.dc/zen/threes/api/debug.Tests:loadUnit?tid=
+    # http://threes.dc/threes.api/debug.Tests:apiTest
+    public function apiTest()
+    {
+        return 'Отлично, ajax работает!';
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:loadUnit?tid=
     public function loadUnit()
     {
         $unit = Unit::find(request('tid'));
         dd($unit->toArray());
     }
 
-    # http://threes.dc/zen/threes/api/debug.Tests:test
+    # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
         dd('Threes api works!');
+    }
+}
+
+```
+`plugins/zen/threes/api/sprites/Program.php`
+```<?php
+
+namespace Zen\Threes\Api\Sprites;
+
+use Zen\Threes\Models\Sprite;
+
+class Program
+{
+    # http://threes.dc/threes.api/Sprites.Program:save
+    public function save(): array
+    {
+        $sid = request('sid');
+        $program = request('program');
+
+        ths()->sprites($sid)->programSave($sid, $program);
+
+        return [
+            'success' => true
+        ];
+    }
+
+    # http://threes.dc/threes.api/Sprites.Program:load?sid=acme
+    public function load(): array
+    {
+        $sid = request('sid');
+        return [
+            'success' => true,
+            'program' => Sprite::find($sid)?->program
+        ];
+    }
+
+    # http://threes.dc/threes.api/Sprites.Program:move
+    public function move(): array
+    {
+        //ths()->requestDebug('move');
+        $sid = request('sid');
+        $nid = request('nid');
+        $after_nid = request('after_nid');
+        ths()->sprites()->moveNode($sid, $nid, $after_nid);
+
+        return [
+            'success' => true,
+        ];
+    }
+}
+
+```
+`plugins/zen/threes/api/sprites/SelectNode.php`
+```<?php
+
+namespace Zen\Threes\Api\Sprites;
+
+class SelectNode
+{
+    /**
+     * http://threes.dc/threes.api/Sprites.SelectNode:records
+     * @return array[]
+     */
+    public function records(): array
+    {
+        $node_types = [
+            [
+                'type' => 'input',
+                'name' => 'Вход',
+                'icon' => 'input.svg',
+                'desc' => 'Входной пин для входных данных',
+            ],
+            [
+                'type' => 'unit',
+                'name' => 'Юнит',
+                'icon' => 'unit.svg',
+                'desc' => 'Нод подключающий юнит',
+            ],
+            [
+                'type' => 'if',
+                'name' => 'Условие',
+                'icon' => 'if.svg',
+                'desc' => 'Условие ЕСЛИ',
+            ],
+            [
+                'type' => 'else',
+                'name' => 'Условие',
+                'icon' => 'else.svg',
+                'desc' => 'Условие ИЛИ',
+            ],
+        ];
+
+
+        return [
+            'node_types' => $node_types,
+        ];
+    }
+}
+
+```
+`plugins/zen/threes/api/units/Records.php`
+```<?php
+
+namespace Zen\Threes\Api\Units;
+
+class Records
+{
+    /**
+     * http://threes.dc/threes.api/Units.Records:get
+     * plugins/zen/threes/classes/units/Records.php
+     * @return void
+     */
+    public function get()
+    {
+        dd(
+            ths()->units()->getRecords()
+        );
+    }
+}
+
+```
+`plugins/zen/threes/api/units/SelectUnit.php`
+```<?php
+
+namespace Zen\Threes\Api\Units;
+
+use Zen\Threes\Models\Unit;
+
+class SelectUnit
+{
+    /**
+     * http://threes.dc/threes.api/Units.SelectUnit:records
+     */
+    public function records()
+    {
+        $units = Unit::active()->get();
+
+        $output = [];
+        foreach ($units as $unit) {
+            $output[] = [
+                'tid' => $unit->tid,
+                'name' => $unit->name,
+                'icon' => $unit->icon_path,
+                'description' => $unit->description,
+            ];
+        }
+
+        return [
+            'units' => $output
+        ];
+    }
+
+    /**
+     * http://threes.dc/threes.api/Units.SelectUnit:makeNode
+     * @return array
+     */
+    public function makeNode(): array
+    {
+        $tid = request('tid');
+        $unit = Unit::find($tid);
+        if (!$unit) {
+            return [
+                'success' => false
+            ];
+        }
+        return [
+            'success' => true,
+            'node' => [
+                'tid' => $tid,
+                'name' => $unit->name,
+                'icon' => env('APP_URL') . $unit->icon_path,
+                'io' => $unit->io,
+            ]
+        ];
     }
 }
 
@@ -119,15 +298,129 @@ class Tests
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Classes\Helpers\Debug;
 use Zen\Threes\Classes\Helpers\Files;
 use Zen\Threes\Classes\Helpers\Json;
+use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
 
 class Helpers
 {
-    use Files;
-    use Json;
-    use Yaml;
+    use Debug;    # Методы отладки
+    use Files;    # Работа с файлами
+    use Json;     # Работа с JSON
+    use Yaml;     # Работа с YAML
+    use Strings;  # Слой настроек
+
+    public function units(): Units
+    {
+        return Units::getInstance();
+    }
+
+    public function sprites(string | null $sid = null): Sprites
+    {
+        return Sprites::getInstance($sid);
+    }
+}
+
+```
+`plugins/zen/threes/classes/Sprites.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Classes\Sprites\Program;
+
+class Sprites
+{
+    private ?string $sid = null;
+
+    public function __construct(string | null $sid = null)
+    {
+        $this->sid = $sid;
+    }
+
+
+    use SingletonTrait;
+    use Program;
+}
+
+```
+`plugins/zen/threes/classes/Units.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Zen\Threes\Classes\Units\UnitRecords;
+use Zen\Threes\Classes\Units\UnitRecord;
+use Zen\Threes\Traits\SingletonTrait;
+
+class Units
+{
+    use SingletonTrait;
+    use UnitRecords;
+    use UnitRecord;
+}
+
+```
+`plugins/zen/threes/classes/helpers/Debug.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+trait Debug
+{
+    /**
+     * Сохранить запрос
+     * @param string $name
+     * @return void
+     */
+    public function requestSave(string $name = 'default'): void
+    {
+        ths()->toJsonFile(
+            storage_path("temp/threes/request_$name.json"),
+            request()->all(),
+            true
+        );
+    }
+
+    /**
+     * Загрузить запрос
+     * @param string $name
+     * @return array|null
+     */
+    public function requestLoad(string $name = 'default'): array | null
+    {
+        return ths()->fromJsonFile(
+            storage_path("temp/threes/request_$name.json"),
+        );
+    }
+
+    /**
+     * Выполнить запрос
+     * @param string $name
+     * @return void
+     */
+    public function requestExec(string $name = 'default'): void
+    {
+        $request = $this->requestLoad($name);
+        request()->merge($request);
+    }
+
+    /**
+     * Автоматическая отладка, если данные есть они сохраняются, если нет они подгружаются
+     * @param string $name
+     * @return void
+     */
+    public function requestDebug(string $name = 'default'): void
+    {
+        if (count(request()->all())) {
+            $this->requestSave($name);
+        } else {
+            $this->requestExec($name);
+        }
+    }
 }
 
 ```
@@ -262,6 +555,27 @@ trait Json
 }
 
 ```
+`plugins/zen/threes/classes/helpers/Strings.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+use Str;
+
+trait Strings
+{
+    public function createUuid(): string
+    {
+        return Str::uuid()->toString();
+    }
+
+    public function createToken($length = 8): string
+    {
+        return Str::random($length);
+    }
+}
+
+```
 `plugins/zen/threes/classes/helpers/Yaml.php`
 ```<?php
 
@@ -327,6 +641,279 @@ trait Yaml
                 $indent
             )
         );
+    }
+}
+
+```
+`plugins/zen/threes/classes/sprites/Program.php`
+```<?php
+
+namespace Zen\Threes\Classes\Sprites;
+
+use Zen\Threes\Models\Sprite;
+
+trait Program
+{
+    /**
+     * Сохранить программу спрайта
+     * @param string $sid
+     * @param array $program
+     * @return string[]
+     */
+    public function programSave(string $sid, array $program): array
+    {
+        $sprite = Sprite::find($sid);
+        $sprite->program = $program;
+        $sprite->save();
+
+        return [
+            'success' => 'true',
+        ];
+    }
+
+    public function programLoad(string $sid): array
+    {
+        $sprite = Sprite::find($sid);
+        return [
+            'success' => true,
+            'program' => $sprite,
+        ];
+    }
+
+    /**
+     * Метод перемещения нодов
+     * @param string $sid
+     * @param string $nid
+     * @param string $after_nid
+     * @return void
+     */
+    public function moveNode(string $sid, string $nid, string $after_nid)
+    {
+        $sprite = Sprite::find($sid);
+        $program = $sprite->program;
+
+        $node_dump = null;
+        $source_line_index = null;
+        $source_node_index = null;
+        $target_line_index = null;
+        $target_node_index = null;
+
+        // Шаг 1: Найти и удалить узел с nid
+        foreach ($program as $line_index => &$line) {
+            foreach ($line as $node_index => $node) {
+                if ($nid === $line_index . '.' . $node_index) {
+                    $node_dump = $node;
+                    $source_line_index = $line_index;
+                    $source_node_index = $node_index;
+                }
+                if ($after_nid === $line_index . '.' . $node_index) {
+                    $target_line_index = $line_index;
+                    $target_node_index = $node_index;
+                }
+            }
+        }
+
+        // Если узел для перемещения не найден, выходим
+        if ($node_dump === null) {
+            return;
+        }
+
+        // Удаляем узел из исходного места
+        unset($program[$source_line_index][$source_node_index]);
+        $program[$source_line_index] = array_values($program[$source_line_index]); // Уплотняем индексы
+
+        // Если не нашли целевой узел, добавляем узел в конец первой строки
+        if ($target_line_index === null) {
+            $program[0][] = $node_dump;
+        } else {
+            // Вставляем узел после найденного after_nid
+            array_splice($program[$target_line_index], $target_node_index + 1, 0, [$node_dump]);
+        }
+
+        // Сохраняем изменения обратно
+        $sprite->program = $program;
+        $sprite->save();
+    }
+
+}
+
+```
+`plugins/zen/threes/classes/sprites/SpriteNodes.php`
+```<?php
+
+namespace Zen\Threes\Classes\Sprites;
+
+use Zen\Threes\Models\Sprite;
+
+/**
+ * todo: deprecated
+ */
+trait SpriteNodes
+{
+    public function addNode(): array
+    {
+        return [
+            'nid' => ths()->createToken(),
+            'name' => 'Новый node',
+            'type' => 'unit',
+            'scheme' => []
+        ];
+    }
+
+    public function getNodes(string $sprite_id): array
+    {
+        $sprite = Sprite::find($sprite_id);
+
+        if (!$sprite) {
+            return [];
+        }
+
+        $nodes = $sprite->nodes ?? [];
+
+        $nodes_ex = [
+            [
+                'nid' => 'node1',
+                'name' => 'Тестовый нод, реализующий спрайт',
+                'type' => 'unit',
+                'scheme' => [
+                    'uid' => 'zen.units.adder'
+                ]
+            ],
+            [
+                'nid' => 'node2',
+                'name' => 'Тестовый нод, реализующий спрайт',
+                'type' => 'unit',
+                'scheme' => [
+                    'uid' => 'zen.units.adder'
+                ]
+            ],
+            [
+                'nid' => 'node3',
+                'name' => 'Node 3',
+                'type' => 'unit',
+                'scheme' => [
+                    'uid' => 'zen.units.test',
+                ]
+            ],
+            [
+                'nid' => 'node4',
+                'name' => 'Node 4',
+                'type' => 'other',
+                'scheme' => []
+            ]
+        ];
+
+        # Тут каждый нод облагораживается данными из юнита
+        foreach ($nodes as &$node) {
+            if (empty($node['scheme'])) {
+                continue;
+            }
+
+            if ($node['type'] === 'unit' && isset($node['scheme']['uid'])) {
+                $node['scheme']['data'] = ths()->units()->getUnitData($node['scheme']['uid']);
+
+                if (isset($node['scheme']['data']['io'])) {
+                    foreach ($node['scheme']['data']['io'] as &$item_io) {
+                        unset($item_io['io_description']);
+                    }
+                }
+            }
+        }
+        return $nodes;
+    }
+
+    public function saveNodes(string $sprite_id, array $nodes): bool
+    {
+        $sprite = Sprite::find($sprite_id);
+
+        if (!$sprite) {
+            return false;
+        }
+
+        $sprite->nodes = $nodes;
+        $sprite->save();
+
+        return true;
+    }
+
+    /**
+     * Сохранить настройки нода
+     * @param string $sprite_id
+     * @param array $data
+     * @return bool
+     */
+    public function saveNode(string $sprite_id, array $data): bool
+    {
+        $sprite = Sprite::find($sprite_id);
+
+        if (!$sprite) {
+            return false;
+        }
+
+        $nodes = $sprite->nodes;
+
+        if (!count($nodes)) {
+            return false;
+        }
+
+        $old_nid = $data['old_nid'];
+        $new_nid = $data['new_nid'];
+        #$old_type = $data['old_type'];
+        $new_type = $data['new_type'];
+        $name = $data['name'];
+        $scheme = $data['scheme'];
+
+        foreach ($nodes as &$node) {
+            if ($node['nid'] === $old_nid) {
+                $node['nid'] = $new_nid;
+                $node['type'] = $new_type;
+                $node['name'] = $name;
+                $node['scheme'] = $scheme;
+                break;
+            }
+        }
+
+        $sprite->nodes = $nodes;
+        $sprite->save();
+
+        return true;
+    }
+}
+
+```
+`plugins/zen/threes/classes/units/UnitRecord.php`
+```<?php
+
+namespace Zen\Threes\Classes\Units;
+
+use Zen\Threes\Models\Unit;
+
+trait UnitRecord
+{
+    public function getUnitData(string $uid)
+    {
+        $unit = Unit::find($uid);
+        if (!$unit) {
+            return null;
+        }
+
+        return [
+            'io' => $unit->io,
+        ];
+    }
+}
+
+```
+`plugins/zen/threes/classes/units/UnitRecords.php`
+```<?php
+
+namespace Zen\Threes\Classes\Units;
+
+trait UnitRecords
+{
+    public function getRecords()
+    {
+        dd('units records');
     }
 }
 
@@ -422,9 +1009,9 @@ class SpriteController extends Controller
     {
         parent::__construct();
         BackendMenu::setContext('Zen.Threes', 'main', 'sprites');
+        $this->addCss(mix('css/threes.css', 'plugins/zen/threes/assets'));
+        $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);
     }
-
-    
 }
 
 ```
@@ -455,8 +1042,14 @@ class UnitController extends Controller
     {
         parent::__construct();
         BackendMenu::setContext('Zen.Threes', 'main', 'units');
+        $this->addCss('/plugins/zen/threes/controllers/unitcontroller/assets/css/unitcontroller.css');
     }
 
+    /**
+     * Расширение интерфейса
+     * @param $form
+     * @return void
+     */
     public function formExtendFields($form)
     {
         if (!isset($this->params[0])) {
@@ -465,8 +1058,30 @@ class UnitController extends Controller
 
         $unit = Unit::find($this->params[0]);
         if ($unit && $unit->additional_fields) {
+            $this->clearMissingFields($unit);
             $form->addFields($unit->additional_fields, 'primary');
         }
+    }
+
+    /**
+     * При изменении состава дополнительных полей, необходимо подчистить settings
+     * @param Unit $unit
+     * @return void
+     */
+    private function clearMissingFields(Unit $unit)
+    {
+        $missing_fields = array_keys(array_diff_key($unit->settings, $unit->additional_fields));
+        $keys_to_remove  = array_flip($missing_fields);
+        if (!$keys_to_remove) {
+            return;
+        }
+        $data = $unit->data;
+        $data['settings'] = array_diff_key($data['settings'], $keys_to_remove);
+        \DB::table('zen_threes_units')
+            ->where('tid', $unit->tid)
+            ->update([
+                'data' => ths()->toJson($data, true),
+            ]);
     }
 }
 
@@ -576,9 +1191,7 @@ toolbar:
 
 ```
 `plugins/zen/threes/controllers/spritecontroller/partials/scheme.php`
-```<?php
-
-echo "Hallo";
+```<div id="threes"></div>
 
 ```
 `plugins/zen/threes/controllers/spritecontroller/preview.php`
@@ -681,6 +1294,16 @@ echo "Hallo";
 </div>
 
 ```
+`plugins/zen/threes/controllers/unitcontroller/assets/css/unitcontroller.css`
+```.threes-icon {
+    width: 26px;
+    height: 26px;
+    margin-top: -3px;
+    margin-bottom: -10px;
+    margin-left: -7px;
+}
+
+```
 `plugins/zen/threes/controllers/unitcontroller/config_form.yaml`
 ```name: UnitController
 form: $/zen/threes/models/unit/fields.yaml
@@ -759,6 +1382,12 @@ recordUrl: 'zen/threes/unitcontroller/update/:tid'
 ```
 `plugins/zen/threes/controllers/unitcontroller/index.php`
 ```<?= $this->listRender() ?>
+
+```
+`plugins/zen/threes/controllers/unitcontroller/partials/icon.php`
+```<div class="threes-icon">
+    <img src="<?=$record->icon_path?>" alt="<?php echo $record->name; ?>">
+</div>
 
 ```
 `plugins/zen/threes/controllers/unitcontroller/preview.php`
@@ -893,6 +1522,9 @@ use Model;
 use Zen\Threes\Traits\SimpleTree;
 use October\Rain\Database\Traits\Validation;
 
+/**
+ * @method static find(string $tid)
+ */
 
 class Sprite extends Model
 {
@@ -907,14 +1539,37 @@ class Sprite extends Model
         'sid' => 'unique:zen_threes_sprites,sid',
     ];
 
-//    public function getUnitsOptions()
-//    {
-//        return Unit::active()->lists('name', 'tid');
-//    }
+    protected $fillable = [
+        'sid',
+        'parent_sid',
+        'name',
+        'description',
+        'data',
+        'active',
+        'program',
+    ];
 
-    public function getParentSidOptions()
+    protected array $data_dump = [];
+
+    ### begin:Events
+    public function afterFetch(): void
     {
-        return [null => '--'] + self::all()->lists('name', 'sid');
+        $this->data_dump = $this->data;
+    }
+
+    public function beforeSave(): void
+    {
+        $this->saveData();
+    }
+
+    ### end:Events
+
+    public function saveData(): void
+    {
+        if (empty($this->attributes['sid'])) {
+            $this->attributes['sid'] = $this->sid ?? 's_'. ths()->createToken();
+        }
+        $this->attributes['data'] = ths()->toJson($this->data_dump, true);
     }
 
     public function getDataAttribute(?string $record): array
@@ -930,17 +1585,14 @@ class Sprite extends Model
         $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
     }
 
-    public function getUnitsAttribute()
+    public function getProgramAttribute()
     {
-        $data = $this->data ?? [];
-        return $data['units'] ?? [];
+        return $this->data_dump['program'] ?? [];
     }
 
-    public function setUnitsAttribute(?array $fields = null): void
+    public function setProgramAttribute(?array $fields = null): void
     {
-        $data = $this->data ?? [];
-        $data['units'] = $fields ?? [];
-        $this->attributes['data'] = ths()->toJson($data, true);
+        $this->data_dump['program'] = $fields ?? [];
     }
 }
 
@@ -950,10 +1602,18 @@ class Sprite extends Model
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use Log;
 
 /**
- * @property bool $active
+ * @property bool $active - Активность юнита
+ * @property string $tid - ThreesID (Уникальный код юнита)
+ * @property string $name - Имя юнита
+ * @property string $description - Описание юнита
+ * @property string $icon - SVG-иконка из базы данных
+ * @property string $icon_path - Путь до SVG иконки
+ * @property array $io - Массив соединений (пинов)
+ * @property array $fields - Поля настроек юнита
+ * @method static active - Активные юниты
+ * @method static find(string $tid)
  */
 class Unit extends Model
 {
@@ -968,7 +1628,10 @@ class Unit extends Model
     ];
 
     protected $fillable = [
+        'icon',
+        'icon_path',
         'tid',
+        'io',
         'name',
         'description',
         'active',
@@ -976,6 +1639,7 @@ class Unit extends Model
     ];
 
     protected array $dynamic_attributes = [];
+    protected array $data_dump = [];
 
     public function __set($name, $value)
     {
@@ -997,28 +1661,57 @@ class Unit extends Model
         return in_array($key, $this->fillable);
     }
 
-    public function afterFetch()
+    //region События модели
+    /**
+     * Событие после загрузки данных в экземпляр
+     * @return void
+     */
+    public function afterFetch(): void
     {
-        $settings = $this->data['settings'] ?? null;
-        if ($settings) {
-            foreach ($settings as $field => $value) {
-                $this->attributes[$field] = $value;
-            }
+        $this->data_dump = $this->data;
+        $this->fillSettings();
+    }
+
+    /**
+     * Событие перед сохранением экземпляра
+     * @return void
+     */
+    public function beforeSave(): void
+    {
+        $this->saveData();
+        $this->saveSvgIcon();
+    }
+
+    /**
+     * Событие после сохранения экземпляра
+     * @return void
+     */
+    /*
+    public function afterSave()
+    {
+    }
+    */
+    //endregion
+
+    /**
+     * Сохраняет иконку в специальное место и возвращает её имя
+     * @return string|null
+     */
+    private function saveSvgIcon(): void
+    {
+        if (!$this->icon) {
+            return;
         }
+        $icon_name = md5($this->icon) . '.svg';
+        $path = ths()->checkDir(storage_path('app/uploads/public/threes/icons/' . $icon_name));
+        file_put_contents(
+            $path,
+            $this->icon
+        );
+        $this->attributes['icon_name'] = $icon_name;
     }
 
-    public function beforeSave()
-    {
-        $this->saveSettings();
-    }
-
-    public function saveSettings()
-    {
-        $attributes = $this->dynamic_attributes;
-        $data = $this->data ?? [];
-        $data['settings'] = $attributes ?? [];
-        $this->attributes['data'] = ths()->toJson($data, true);
-    }
+    ### Getters and setters
 
     public function getTidAttribute($value)
     {
@@ -1030,30 +1723,56 @@ class Unit extends Model
         return $author_token . '.';
     }
 
-    public function getDataAttribute(?string $record): array
+    public function getSettingsAttribute()
     {
-        if ($record) {
-            return ths()->fromJson($record) ?? [];
+        return $this->data_dump['settings'] ?? [];
+    }
+
+    public function getIconAttribute($svg)
+    {
+        if (!$svg) {
+            return file_get_contents(
+                base_path('plugins/zen/threes/assets/images/icons/default-icon.svg')
+            );
+        }
+        return $svg;
+    }
+
+    public function getIconPathAttribute()
+    {
+        if (!$this->icon) {
+            return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
+        }
+
+        return '/storage/app/uploads/public/threes/icons/' . $this->icon_name;
+    }
+
+    public function setIoAttribute($io)
+    {
+        $this->data_dump['io'] = $io ?? [];
+    }
+
+    public function getIoAttribute()
+    {
+        return $this->data_dump['io'] ?? [];
+    }
+
+    public function getDataAttribute(?string $data): array
+    {
+        if ($data) {
+            return ths()->fromJson($data) ?? [];
         }
         return [];
     }
 
-    public function setDataAttribute(?array $record): void
-    {
-        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
-    }
-
     public function getFieldsAttribute()
     {
-        $data = $this->data ?? [];
-        return $data['fields'] ?? [];
+        return $this->data_dump['fields'] ?? [];
     }
 
     public function setFieldsAttribute(?array $fields = null): void
     {
-        $data = $this->data ?? [];
-        $data['fields'] = $fields ?? [];
-        $this->attributes['data'] = ths()->toJson($data, true);
+        $this->data_dump['fields'] = $fields ?? [];
     }
 
     public function getAdditionalFieldsAttribute()
@@ -1083,6 +1802,8 @@ class Unit extends Model
         }
         return [];
     }
+
+    ### Options methods
 
     public function getSpanOptions()
     {
@@ -1132,6 +1853,54 @@ class Unit extends Model
             'giant' => 'Giant',
         ];
     }
+
+    public function getIoTypeOptions()
+    {
+        return [
+            'string' => 'Строка',
+            'bool' => 'Булево',
+            'int' => 'Целое число',
+            'float' => 'Дробное число',
+            'array' => 'Массив',
+            'object' => 'Объект'
+        ];
+    }
+
+    public function getIoDirectionOptions()
+    {
+        return [
+            'input' => 'Вход',
+            'output' => 'Выход',
+            'event' => 'Событие'
+        ];
+    }
+
+    ### Inner methods
+
+
+    /**
+     * Заполняет поля из настроек при загрузке fillSettings()
+     * @return void
+     */
+    private function fillSettings(): void
+    {
+        $settings = $this->data_dump['settings'] ?? null;
+        if ($settings) {
+            foreach ($settings as $field => $value) {
+                $this->attributes[$field] = $value;
+            }
+        }
+    }
+
+    public function saveData()
+    {
+        if (empty($this->attributes['tid'])) {
+            $this->attributes['tid'] = $this->tid ?? ths()->settings('author_token') ?? 'project';
+        }
+        $settings = $this->dynamic_attributes;
+        $this->data_dump['settings'] = $settings;
+        $this->attributes['data'] = ths()->toJson($this->data_dump, true);
+    }
 }
 
 ```
@@ -1168,24 +1937,24 @@ class Unit extends Model
 ```
 `plugins/zen/threes/models/sprite/fields.yaml`
 ```fields:
+    scheme:
+        label: ''
+        span: full
+        path: $/zen/threes/controllers/spritecontroller/partials/scheme.php
+        type: partial
     name:
         label: 'Название спрайта'
-        span: left
+        span: auto
         type: text
     sid:
         label: 'Код спрайта'
-        span: left
+        span: auto
         type: text
     description:
         label: Описание
         size: large
-        span: left
+        span: auto
         type: richeditor
-    scheme:
-        label: ''
-        span: right
-        path: $/zen/threes/controllers/spritecontroller/partials/scheme.php
-        type: partial
 
 ```
 `plugins/zen/threes/models/unit/columns.yaml`
@@ -1206,24 +1975,15 @@ class Unit extends Model
         type: text
         searchable: true
         sortable: true
+    icon:
+        label: i
+        type: partial
+        width: 40px
+        path: $/zen/threes/controllers/unitcontroller/partials/icon.php
 
 ```
 `plugins/zen/threes/models/unit/fields.yaml`
-```fields:
-    name:
-        label: 'Название юнита'
-        span: auto
-        type: text
-    tid:
-        label: 'Адрес юнита'
-        span: auto
-        type: text
-    description:
-        label: Описание
-        size: large
-        span: full
-        type: richeditor
-tabs:
+```tabs:
     fields:
         fields:
             label: ''
@@ -1276,31 +2036,94 @@ tabs:
                                     language: plain_text
                                     span: full
                                     type: codeeditor
+        io:
+            label: ''
+            prompt: Добавить
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Интеграция
+            form:
+                fields:
+                    io_key:
+                        label: Ключ
+                        span: auto
+                        type: text
+                    io_type:
+                        label: 'Тип данных'
+                        showSearch: true
+                        span: auto
+                        type: dropdown
+                    io_direction:
+                        label: Направление
+                        showSearch: true
+                        span: auto
+                        type: dropdown
+                    io_name:
+                        label: Название
+                        span: auto
+                        type: text
+                    io_description:
+                        label: Описание
+                        size: large
+                        span: full
+                        type: richeditor
+fields:
+    name:
+        label: 'Название юнита'
+        span: auto
+        type: text
+    tid:
+        label: 'Адрес юнита'
+        span: auto
+        type: text
+    description:
+        label: Описание
+        size: large
+        span: full
+        type: richeditor
+secondaryTabs:
+    fields:
+        icon:
+            label: 'SVG Иконка'
+            span: full
+            size: large
+            language: php
+            type: codeeditor
+            tab: Иконка
 
 ```
 `plugins/zen/threes/package.json`
 ```{
-  "name": "threes",
-  "version": "1.0.0",
-  "description": "Threes — это революционная платформа для рекурсивно-модульного программирования, разработанная для упрощения и ускорения процесса разработки. Система позволяет разработчикам создавать гибкие и мощные приложения, используя концепции юнитов и спрайтов, а так-же позволяет версионировать, переиспользовать и распространять решения.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Alex Blaze",
-  "license": "MIT",
-  "devDependencies": {
-    "laravel-mix": "^6.0.49",
-    "resolve-url-loader": "^5.0.0",
-    "sass": "^1.83.1",
-    "sass-loader": "^12.6.0",
-    "vue-loader": "^16.8.3"
-  },
-  "dependencies": {
-    "axios": "^1.7.9",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
-  }
+    "name": "threes",
+    "version": "1.0.0",
+    "description": "Threes — это революционная платформа для рекурсивно-модульного программирования, разработанная для упрощения и ускорения процесса разработки. Система позволяет разработчикам создавать гибкие и мощные приложения, используя концепции юнитов и спрайтов, а так-же позволяет версионировать, переиспользовать и распространять решения.",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Alex Blaze",
+    "license": "MIT",
+    "devDependencies": {
+        "@vue/language-server": "^2.2.0",
+        "laravel-mix": "^6.0.49",
+        "resolve-url-loader": "^5.0.0",
+        "sass": "^1.83.4",
+        "sass-loader": "^16.0.4",
+        "typescript": "^5.7.3",
+        "vue-loader": "^16.8.3"
+    },
+    "dependencies": {
+        "autoprefixer": "^10.4.20",
+        "axios": "^1.7.9",
+        "lodash": "^4.17.21",
+        "md5": "^2.3.0",
+        "primeicons": "^5.0.0",
+        "primevue": "^3.10.0",
+        "vue": "^3.5.13",
+        "vue-router": "^4.5.0",
+        "vue-select": "^4.0.0-beta.6"
+    }
 }
 
 ```
@@ -1353,7 +2176,7 @@ navigation:
 
 Route::match(
     ['get', 'post'],
-    '/zen/threes/api/{path}:{method}',
+    'threes.api/{path}:{method}',
     function (string $path, string $method) {
         $response = ths()->api($path, $method);
         if (is_null($response)) {
@@ -1377,9 +2200,16 @@ Route::match(
 
 const routes = [
     {
-        path: "/",
-        name: "Threes",
-        component: () => import("../vue/Threes.vue"),
+        path: "/:backend/zen/threes/spritecontroller/create",
+        name: "CreateSprite",
+        component: () => import("../vue/pages/ThreesProgram.vue"),
+        props: true,
+    },
+    {
+        path: "/:backend/zen/threes/spritecontroller/update/:sid",
+        name: "UpdateSprite",
+        component: () => import("../vue/pages/ThreesProgram.vue"),
+        props: true,
     },
 ];
 
@@ -1392,14 +2222,818 @@ export default router;
 
 ```
 `plugins/zen/threes/src/js/threes.js`
-```import {createApp} from 'vue';
-import router from './routes';
+```
+const axios = require('axios');
+const md5 = require('md5');
 
+import { createApp } from 'vue';
+import { reactive } from 'vue'
+import router from './routes';
+import PrimeVue from 'primevue/config';
 import Threes from '../vue/Threes.vue'
 
-const app = createApp(Threes)
-app.use(router)
-app.mount("#threes")
+window._ = require('lodash');
+window.ths = {
+    requests_register: {},
+    auth_token: null,
+
+    // Объект для хранения глобальных данных
+    data: reactive({
+        mouse: {
+            x: 0,
+            y: 0,
+        },
+        sprite_pins: [], // Соединения в спрайте
+    }),
+
+    api(opts) {
+        let domain = location.origin
+        let data = (opts.data) ? opts.data : null
+        let api_url = domain + opts.url
+        let request_key = md5(api_url)
+        let axios_options = null
+
+        if (opts.api) {
+            api_url = domain + '/threes.api/' + opts.api
+        }
+
+        // For debug
+        console.log('Threes query [' + request_key + ']: ' + api_url, data)
+
+        if (this.auth_token) {
+            axios_options = {
+                withCredentials: true,
+                headers: {
+                    PlayAuth: this.auth_token
+                }
+            }
+        }
+
+        if (!data) {
+            axios.get(api_url, axios_options)
+                .then((response) => {
+                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
+                    this.afterResponse(response.data, opts.then, request_key)
+                })
+                .catch((error) => {
+                    delete this.requests_register[request_key]
+                    this.preloader(false)
+                    console.log(error) // todo:debug
+                })
+        } else {
+            axios.post(api_url, data, axios_options)
+                .then((response) => {
+                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
+                    this.afterResponse(response.data, opts.then, request_key)
+                })
+                .catch((error) => {
+                    delete this.requests_register[request_key]
+                    this.preloader(false)
+                    console.log(error) // todo:debug
+                })
+        }
+    },
+    afterResponse(response, then, request_key) {
+        delete this.requests_register[request_key]
+        this.preloader(false)
+        if (response.alerts) {
+            this.pushAlerts(response.alerts)
+        }
+        if (then) {
+            then(response)
+        }
+    },
+    preloader(state) {
+        console.log('Preloader = ' + state)
+    },
+    pushAlerts(alerts) {
+        console.log('Alerts', alerts)
+    },
+}
+
+import FormFitter from "../vue/components/ux/forms/FormFitter.vue";
+import FormSection from "../vue/components/ux/forms/FormSection.vue";
+
+const app = createApp(Threes);
+app.use(router);
+app.use(PrimeVue, {ripple: true});
+app.component('FormFitter', FormFitter);
+app.component('FormSection', FormSection);
+app.mount("#threes");
+
+```
+`plugins/zen/threes/src/vue/components/Dwarf/inputs/DwarfSelect.css`
+```:root {
+    --vs-colors--lightest: rgba(60, 60, 60, .26);
+    --vs-colors--light: rgba(60, 60, 60, .5);
+    --vs-colors--dark: #333;
+    --vs-colors--darkest: rgba(0, 0, 0, .15);
+    --vs-search-input-color: inherit;
+    --vs-search-input-placeholder-color: inherit;
+    --vs-font-size: 1rem;
+    --vs-line-height: 1.4;
+    --vs-state-disabled-bg: rgb(248, 248, 248);
+    --vs-state-disabled-color: var(--vs-colors--light);
+    --vs-state-disabled-controls-color: var(--vs-colors--light);
+    --vs-state-disabled-cursor: not-allowed;
+    --vs-border-color: var(--vs-colors--lightest);
+    --vs-border-width: 1px;
+    --vs-border-style: solid;
+    --vs-border-radius: 4px;
+    --vs-actions-padding: 4px 6px 0 3px;
+    --vs-controls-color: var(--vs-colors--light);
+    --vs-controls-size: 1;
+    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
+    --vs-selected-bg: #f0f0f0;
+    --vs-selected-color: var(--vs-colors--dark);
+    --vs-selected-border-color: var(--vs-border-color);
+    --vs-selected-border-style: var(--vs-border-style);
+    --vs-selected-border-width: var(--vs-border-width);
+    --vs-dropdown-bg: #fff;
+    --vs-dropdown-color: inherit;
+    --vs-dropdown-z-index: 1000;
+    --vs-dropdown-min-width: 160px;
+    --vs-dropdown-max-height: 350px;
+    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
+    --vs-dropdown-option-bg: #000;
+    --vs-dropdown-option-color: var(--vs-dropdown-color);
+    --vs-dropdown-option-padding: 3px 20px;
+    --vs-dropdown-option--active-bg: #5897fb;
+    --vs-dropdown-option--active-color: #fff;
+    --vs-dropdown-option--deselect-bg: #fb5858;
+    --vs-dropdown-option--deselect-color: #fff;
+    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
+    --vs-transition-duration: .15s
+}
+
+.v-select {
+    position: relative;
+    font-family: inherit;
+    background: #fff;
+}
+
+.v-select, .v-select * {
+    box-sizing: border-box
+}
+
+:root {
+    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
+    --vs-transition-duration: .15s
+}
+
+@-webkit-keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+.vs__fade-enter-active, .vs__fade-leave-active {
+    pointer-events: none;
+    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
+}
+
+.vs__fade-enter, .vs__fade-leave-to {
+    opacity: 0
+}
+
+:root {
+    --vs-disabled-bg: var(--vs-state-disabled-bg);
+    --vs-disabled-color: var(--vs-state-disabled-color);
+    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
+    cursor: var(--vs-disabled-cursor);
+    background-color: var(--vs-disabled-bg)
+}
+
+.v-select[dir=rtl] .vs__actions {
+    padding: 0 3px 0 6px
+}
+
+.v-select[dir=rtl] .vs__clear {
+    margin-left: 6px;
+    margin-right: 0
+}
+
+.v-select[dir=rtl] .vs__deselect {
+    margin-left: 0;
+    margin-right: 2px
+}
+
+.v-select[dir=rtl] .vs__dropdown-menu {
+    text-align: right
+}
+
+.vs__dropdown-toggle {
+    height: 42px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: flex;
+    padding: 0 0 4px;
+    background: none;
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-radius: var(--vs-border-radius);
+    white-space: normal
+}
+
+.vs__selected-options {
+    display: flex;
+    flex-basis: 100%;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    padding: 0 2px;
+    position: relative
+}
+
+.vs__actions {
+    display: flex;
+    align-items: center;
+    padding: var(--vs-actions-padding)
+}
+
+.vs--searchable .vs__dropdown-toggle {
+    height: auto;
+    min-height: 42px;
+    cursor: text
+}
+
+.vs--unsearchable .vs__dropdown-toggle {
+    cursor: pointer
+}
+
+.vs--open .vs__dropdown-toggle {
+    border-bottom-color: transparent;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0
+}
+
+.vs__open-indicator {
+    fill: var(--vs-controls-color);
+    transform: scale(var(--vs-controls-size));
+    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
+    transition-timing-function: var(--vs-transition-timing-function)
+}
+
+.vs--open .vs__open-indicator {
+    transform: rotate(180deg) scale(var(--vs-controls-size))
+}
+
+.vs--loading .vs__open-indicator {
+    opacity: 0
+}
+
+.vs__clear {
+    fill: var(--vs-controls-color);
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    margin-right: 8px
+}
+
+.vs__dropdown-menu {
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    top: calc(100% - var(--vs-border-width));
+    left: 0;
+    z-index: var(--vs-dropdown-z-index);
+    padding: 5px 0;
+    margin: 0;
+    width: 100%;
+    max-height: var(--vs-dropdown-max-height);
+    min-width: var(--vs-dropdown-min-width);
+    overflow-y: auto;
+    box-shadow: var(--vs-dropdown-box-shadow);
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-top-style: none;
+    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
+    text-align: left;
+    list-style: none;
+    background: var(--vs-dropdown-bg);
+    color: var(--vs-dropdown-color)
+}
+
+.vs__no-options {
+    text-align: center
+}
+
+.vs__dropdown-option {
+    line-height: 1.42857143;
+    display: block;
+    padding: var(--vs-dropdown-option-padding);
+    clear: both;
+    color: var(--vs-dropdown-option-color);
+    white-space: nowrap;
+    cursor: pointer
+}
+
+.vs__dropdown-option--highlight {
+    background: var(--vs-dropdown-option--active-bg);
+    color: var(--vs-dropdown-option--active-color)
+}
+
+.vs__dropdown-option--deselect {
+    background: var(--vs-dropdown-option--deselect-bg);
+    color: var(--vs-dropdown-option--deselect-color)
+}
+
+.vs__dropdown-option--disabled {
+    background: var(--vs-state-disabled-bg);
+    color: var(--vs-state-disabled-color);
+    cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs__selected {
+    display: flex;
+    align-items: center;
+    background-color: var(--vs-selected-bg);
+    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
+    border-radius: var(--vs-border-radius);
+    color: var(--vs-selected-color);
+    line-height: var(--vs-line-height);
+    margin: 4px 2px 0;
+    padding: 0 .25em;
+    z-index: 0
+}
+
+.vs__deselect {
+    display: inline-flex;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: none;
+    fill: var(--vs-controls-color);
+    text-shadow: var(--vs-controls--deselect-text-shadow)
+}
+
+.vs__selected {
+    height: 33px;
+}
+
+.vs--single .vs__selected {
+    background-color: transparent;
+    border-color: transparent
+}
+
+.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
+    position: absolute;
+    opacity: .4
+}
+
+.vs--single.vs--searching .vs__selected {
+    display: none
+}
+
+.vs__search::-webkit-search-cancel-button {
+    display: none
+}
+
+.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
+    display: none
+}
+
+.vs__search, .vs__search:focus {
+    color: var(--vs-search-input-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    line-height: var(--vs-line-height);
+    font-size: var(--vs-font-size);
+    border: 1px solid transparent;
+    border-left: none;
+    outline: none;
+    margin: 4px 0 0;
+    padding: 0 7px;
+    background: none;
+    box-shadow: none;
+    width: 0;
+    max-width: 100%;
+    flex-grow: 1;
+    z-index: 1
+}
+
+.vs__search::-moz-placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs__search::placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs--unsearchable .vs__search {
+    opacity: 1
+}
+
+.vs--unsearchable:not(.vs--disabled) .vs__search {
+    cursor: pointer
+}
+
+.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
+    opacity: .2
+}
+
+.vs__spinner {
+    align-self: center;
+    opacity: 0;
+    font-size: 5px;
+    text-indent: -9999em;
+    overflow: hidden;
+    border-top: .9em solid rgba(100, 100, 100, .1);
+    border-right: .9em solid rgba(100, 100, 100, .1);
+    border-bottom: .9em solid rgba(100, 100, 100, .1);
+    border-left: .9em solid rgba(60, 60, 60, .45);
+    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
+    -webkit-animation: vSelectSpinner 1.1s infinite linear;
+    animation: vSelectSpinner 1.1s infinite linear;
+    transition: opacity .1s
+}
+
+.vs__spinner, .vs__spinner:after {
+    border-radius: 50%;
+    width: 5em;
+    height: 5em;
+    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
+}
+
+.vs--loading .vs__spinner {
+    opacity: 1
+}
+
+```
+`plugins/zen/threes/src/vue/components/ux/inputs/Select.css`
+```:root {
+    --vs-colors--lightest: rgba(60, 60, 60, .26);
+    --vs-colors--light: rgba(60, 60, 60, .5);
+    --vs-colors--dark: #333;
+    --vs-colors--darkest: rgba(0, 0, 0, .15);
+    --vs-search-input-color: inherit;
+    --vs-search-input-placeholder-color: inherit;
+    --vs-font-size: 1rem;
+    --vs-line-height: 1.4;
+    --vs-state-disabled-bg: rgb(248, 248, 248);
+    --vs-state-disabled-color: var(--vs-colors--light);
+    --vs-state-disabled-controls-color: var(--vs-colors--light);
+    --vs-state-disabled-cursor: not-allowed;
+    --vs-border-color: var(--vs-colors--lightest);
+    --vs-border-width: 1px;
+    --vs-border-style: solid;
+    --vs-border-radius: 4px;
+    --vs-actions-padding: 4px 6px 0 3px;
+    --vs-controls-color: var(--vs-colors--light);
+    --vs-controls-size: 1;
+    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
+    --vs-selected-bg: #f0f0f0;
+    --vs-selected-color: var(--vs-colors--dark);
+    --vs-selected-border-color: var(--vs-border-color);
+    --vs-selected-border-style: var(--vs-border-style);
+    --vs-selected-border-width: var(--vs-border-width);
+    --vs-dropdown-bg: #fff;
+    --vs-dropdown-color: inherit;
+    --vs-dropdown-z-index: 1000;
+    --vs-dropdown-min-width: 160px;
+    --vs-dropdown-max-height: 350px;
+    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
+    --vs-dropdown-option-bg: #000;
+    --vs-dropdown-option-color: var(--vs-dropdown-color);
+    --vs-dropdown-option-padding: 3px 20px;
+    --vs-dropdown-option--active-bg: #5897fb;
+    --vs-dropdown-option--active-color: #fff;
+    --vs-dropdown-option--deselect-bg: #fb5858;
+    --vs-dropdown-option--deselect-color: #fff;
+    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
+    --vs-transition-duration: .15s
+}
+
+.v-select {
+    position: relative;
+    font-family: inherit;
+    background: #fff;
+}
+
+.v-select, .v-select * {
+    box-sizing: border-box
+}
+
+:root {
+    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
+    --vs-transition-duration: .15s
+}
+
+@-webkit-keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+.vs__fade-enter-active, .vs__fade-leave-active {
+    pointer-events: none;
+    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
+}
+
+.vs__fade-enter, .vs__fade-leave-to {
+    opacity: 0
+}
+
+:root {
+    --vs-disabled-bg: var(--vs-state-disabled-bg);
+    --vs-disabled-color: var(--vs-state-disabled-color);
+    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
+    cursor: var(--vs-disabled-cursor);
+    background-color: var(--vs-disabled-bg)
+}
+
+.v-select[dir=rtl] .vs__actions {
+    padding: 0 3px 0 6px
+}
+
+.v-select[dir=rtl] .vs__clear {
+    margin-left: 6px;
+    margin-right: 0
+}
+
+.v-select[dir=rtl] .vs__deselect {
+    margin-left: 0;
+    margin-right: 2px
+}
+
+.v-select[dir=rtl] .vs__dropdown-menu {
+    text-align: right
+}
+
+.vs__dropdown-toggle {
+    height: 42px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: flex;
+    padding: 0 0 4px;
+    background: none;
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-radius: var(--vs-border-radius);
+    white-space: normal
+}
+
+.vs__selected-options {
+    display: flex;
+    flex-basis: 100%;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    padding: 0 2px;
+    position: relative
+}
+
+.vs__actions {
+    display: flex;
+    align-items: center;
+    padding: var(--vs-actions-padding)
+}
+
+.vs--searchable .vs__dropdown-toggle {
+    height: auto;
+    min-height: 36px;
+    cursor: text
+}
+
+.vs--unsearchable .vs__dropdown-toggle {
+    cursor: pointer
+}
+
+.vs--open .vs__dropdown-toggle {
+    border-bottom-color: transparent;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0
+}
+
+.vs__open-indicator {
+    fill: var(--vs-controls-color);
+    transform: scale(var(--vs-controls-size));
+    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
+    transition-timing-function: var(--vs-transition-timing-function)
+}
+
+.vs--open .vs__open-indicator {
+    transform: rotate(180deg) scale(var(--vs-controls-size))
+}
+
+.vs--loading .vs__open-indicator {
+    opacity: 0
+}
+
+.vs__clear {
+    fill: var(--vs-controls-color);
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    margin-right: 8px
+}
+
+.vs__dropdown-menu {
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    top: calc(100% - var(--vs-border-width));
+    left: 0;
+    z-index: var(--vs-dropdown-z-index);
+    padding: 5px 0;
+    margin: 0;
+    width: 100%;
+    max-height: var(--vs-dropdown-max-height);
+    min-width: var(--vs-dropdown-min-width);
+    overflow-y: auto;
+    box-shadow: var(--vs-dropdown-box-shadow);
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-top-style: none;
+    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
+    text-align: left;
+    list-style: none;
+    background: var(--vs-dropdown-bg);
+    color: var(--vs-dropdown-color)
+}
+
+.vs__no-options {
+    text-align: center
+}
+
+.vs__dropdown-option {
+    line-height: 1.42857143;
+    display: block;
+    padding: var(--vs-dropdown-option-padding);
+    clear: both;
+    color: var(--vs-dropdown-option-color);
+    white-space: nowrap;
+    cursor: pointer
+}
+
+.vs__dropdown-option--highlight {
+    background: var(--vs-dropdown-option--active-bg);
+    color: var(--vs-dropdown-option--active-color)
+}
+
+.vs__dropdown-option--deselect {
+    background: var(--vs-dropdown-option--deselect-bg);
+    color: var(--vs-dropdown-option--deselect-color)
+}
+
+.vs__dropdown-option--disabled {
+    background: var(--vs-state-disabled-bg);
+    color: var(--vs-state-disabled-color);
+    cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs__selected {
+    display: flex;
+    align-items: center;
+    background-color: var(--vs-selected-bg);
+    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
+    border-radius: var(--vs-border-radius);
+    color: var(--vs-selected-color);
+    line-height: var(--vs-line-height);
+    margin: 4px 2px 0;
+    padding: 0 .25em;
+    z-index: 0
+}
+
+.vs__deselect {
+    display: inline-flex;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: none;
+    fill: var(--vs-controls-color);
+    text-shadow: var(--vs-controls--deselect-text-shadow)
+}
+
+.vs__selected {
+    /*height: 33px;*/
+}
+
+.vs--single .vs__selected {
+    background-color: transparent;
+    border-color: transparent
+}
+
+.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
+    position: absolute;
+    opacity: .4
+}
+
+.vs--single.vs--searching .vs__selected {
+    display: none
+}
+
+.vs__search::-webkit-search-cancel-button {
+    display: none
+}
+
+.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
+    display: none
+}
+
+.vs__search, .vs__search:focus {
+    color: var(--vs-search-input-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    line-height: var(--vs-line-height);
+    font-size: var(--vs-font-size);
+    border: 1px solid transparent;
+    border-left: none;
+    outline: none;
+    margin: 4px 0 0;
+    padding: 0 7px;
+    background: none;
+    box-shadow: none;
+    width: 0;
+    max-width: 100%;
+    flex-grow: 1;
+    z-index: 1
+}
+
+.vs__search::-moz-placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs__search::placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs--unsearchable .vs__search {
+    opacity: 1
+}
+
+.vs--unsearchable:not(.vs--disabled) .vs__search {
+    cursor: pointer
+}
+
+.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
+    opacity: .2
+}
+
+.vs__spinner {
+    align-self: center;
+    opacity: 0;
+    font-size: 5px;
+    text-indent: -9999em;
+    overflow: hidden;
+    border-top: .9em solid rgba(100, 100, 100, .1);
+    border-right: .9em solid rgba(100, 100, 100, .1);
+    border-bottom: .9em solid rgba(100, 100, 100, .1);
+    border-left: .9em solid rgba(60, 60, 60, .45);
+    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
+    -webkit-animation: vSelectSpinner 1.1s infinite linear;
+    animation: vSelectSpinner 1.1s infinite linear;
+    transition: opacity .1s
+}
+
+.vs__spinner, .vs__spinner:after {
+    border-radius: 50%;
+    width: 5em;
+    height: 5em;
+    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
+}
+
+.vs--loading .vs__spinner {
+    opacity: 1
+}
 
 ```
 `plugins/zen/threes/traits/SimpleTree.php`
@@ -1694,19 +3328,19 @@ trait SingletonTrait
 {
     private static ?self $instance = null;
 
-    public static function getInstance(): self {
+    public static function getInstance(mixed $var = null): self {
         if (!self::$instance) {
-            self::$instance = new self();
+            self::$instance = new self($var);
         }
 
         return self::$instance;
     }
 
+    /* zenc0dr: Раскомментировать при явной необходимости
     private function __construct() {}
-
     private function __clone() {}
-
     public function __wakeup() {}
+    */
 }
 
 ```
@@ -1753,6 +3387,8 @@ class BuilderTableCreateZenThreesUnits extends Migration
         Schema::create('zen_threes_units', function($table)
         {
             $table->string('tid')->primary();
+            $table->text('icon')->nullable();
+            $table->string('icon_name')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
@@ -1769,6 +3405,31 @@ class BuilderTableCreateZenThreesUnits extends Migration
     }
 }
 ```
+`plugins/zen/threes/updates/builder_table_update_zen_threes_units.php`
+```<?php namespace Zen\Threes\Updates;
+
+use Schema;
+use October\Rain\Database\Updates\Migration;
+
+class BuilderTableUpdateZenThreesUnits extends Migration
+{
+    public function up()
+    {
+        Schema::table('zen_threes_units', function($table)
+        {
+            $table->string('icon_name')->nullable();
+        });
+    }
+    
+    public function down()
+    {
+        Schema::table('zen_threes_units', function($table)
+        {
+            #$table->dropColumn('icon_name');
+        });
+    }
+}
+```
 `plugins/zen/threes/updates/version.yaml`
 ```v1.0.1:
     - 'Initialize plugin'
@@ -1778,46 +3439,64 @@ v1.0.2:
 v1.0.3:
     - 'Create sprites'
     - builder_table_create_zen_threes_sprites.php
+v1.0.4:
+    - 'Updated table zen_threes_units'
+    - builder_table_update_zen_threes_units.php
 
 ```
 `plugins/zen/threes/webpack.mix.js`
 ```const mix = require('laravel-mix');
 const path = require('path');
-mix.sass('src/scss/threes.scss', 'css');
-mix.js('src/js/threes.js', 'js').vue();
+const webpack = require('webpack');
 
-mix.setPublicPath('assets');
+mix.sass('src/scss/threes.scss', 'css')
+    .options({
+        processCssUrls: false // Отключает автоматическую обработку относительных URL в CSS
+    })
+    .webpackConfig({
+        output: {
+            filename: '[name].js',
+            chunkFilename: 'js/[name].app.js',
+            publicPath: '/plugins/zen/threes/assets/', // Указывает базовый путь для публичных файлов
+        },
+        // stats: {
+        //     children: true // Раскомментировать только если будут ошибки сборки
+        // },
+        devtool: mix.inProduction() ? false : 'inline-source-map',
+        module: {
+            rules: [
+                {
+                    test: /\.(woff|woff2|eot|ttf|svg)$/, // Обработка шрифтов и SVG
+                    loader: 'file-loader',
+                    options: {
+                        name: 'fonts/vendor/primeicons/[name].[ext]', // Название файлов
+                        publicPath: '/plugins/zen/threes/assets/', // Путь для использования в браузере
+                        outputPath: 'fonts/vendor/primeicons/', // Путь для сохранения файлов
+                    },
+                },
+            ],
+        },
+        plugins: [
+            new webpack.DefinePlugin({
+                __VUE_OPTIONS_API__: JSON.stringify(true),
+                __VUE_PROD_DEVTOOLS__: JSON.stringify(false),
+                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
+            }),
+        ],
+    });
 
-mix.options({
-    terser: {
-        ecma: 2020
-    }
-})
+mix.js('src/js/threes.js', 'js').vue(); // Обработка Vue.js файлов
+mix.setPublicPath('assets'); // Путь к папке публичных файлов
 
 if (mix.inProduction()) {
-    mix.webpackConfig({
-        output: {
-            filename: '[name].js',
-            chunkFilename: 'js/[name].app.js',
-            publicPath: 'assets'
-        }
-    })
-    mix.version();
-} else {
-    mix.webpackConfig({
-        output: {
-            filename: '[name].js',
-            chunkFilename: 'js/[name].app.js',
-            publicPath: 'assets'
-        },
-        devtool: 'inline-source-map'
-    })
+    mix.version(); // Версионирование файлов в продакшене
 }
 
-mix.alias({
-    '@': path.join(__dirname, 'src/js')
-});
+// Настройка alias для удобства работы с путями
+mix.alias({ '@': path.join(__dirname, 'src/js') });
 
+// Копирование дополнительных ресурсов
 mix.copyDirectory(path.join(__dirname, 'src/images'), 'assets/images');
+mix.copyDirectory('node_modules/primeicons/fonts', 'assets/fonts/vendor/primeicons');
 
 ```

@@ -29,36 +29,40 @@ export default {
     props: {
         node: null,
         nid: null, // Вид 0.0, {индекс линии}.{индекс нода}
-        hovering: { // Объект содержащий данные о перемещении
-            type: Object,
-            default: {}
+        hovering: null // тут приходит nid
+    },
+    computed: {
+        style() {
+            if (this.hovering && this.nid === this.hovering) {
+                return {
+                    position: 'absolute',
+                    left: (ths.data.mouse.x - 1) + 'px',
+                    top: (ths.data.mouse.y - 1) + 'px',
+                    zIndex: 1000,
+                    opacity: 0.8,
+                    filter: 'blur(1px)'
+                }
+            } else {
+                return {}
+            }
         }
     },
     methods: {
         io(io, direction) {
-            return io.filter(el => el.io_direction === direction);
+            return io.filter(el => el.io_direction === direction)
         },
         icon(src) {
             return {
                 'background-image':`url(${src})`
             }
         },
-        style() {
-            if (this.hovering === {}) {
-                return {}
-            }
-            return {
-                position: 'absolute',
-                left: this.hovering.x,
-                top: this.hovering.y
-            }
-        }
     }
 }
 </script>
 <style lang="scss">
 .threes-node {
     display: flex;
+    position: relative;
     flex-direction: row;
     background-color: #ffffff;
     border: 2px solid #96abc3;
@@ -69,7 +73,7 @@ export default {
     align-content: space-between;
     cursor: pointer;
     user-select: none;
-    transition: 200ms;
+    transition: 100ms;
 
     &:hover {
         border-color: #3e8fe8;
