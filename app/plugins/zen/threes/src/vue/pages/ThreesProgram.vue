@@ -267,6 +267,10 @@ export default {
             this.popup = false
             if (action === 'copy') {
                 this.copyNodeAction(nid)
+            } else if (action === 'delete') {
+                this.deleteNodeAction(nid);
+            } else if (action === 'settings') {
+                this.openSettingsPage(nid);
             }
         },
         copyNodeAction(nid) {
@@ -280,6 +284,21 @@ export default {
                     this.loadProgram()
                 }
             })
+        },
+        deleteNodeAction(nid) {
+            ths.api({
+                api: 'Sprites.Program:delete',
+                data: {
+                    sid:this.sid,
+                    nid
+                },
+                then: response => {
+                    this.loadProgram()
+                }
+            });
+        },
+        openSettingsPage(nid) {
+            console.log('openSettingsPage' + nid)
         }
     }
 }
