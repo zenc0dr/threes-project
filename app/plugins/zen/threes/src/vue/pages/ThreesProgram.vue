@@ -6,11 +6,12 @@
                 <ThreesNode
                     v-for="(node, node_index) in nodes"
                     :node="node"
-                    :nid="`${line_index}.${node_index}`"
+                    :nid="[line_index, node_index].join('.')"
                     :hovering="node_hovering"
-                    @mousedown="captureNodeStart(`${line_index}.${node_index}`)"
+                    @mousedown="captureNodeStart([line_index, node_index].join('.'))"
                     @mouseup="captureNodeEnd"
                     @mouseleave="captureNodeEnd"
+                    @contextmenu.prevent="openNodeMenu($event, [line_index, node_index].join('.'))"
                 />
                 <div class="threes-coder__add_node">
                     <div @click="openCreateNodeModal(line_index)" class="threes-coder__add_node__btn">
@@ -36,12 +37,14 @@
             <SelectNode @fetch="makeNode"/>
         </template>
     </ThreesModal>
+    <NodePopup v-if="popup" :x="popup_x" :y="popup_y" @select="execNodeMenu"/>
 </template>
 <script>
 import ThreesModal from "../components/ThreesModal.vue";
 import ControlPanel from "../components/ux/forms/ControlPanel.vue";
 import SelectNode from "../components/SelectNode.vue";
 import ThreesNode from "../components/ThreesNode.vue";
+import NodePopup from "../components/ux/forms/NodePopup.vue";
 import throttle from 'lodash/throttle'; // Ограничитель сканирований
 export default {
     name: "ThreesProgram",
@@ -50,7 +53,8 @@ export default {
         ThreesModal,
         ControlPanel,
         SelectNode,
-        ThreesNode
+        ThreesNode,
+        NodePopup
     },
     data() {
         return {
@@ -71,6 +75,12 @@ export default {
             node_hovering_nid: null, // nid перемещаемого нода
             node_hovering_active: false,
             node_hovering: null, // Объект для передачи ноду
+
+            /* Всплывающее меню */
+            popup: false,
+            popup_nid: null,
+            popup_x: 0,
+            popup_y: 0,
 
             /* Программа спрайта */
             program: [
@@ -244,6 +254,19 @@ export default {
                     this.loadProgram()
                 }
             })
+        },
+        openNodeMenu(event, nid) {
+            const rect = this.$refs.threesCoder.getBoundingClientRect()
+            this.popup_x = event.clientX - rect.left
+            this.popup_y = event.clientY - rect.top
+            this.popup_nid = nid
+            this.popup = true
+        },
+        execNodeMenu(action) {
+            let nid = this.popup_nid
+            this.popup = false
+
+            console.log('action:' + nid, action)
         }
     }
 }

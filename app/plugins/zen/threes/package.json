@@ -25,6 +25,7 @@
         "primeicons": "^5.0.0",
         "primevue": "^3.10.0",
         "vue": "^3.5.13",
+        "vue-click-outside-element": "^3.1.2",
         "vue-router": "^4.5.0",
         "vue-select": "^4.0.0-beta.6"
     }
