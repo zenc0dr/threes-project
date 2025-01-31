@@ -19,7 +19,7 @@
         </template>
         <template v-else-if="ifArchitectNode(node.type)">
             <div class="threes-node__architect" :class="'node-type__' + node.type">
-                <icon src="@node_types/else.svg"/> {{ node.type }}
+                <icon class="threes-node__architect__icon" :src="`@node_types/${ node.type }.svg`"/>
             </div>
         </template>
     </div>
@@ -129,13 +129,17 @@ export default {
     &__architect {
         display: flex;
         padding: 15px;
-        background: #dcdcdc;
+        background: #def0ff;
         color: #6e7987;
         font-size: 27px;
         font-weight: bold;
         text-transform: uppercase;
         border-radius: 4px;
         align-items: center;
+
+        &__icon {
+            margin-right: 5px;
+        }
 
         &.node-type_if {
 

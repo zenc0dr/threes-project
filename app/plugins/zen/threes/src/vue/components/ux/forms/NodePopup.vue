@@ -1,24 +1,15 @@
 <template>
 <div class="node-popup" :style="style" v-click-outside-element="handleClickOutside">
-    <div @click="select('copy')" class="btn btn-primary">Копировать</div>
-    <div @click="select('delete')" class="btn btn-primary">Удалить</div>
-    <div @click="select('settings')" class="btn btn-primary">Настройки</div>
+    <slot :handleClick="handleClick"></slot>
 </div>
 </template>
 <script>
 export default {
     name: 'NodePopup',
-    emits: ['select'],
+    emits: ['select', 'close'],
     props: {
         x: 0,
         y: 0
-    },
-    data() {
-        return {
-            buttons: [
-
-            ]
-        }
     },
     computed: {
         style() {
@@ -30,10 +21,14 @@ export default {
     },
     methods: {
         handleClickOutside() {
-            this.select('close');
+            this.$emit('select', 'close');
         },
-        select(action) {
-            this.$emit('select', action);
+        handleClick(event) {
+            console.log('handleClick event', event);
+            const action = event.target.dataset.action;
+            if (action) {
+                this.$emit('select', action);
+            }
         }
     }
 }

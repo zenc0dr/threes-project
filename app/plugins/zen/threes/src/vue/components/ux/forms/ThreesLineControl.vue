@@ -25,5 +25,12 @@ export default {
     font-weight: bold;
     color: #505e6f;
     margin-right: 5px;
+    cursor: pointer;
+    transition: 200ms;
+
+    &:hover {
+        background: #4978d3;
+        color: #fff;
+    }
 }
 </style>

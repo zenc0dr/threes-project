@@ -1,15 +1,15 @@
 <template>
     <div class="threes-coder" ref="threesCoder" @mousemove="mousemove">
-        <div v-for="(nodes, line_index) in program" class="threes-coder__line">
-            <ThreesLineControl :line_index="line_index" />
+        <div @mouseup="dropToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
+            <ThreesLineControl @contextmenu.prevent="openLinePopupMenu($event, line_index)" :line_index="line_index" />
             <div class="threes-coder__line_items">
                 <ThreesNode
                     v-for="(node, node_index) in nodes"
                     :node="node"
                     :nid="[line_index, node_index].join('.')"
                     :hovering="node_hovering"
-                    @mousedown="captureNodeStart([line_index, node_index].join('.'))"
-                    @mouseup="captureNodeEnd"
+                    @mousedown.stop="captureNodeStart([line_index, node_index].join('.'))"
+                    @mouseup.stop="captureNodeEnd"
                     @mouseleave="captureNodeEnd"
                     @contextmenu.prevent="openNodeMenu($event, [line_index, node_index].join('.'))"
                 />
@@ -40,7 +40,20 @@
             <SelectNode @fetch="makeNode"/>
         </template>
     </ThreesModal>
-    <NodePopup v-if="popup" :x="popup_x" :y="popup_y" @select="execNodeMenu"/>
+    <NodePopup v-if="node_popup" :x="node_popup_x" :y="node_popup_y" @select="execNodeMenu">
+        <template #default="{ handleClick }">
+            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать</div>
+            <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить</div>
+            <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки</div>
+        </template>
+    </NodePopup>
+    <NodePopup v-if="line_popup" :x="line_popup_x" :y="line_popup_y" @select="execLineMenu">
+        <template #default="{ handleClick }">
+            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать</div>
+            <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить</div>
+            <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки</div>
+        </template>
+    </NodePopup>
 </template>
 <script>
 import ThreesModal from "../components/ThreesModal.vue";
@@ -81,11 +94,17 @@ export default {
             node_hovering_active: false,
             node_hovering: null, // Объект для передачи ноду
 
-            /* Всплывающее меню */
-            popup: false,
-            popup_nid: null,
-            popup_x: 0,
-            popup_y: 0,
+            /* Всплывающее меню нода*/
+            node_popup: false,
+            node_popup_x: 0,
+            node_popup_y: 0,
+            node_popup_nid: null,
+
+            /* Всплывающее меню линии */
+            line_popup: false,
+            line_popup_x: 0,
+            line_popup_y: 0,
+            line_popup_index: null,
 
             /* Программа спрайта */
             program: [
@@ -251,7 +270,36 @@ export default {
             this.node_hovering_nid = null
             this.node_hovering = null
         },
-        /* Втыкает нод после нода */
+
+        /* Открыть меню линии */
+        openLinePopupMenu(event, line_index) {
+            const rect = this.$refs.threesCoder.getBoundingClientRect()
+            this.node_popup_x = event.clientX - rect.left
+            this.node_popup_y = event.clientY - rect.top
+            this.line_popup = true
+            //this.line_index = line_index
+        },
+
+        /* Открыть меню линии */
+        execLineMenu(action, line_index) {
+            this.line_index = false
+            this.line_popup = false
+            console.log('Вызвали меню линии: ' + line_index + ' action: ' + action)
+        },
+
+        /* Бросить нод на линию */
+        dropToLine(line_index) {
+            console.log(
+                'line_index=' + line_index,
+                'nid=' + this.node_hovering_nid,
+            )
+        },
+
+        insertNodeToLine(nid, line_index) {
+
+        },
+
+        /* Вставляет нод после нода */
         insertNodeAfterNode(nid, after_nid) {
             ths.api({
                 api: 'Sprites.Program:move',
@@ -270,16 +318,17 @@ export default {
         /* Открыть popup-меню нода */
         openNodeMenu(event, nid) {
             const rect = this.$refs.threesCoder.getBoundingClientRect()
-            this.popup_x = event.clientX - rect.left
-            this.popup_y = event.clientY - rect.top
-            this.popup_nid = nid
-            this.popup = true
+            this.node_popup_x = event.clientX - rect.left
+            this.node_popup_y = event.clientY - rect.top
+            this.node_popup_nid = nid
+            this.node_popup = true
         },
 
         /* Нажали на пункт popup-меню нода  */
         execNodeMenu(action) {
-            let nid = this.popup_nid
-            this.popup = false
+            let nid = this.node_popup_nid
+            this.node_popup_nid = false
+            this.node_popup = false
             if (action === 'copy') {
                 this.copyNodeAction(nid)
             } else if (action === 'delete') {
