@@ -1,7 +1,7 @@
 <template>
     <div class="threes-coder" ref="threesCoder" @mousemove="mousemove">
         <div v-for="(nodes, line_index) in program" class="threes-coder__line">
-            <div class="threes-coder__line_info">{{ line_index }}</div>
+            <ThreesLineControl :line_index="line_index" />
             <div class="threes-coder__line_items">
                 <ThreesNode
                     v-for="(node, node_index) in nodes"
@@ -19,6 +19,9 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div @click="addProgramLine" class="threes-coder__add-line">
+            +
         </div>
         <div class="threes-debug">
             <div @click="debug_panel = !debug_panel" class="threes-debug__head">
@@ -45,6 +48,7 @@ import ControlPanel from "../components/ux/forms/ControlPanel.vue";
 import SelectNode from "../components/SelectNode.vue";
 import ThreesNode from "../components/ThreesNode.vue";
 import NodePopup from "../components/ux/forms/NodePopup.vue";
+import ThreesLineControl from "../components/ux/forms/ThreesLineControl.vue";
 import throttle from 'lodash/throttle'; // Ограничитель сканирований
 export default {
     name: "ThreesProgram",
@@ -54,6 +58,7 @@ export default {
         ControlPanel,
         SelectNode,
         ThreesNode,
+        ThreesLineControl,
         NodePopup
     },
     data() {
@@ -128,6 +133,11 @@ export default {
                     }
                 }
             })
+        },
+        /* Добавить строку в программу */
+        addProgramLine() {
+            this.program.push({})
+            this.saveProgram()
         },
         /* Обработать программу */
         handleProgram(program) {
@@ -257,6 +267,7 @@ export default {
                 }
             })
         },
+        /* Открыть popup-меню нода */
         openNodeMenu(event, nid) {
             const rect = this.$refs.threesCoder.getBoundingClientRect()
             this.popup_x = event.clientX - rect.left
@@ -264,6 +275,8 @@ export default {
             this.popup_nid = nid
             this.popup = true
         },
+
+        /* Нажали на пункт popup-меню нода  */
         execNodeMenu(action) {
             let nid = this.popup_nid
             this.popup = false
@@ -275,6 +288,7 @@ export default {
                 this.openSettingsPage(nid);
             }
         },
+        /* Копировать нод */
         copyNodeAction(nid) {
             ths.api({
                 api: 'Sprites.Program:copy',
@@ -287,6 +301,7 @@ export default {
                 }
             })
         },
+        /* Удалить нод */
         deleteNodeAction(nid) {
             ths.api({
                 api: 'Sprites.Program:delete',
@@ -299,6 +314,7 @@ export default {
                 }
             });
         },
+        /* Открыть страницу с натстройками */
         openSettingsPage(nid) {
             console.log('openSettingsPage' + nid)
         }
@@ -314,19 +330,21 @@ export default {
         margin: 5px 0;
         min-height: 30px;
     }
-    &__line_info {
-        width: 27px;
-        display: flex;
-        align-content: center;
-        justify-content: flex-end;
-        align-items: center;
-        background: #efefef;
-        padding: 0 5px;
+
+    &__add-line {
+        padding: 7px;
         border-radius: 4px;
-        font-size: 12px;
+        background: #f5f5f5;
+        color: #797979;
+        text-align: center;
         font-weight: bold;
-        color: #505e6f;
-        margin-right: 5px;
+        transition: 200ms;
+        cursor: pointer;
+
+        &:hover {
+            background: #efefef;
+            color: #797979;
+        }
     }
 
     &__line_items {

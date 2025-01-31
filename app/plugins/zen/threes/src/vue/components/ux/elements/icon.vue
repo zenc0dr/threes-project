@@ -9,10 +9,33 @@ export default {
         width: '30px',
         height: '30px'
     },
+    data() {
+        return {
+            aliases: {
+                '@node_types': '/plugins/zen/threes/assets/images/node_types'
+            }
+        }
+    },
     computed: {
+        aliased_src() {
+            if (!this.src) {
+                return ''
+            }
+
+            let processed = this.src;
+            for (const key in this.aliases) {
+                processed = processed.replace(key, this.aliases[key]);
+            }
+
+            return processed;
+        },
         style() {
+            if (!this.aliased_src) {
+                return {}
+            }
+
             return {
-                backgroundImage: `url(${this.src})`,
+                backgroundImage: `url(${this.aliased_src})`,
                 width: this.width,
                 height: this.height
             }
