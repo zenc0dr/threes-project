@@ -1,6 +1,6 @@
 <template>
     <div class="threes-coder" ref="threesCoder" @mousemove="mousemove">
-        <div @mouseup="dropToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
+        <div @mouseup="dropNodeToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
             <ThreesLineControl @contextmenu.prevent="openLinePopupMenu($event, line_index)" :line_index="line_index" />
             <div class="threes-coder__line_items">
                 <ThreesNode
@@ -119,17 +119,6 @@ export default {
     mounted() {
         this.loadProgram()
     },
-    // watch: {
-    //     program: {
-    //         handler(program) {
-    //             const last_line = program[program.length - 1]
-    //             if (last_line.length) {
-    //                 program.push([])
-    //             }
-    //         },
-    //         deep: true
-    //     }
-    // },
     methods: {
         /* Фиксировать движение мыши */
         mousemove: throttle(function (event) {
@@ -137,6 +126,7 @@ export default {
             ths.data.mouse.y = event.pageY - this.coder_offset_y
             this.moveNodeProcess()
         }, 30),
+
         /* Загрузить программу */
         loadProgram() {
             ths.api({
@@ -153,16 +143,19 @@ export default {
                 }
             })
         },
+
         /* Добавить строку в программу */
         addProgramLine() {
             this.program.push({})
             this.saveProgram()
         },
+
         /* Обработать программу */
         handleProgram(program) {
             program = this.generatePinTable(program)
             return program
         },
+
         /* Генерировать таблицу пинов для программы */
         generatePinTable(program) {
             let io_pins = []
@@ -199,6 +192,7 @@ export default {
             ths.data.sprite_pins = io_pins
             return program
         },
+
         /* Сохранить программу */
         saveProgram() {
             ths.api({
@@ -209,21 +203,25 @@ export default {
                 }
             })
         },
+
         /* Открыть окно создания нода */
         openCreateNodeModal(line) {
             this.new_node = true
             this.active_line = line
             console.log('line', line)
         },
+
         /* Закрыть окно создания нода */
         closeCreateNodeModal() {
             this.new_node = false
         },
+
         /* Создать нод из объекта */
         makeNode(node) {
             this.program[this.active_line].push(node)
             this.saveProgram()
         },
+
         /* Фиксировать нажатие мыши с последующим удержанием */
         captureNodeStart(nid) {
             if (!this.node_hovering_active) {
@@ -235,6 +233,7 @@ export default {
                 this.insertNodeAfterNode(this.node_hovering, nid)
             }
         },
+
         /* Остановить таймер захвата нода */
         captureTimerStop() {
             if (this.push_timer) {
@@ -242,28 +241,33 @@ export default {
                 this.push_timer = null
             }
         },
+
         /* Завершение захвата нода, отпускание нода */
         captureNodeEnd() {
             this.captureTimerStop()
         },
+
         /* Фиксируем смещение курсора */
         fixMouseOffset() {
             const rect = this.$refs.threesCoder.getBoundingClientRect()
             this.coder_offset_x = rect.left + window.scrollX
             this.coder_offset_y = rect.top + window.scrollY
         },
+
         /* Начало процесса перемещения нода */
         moveNodeStart() {
             this.fixMouseOffset()
             this.captureTimerStop()
             this.node_hovering_active = true
         },
+
         /* Процесс перемещения нода */
         moveNodeProcess() {
             if (this.node_hovering_active) {
                 this.node_hovering = this.node_hovering_nid
             }
         },
+
         /* Очистить данные после перемещения нода */
         clearMoveData() {
             this.node_hovering_active = false
@@ -288,15 +292,27 @@ export default {
         },
 
         /* Бросить нод на линию */
-        dropToLine(line_index) {
-            console.log(
-                'line_index=' + line_index,
-                'nid=' + this.node_hovering_nid,
+        dropNodeToLine(line_index) {
+            this.insertNodeToLine(
+                this.node_hovering_nid,
+                line_index
             )
         },
 
+        /* Добавить нод на линию */
         insertNodeToLine(nid, line_index) {
-
+            ths.api({
+                api: 'Sprites.Program:move',
+                data: {
+                    sid: this.sid,
+                    nid,
+                    after_nid: line_index, // Вместо after_nid вида `0.0` посылается только индекс линии
+                },
+                then: response => {
+                    this.clearMoveData()
+                    this.loadProgram()
+                }
+            })
         },
 
         /* Вставляет нод после нода */

@@ -24,7 +24,7 @@ export default {
 
             let processed = this.src;
             for (const key in this.aliases) {
-                processed = processed.replace(key, this.aliases[key]);
+                processed = processed.replace(key, this.aliases[key])
             }
 
             return processed;
