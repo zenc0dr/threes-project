@@ -1,17 +1,16 @@
 <template>
-    <div class="threes-coder" ref="threesCoder" @mousemove="mousemove">
-        <div @mouseup="dropNodeToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
+    <div class="threes-coder" ref="threesCoder" @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown">
+        <div @mouseup="dropNodeToLine(line_index)" @mousedown="dropNodeToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
             <ThreesLineControl @contextmenu.prevent="openLinePopupMenu($event, line_index)" :line_index="line_index" />
             <div class="threes-coder__line_items">
                 <ThreesNode
                     v-for="(node, node_index) in nodes"
                     :node="node"
-                    :nid="[line_index, node_index].join('.')"
+                    :nid="getNid(line_index, node_index)"
                     :hovering="node_hovering"
-                    @mousedown.stop="captureNodeStart([line_index, node_index].join('.'))"
-                    @mouseup.stop="captureNodeEnd"
-                    @mouseleave="captureNodeEnd"
-                    @contextmenu.prevent="openNodeMenu($event, [line_index, node_index].join('.'))"
+                    @mousedown="captureNodeStart($event, getNid(line_index, node_index))"
+                    @mouseup="captureNodeEnd(getNid(line_index, node_index))"
+                    @contextmenu.prevent="openNodeMenu($event, getNid(line_index, node_index))"
                 />
                 <div class="threes-coder__add_node">
                     <div @click="openCreateNodeModal(line_index)" class="threes-coder__add_node__btn">
@@ -37,7 +36,7 @@
             Выбор нода
         </template>
         <template #default>
-            <SelectNode @fetch="makeNode"/>
+            <SelectNode @fetch="addNodeToProgram"/>
         </template>
     </ThreesModal>
     <NodePopup v-if="node_popup" :x="node_popup_x" :y="node_popup_y" @select="execNodeMenu">
@@ -76,11 +75,10 @@ export default {
     },
     data() {
         return {
-            /* Контроль курсора и мыши */
-            mouse_x: 0,
-            mouse_y: 0,
-            coder_offset_x: 0, // Смещение по x и y которое будет учитано при перетаскивании
+            /* Управление курсором */
+            coder_offset_x: 0,
             coder_offset_y: 0,
+            mouse_down: false,
 
             /* Управление нодами */
             new_node: null, // (object) Создание нового нода
@@ -88,11 +86,10 @@ export default {
             debug_panel: false, // (bool) Панель отладки
 
             /* Перетаскивание нод */
-            push_timer: null, // Таймер задержки нажатия
-            push_interval: 200, // Время задержки до активации
+            node_hovering_start_position: null, // [x, y]
+            node_hovering_target: null,
             node_hovering_nid: null, // nid перемещаемого нода
-            node_hovering_active: false,
-            node_hovering: null, // Объект для передачи ноду
+            node_hovering: null, // nid для передачи ноду
 
             /* Всплывающее меню нода*/
             node_popup: false,
@@ -120,6 +117,7 @@ export default {
         this.loadProgram()
     },
     methods: {
+        //region M1 - Контроль мыши и перемещений
         /* Фиксировать движение мыши */
         mousemove: throttle(function (event) {
             ths.data.mouse.x = event.pageX - this.coder_offset_x // Добавляем смещение
@@ -127,6 +125,93 @@ export default {
             this.moveNodeProcess()
         }, 30),
 
+        /* Нажали мышь */
+        mousedown() {
+            console.log('Нажал мышку')
+            this.mouse_down = true
+        },
+
+        /* Отпустили мышь */
+        mouseup() {
+            console.log('Отпустил мышку')
+            this.mouse_up = true
+        },
+
+        /* Фиксируем смещение курсора */
+        fixMouseOffset() {
+            const rect = this.$refs.threesCoder.getBoundingClientRect()
+            this.coder_offset_x = rect.left + window.scrollX
+            this.coder_offset_y = rect.top + window.scrollY
+        },
+
+        /* Фиксировать начало нажатия ЛК-мыши на ноде для меню */
+        captureNodeStart(event, nid) {
+            // зафиксировать начало движения курсора, зафиксировать стартовые координаты
+            if (this.node_hovering_start_position === null && this.node_hovering === null) {
+                console.log('Зафиксирована стартовая позиция мыши')
+                this.node_hovering_nid = nid
+                this.node_hovering_start_position = [
+                    ths.data.mouse.x,
+                    ths.data.mouse.y,
+                ]
+            }
+            this.dropNodeToNode(nid)
+        },
+
+        captureNodeEnd(nid) {
+            this.dropNodeToNode(nid)
+        },
+
+        /* Процесс перемещения нода */
+        moveNodeProcess() {
+            if (this.node_hovering_start_position !== null) {
+                console.log('Фиксирую перемещение после фиксации стартовой позиции')
+                const offset = Math.max(
+                    Math.abs(ths.data.mouse.x - this.node_hovering_start_position[0]),
+                    Math.abs(ths.data.mouse.y - this.node_hovering_start_position[1])
+                )
+                if (offset > 5) {
+                    // ЛКМ ещё нажата
+                    if (this.mouse_down) {
+                        console.log('Кнопка ещё нажата, начинаю движение')
+                        this.fixMouseOffset()
+                        this.node_hovering_start_position = null
+                        this.node_hovering = this.node_hovering_nid // Это заставляет нод двигаться
+                    // ЛКМ уже отпущена
+                    } else {
+                        this.clearNodeMoveData()
+                    }
+                }
+            }
+        },
+
+        /* Бросить нод на нод */
+        dropNodeToNode(nid) {
+            if (this.node_hovering) {
+                this.insertNodeAfterNode(this.node_hovering, nid)
+                this.clearNodeMoveData()
+            }
+        },
+
+        /* Бросить нод на линию */
+        dropNodeToLine(line_index) {
+            if (this.node_hovering) {
+                this.insertNodeToLine(
+                    this.node_hovering_nid,
+                    line_index
+                )
+            }
+        },
+
+        /* Очистить данные о перемещениях */
+        clearNodeMoveData() {
+            console.log('Очищаю данные о перемещении')
+            this.node_hovering_start_position = null
+            this.node_hovering = null
+        },
+        //endregion
+
+        //region P1 - Программа
         /* Загрузить программу */
         loadProgram() {
             ths.api({
@@ -142,12 +227,6 @@ export default {
                     }
                 }
             })
-        },
-
-        /* Добавить строку в программу */
-        addProgramLine() {
-            this.program.push({})
-            this.saveProgram()
         },
 
         /* Обработать программу */
@@ -204,115 +283,23 @@ export default {
             })
         },
 
-        /* Открыть окно создания нода */
-        openCreateNodeModal(line) {
-            this.new_node = true
-            this.active_line = line
-            console.log('line', line)
-        },
-
-        /* Закрыть окно создания нода */
-        closeCreateNodeModal() {
-            this.new_node = false
-        },
-
-        /* Создать нод из объекта */
-        makeNode(node) {
-            this.program[this.active_line].push(node)
+        /* Добавить строку в программу */
+        addProgramLine() {
+            this.program.push({})
             this.saveProgram()
         },
+        //endregion
 
-        /* Фиксировать нажатие мыши с последующим удержанием */
-        captureNodeStart(nid) {
-            if (!this.node_hovering_active) {
-                this.node_hovering_nid = nid
-                if (!this.push_timer) {
-                    this.push_timer = setInterval(this.moveNodeStart, this.push_interval)
-                }
-            } else {
-                this.insertNodeAfterNode(this.node_hovering, nid)
-            }
+        //region N1 - Управление нодом
+        /* Получить идентификатор нода по индексу строки и индексу самого нода*/
+        getNid(line_index, node_index) {
+            return line_index + '.' + node_index;
         },
 
-        /* Остановить таймер захвата нода */
-        captureTimerStop() {
-            if (this.push_timer) {
-                clearInterval(this.push_timer)
-                this.push_timer = null
-            }
-        },
-
-        /* Завершение захвата нода, отпускание нода */
-        captureNodeEnd() {
-            this.captureTimerStop()
-        },
-
-        /* Фиксируем смещение курсора */
-        fixMouseOffset() {
-            const rect = this.$refs.threesCoder.getBoundingClientRect()
-            this.coder_offset_x = rect.left + window.scrollX
-            this.coder_offset_y = rect.top + window.scrollY
-        },
-
-        /* Начало процесса перемещения нода */
-        moveNodeStart() {
-            this.fixMouseOffset()
-            this.captureTimerStop()
-            this.node_hovering_active = true
-        },
-
-        /* Процесс перемещения нода */
-        moveNodeProcess() {
-            if (this.node_hovering_active) {
-                this.node_hovering = this.node_hovering_nid
-            }
-        },
-
-        /* Очистить данные после перемещения нода */
-        clearMoveData() {
-            this.node_hovering_active = false
-            this.node_hovering_nid = null
-            this.node_hovering = null
-        },
-
-        /* Открыть меню линии */
-        openLinePopupMenu(event, line_index) {
-            const rect = this.$refs.threesCoder.getBoundingClientRect()
-            this.node_popup_x = event.clientX - rect.left
-            this.node_popup_y = event.clientY - rect.top
-            this.line_popup = true
-            //this.line_index = line_index
-        },
-
-        /* Открыть меню линии */
-        execLineMenu(action, line_index) {
-            this.line_index = false
-            this.line_popup = false
-            console.log('Вызвали меню линии: ' + line_index + ' action: ' + action)
-        },
-
-        /* Бросить нод на линию */
-        dropNodeToLine(line_index) {
-            this.insertNodeToLine(
-                this.node_hovering_nid,
-                line_index
-            )
-        },
-
-        /* Добавить нод на линию */
-        insertNodeToLine(nid, line_index) {
-            ths.api({
-                api: 'Sprites.Program:move',
-                data: {
-                    sid: this.sid,
-                    nid,
-                    after_nid: line_index, // Вместо after_nid вида `0.0` посылается только индекс линии
-                },
-                then: response => {
-                    this.clearMoveData()
-                    this.loadProgram()
-                }
-            })
+        /* Добавить нод в программу */
+        addNodeToProgram(node) {
+            this.program[this.active_line].push(node)
+            this.saveProgram()
         },
 
         /* Вставляет нод после нода */
@@ -326,11 +313,28 @@ export default {
                 },
                 then: response => {
                     /* Обнуление */
-                    this.clearMoveData()
+                    this.clearNodeMoveData()
                     this.loadProgram()
                 }
             })
         },
+
+        /* Добавить нод на линию */
+        insertNodeToLine(nid, line_index) {
+            ths.api({
+                api: 'Sprites.Program:move',
+                data: {
+                    sid: this.sid,
+                    nid,
+                    after_nid: line_index, // Вместо after_nid вида `0.0` посылается только индекс линии
+                },
+                then: response => {
+                    this.clearNodeMoveData()
+                    this.loadProgram()
+                }
+            })
+        },
+
         /* Открыть popup-меню нода */
         openNodeMenu(event, nid) {
             const rect = this.$refs.threesCoder.getBoundingClientRect()
@@ -353,6 +357,7 @@ export default {
                 this.openSettingsPage(nid);
             }
         },
+
         /* Копировать нод */
         copyNodeAction(nid) {
             ths.api({
@@ -366,6 +371,7 @@ export default {
                 }
             })
         },
+
         /* Удалить нод */
         deleteNodeAction(nid) {
             ths.api({
@@ -379,10 +385,42 @@ export default {
                 }
             });
         },
+
         /* Открыть страницу с натстройками */
         openSettingsPage(nid) {
             console.log('openSettingsPage' + nid)
-        }
+        },
+        //endregion
+
+        //region M2 - Механизм создания нода
+        /* Открыть окно создания нода */
+        openCreateNodeModal(line) {
+            this.new_node = true
+            this.active_line = line
+        },
+
+        /* Закрыть окно создания нода */
+        closeCreateNodeModal() {
+            this.new_node = false
+        },
+        //endregion
+
+        //region L1 - Управление линией программы
+        /* Открыть меню линии */
+        openLinePopupMenu(event, line_index) {
+            const rect = this.$refs.threesCoder.getBoundingClientRect()
+            this.node_popup_x = event.clientX - rect.left
+            this.node_popup_y = event.clientY - rect.top
+            this.line_popup = true
+            //this.line_index = line_index
+        },
+        /* Открыть меню линии */
+        execLineMenu(action, line_index) {
+            this.line_index = false
+            this.line_popup = false
+            console.log('Вызвали меню линии: ' + line_index + ' action: ' + action)
+        },
+        //endregion
     }
 }
 </script>
