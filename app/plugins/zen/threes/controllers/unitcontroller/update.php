@@ -4,7 +4,13 @@
         <li><?= e($this->pageTitle) ?></li>
     </ul>
 <?php Block::endPut() ?>
+<?php
 
+if (request('sid') && request('nid')) {
+    echo ths()->sprites()->getNodeTitle(request('sid'), request('nid'));
+}
+
+?>
 <?php if (!$this->fatalError): ?>
 
     <?= Form::open(['class' => 'layout']) ?>

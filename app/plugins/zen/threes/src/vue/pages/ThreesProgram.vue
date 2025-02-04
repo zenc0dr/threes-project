@@ -10,7 +10,7 @@
                     :hovering="node_hovering"
                     @mousedown.left="captureNodeStart($event, getNid(line_index, node_index))"
                     @mouseup="captureNodeEnd(getNid(line_index, node_index))"
-                    @contextmenu.prevent="openNodeMenu($event, getNid(line_index, node_index))"
+                    @contextmenu.prevent="openNodeMenu($event, node, getNid(line_index, node_index))"
                 />
                 <div class="threes-coder__add_node">
                     <div @click="openCreateNodeModal(line_index)" class="threes-coder__add_node__btn">
@@ -100,6 +100,7 @@ export default {
             node_popup_x: 0,
             node_popup_y: 0,
             node_popup_nid: null,
+            node_selected: null,
 
             /* Всплывающее меню линии */
             line_popup: false,
@@ -348,7 +349,8 @@ export default {
         },
 
         /* Открыть popup-меню нода */
-        openNodeMenu(event, nid) {
+        openNodeMenu(event, node, nid) {
+            this.node_selected = node
             const rect = this.$refs.threesCoder.getBoundingClientRect()
             this.node_popup_x = event.clientX - rect.left
             this.node_popup_y = event.clientY - rect.top
@@ -400,7 +402,10 @@ export default {
 
         /* Открыть страницу с натстройками */
         openSettingsPage(nid) {
-            console.log('openSettingsPage' + nid)
+            console.log('openSettingsPage', this.sid, nid, this.backend)
+            let tid = this.node_selected.tid
+            const url = `/${this.backend}/zen/threes/unitcontroller/update/${tid}?sid=${this.sid}&nid=${nid}`
+            window.open(url, '_blank')
         },
         //endregion
 

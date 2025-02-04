@@ -24,7 +24,6 @@ export default {
             this.$emit('select', 'close');
         },
         handleClick(event) {
-            console.log('handleClick event', event);
             const action = event.target.dataset.action;
             if (action) {
                 this.$emit('select', action);

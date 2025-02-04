@@ -4,6 +4,7 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Classes\Sprites\Program;
+use Zen\Threes\Classes\Sprites\Node;
 
 class Sprites
 {
@@ -17,4 +18,5 @@ class Sprites
 
     use SingletonTrait;
     use Program;
+    use Node;
 }

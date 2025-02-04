@@ -9,7 +9,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->requestDebug();
+        ths()->sprites()->getNodeTitle('');
     }
 
     # http://threes.dc/threes.api/debug.Tests:apiTest

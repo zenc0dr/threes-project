@@ -7,6 +7,7 @@ use Zen\Threes\Classes\Helpers\Files;
 use Zen\Threes\Classes\Helpers\Json;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
+use Zen\Threes\Classes\Helpers\State;
 
 class Helpers
 {
@@ -15,6 +16,7 @@ class Helpers
     use Json;     # Работа с JSON
     use Yaml;     # Работа с YAML
     use Strings;  # Слой настроек
+    use State;    # Управлением состоянием (сессия Threes)
 
     public function units(): Units
     {

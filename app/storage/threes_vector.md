@@ -58,6 +58,7 @@ namespace Zen\Threes;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Settings;
 use Zen\Threes\classes\Helpers;
+use Zen\Threes\Classes\Fitter;
 
 class Threes extends Helpers
 {
@@ -80,6 +81,11 @@ class Threes extends Helpers
     {
         return Settings::get($key);
     }
+
+    public function fitter(): Fitter
+    {
+        return Fitter::getInstance();
+    }
 }
 
 ```
@@ -95,7 +101,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->requestDebug();
+        ths()->fitter()->build('');
     }
 
     # http://threes.dc/threes.api/debug.Tests:apiTest
@@ -131,10 +137,10 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:save
     public function save(): array
     {
-        $sid = request('sid');
-        $program = request('program');
-
-        ths()->sprites($sid)->programSave($sid, $program);
+        ths()->sprites()->programSave(
+            request('sid'),
+            request('program')
+        );
 
         return [
             'success' => true
@@ -144,22 +150,60 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:load?sid=acme
     public function load(): array
     {
-        $sid = request('sid');
         return [
             'success' => true,
-            'program' => Sprite::find($sid)?->program
+            'program' => Sprite::find(request('sid'))?->program
         ];
     }
 
     # http://threes.dc/threes.api/Sprites.Program:move
     public function move(): array
     {
-        //ths()->requestDebug('move');
-        $sid = request('sid');
-        $nid = request('nid');
-        $after_nid = request('after_nid');
-        ths()->sprites()->moveNode($sid, $nid, $after_nid);
+        ths()->sprites()->moveNode(
+            request('sid'),
+            request('nid'),
+            request('after_nid')
+        );
 
+        return [
+            'success' => true,
+        ];
+    }
+
+    # http://threes.dc/threes.api/Sprites.Program:copy
+    public function copy(): array
+    {
+        ths()->sprites()->copyNode(
+            request('sid'),
+            request('nid')
+        );
+
+        return [
+            'success' => true,
+        ];
+    }
+
+    # http://threes.dc/threes.api/Sprites.Program:delete
+    public function delete(): array
+    {
+        ths()->sprites()->deleteNode(
+            request('sid'),
+            request('nid')
+        );
+
+        return [
+            'success' => true,
+        ];
+    }
+
+    # http://threes.dc/threes.api/Sprites.Program:lineActions
+    public function lineActions(): array
+    {
+        ths()->sprites()->lineActions(
+            request('sid'),
+            request('action'),
+            request('line_index')
+        );
         return [
             'success' => true,
         ];
@@ -204,6 +248,12 @@ class SelectNode
                 'name' => 'Условие',
                 'icon' => 'else.svg',
                 'desc' => 'Условие ИЛИ',
+            ],
+            [
+                'type' => 'do',
+                'name' => 'Делать',
+                'icon' => 'do.svg',
+                'desc' => 'Делать',
             ],
         ];
 
@@ -289,6 +339,24 @@ class SelectUnit
                 'io' => $unit->io,
             ]
         ];
+    }
+}
+
+```
+`plugins/zen/threes/classes/Fitter.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Zen\Threes\Traits\SingletonTrait;
+
+class Fitter
+{
+    use SingletonTrait;
+
+    public function build(string $sid)
+    {
+        dd('ok', $sid);
     }
 }
 
@@ -687,7 +755,7 @@ trait Program
      * @param string $after_nid
      * @return void
      */
-    public function moveNode(string $sid, string $nid, string $after_nid)
+    public function moveNode(string $sid, string $nid, string $after_nid): void
     {
         $sprite = Sprite::find($sid);
         $program = $sprite->program;
@@ -698,7 +766,8 @@ trait Program
         $target_line_index = null;
         $target_node_index = null;
 
-        // Шаг 1: Найти и удалить узел с nid
+        $is_target_line_only = (!str_contains($after_nid, '.'));
+
         foreach ($program as $line_index => &$line) {
             foreach ($line as $node_index => $node) {
                 if ($nid === $line_index . '.' . $node_index) {
@@ -706,177 +775,187 @@ trait Program
                     $source_line_index = $line_index;
                     $source_node_index = $node_index;
                 }
-                if ($after_nid === $line_index . '.' . $node_index) {
+                if (!$is_target_line_only && $after_nid === $line_index . '.' . $node_index) {
                     $target_line_index = $line_index;
                     $target_node_index = $node_index;
                 }
             }
         }
 
-        // Если узел для перемещения не найден, выходим
         if ($node_dump === null) {
             return;
         }
 
-        // Удаляем узел из исходного места
         unset($program[$source_line_index][$source_node_index]);
-        $program[$source_line_index] = array_values($program[$source_line_index]); // Уплотняем индексы
 
-        // Если не нашли целевой узел, добавляем узел в конец первой строки
-        if ($target_line_index === null) {
-            $program[0][] = $node_dump;
+        $program[$source_line_index] = array_values($program[$source_line_index]);
+
+        if ($is_target_line_only) {
+            $target_line_index = $after_nid;
+            if (!isset($program[$target_line_index])) {
+                $program[$target_line_index] = [];
+            }
+            $program[$target_line_index][] = $node_dump;
         } else {
-            // Вставляем узел после найденного after_nid
-            array_splice($program[$target_line_index], $target_node_index + 1, 0, [$node_dump]);
+            if ($target_line_index === null) {
+                $program[0][] = $node_dump;
+            } else {
+                array_splice($program[$target_line_index], $target_node_index + 1, 0, [$node_dump]);
+            }
         }
 
-        // Сохраняем изменения обратно
         $sprite->program = $program;
         $sprite->save();
     }
 
-}
-
-```
-`plugins/zen/threes/classes/sprites/SpriteNodes.php`
-```<?php
-
-namespace Zen\Threes\Classes\Sprites;
-
-use Zen\Threes\Models\Sprite;
-
-/**
- * todo: deprecated
- */
-trait SpriteNodes
-{
-    public function addNode(): array
+    public function copyNode(string $sid, string $nid): void
     {
-        return [
-            'nid' => ths()->createToken(),
-            'name' => 'Новый node',
-            'type' => 'unit',
-            'scheme' => []
-        ];
-    }
+        $sprite = Sprite::find($sid);
+        $program = $sprite->program;
 
-    public function getNodes(string $sprite_id): array
-    {
-        $sprite = Sprite::find($sprite_id);
+        $node_copy = null;
+        $source_line_index = null;
+        $source_node_index = null;
 
-        if (!$sprite) {
-            return [];
-        }
-
-        $nodes = $sprite->nodes ?? [];
-
-        $nodes_ex = [
-            [
-                'nid' => 'node1',
-                'name' => 'Тестовый нод, реализующий спрайт',
-                'type' => 'unit',
-                'scheme' => [
-                    'uid' => 'zen.units.adder'
-                ]
-            ],
-            [
-                'nid' => 'node2',
-                'name' => 'Тестовый нод, реализующий спрайт',
-                'type' => 'unit',
-                'scheme' => [
-                    'uid' => 'zen.units.adder'
-                ]
-            ],
-            [
-                'nid' => 'node3',
-                'name' => 'Node 3',
-                'type' => 'unit',
-                'scheme' => [
-                    'uid' => 'zen.units.test',
-                ]
-            ],
-            [
-                'nid' => 'node4',
-                'name' => 'Node 4',
-                'type' => 'other',
-                'scheme' => []
-            ]
-        ];
-
-        # Тут каждый нод облагораживается данными из юнита
-        foreach ($nodes as &$node) {
-            if (empty($node['scheme'])) {
-                continue;
-            }
-
-            if ($node['type'] === 'unit' && isset($node['scheme']['uid'])) {
-                $node['scheme']['data'] = ths()->units()->getUnitData($node['scheme']['uid']);
-
-                if (isset($node['scheme']['data']['io'])) {
-                    foreach ($node['scheme']['data']['io'] as &$item_io) {
-                        unset($item_io['io_description']);
-                    }
+        // Найти узел, который нужно скопировать
+        foreach ($program as $line_index => $line) {
+            foreach ($line as $node_index => $node) {
+                if ($nid === $line_index . '.' . $node_index) {
+                    $node_copy = $node;
+                    $source_line_index = $line_index;
+                    $source_node_index = $node_index;
+                    break 2; // Выход из обоих циклов
                 }
             }
         }
-        return $nodes;
-    }
 
-    public function saveNodes(string $sprite_id, array $nodes): bool
-    {
-        $sprite = Sprite::find($sprite_id);
-
-        if (!$sprite) {
-            return false;
+        // Если узел не найден, выходим
+        if ($node_copy === null) {
+            return;
         }
 
-        $sprite->nodes = $nodes;
-        $sprite->save();
+        // Создаём уникальный идентификатор для копии узла
+        $node_copy['id'] = uniqid('node_', true);
 
-        return true;
+        // Добавляем копию узла в конец той же строки
+        $program[$source_line_index][] = $node_copy;
+
+        // Сохраняем изменения обратно в базу данных
+        $sprite->program = $program;
+        $sprite->save();
     }
 
     /**
-     * Сохранить настройки нода
-     * @param string $sprite_id
-     * @param array $data
-     * @return bool
+     * Удалить узел из программы спрайта
+     *
+     * @param string $sid ID спрайта
+     * @param string $nid ID узла
+     * @return void
      */
-    public function saveNode(string $sprite_id, array $data): bool
+    public function deleteNode(string $sid, string $nid): void
     {
-        $sprite = Sprite::find($sprite_id);
+        $sprite = Sprite::find($sid);
+        $program = $sprite->program;
 
-        if (!$sprite) {
-            return false;
-        }
+        $found = false;
 
-        $nodes = $sprite->nodes;
-
-        if (!count($nodes)) {
-            return false;
-        }
-
-        $old_nid = $data['old_nid'];
-        $new_nid = $data['new_nid'];
-        #$old_type = $data['old_type'];
-        $new_type = $data['new_type'];
-        $name = $data['name'];
-        $scheme = $data['scheme'];
-
-        foreach ($nodes as &$node) {
-            if ($node['nid'] === $old_nid) {
-                $node['nid'] = $new_nid;
-                $node['type'] = $new_type;
-                $node['name'] = $name;
-                $node['scheme'] = $scheme;
-                break;
+        // Найти и удалить узел с указанным nid
+        foreach ($program as $line_index => &$line) {
+            foreach ($line as $node_index => $node) {
+                if ($nid === $line_index . '.' . $node_index) {
+                    unset($line[$node_index]);
+                    $line = array_values($line); // Уплотняем индексы
+                    $found = true;
+                    break 2; // Выходим из обоих циклов
+                }
             }
         }
 
-        $sprite->nodes = $nodes;
-        $sprite->save();
+        // Если узел не найден, выходим
+        if (!$found) {
+            return;
+        }
 
-        return true;
+        // Сохраняем обновлённую программу обратно в базу
+        $sprite->program = $program;
+        $sprite->save();
+    }
+
+    /**
+     * Произвести действие над линией
+     * @param string $sid
+     * @param string $action
+     * @param int $line_index
+     * @return void
+     */
+    public function lineActions(string $sid, string $action, int $line_index): void
+    {
+        if ($action === 'copy') {
+            $this->lineCopyAction($sid, $action, $line_index);
+        }
+        if ($action === 'delete') {
+            $this->lineDeleteAction($sid, $action, $line_index);
+        }
+    }
+
+    /**
+     * Копировать линию
+     * @param string $sid
+     * @param string $action
+     * @param int $line_index
+     * @return void
+     */
+    private function lineCopyAction(string $sid, string $action, int $line_index): void
+    {
+        $sprite = Sprite::find($sid);
+        if (!$sprite) {
+            return;
+        }
+
+        $program = $sprite->program;
+        if (!isset($program[$line_index])) {
+            return;
+        }
+
+        $lineToCopy = $program[$line_index];
+        $lineCopy = [];
+        foreach ($lineToCopy as $node) {
+            $nodeCopy = $node;
+            $nodeCopy['id'] = uniqid('node_', true);
+            $lineCopy[] = $nodeCopy;
+        }
+
+        array_splice($program, $line_index + 1, 0, [$lineCopy]);
+
+        $sprite->program = $program;
+        $sprite->save();
+    }
+
+    /**
+     * Удалить линию
+     * @param string $sid
+     * @param string $action
+     * @param int $line_index
+     * @return void
+     */
+    private function lineDeleteAction(string $sid, string $action, int $line_index): void
+    {
+        $sprite = Sprite::find($sid);
+        if (!$sprite) {
+            return;
+        }
+
+        $program = $sprite->program;
+        if (!isset($program[$line_index])) {
+            return;
+        }
+
+        unset($program[$line_index]);
+
+        $program = array_values($program);
+
+        $sprite->program = $program;
+        $sprite->save();
     }
 }
 
@@ -1055,6 +1134,9 @@ class UnitController extends Controller
         if (!isset($this->params[0])) {
             return;
         }
+
+        $sid = request('sid');
+        # ??????????????
 
         $unit = Unit::find($this->params[0]);
         if ($unit && $unit->additional_fields) {
@@ -1536,7 +1618,7 @@ class Sprite extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     public $rules = [
-        'sid' => 'unique:zen_threes_sprites,sid',
+        'sid' => 'required|unique:zen_threes_sprites,sid',
     ];
 
     protected $fillable = [
@@ -1624,7 +1706,7 @@ class Unit extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     public $rules = [
-        'tid' => 'unique:zen_threes_units,tid',
+        'tid' => 'required|unique:zen_threes_units,tid',
     ];
 
     protected $fillable = [
@@ -1949,6 +2031,10 @@ class Unit extends Model
     sid:
         label: 'Код спрайта'
         span: auto
+        preset:
+            field: name
+            type: slug
+        required: 1
         type: text
     description:
         label: Описание
@@ -2068,6 +2154,15 @@ class Unit extends Model
                         size: large
                         span: full
                         type: richeditor
+secondaryTabs:
+    fields:
+        icon:
+            label: 'SVG Иконка'
+            span: full
+            size: large
+            language: php
+            type: codeeditor
+            tab: Иконка
 fields:
     name:
         label: 'Название юнита'
@@ -2082,15 +2177,6 @@ fields:
         size: large
         span: full
         type: richeditor
-secondaryTabs:
-    fields:
-        icon:
-            label: 'SVG Иконка'
-            span: full
-            size: large
-            language: php
-            type: codeeditor
-            tab: Иконка
 
 ```
 `plugins/zen/threes/package.json`
@@ -2121,6 +2207,7 @@ secondaryTabs:
         "primeicons": "^5.0.0",
         "primevue": "^3.10.0",
         "vue": "^3.5.13",
+        "vue-click-outside-element": "^3.1.2",
         "vue-router": "^4.5.0",
         "vue-select": "^4.0.0-beta.6"
     }
@@ -2313,10 +2400,12 @@ window.ths = {
 
 import FormFitter from "../vue/components/ux/forms/FormFitter.vue";
 import FormSection from "../vue/components/ux/forms/FormSection.vue";
+import vueClickOutsideElement from 'vue-click-outside-element';
 
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
+app.use(vueClickOutsideElement)
 app.component('FormFitter', FormFitter);
 app.component('FormSection', FormSection);
 app.mount("#threes");
@@ -3405,43 +3494,15 @@ class BuilderTableCreateZenThreesUnits extends Migration
     }
 }
 ```
-`plugins/zen/threes/updates/builder_table_update_zen_threes_units.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class BuilderTableUpdateZenThreesUnits extends Migration
-{
-    public function up()
-    {
-        Schema::table('zen_threes_units', function($table)
-        {
-            $table->string('icon_name')->nullable();
-        });
-    }
-    
-    public function down()
-    {
-        Schema::table('zen_threes_units', function($table)
-        {
-            #$table->dropColumn('icon_name');
-        });
-    }
-}
-```
 `plugins/zen/threes/updates/version.yaml`
-```v1.0.1:
+```1.0.1:
     - 'Initialize plugin'
-v1.0.2:
+1.0.2:
     - 'Create units'
     - builder_table_create_zen_threes_units.php
-v1.0.3:
+1.0.3:
     - 'Create sprites'
     - builder_table_create_zen_threes_sprites.php
-v1.0.4:
-    - 'Updated table zen_threes_units'
-    - builder_table_update_zen_threes_units.php
 
 ```
 `plugins/zen/threes/webpack.mix.js`

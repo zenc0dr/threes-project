@@ -18,7 +18,7 @@ class Sprite extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     public $rules = [
-        'sid' => 'unique:zen_threes_sprites,sid',
+        'sid' => 'required|unique:zen_threes_sprites,sid',
     ];
 
     protected $fillable = [

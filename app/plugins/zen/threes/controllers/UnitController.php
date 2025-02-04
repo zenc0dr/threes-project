@@ -4,6 +4,7 @@ use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
 use Zen\Threes\Models\Unit;
+use Flash;
 
 class UnitController extends Controller
 {
@@ -32,16 +33,53 @@ class UnitController extends Controller
      * @param $form
      * @return void
      */
-    public function formExtendFields($form)
+    public function formExtendFields($form): void
     {
         if (!isset($this->params[0])) {
             return;
+        }
+
+        $sid = request('sid');
+
+        if ($sid) {
+            // Скрываем поля при наличии параметра sid
+            if ($form->getField('fields')) {
+                $form->removeField('fields');
+            }
+
+            if ($form->getField('io')) {
+                $form->removeField('io');
+            }
+
+            if ($form->getField('icon')) {
+                $form->removeField('icon');
+            }
         }
 
         $unit = Unit::find($this->params[0]);
         if ($unit && $unit->additional_fields) {
             $this->clearMissingFields($unit);
             $form->addFields($unit->additional_fields, 'primary');
+        }
+    }
+
+    /**
+     * Переопределение метода сохранения формы
+     * @param $model
+     * @return void
+     * @throws \Exception
+     */
+    public function formBeforeSave($model)
+    {
+        $sid = request('sid');
+        $nid = request('nid');
+
+        if ($sid) {
+            Flash::info('Настройки нода сохранены');
+            # Останавливаем дальнейшее выполнение сохранения
+            # Проверяется в plugins/zen/threes/models/Unit@boot
+            ths()->setState('unit.prevent_save', true);
+            ///////////
         }
     }
 

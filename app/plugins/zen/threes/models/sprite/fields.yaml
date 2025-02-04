@@ -11,6 +11,10 @@ fields:
     sid:
         label: 'Код спрайта'
         span: auto
+        preset:
+            field: name
+            type: slug
+        required: 1
         type: text
     description:
         label: Описание

@@ -24,7 +24,7 @@ class Unit extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     public $rules = [
-        'tid' => 'unique:zen_threes_units,tid',
+        'tid' => 'required|unique:zen_threes_units,tid',
     ];
 
     protected $fillable = [
@@ -49,6 +49,19 @@ class Unit extends Model
         } else {
             parent::__set($name, $value);
         }
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        # Предотвращение сохранения модели
+        # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
+        static::saving(function ($model) {
+            if (ths()->getState('unit.prevent_save')) {
+                return false;
+            }
+        });
     }
 
     public function scopeActive($query)
@@ -76,7 +89,7 @@ class Unit extends Model
      * Событие перед сохранением экземпляра
      * @return void
      */
-    public function beforeSave(): void
+    public function beforeSave()
     {
         $this->saveData();
         $this->saveSvgIcon();
