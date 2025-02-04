@@ -165,5 +165,80 @@ trait Program
         $sprite->save();
     }
 
+    /**
+     * Произвести действие над линией
+     * @param string $sid
+     * @param string $action
+     * @param int $line_index
+     * @return void
+     */
+    public function lineActions(string $sid, string $action, int $line_index): void
+    {
+        if ($action === 'copy') {
+            $this->lineCopyAction($sid, $action, $line_index);
+        }
+        if ($action === 'delete') {
+            $this->lineDeleteAction($sid, $action, $line_index);
+        }
+    }
 
+    /**
+     * Копировать линию
+     * @param string $sid
+     * @param string $action
+     * @param int $line_index
+     * @return void
+     */
+    private function lineCopyAction(string $sid, string $action, int $line_index): void
+    {
+        $sprite = Sprite::find($sid);
+        if (!$sprite) {
+            return;
+        }
+
+        $program = $sprite->program;
+        if (!isset($program[$line_index])) {
+            return;
+        }
+
+        $lineToCopy = $program[$line_index];
+        $lineCopy = [];
+        foreach ($lineToCopy as $node) {
+            $nodeCopy = $node;
+            $nodeCopy['id'] = uniqid('node_', true);
+            $lineCopy[] = $nodeCopy;
+        }
+
+        array_splice($program, $line_index + 1, 0, [$lineCopy]);
+
+        $sprite->program = $program;
+        $sprite->save();
+    }
+
+    /**
+     * Удалить линию
+     * @param string $sid
+     * @param string $action
+     * @param int $line_index
+     * @return void
+     */
+    private function lineDeleteAction(string $sid, string $action, int $line_index): void
+    {
+        $sprite = Sprite::find($sid);
+        if (!$sprite) {
+            return;
+        }
+
+        $program = $sprite->program;
+        if (!isset($program[$line_index])) {
+            return;
+        }
+
+        unset($program[$line_index]);
+
+        $program = array_values($program);
+
+        $sprite->program = $program;
+        $sprite->save();
+    }
 }

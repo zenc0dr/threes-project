@@ -9,10 +9,10 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:save
     public function save(): array
     {
-        $sid = request('sid');
-        $program = request('program');
-
-        ths()->sprites($sid)->programSave($sid, $program);
+        ths()->sprites()->programSave(
+            request('sid'),
+            request('program')
+        );
 
         return [
             'success' => true
@@ -22,21 +22,20 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:load?sid=acme
     public function load(): array
     {
-        $sid = request('sid');
         return [
             'success' => true,
-            'program' => Sprite::find($sid)?->program
+            'program' => Sprite::find(request('sid'))?->program
         ];
     }
 
     # http://threes.dc/threes.api/Sprites.Program:move
     public function move(): array
     {
-        //ths()->requestDebug('move');
-        $sid = request('sid');
-        $nid = request('nid');
-        $after_nid = request('after_nid');
-        ths()->sprites()->moveNode($sid, $nid, $after_nid);
+        ths()->sprites()->moveNode(
+            request('sid'),
+            request('nid'),
+            request('after_nid')
+        );
 
         return [
             'success' => true,
@@ -46,10 +45,10 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:copy
     public function copy(): array
     {
-        $sid = request('sid');
-        $nid = request('nid');
-
-        ths()->sprites()->copyNode($sid, $nid);
+        ths()->sprites()->copyNode(
+            request('sid'),
+            request('nid')
+        );
 
         return [
             'success' => true,
@@ -59,11 +58,23 @@ class Program
     # http://threes.dc/threes.api/Sprites.Program:delete
     public function delete(): array
     {
-        $sid = request('sid');
-        $nid = request('nid');
+        ths()->sprites()->deleteNode(
+            request('sid'),
+            request('nid')
+        );
 
-        ths()->sprites()->deleteNode($sid, $nid);
+        return [
+            'success' => true,
+        ];
+    }
 
+    public function lineActions(): array
+    {
+        ths()->sprites()->lineActions(
+            request('sid'),
+            request('action'),
+            request('line_index')
+        );
         return [
             'success' => true,
         ];

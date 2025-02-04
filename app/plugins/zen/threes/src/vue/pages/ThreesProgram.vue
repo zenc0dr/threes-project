@@ -1,5 +1,5 @@
 <template>
-    <div class="threes-coder" ref="threesCoder" @mousemove="mousemove" @mouseup="mouseup" @mousedown="mousedown">
+    <div class="threes-coder" ref="threesCoder" @mousemove="mousemove" @mouseup.left="mouseup" @mousedown.left="mousedown">
         <div @mouseup="dropNodeToLine(line_index)" @mousedown="dropNodeToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
             <ThreesLineControl @contextmenu.prevent="openLinePopupMenu($event, line_index)" :line_index="line_index" />
             <div class="threes-coder__line_items">
@@ -8,7 +8,7 @@
                     :node="node"
                     :nid="getNid(line_index, node_index)"
                     :hovering="node_hovering"
-                    @mousedown="captureNodeStart($event, getNid(line_index, node_index))"
+                    @mousedown.left="captureNodeStart($event, getNid(line_index, node_index))"
                     @mouseup="captureNodeEnd(getNid(line_index, node_index))"
                     @contextmenu.prevent="openNodeMenu($event, getNid(line_index, node_index))"
                 />
@@ -41,16 +41,16 @@
     </ThreesModal>
     <NodePopup v-if="node_popup" :x="node_popup_x" :y="node_popup_y" @select="execNodeMenu">
         <template #default="{ handleClick }">
-            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать</div>
-            <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить</div>
-            <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки</div>
+            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать нод</div>
+            <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить нод</div>
+            <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки нод</div>
         </template>
     </NodePopup>
     <NodePopup v-if="line_popup" :x="line_popup_x" :y="line_popup_y" @select="execLineMenu">
         <template #default="{ handleClick }">
-            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать</div>
-            <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить</div>
-            <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки</div>
+            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать линию</div>
+            <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить линию</div>
+            <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки линии</div>
         </template>
     </NodePopup>
 </template>
@@ -224,6 +224,7 @@ export default {
                         this.program = this.handleProgram(
                             response.program
                         )
+                        this.$forceUpdate()
                     }
                 }
             })
@@ -273,12 +274,17 @@ export default {
         },
 
         /* Сохранить программу */
-        saveProgram() {
+        saveProgram(fn) {
             ths.api({
                 api: 'Sprites.Program:save',
                 data: {
                     sid: this.sid,
                     program: this.program
+                },
+                then: response => {
+                    if (fn) {
+                        fn()
+                    }
                 }
             })
         },
@@ -286,7 +292,9 @@ export default {
         /* Добавить строку в программу */
         addProgramLine() {
             this.program.push({})
-            this.saveProgram()
+            this.saveProgram(function () {
+                this.loadProgram()
+            })
         },
         //endregion
 
@@ -409,16 +417,28 @@ export default {
         /* Открыть меню линии */
         openLinePopupMenu(event, line_index) {
             const rect = this.$refs.threesCoder.getBoundingClientRect()
-            this.node_popup_x = event.clientX - rect.left
-            this.node_popup_y = event.clientY - rect.top
+            this.line_popup_x = event.clientX - rect.left
+            this.line_popup_y = event.clientY - rect.top
             this.line_popup = true
-            //this.line_index = line_index
+            this.line_index = line_index
+
+            console.log('Открыть линию ' + line_index)
         },
         /* Открыть меню линии */
-        execLineMenu(action, line_index) {
+        execLineMenu(action) {
+            const line_index = this.line_index
             this.line_index = false
             this.line_popup = false
-            console.log('Вызвали меню линии: ' + line_index + ' action: ' + action)
+            ths.api({
+                api: 'Sprites.Program:lineActions',
+                data: {
+                    action,
+                    line_index
+                },
+                then: response => {
+                    this.loadProgram()
+                }
+            })
         },
         //endregion
     }

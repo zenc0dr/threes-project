@@ -35,6 +35,12 @@ class SelectNode
                 'icon' => 'else.svg',
                 'desc' => 'Условие ИЛИ',
             ],
+            [
+                'type' => 'do',
+                'name' => 'Делать',
+                'icon' => 'do.svg',
+                'desc' => 'Делать',
+            ],
         ];
 
 
