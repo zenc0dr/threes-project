@@ -41,14 +41,18 @@
     </ThreesModal>
     <NodePopup v-if="node_popup" :x="node_popup_x" :y="node_popup_y" @select="execNodeMenu">
         <template #default="{ handleClick }">
-            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать нод</div>
+            <div data-action="copy" class="btn btn-primary" @click="handleClick">Дублировать нод</div>
+            <div data-action="cb_save" class="btn btn-primary" @click="handleClick">Копировать нод</div>
+            <div data-action="cb_load" class="btn btn-primary" @click="handleClick">Вставить нод</div>
             <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить нод</div>
             <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки нод</div>
         </template>
     </NodePopup>
     <NodePopup v-if="line_popup" :x="line_popup_x" :y="line_popup_y" @select="execLineMenu">
         <template #default="{ handleClick }">
-            <div data-action="copy" class="btn btn-primary" @click="handleClick">Копировать линию</div>
+            <div data-action="copy" class="btn btn-primary" @click="handleClick">Дублировать линию</div>
+            <div data-action="cb_save" class="btn btn-primary" @click="handleClick">Копировать линию</div>
+            <div data-action="cb_load" class="btn btn-primary" @click="handleClick">Вставить линию</div>
             <div data-action="delete" class="btn btn-primary" @click="handleClick">Удалить линию</div>
             <div data-action="settings" class="btn btn-primary" @click="handleClick">Настройки линии</div>
         </template>
@@ -432,6 +436,7 @@ export default {
             ths.api({
                 api: 'Sprites.Program:lineActions',
                 data: {
+                    sid:this.sid,
                     action,
                     line_index
                 },

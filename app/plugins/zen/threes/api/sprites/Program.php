@@ -68,6 +68,7 @@ class Program
         ];
     }
 
+    # http://threes.dc/threes.api/Sprites.Program:lineActions
     public function lineActions(): array
     {
         ths()->sprites()->lineActions(
