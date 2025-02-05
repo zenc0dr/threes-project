@@ -4,6 +4,8 @@ namespace Zen\Threes\Classes\Sprites;
 
 use Zen\Threes\Models\Sprite;
 
+use Zen\Threes\Classes\CodeBuilder;
+
 trait Program
 {
     /**
@@ -268,5 +270,11 @@ trait Program
 
         $sprite->program = $program;
         $sprite->save();
+    }
+
+    public function buildCode(string $sid)
+    {
+        $code_builder = new CodeBuilder($sid);
+        $code_builder->generate();
     }
 }

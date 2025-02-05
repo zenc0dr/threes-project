@@ -81,8 +81,12 @@ class Program
         ];
     }
 
-    public function generateNodeCode()
+    # http://threes.dc/threes.api/Sprites.Program:buildCode?sid=test
+    public function buildCode()
     {
-
+        ths()->sprites()->buildCode(request('sid'));
+        return [
+            'success' => true,
+        ];
     }
 }

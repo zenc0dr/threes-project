@@ -1,4 +1,5 @@
 <template>
+    <SpriteVersion ref="spriteVersionRef" :sid="sid" />
     <div
         class="threes-coder"
         ref="threesCoder"
@@ -80,6 +81,8 @@ import ThreesNode from "../components/ThreesNode.vue";
 import NodePopup from "../components/ux/forms/NodePopup.vue";
 import ThreesLineControl from "../components/ux/forms/ThreesLineControl.vue";
 import throttle from 'lodash/throttle'; // Ограничитель сканирований
+import SpriteVersion from "../components/SpriteVersion.vue";
+
 export default {
     name: "ThreesProgram",
     props: ['backend', 'sid'],
@@ -89,7 +92,8 @@ export default {
         SelectNode,
         ThreesNode,
         ThreesLineControl,
-        NodePopup
+        NodePopup,
+        SpriteVersion
     },
     data() {
         return {
@@ -243,6 +247,7 @@ export default {
                         this.program = this.handleProgram(
                             response.program
                         )
+                        this.$refs.spriteVersionRef.getVersion()
                         this.$forceUpdate()
                     }
                 }
@@ -326,7 +331,9 @@ export default {
         /* Добавить нод в программу */
         addNodeToProgram(node) {
             this.program[this.active_line].push(node)
-            this.saveProgram()
+            this.saveProgram(fn => {
+                this.loadProgram()
+            })
         },
 
         /* Вставляет нод после нода */

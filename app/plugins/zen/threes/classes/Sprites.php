@@ -5,6 +5,7 @@ namespace Zen\Threes\Classes;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Classes\Sprites\Program;
 use Zen\Threes\Classes\Sprites\Node;
+use Zen\Threes\Classes\Sprites\Version;
 use Zen\Threes\Models\Sprite;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -13,6 +14,7 @@ class Sprites
     use SingletonTrait;
     use Program;
     use Node;
+    use Version;
 
     private ?string $sid = null;
 

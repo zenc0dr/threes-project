@@ -25,7 +25,7 @@ window.ths = {
     api(opts) {
         let domain = location.origin
         let data = (opts.data) ? opts.data : null
-        let api_url = domain + opts.url
+        let api_url = domain + opts.url + opts.api
         let request_key = md5(api_url)
         let axios_options = null
 
