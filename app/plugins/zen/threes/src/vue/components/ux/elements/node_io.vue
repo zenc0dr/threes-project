@@ -1,6 +1,10 @@
 <template>
 <div v-if="io !== null && io_direction !== null" class="node-io">
-    <div class="node-io__pin" :class="{active:pinState(pin, pin_index)}" v-for="(pin, pin_index) in io">
+    <div class="node-io__pin"
+         :title="getTitle(pin)"
+         :class="{active:pinState(pin, pin_index)}"
+         v-for="(pin, pin_index) in io"
+    >
         <template v-if="pin.io_direction === io_direction">
             {{ io_type(pin.io_type) }}
         </template>
@@ -46,7 +50,15 @@ export default {
             ].join('.')
 
             return ths.data.sprite_pins.includes(pin_token)
-        }
+        },
+        getTitle(pin) {
+            let title = pin.io_key + '[' + pin.io_type + '] ' + pin.io_name
+            if (pin.io_description) {
+                const description = pin.io_description.replace(/<[^>]*>/g, '')
+                title += ' (' + description + ')'
+            }
+            return title
+        },
     }
 }
 </script>
