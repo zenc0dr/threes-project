@@ -47,6 +47,11 @@ class Set
         return ths()->fromJson($record->data)[0];
     }
 
+    public function remove(string $uuid): void
+    {
+        DB::table('zen_threes_sets')->where('uuid', $uuid)->delete();
+    }
+
     /**
      * Загрузить пачку сетов
      * @param array $uuids

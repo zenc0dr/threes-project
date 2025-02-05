@@ -6,11 +6,6 @@ use Zen\Threes\Models\Sprite;
 
 trait Program
 {
-    public function generateNodeCode()
-    {
-
-    }
-
     /**
      * Сохранить программу спрайта
      * @param string $sid
@@ -122,15 +117,14 @@ trait Program
 
         $node_copy = null;
         $source_line_index = null;
-        $source_node_index = null;
 
         // Найти узел, который нужно скопировать
         foreach ($program as $line_index => $line) {
             foreach ($line as $node_index => $node) {
                 if ($nid === $line_index . '.' . $node_index) {
                     $node_copy = $node;
+                    $node_copy['node'] = \Str::uuid();
                     $source_line_index = $line_index;
-                    $source_node_index = $node_index;
                     break 2; // Выход из обоих циклов
                 }
             }
@@ -170,6 +164,11 @@ trait Program
         foreach ($program as $line_index => &$line) {
             foreach ($line as $node_index => $node) {
                 if ($nid === $line_index . '.' . $node_index) {
+
+                    if (isset($node['node'])) {
+                        ths()->sets()->remove($node['node']);
+                    }
+
                     unset($line[$node_index]);
                     $line = array_values($line); // Уплотняем индексы
                     $found = true;
@@ -224,15 +223,15 @@ trait Program
             return;
         }
 
-        $lineToCopy = $program[$line_index];
-        $lineCopy = [];
-        foreach ($lineToCopy as $node) {
-            $nodeCopy = $node;
-            $nodeCopy['id'] = uniqid('node_', true);
-            $lineCopy[] = $nodeCopy;
+        $line_to_copy = $program[$line_index];
+        $line_copy = [];
+        foreach ($line_to_copy as $node) {
+            $node_copy = $node;
+            $node_copy['node'] = \Str::uuid();
+            $line_copy[] = $node_copy;
         }
 
-        array_splice($program, $line_index + 1, 0, [$lineCopy]);
+        array_splice($program, $line_index + 1, 0, [$line_copy]);
 
         $sprite->program = $program;
         $sprite->save();
@@ -255,6 +254,12 @@ trait Program
         $program = $sprite->program;
         if (!isset($program[$line_index])) {
             return;
+        }
+
+        foreach ($program[$line_index] as $node) {
+            if (isset($node['node'])) {
+                ths()->sets()->remove($node['node']);
+            }
         }
 
         unset($program[$line_index]);
