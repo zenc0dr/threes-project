@@ -6,23 +6,17 @@ use View;
 
 trait Node
 {
-    public function saveNodeSettings(string $node_uuid, array $settings)
+    public function saveNodeSettings(string $node_uuid, array $settings): void
     {
-        ths()->toJsonFile(
-            storage_path("threes/node_settings/{$node_uuid}.json"),
-            $settings,
-            true
-        );
+        ths()->sets()->set($node_uuid, $settings, 'nodes');
     }
 
-    public function loadNodeSettings(string $node_uuid)
+    public function loadNodeSettings(string $node_uuid): ?array
     {
-        return ths()->fromJsonFile(
-            storage_path("threes/node_settings/{$node_uuid}.json"),
-        );
+        return ths()->sets()->get($node_uuid);
     }
 
-    public function getNodeTitle(string $sid, string $node_uuid)
+    public function getNodeTitle(string $sid, string $node_uuid): string
     {
         return View::make("zen.threes::node.info", [
             'sid' => $sid,

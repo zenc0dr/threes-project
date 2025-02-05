@@ -27,4 +27,10 @@ class Helpers
     {
         return Sprites::getInstance($sid);
     }
+
+    public function sets(): Set
+    {
+        return Set::getInstance();
+    }
+
 }
