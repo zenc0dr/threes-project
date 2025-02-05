@@ -58,7 +58,11 @@ class Unit extends Model
         # Предотвращение сохранения модели
         # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
         static::saving(function ($model) {
-            if (ths()->getState('unit.prevent_save')) {
+            if ($save_data = ths()->getState('unit.prevent_save')) {
+                ths()->sprites()->saveNodeSettings(
+                    $save_data['node_uuid'],
+                    $save_data['settings']
+                );
                 return false;
             }
         });

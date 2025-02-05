@@ -80,4 +80,9 @@ class Program
             'success' => true,
         ];
     }
+
+    public function generateNodeCode()
+    {
+
+    }
 }

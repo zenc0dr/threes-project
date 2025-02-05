@@ -6,6 +6,11 @@ use Zen\Threes\Models\Sprite;
 
 trait Program
 {
+    public function generateNodeCode()
+    {
+
+    }
+
     /**
      * Сохранить программу спрайта
      * @param string $sid
@@ -14,6 +19,8 @@ trait Program
      */
     public function programSave(string $sid, array $program): array
     {
+        $this->stampUuids($program);
+
         $sprite = Sprite::find($sid);
         $sprite->program = $program;
         $sprite->save();
@@ -21,6 +28,22 @@ trait Program
         return [
             'success' => 'true',
         ];
+    }
+
+    /**
+     * Проставить недостающие uuids у нод в программе
+     * @param array $program
+     * @return void
+     */
+    private function stampUuids(array &$program): void
+    {
+        foreach ($program as &$line) {
+            foreach ($line as &$node) {
+                if (isset($node['tid']) && !isset($node['node'])) {
+                    $node['node'] = \Str::uuid();
+                }
+            }
+        }
     }
 
     public function programLoad(string $sid): array

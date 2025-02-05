@@ -41,7 +41,7 @@ trait Json
      */
     public function toJson(
         array $arr = [],
-        bool $pretty_print = false,
+        bool $pretty_print = true,
         bool $no_slashes = false
     ): ?string {
         if (empty($arr)) {
@@ -65,7 +65,7 @@ trait Json
     public function toJsonFile(
         string $file_path,
         array $arr = [],
-        bool $pretty_print = false,
+        bool $pretty_print = true,
         bool $no_slashes = false
     ): void {
         file_put_contents(

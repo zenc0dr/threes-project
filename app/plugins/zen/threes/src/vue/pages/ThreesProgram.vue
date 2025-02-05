@@ -1,14 +1,28 @@
 <template>
-    <div class="threes-coder" ref="threesCoder" @mousemove="mousemove" @mouseup.left="mouseup" @mousedown.left="mousedown">
-        <div @mouseup="dropNodeToLine(line_index)" @mousedown="dropNodeToLine(line_index)" v-for="(nodes, line_index) in program" class="threes-coder__line">
-            <ThreesLineControl @contextmenu.prevent="openLinePopupMenu($event, line_index)" :line_index="line_index" />
+    <div
+        class="threes-coder"
+        ref="threesCoder"
+        @mousemove="mousemove"
+        @mouseup.left="mouseup"
+        @mousedown.left="mousedown"
+    >
+        <div
+            @mouseup="dropNodeToLine(line_index)"
+            @mousedown="dropNodeToLine(line_index)"
+            v-for="(nodes, line_index) in program"
+            class="threes-coder__line"
+        >
+            <ThreesLineControl
+                @contextmenu.prevent="openLinePopupMenu($event, line_index)"
+                :line_index="line_index"
+            />
             <div class="threes-coder__line_items">
                 <ThreesNode
                     v-for="(node, node_index) in nodes"
                     :node="node"
                     :nid="getNid(line_index, node_index)"
                     :hovering="node_hovering"
-                    @mousedown.left="captureNodeStart($event, getNid(line_index, node_index))"
+                    @mousedown.left="captureNodeStart($event, node, getNid(line_index, node_index))"
                     @mouseup="captureNodeEnd(getNid(line_index, node_index))"
                     @contextmenu.prevent="openNodeMenu($event, node, getNid(line_index, node_index))"
                 />
@@ -150,10 +164,10 @@ export default {
         },
 
         /* Фиксировать начало нажатия ЛК-мыши на ноде для меню */
-        captureNodeStart(event, nid) {
+        captureNodeStart(event, node, nid) {
+            this.node_selected = node
             // зафиксировать начало движения курсора, зафиксировать стартовые координаты
             if (this.node_hovering_start_position === null && this.node_hovering === null) {
-                console.log('Зафиксирована стартовая позиция мыши')
                 this.node_hovering_nid = nid
                 this.node_hovering_start_position = [
                     ths.data.mouse.x,
@@ -297,7 +311,7 @@ export default {
         /* Добавить строку в программу */
         addProgramLine() {
             this.program.push({})
-            this.saveProgram(function () {
+            this.saveProgram(then => {
                 this.loadProgram()
             })
         },
@@ -368,7 +382,7 @@ export default {
             } else if (action === 'delete') {
                 this.deleteNodeAction(nid);
             } else if (action === 'settings') {
-                this.openSettingsPage(nid);
+                this.openSettingsPage();
             }
         },
 
@@ -401,10 +415,10 @@ export default {
         },
 
         /* Открыть страницу с натстройками */
-        openSettingsPage(nid) {
-            console.log('openSettingsPage', this.sid, nid, this.backend)
+        openSettingsPage() {
             let tid = this.node_selected.tid
-            const url = `/${this.backend}/zen/threes/unitcontroller/update/${tid}?sid=${this.sid}&nid=${nid}`
+            let uuid = this.node_selected.node
+            const url = `/${this.backend}/zen/threes/unitcontroller/update/${tid}?sid=${this.sid}&node=${uuid}`
             window.open(url, '_blank')
         },
         //endregion

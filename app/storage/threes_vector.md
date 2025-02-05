@@ -101,7 +101,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->fitter()->build('');
+        $sprite = ths()->sprites()->get('test');
+        $sprite->save();
     }
 
     # http://threes.dc/threes.api/debug.Tests:apiTest
@@ -207,6 +208,11 @@ class Program
         return [
             'success' => true,
         ];
+    }
+
+    public function generateNodeCode()
+    {
+
     }
 }
 
@@ -371,6 +377,7 @@ use Zen\Threes\Classes\Helpers\Files;
 use Zen\Threes\Classes\Helpers\Json;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
+use Zen\Threes\Classes\Helpers\State;
 
 class Helpers
 {
@@ -379,6 +386,7 @@ class Helpers
     use Json;     # Работа с JSON
     use Yaml;     # Работа с YAML
     use Strings;  # Слой настроек
+    use State;    # Управлением состоянием (сессия Threes)
 
     public function units(): Units
     {
@@ -399,9 +407,16 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Classes\Sprites\Program;
+use Zen\Threes\Classes\Sprites\Node;
+use Zen\Threes\Models\Sprite;
+use Illuminate\Database\Eloquent\Builder;
 
 class Sprites
 {
+    use SingletonTrait;
+    use Program;
+    use Node;
+
     private ?string $sid = null;
 
     public function __construct(string | null $sid = null)
@@ -409,9 +424,28 @@ class Sprites
         $this->sid = $sid;
     }
 
+    /**
+     * Вернуть экземпляр спрайта по sid
+     * @param string|null $sid
+     * @return Sprite|null
+     */
+    public function get(string | null $sid = null): Sprite | null
+    {
+        $sid = $sid ?? $this->sid;
+        if (!$sid) {
+            return null;
+        }
+        return Sprite::find($sid);
+    }
 
-    use SingletonTrait;
-    use Program;
+    /**
+     * Вернуть конструктор запросов
+     * @return Builder
+     */
+    public function query(): Builder
+    {
+        return Sprite::query();
+    }
 }
 
 ```
@@ -584,7 +618,7 @@ trait Json
      */
     public function toJson(
         array $arr = [],
-        bool $pretty_print = false,
+        bool $pretty_print = true,
         bool $no_slashes = false
     ): ?string {
         if (empty($arr)) {
@@ -608,7 +642,7 @@ trait Json
     public function toJsonFile(
         string $file_path,
         array $arr = [],
-        bool $pretty_print = false,
+        bool $pretty_print = true,
         bool $no_slashes = false
     ): void {
         file_put_contents(
@@ -619,6 +653,42 @@ trait Json
                 $no_slashes
             )
         );
+    }
+}
+
+```
+`plugins/zen/threes/classes/helpers/State.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+use Zen\Threes\Traits\SingletonTrait;
+
+trait State
+{
+    use SingletonTrait;
+
+    private array $state = [];
+
+    /**
+     * Сохранить состояние
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    public function setState(string $key, mixed $value): void
+    {
+        $this->state[$key] = $value;
+    }
+
+    /**
+     * Загрузить состояние
+     * @param string $key
+     * @return mixed
+     */
+    public function getState(string $key): mixed
+    {
+        return $this->state[$key] ?? null;
     }
 }
 
@@ -713,6 +783,34 @@ trait Yaml
 }
 
 ```
+`plugins/zen/threes/classes/sprites/Node.php`
+```<?php
+
+namespace Zen\Threes\Classes\Sprites;
+
+use View;
+
+trait Node
+{
+    public function saveNodeSettings(string $node_uuid, array $settings)
+    {
+        ths()->toJsonFile(
+            storage_path("threes/node_settings/{$node_uuid}.json"),
+            $settings,
+            true
+        );
+    }
+
+    public function getNodeTitle(string $sid, string $node_uuid)
+    {
+        return View::make("zen.threes::node.info", [
+            'sid' => $sid,
+            'nid' => $node_uuid,
+        ])->render();
+    }
+}
+
+```
 `plugins/zen/threes/classes/sprites/Program.php`
 ```<?php
 
@@ -722,6 +820,11 @@ use Zen\Threes\Models\Sprite;
 
 trait Program
 {
+    public function generateNodeCode()
+    {
+
+    }
+
     /**
      * Сохранить программу спрайта
      * @param string $sid
@@ -730,6 +833,8 @@ trait Program
      */
     public function programSave(string $sid, array $program): array
     {
+        $this->stampUuids($program);
+
         $sprite = Sprite::find($sid);
         $sprite->program = $program;
         $sprite->save();
@@ -737,6 +842,22 @@ trait Program
         return [
             'success' => 'true',
         ];
+    }
+
+    /**
+     * Проставить недостающие uuids у нод в программе
+     * @param array $program
+     * @return void
+     */
+    private function stampUuids(array &$program): void
+    {
+        foreach ($program as &$line) {
+            foreach ($line as &$node) {
+                if (isset($node['tid']) && !isset($node['node'])) {
+                    $node['node'] = \Str::uuid();
+                }
+            }
+        }
     }
 
     public function programLoad(string $sid): array
@@ -1101,6 +1222,7 @@ use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
 use Zen\Threes\Models\Unit;
+use Flash;
 
 class UnitController extends Controller
 {
@@ -1129,19 +1251,73 @@ class UnitController extends Controller
      * @param $form
      * @return void
      */
-    public function formExtendFields($form)
+    public function formExtendFields($form): void
     {
         if (!isset($this->params[0])) {
             return;
         }
 
         $sid = request('sid');
-        # ??????????????
+
+        if ($sid) {
+            // Скрываем поля при наличии параметра sid
+            if ($form->getField('name')) {
+                $form->removeField('name');
+            }
+
+            if ($form->getField('tid')) {
+                $form->removeField('tid');
+            }
+
+            if ($form->getField('description')) {
+                $form->removeField('description');
+            }
+
+            if ($form->getField('fields')) {
+                $form->removeField('fields');
+            }
+
+            if ($form->getField('io')) {
+                $form->removeField('io');
+            }
+
+            if ($form->getField('icon')) {
+                $form->removeField('icon');
+            }
+        }
 
         $unit = Unit::find($this->params[0]);
         if ($unit && $unit->additional_fields) {
             $this->clearMissingFields($unit);
             $form->addFields($unit->additional_fields, 'primary');
+        }
+    }
+
+    /**
+     * Переопределение метода сохранения формы
+     * @param $model
+     * @return void
+     * @throws \Exception
+     */
+    public function formBeforeSave($model)
+    {
+        $sid = request('sid');
+        $node_uuid = request('node');
+
+        if ($sid && $node_uuid) {
+            Flash::info('Настройки нода сохранены');
+
+            $node_settings = request('Unit');
+            unset($node_settings['tid']);
+            unset($node_settings['name']);
+            unset($node_settings['description']);
+
+            # Останавливаем дальнейшее выполнение сохранения
+            # Проверяется в plugins/zen/threes/models/Unit@boot
+            ths()->setState('unit.prevent_save', [
+                'node_uuid' => $node_uuid,
+                'settings' => $node_settings
+            ]);
         }
     }
 
@@ -1503,7 +1679,13 @@ recordUrl: 'zen/threes/unitcontroller/update/:tid'
         <li><?= e($this->pageTitle) ?></li>
     </ul>
 <?php Block::endPut() ?>
+<?php
 
+if (request('sid') && request('node')) {
+    echo ths()->sprites()->getNodeTitle(request('sid'), request('node'));
+}
+
+?>
 <?php if (!$this->fatalError): ?>
 
     <?= Form::open(['class' => 'layout']) ?>
@@ -1551,6 +1733,7 @@ recordUrl: 'zen/threes/unitcontroller/update/:tid'
     <p class="flash-message static error"><?= e(trans($this->fatalError)) ?></p>
     <p><a href="<?= Backend::url('zen/threes/unitcontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
 <?php endif ?>
+
 ```
 `plugins/zen/threes/init.php`
 ```<?php
@@ -1733,6 +1916,23 @@ class Unit extends Model
         }
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        # Предотвращение сохранения модели
+        # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
+        static::saving(function ($model) {
+            if ($save_data = ths()->getState('unit.prevent_save')) {
+                ths()->sprites()->saveNodeSettings(
+                    $save_data['node_uuid'],
+                    $save_data['settings']
+                );
+                return false;
+            }
+        });
+    }
+
     public function scopeActive($query)
     {
         return $query->where('active', 1);
@@ -1758,7 +1958,7 @@ class Unit extends Model
      * Событие перед сохранением экземпляра
      * @return void
      */
-    public function beforeSave(): void
+    public function beforeSave()
     {
         $this->saveData();
         $this->saveSvgIcon();
@@ -2116,7 +2316,7 @@ class Unit extends Model
                         type: repeater
                         form:
                             fields:
-                                rule:
+                                 rule:
                                     label: ''
                                     size: small
                                     language: plain_text
@@ -3503,6 +3703,45 @@ class BuilderTableCreateZenThreesUnits extends Migration
 1.0.3:
     - 'Create sprites'
     - builder_table_create_zen_threes_sprites.php
+
+```
+`plugins/zen/threes/views/node/info.htm`
+```<div class="threes-node-title">
+    <div>
+        <span>Спрайт:</span>
+        <span>{{ sid }}</span>
+    </div>
+    <div>
+        <span>Нод:</span>
+        <span>{{ nid }}</span>
+    </div>
+</div>
+<style>
+.threes-node-title {
+    display: flex;
+    padding: 10px;
+    background: #457b8a;
+    color: #ffffff;
+    font-size: 18px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.threes-node-title > div {
+    display: flex;
+}
+.threes-node-title > div:first-child {
+    padding-right: 10px;
+}
+.threes-node-title > div > span {
+
+}
+.threes-node-title > div > span:first-child {
+    padding-right: 5px;
+    font-weight: bold;
+}
+</style>
 
 ```
 `plugins/zen/threes/webpack.mix.js`

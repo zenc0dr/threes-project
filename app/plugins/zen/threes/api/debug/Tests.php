@@ -9,7 +9,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->sprites()->getNodeTitle('');
+        $sprite = ths()->sprites()->get('test');
+        $sprite->save();
     }
 
     # http://threes.dc/threes.api/debug.Tests:apiTest

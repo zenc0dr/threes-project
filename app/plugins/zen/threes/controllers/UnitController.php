@@ -40,19 +40,13 @@ class UnitController extends Controller
         }
 
         $sid = request('sid');
+        $node_uuid = request('node');
 
         if ($sid) {
-            // Скрываем поля при наличии параметра sid
-            if ($form->getField('fields')) {
-                $form->removeField('fields');
-            }
-
-            if ($form->getField('io')) {
-                $form->removeField('io');
-            }
-
-            if ($form->getField('icon')) {
-                $form->removeField('icon');
+            foreach (['name', 'tid', 'description', 'fields', 'io', 'icon'] as $field) {
+                if ($form->getField($field)) {
+                    $form->removeField($field);
+                }
             }
         }
 
@@ -61,7 +55,21 @@ class UnitController extends Controller
             $this->clearMissingFields($unit);
             $form->addFields($unit->additional_fields, 'primary');
         }
+
+        // Загружаем настройки нода после добавления полей
+        if ($sid && $node_uuid) {
+            $node_settings = ths()->sprites()->loadNodeSettings($node_uuid);
+
+            if ($node_settings) {
+                foreach ($node_settings as $key => $value) {
+                    if ($form->getField($key)) {
+                        $form->getField($key)->value = $value;
+                    }
+                }
+            }
+        }
     }
+
 
     /**
      * Переопределение метода сохранения формы
@@ -72,14 +80,22 @@ class UnitController extends Controller
     public function formBeforeSave($model)
     {
         $sid = request('sid');
-        $nid = request('nid');
+        $node_uuid = request('node');
 
-        if ($sid) {
+        if ($sid && $node_uuid) {
             Flash::info('Настройки нода сохранены');
+
+            $node_settings = request('Unit');
+            unset($node_settings['tid']);
+            unset($node_settings['name']);
+            unset($node_settings['description']);
+
             # Останавливаем дальнейшее выполнение сохранения
             # Проверяется в plugins/zen/threes/models/Unit@boot
-            ths()->setState('unit.prevent_save', true);
-            ///////////
+            ths()->setState('unit.prevent_save', [
+                'node_uuid' => $node_uuid,
+                'settings' => $node_settings
+            ]);
         }
     }
 
@@ -100,7 +116,7 @@ class UnitController extends Controller
         \DB::table('zen_threes_units')
             ->where('tid', $unit->tid)
             ->update([
-                'data' => ths()->toJson($data, true),
+                'data' => ths()->toJson($data),
             ]);
     }
 }

@@ -6,8 +6,8 @@
 <?php Block::endPut() ?>
 <?php
 
-if (request('sid') && request('nid')) {
-    echo ths()->sprites()->getNodeTitle(request('sid'), request('nid'));
+if (request('sid') && request('node')) {
+    echo ths()->sprites()->getNodeTitle(request('sid'), request('node'));
 }
 
 ?>
