@@ -40,6 +40,7 @@ export default {
     border-radius: 4px;
     background-color: #d3d3d3;
     flex-direction: column;
+    z-index: 10000;
 
     .btn {
         margin: 5px;

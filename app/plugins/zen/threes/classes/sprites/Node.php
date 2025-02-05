@@ -16,9 +16,13 @@ trait Node
         return ths()->sets()->get($node_uuid);
     }
 
-    public function getNodeTitle(string $sid, string $node_uuid): string
+    public function getNodeTitle(string $tid, string $sid, string $node_uuid): string
     {
+        $unit = ths()->units()->get($tid);
+
         return View::make("zen.threes::node.info", [
+            'tid' => $tid,
+            'unit_name' => $unit->name,
             'sid' => $sid,
             'nid' => $node_uuid,
         ])->render();

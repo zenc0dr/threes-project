@@ -7,7 +7,11 @@
 <?php
 
 if (request('sid') && request('node')) {
-    echo ths()->sprites()->getNodeTitle(request('sid'), request('node'));
+    echo ths()->sprites()->getNodeTitle(
+        $this->params[0],
+        request('sid'),
+        request('node')
+    );
 }
 
 ?>

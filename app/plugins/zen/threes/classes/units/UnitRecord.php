@@ -6,9 +6,9 @@ use Zen\Threes\Models\Unit;
 
 trait UnitRecord
 {
-    public function getUnitData(string $uid)
+    public function getUnitData(string $tid): array | null
     {
-        $unit = Unit::find($uid);
+        $unit = Unit::find($tid);
         if (!$unit) {
             return null;
         }
@@ -16,5 +16,10 @@ trait UnitRecord
         return [
             'io' => $unit->io,
         ];
+    }
+
+    public function get(string $tid) : Unit | null
+    {
+        return Unit::find($tid);
     }
 }
