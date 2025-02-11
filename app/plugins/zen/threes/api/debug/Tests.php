@@ -9,7 +9,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
+            require_once base_path('storage/temp/threes/pipelines/Pipelines2.php');
+            dd(
+                \Threes\Pipelines\Pipelines2::exec(1)
+            );
     }
 
     # http://threes.dc/threes.api/debug.Tests:apiTest
