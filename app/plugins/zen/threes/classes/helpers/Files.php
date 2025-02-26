@@ -9,17 +9,17 @@ trait Files
 {
     /**
      * Проверить адрес файла и рекурсивно создать недостающие папки
-     * @param string $dir_path
+     * @param string $file_path
      * @param int $permissions
      * @return string
      */
-    public function checkDir(string $dir_path, int $permissions = 0777): string
+    public function checkDir(string $file_path, int $permissions = 0777): string
     {
-        $dirname = dirname($dir_path);
+        $dirname = dirname($file_path);
         if (!is_dir($dirname)) {
             mkdir($dirname, $permissions, true);
         }
-        return $dir_path;
+        return $file_path;
     }
 
     /**

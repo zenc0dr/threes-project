@@ -18,7 +18,7 @@ class Helpers
     use Yaml;     # Работа с YAML
     use Strings;  # Слой настроек
     use State;    # Управлением состоянием (сессия Threes)
-    use Carbon;
+    use Carbon;   # Создание объекта Carbon
 
     public function units(): Units
     {

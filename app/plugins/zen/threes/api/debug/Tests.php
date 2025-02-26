@@ -9,8 +9,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-            require_once base_path('storage/temp/threes/pipelines/Pipelines7.php');
-            dd(\Threes\Pipelines\Pipelines7::logic());
+        ths()->requestSave();
+
+            //require_once base_path('storage/temp/threes/pipelines/Pipelines7.php');
+            //dd(\Threes\Pipelines\Pipelines7::logic());
     }
 
     # http://threes.dc/threes.api/debug.Tests:pipelineTest?num=1

@@ -2,10 +2,9 @@
 
 namespace Zen\Threes\Classes\Helpers;
 
-
 trait Carbon
 {
-    function carbon($date = null, $format = null): \Carbon\Carbon
+    function carbon(?string $date = null, ?string $format = null): \Carbon\Carbon
     {
         return $format
             ? \Carbon\Carbon::createFromFormat($format, $date)

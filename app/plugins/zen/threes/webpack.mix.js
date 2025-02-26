@@ -38,11 +38,11 @@ mix.sass('src/scss/threes.scss', 'css')
         ],
     });
 
-mix.js('src/js/threes.js', 'js').vue(); // Обработка Vue.js файлов
-mix.setPublicPath('assets'); // Путь к папке публичных файлов
+mix.js('src/js/threes.js', 'js').vue();
+mix.setPublicPath('assets');
 
 if (mix.inProduction()) {
-    mix.version(); // Версионирование файлов в продакшене
+    mix.version();
 }
 
 // Настройка alias для удобства работы с путями
