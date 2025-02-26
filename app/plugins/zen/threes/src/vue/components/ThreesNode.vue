@@ -11,7 +11,7 @@
                         {{ node.name }}
                     </div>
                 </div>
-                <div class="threes-node__body"></div>
+                <div v-if="false" class="threes-node__body"></div>
             </div>
             <div class="threes-node__io">
                 <node_io :nid="nid" io_direction="output" :io="io(node.io, 'output')" />

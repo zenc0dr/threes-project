@@ -24,7 +24,6 @@
             </div>
         </div>
         <SelectUnit v-if="selected_type === 'unit'" @fetch="makeNode"/>
-
     </div>
 </template>
 <script>

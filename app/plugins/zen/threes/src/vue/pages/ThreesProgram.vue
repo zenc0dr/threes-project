@@ -51,7 +51,7 @@
             Выбор нода
         </template>
         <template #default>
-            <SelectNode @fetch="addNodeToProgram"/>
+            <SelectUnit @fetch="addNodeToProgram" />
         </template>
     </ThreesModal>
     <NodePopup v-if="node_popup" :x="node_popup_x" :y="node_popup_y" @select="execNodeMenu">
@@ -76,7 +76,7 @@
 <script>
 import ThreesModal from "../components/ThreesModal.vue";
 import ControlPanel from "../components/ux/forms/ControlPanel.vue";
-import SelectNode from "../components/SelectNode.vue";
+import SelectUnit from "../components/SelectUnit.vue";
 import ThreesNode from "../components/ThreesNode.vue";
 import NodePopup from "../components/ux/forms/NodePopup.vue";
 import ThreesLineControl from "../components/ux/forms/ThreesLineControl.vue";
@@ -89,7 +89,7 @@ export default {
     components: {
         ThreesModal,
         ControlPanel,
-        SelectNode,
+        SelectUnit,
         ThreesNode,
         ThreesLineControl,
         NodePopup,
@@ -243,7 +243,7 @@ export default {
                     sid: this.sid,
                 },
                 then: response => {
-                    if (response.program.length > 0) {
+                    if (response.program?.length > 0) {
                         this.program = this.handleProgram(
                             response.program
                         )

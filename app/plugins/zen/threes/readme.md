@@ -87,3 +87,14 @@ ths()->sets()->getBatch(scope: 'пространство'); // Вернётся 
 ths()->setState('ключ', 'значение'); # Установить значение в сессии
 $state = ths()->getState('ключ'); # Получить значение в сессии
 ```
+
+### Структура фронтенда
+
+Компоненты для сборки фронтенда находятся в папке `plugins/zen/threes/src/vue`
+`pages/ThreesProgram.vue` - Интерфейс программы
+	`components/SelectNode.vue` - Компонент выбора нода
+		`components/SelectNode.vue` - Компонент выбора юнита
+
+###### Добавление нового нода в программу
+Тут хочу обратить внимание на механику добавления нода. Новый нод попадает на схему через метод `pages/ThreesProgram@addNodeToProgram` который принимает на вход json-объект нового нода которы был пораждён на бэкенде эндпоинтом `Units.SelectUnit:makeNode` (например этот запрос делается в компоненте `components/SelectUnit.vue`), сам метод располагается соответственно тут `plugins/zen/threes/api/units/SelectUnit.php`.
+
