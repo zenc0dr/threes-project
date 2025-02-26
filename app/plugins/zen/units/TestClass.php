@@ -23,6 +23,40 @@ class TestClass
         if ($value === null) {
             return 0;
         }
-        return $value + 1;
+        return $value + $value * 2;
+    }
+
+    /**
+     * Для тестирования формирования ui
+     * Вызов: Zen.Units.TestClass.uiOutput
+     * @param int $value
+     * @return string
+     */
+    public function uiOutput(int $value = 0): string
+    {
+        return "<span style='color:green;font-weight:bold;'>$value</span>";
+    }
+
+    public function foo($value) {
+        return "Результат будет: $value";
+    }
+
+    public function condition($value)
+    {
+        if ($value > 5) {
+            return true;
+        }
+        return false;
+    }
+
+    public function intToArray($value): array
+    {
+        return [
+            $value,
+            $value,
+            $value,
+            $value,
+            $value
+        ];
     }
 }

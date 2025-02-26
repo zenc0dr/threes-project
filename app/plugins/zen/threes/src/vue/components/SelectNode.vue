@@ -78,6 +78,7 @@ export default {
         display: flex;
         margin: 0 -5px;
         margin-bottom: 15px;
+        flex-wrap: wrap;
     }
 
     &__type {

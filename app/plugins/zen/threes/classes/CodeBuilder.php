@@ -48,7 +48,7 @@ class CodeBuilder
             }
         }
 
-        dd($method, $pipeline);
+
         $this->createPipeline($method, $pipeline);
     }
 
@@ -59,13 +59,15 @@ class CodeBuilder
 
     private function createPipeline($method, $pipeline)
     {
-        if ($method === 'input') {
-
-        }
+//        if ($method === 'input') {
+//
+//        }
 
 
         $this->pipeline_index++;
         $file_name = "Pipelines" . $this->pipeline_index;
+
+        # Создаём класс спрайта
         $pipelines_path = ths()->checkDir(storage_path("temp/threes/pipelines/$file_name.php"));
 
         $file = [];
@@ -78,7 +80,8 @@ class CodeBuilder
         $file[] = '{';
 
         $exec_input = join(', ', $this->getIoKeysNodes($pipeline[0], 'input', '$'));
-        $file[] = "    public static function exec($exec_input) {";
+        $file[] = "    public static function exec($exec_input)";
+        $file[] = '    {';
 
         $methods = [];
         $node_count = 0;
@@ -110,7 +113,8 @@ class CodeBuilder
         $method_lines = [];
         $unit = ths()->units()->get($node['tid']);
         $call = $unit['call'];
-        $call_data = $this->parseClassMethod($call);
+
+        $call_data = ths()->sprites()->parseClassMethod($call);
         $class = $call_data['class'];
         $method = $call_data['method'];
         $method_lines[] = '    private static function node' . $node_count . '($input)';
@@ -121,17 +125,6 @@ class CodeBuilder
         $method_lines[] = '    }';
         $method_lines[] = '';
         $methods = array_merge($methods, $method_lines);
-    }
-
-    private function parseClassMethod(string $identifier): array
-    {
-        $parts = explode('.', $identifier);
-        $method = array_pop($parts);
-        $class = '\\' . implode('\\', $parts);
-        return [
-            'class' => $class,
-            'method' => $method,
-        ];
     }
 
 

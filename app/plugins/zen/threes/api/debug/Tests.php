@@ -9,16 +9,18 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-            require_once base_path('storage/temp/threes/pipelines/Pipelines2.php');
-            dd(
-                \Threes\Pipelines\Pipelines2::exec(1)
-            );
+            require_once base_path('storage/temp/threes/pipelines/Pipelines7.php');
+            dd(\Threes\Pipelines\Pipelines7::logic());
     }
 
-    # http://threes.dc/threes.api/debug.Tests:apiTest
-    public function apiTest()
+    # http://threes.dc/threes.api/debug.Tests:pipelineTest?num=1
+    public function pipelineTest()
     {
-        return 'Отлично, ajax работает!';
+        $num = intval(request('num'));
+        require_once base_path("storage/temp/threes/pipelines/Pipelines1.php");
+        dd(
+            \Threes\Pipelines\Pipelines1::exec($num)
+        );
     }
 
     # http://threes.dc/threes.api/debug.Tests:loadUnit?tid=

@@ -41,6 +41,30 @@ class SelectNode
                 'icon' => 'do.svg',
                 'desc' => 'Делать',
             ],
+            [
+                'type' => 'for',
+                'name' => 'Цикл',
+                'icon' => 'for.svg',
+                'desc' => 'Выполняет код в цикле FOREACH перебирая элементы массива',
+            ],
+            [
+                'type' => 'end',
+                'name' => 'END',
+                'icon' => 'end.svg',
+                'desc' => 'Конец строки',
+            ],
+            [
+                'type' => 'set',
+                'name' => 'SET',
+                'icon' => 'set.svg',
+                'desc' => 'Записать переменную',
+            ],
+            [
+                'type' => 'var',
+                'name' => 'VAR',
+                'icon' => 'var.svg',
+                'desc' => 'Извлечь переменную',
+            ],
         ];
 
 

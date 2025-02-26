@@ -272,6 +272,28 @@ trait Program
         $sprite->save();
     }
 
+    /**
+     * На вход подаётся Zen.Units.TestClass.adder
+     * На выходе массив вида ['class' => '\Zen\Units\TestClass', 'method' => 'adder']
+     * @param string $identifier
+     * @return array
+     */
+    public function parseClassMethod(string $identifier): array
+    {
+        $parts = explode('.', $identifier);
+        $method = array_pop($parts);
+        $class = '\\' . implode('\\', $parts);
+        return [
+            'class' => $class,
+            'method' => $method,
+        ];
+    }
+
+    /**
+     * Построитель кода
+     * @param string $sid
+     * @return void
+     */
     public function buildCode(string $sid)
     {
         $code_builder = new CodeBuilder($sid);

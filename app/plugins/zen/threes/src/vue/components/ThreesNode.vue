@@ -64,7 +64,7 @@ export default {
             }
         },
         ifArchitectNode(type) {
-            return ['if', 'else', 'do', 'input'].includes(type)
+            return ['if', 'else', 'do', 'input', 'for', 'end', 'set', 'var'].includes(type)
         }
     }
 }
