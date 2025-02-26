@@ -1,27 +1,20 @@
 <template>
     <div class="threes-node" :style="style">
-        <template v-if="!node.type">
-            <div class="threes-node__io">
-                <node_io :nid="nid" io_direction="input" :io="io(node.io, 'input')" />
-            </div>
-            <div class="threes-node__wrap">
-                <div class="threes-node__header">
-                    <icon class="threes-node__icon" width="25px" height="25px" :src="node.icon" />
-                    <div class="threes-node__name">
-                        {{ node.name }}
-                    </div>
+        <div class="threes-node__io">
+            <node_io :nid="nid" io_direction="input" :io="io(node.io, 'input')" />
+        </div>
+        <div class="threes-node__wrap">
+            <div class="threes-node__header">
+                <icon class="threes-node__icon" width="25px" height="25px" :src="node.icon" />
+                <div class="threes-node__name">
+                    {{ node.name }}
                 </div>
-                <div v-if="false" class="threes-node__body"></div>
             </div>
-            <div class="threes-node__io">
-                <node_io :nid="nid" io_direction="output" :io="io(node.io, 'output')" />
-            </div>
-        </template>
-        <template v-else-if="ifArchitectNode(node.type)">
-            <div class="threes-node__architect" :class="'node-type__' + node.type">
-                <icon class="threes-node__architect__icon" :src="`@node_types/${ node.type }.svg`"/>
-            </div>
-        </template>
+            <div v-if="false" class="threes-node__body"></div>
+        </div>
+        <div class="threes-node__io">
+            <node_io :nid="nid" io_direction="output" :io="io(node.io, 'output')" />
+        </div>
     </div>
 </template>
 <script>
@@ -62,9 +55,6 @@ export default {
             return {
                 'background-image':`url(${src})`
             }
-        },
-        ifArchitectNode(type) {
-            return ['if', 'else', 'do', 'input', 'for', 'end', 'set', 'var'].includes(type)
         }
     }
 }
