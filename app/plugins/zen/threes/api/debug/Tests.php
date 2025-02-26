@@ -10,6 +10,9 @@ class Tests
     public function debug()
     {
         //ths()->sets()->set('ключ', 'значение', 'пространство', ['tag1', 'tag2', 'tag3']);
+        ths()->setState('ключ', 'значение');
+        $state = ths()->getState('ключ');
+
         dd(
             ths()->sets()->getBatch(scope: 'пространство')
         );
