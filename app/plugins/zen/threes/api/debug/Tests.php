@@ -9,7 +9,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->requestSave();
+        //ths()->sets()->set('ключ', 'значение', 'пространство', ['tag1', 'tag2', 'tag3']);
+        dd(
+            ths()->sets()->getBatch(scope: 'пространство')
+        );
 
             //require_once base_path('storage/temp/threes/pipelines/Pipelines7.php');
             //dd(\Threes\Pipelines\Pipelines7::logic());

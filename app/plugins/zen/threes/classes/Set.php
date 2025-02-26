@@ -13,10 +13,16 @@ class Set
      * Сохранить сет
      * @param string $uuid
      * @param mixed $value
+     * @param string|null $scope
+     * @param array|null $tags
      * @return void
      */
-    public function set(string $uuid, mixed $value, ?string $scope = null, ?array $tags = null): void
-    {
+    public function set(
+        string $uuid,
+        mixed $value,
+        ?string $scope = null,
+        ?array $tags = null
+    ): void {
         if ($tags) {
             $tags = collect($tags)->map(function ($tag) {
                 return ":$tag:";
@@ -47,6 +53,11 @@ class Set
         return ths()->fromJson($record->data)[0];
     }
 
+    /**
+     * Удалить сет
+     * @param string $uuid
+     * @return void
+     */
     public function remove(string $uuid): void
     {
         DB::table('zen_threes_sets')->where('uuid', $uuid)->delete();
@@ -54,11 +65,16 @@ class Set
 
     /**
      * Загрузить пачку сетов
-     * @param array $uuids
-     * @return mixed[]
+     * @param array|null $uuids - Массив uuid
+     * @param string|null $scope - Метка области
+     * @param array|null $tags - Тэги
+     * @return array
      */
-    public function getBatch(?array $uuids = null, ?string $scope = null, ?array $tags = null): array
-    {
+    public function getBatch(
+        ?array $uuids = null,
+        ?string $scope = null,
+        ?array $tags = null
+    ): array {
         return DB::table('zen_threes_sets')
             ->where(function ($query) use ($uuids, $scope, $tags) {
                 if ($uuids) {
