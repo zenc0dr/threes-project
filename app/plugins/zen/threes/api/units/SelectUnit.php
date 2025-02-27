@@ -41,6 +41,16 @@ class SelectUnit
                 'success' => false
             ];
         }
+
+        # Скрыть заголовок нода, если в его настройках есть позиция node:show_title
+        if (isset($unit->settings['node:show_title'])) {
+            $show_title = boolval($unit->settings['node:show_title']);
+            if (!$show_title) {
+                $unit->name = null;
+            }
+        }
+
+
         return [
             'success' => true,
             'node' => [

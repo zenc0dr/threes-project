@@ -6,7 +6,7 @@
         <div class="threes-node__wrap">
             <div class="threes-node__header">
                 <icon class="threes-node__icon" width="25px" height="25px" :src="node.icon" />
-                <div class="threes-node__name">
+                <div v-if="node.name" class="threes-node__name">
                     {{ node.name }}
                 </div>
             </div>

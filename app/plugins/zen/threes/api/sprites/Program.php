@@ -24,7 +24,7 @@ class Program
     {
         return [
             'success' => true,
-            'program' => Sprite::find(request('sid'))?->program
+            'program' => ths()->sprites()->programLoad(request('sid'))
         ];
     }
 

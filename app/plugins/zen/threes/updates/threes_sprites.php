@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class BuilderTableCreateZenThreesSprites extends Migration
+class ThreesSprites extends Migration
 {
     public function up()
     {
@@ -20,7 +20,7 @@ class BuilderTableCreateZenThreesSprites extends Migration
             $table->unique('sid', 'sid_unique');
         });
     }
-    
+
     public function down()
     {
         Schema::dropIfExists('zen_threes_sprites');

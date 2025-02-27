@@ -5,6 +5,7 @@ namespace Zen\Threes\Classes\Sprites;
 use Zen\Threes\Models\Sprite;
 
 use Zen\Threes\Classes\CodeBuilder;
+use Zen\Threes\Models\Unit;
 
 trait Program
 {
@@ -45,11 +46,32 @@ trait Program
 
     public function programLoad(string $sid): array
     {
-        $sprite = Sprite::find($sid);
-        return [
-            'success' => true,
-            'program' => $sprite,
-        ];
+        $program = Sprite::find($sid)?->program ?? [];
+        $tids = [];
+        foreach ($program as $line) {
+            foreach ($line as $node) {
+                $tids[] = $node['tid'];
+            }
+        }
+        $units = Unit::whereIn('tid', $tids)->get()->keyBy('tid');
+
+        foreach ($program as &$line) {
+            foreach ($line as &$node) {
+                $tid = $node['tid'];
+
+                if (isset($units[$tid]->settings['node:show_title'])) {
+                    $show_title = $units[$tid]->settings['node:show_title'];
+                    if (!$show_title) {
+
+                    }
+                }
+
+                //if ($units['tid'])
+            }
+        }
+
+
+        return $program;
     }
 
     /**

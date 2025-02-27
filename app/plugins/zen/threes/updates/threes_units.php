@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class BuilderTableCreateZenThreesUnits extends Migration
+class ThreesUnits extends Migration
 {
     public function up()
     {

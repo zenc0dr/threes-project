@@ -2,13 +2,13 @@ v1.0.1:
     - 'Initialize plugin'
 v1.0.2:
     - 'Create units'
-    - builder_table_create_zen_threes_units.php
+    - threes_units.php
 v1.0.3:
     - 'Create sprites'
-    - builder_table_create_zen_threes_sprites.php
+    - threes_sprites.php
 v1.0.4:
     - 'Created sets'
-    - builder_table_create_zen_threes_sets.php
+    - threes_sets.php
 v1.0.5:
-    - 'Created table zen_threes_versions'
-    - builder_table_create_zen_threes_versions.php
+    - 'Created versions'
+    - threes_versions.php

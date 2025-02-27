@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class BuilderTableCreateZenThreesSets extends Migration
+class ThreesSets extends Migration
 {
     public function up()
     {
@@ -21,7 +21,7 @@ class BuilderTableCreateZenThreesSets extends Migration
             $table->index('tags');
         });
     }
-    
+
     public function down()
     {
         Schema::dropIfExists('zen_threes_sets');

@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class BuilderTableCreateZenThreesVersions extends Migration
+class ThreesVersions extends Migration
 {
     public function up()
     {
@@ -16,7 +16,7 @@ class BuilderTableCreateZenThreesVersions extends Migration
             $table->dateTime('time')->nullable();
         });
     }
-    
+
     public function down()
     {
         Schema::dropIfExists('zen_threes_versions');
