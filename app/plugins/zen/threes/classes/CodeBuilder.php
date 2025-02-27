@@ -4,6 +4,9 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Models\Sprite;
 
+/**
+ * TODO:DEPRECATED
+ */
 class CodeBuilder
 {
     private Sprite $sprite;

@@ -9,12 +9,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        //ths()->sets()->set('ключ', 'значение', 'пространство', ['tag1', 'tag2', 'tag3']);
-        ths()->setState('ключ', 'значение');
-        $state = ths()->getState('ключ');
+
 
         dd(
-            ths()->sets()->getBatch(scope: 'пространство')
+            ths()->settings('Ключ')
         );
 
             //require_once base_path('storage/temp/threes/pipelines/Pipelines7.php');

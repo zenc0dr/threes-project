@@ -4,6 +4,8 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
 
+#TODO:DEPRECATED
+
 class Fitter
 {
     use SingletonTrait;
