@@ -6,12 +6,21 @@ use Str;
 
 trait Strings
 {
+    /**
+     * Сгенерировать UUID
+     * @return string
+     */
     public function createUuid(): string
     {
         return Str::uuid()->toString();
     }
 
-    public function createToken($length = 8): string
+    /**
+     * Сгенерировать случайную строку с заданной длинной
+     * @param int $length
+     * @return string
+     */
+    public function createToken(int $length = 8): string
     {
         return Str::random($length);
     }
