@@ -10,6 +10,7 @@ use October\Rain\Database\Traits\Validation;
  * @property string $description - Описание юнита
  * @property string $icon - SVG-иконка из базы данных
  * @property string $icon_path - Путь до SVG иконки
+ * @property array $fields - Поля интерфейса ???
  * @method static active - Активные юниты
  * @method static find(string $tid)
  */
@@ -159,6 +160,10 @@ class Unit extends Model
         return $svg;
     }
 
+    /**
+     * Путь до SVG - иконки в стандартном каталоге
+     * @return string
+     */
     public function getIconPathAttribute(): string
     {
         if (!$this->icon) {
@@ -168,6 +173,10 @@ class Unit extends Model
         return '/storage/app/uploads/public/threes/icons/' . $this->icon_name;
     }
 
+    /**
+     * @param string|null $data
+     * @return array
+     */
     public function getDataAttribute(?string $data): array
     {
         if ($data) {
@@ -176,11 +185,18 @@ class Unit extends Model
         return [];
     }
 
-    public function getFieldsAttribute()
+    /**
+     * @return array
+     */
+    public function getFieldsAttribute(): array
     {
         return $this->data_dump['fields'] ?? [];
     }
 
+    /**
+     * @param array|null $fields
+     * @return void
+     */
     public function setFieldsAttribute(?array $fields = null): void
     {
         $this->data_dump['fields'] = $fields ?? [];
