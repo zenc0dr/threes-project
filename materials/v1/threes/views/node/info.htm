@@ -1,0 +1,47 @@
+<div class="threes-node-title">
+    <div>
+        <span>Спрайт:</span>
+        <span>{{ sid }}</span>
+    </div>
+    <div>
+        <span>Юнит:</span>
+        <span>{{ unit_name }} [{{ tid }}]</span>
+    </div>
+    <div>
+        <span>Токен:</span>
+        <span>{{ nid }}</span>
+    </div>
+</div>
+<style>
+.threes-node-title {
+    display: flex;
+    padding: 10px;
+    background: #457b8a;
+    color: #ffffff;
+    font-size: 18px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.threes-node-title > div {
+    margin: 0 15px;
+}
+.threes-node-title > div {
+    padding-right: 5px;
+}
+.threes-node-title > div > span {
+
+}
+.threes-node-title > div > span:first-child {
+    margin-right: 5px;
+    font-weight: bold;
+}
+.threes-node-title > div > span:last-child {
+    background: #345d69;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+</style>

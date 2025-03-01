@@ -1,0 +1,10 @@
+name: SpriteController
+form: $/zen/threes/models/sprite/fields.yaml
+modelClass: Zen\Threes\Models\Sprite
+defaultRedirect: zen/threes/spritecontroller
+create:
+    redirect: 'zen/threes/spritecontroller/update/:sid'
+    redirectClose: zen/threes/spritecontroller
+update:
+    redirect: zen/threes/spritecontroller
+    redirectClose: zen/threes/spritecontroller

@@ -5,7 +5,6 @@ namespace Zen\Threes;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Settings;
 use Zen\Threes\classes\Helpers;
-use Zen\Threes\Classes\Fitter;
 
 class Threes extends Helpers
 {
@@ -24,13 +23,13 @@ class Threes extends Helpers
         return app("Zen\Threes\Api\\$path")->{$method}(...$data);
     }
 
+    /**
+     * Интерфейс для настроек
+     * @param string $key
+     * @return mixed
+     */
     public function settings(string $key)
     {
         return Settings::get($key);
-    }
-
-    public function fitter(): Fitter
-    {
-        return Fitter::getInstance();
     }
 }

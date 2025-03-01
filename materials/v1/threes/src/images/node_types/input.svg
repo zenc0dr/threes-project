@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 48 48"
+   version="1.1"
+   id="svg11"
+   sodipodi:docname="input.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata17">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs15" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1058"
+     inkscape:window-height="705"
+     id="namedview13"
+     showgrid="false"
+     inkscape:zoom="4.9166667"
+     inkscape:cx="24"
+     inkscape:cy="24"
+     inkscape:window-x="498"
+     inkscape:window-y="169"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="icons_Q2" />
+  <g
+     id="Layer_2"
+     data-name="Layer 2">
+    <g
+       id="invisible_box"
+       data-name="invisible box">
+      <rect
+         width="48"
+         height="48"
+         fill="none"
+         id="rect2" />
+    </g>
+    <g
+       id="icons_Q2"
+       data-name="icons Q2">
+      <path
+         d="M8,9.7a2,2,0,0,1,.6-1.4A21.6,21.6,0,0,1,24,2a22,22,0,0,1,0,44A21.6,21.6,0,0,1,8.6,39.7a2,2,0,1,1,2.8-2.8,18,18,0,1,0,0-25.8,1.9,1.9,0,0,1-2.8,0A2,2,0,0,1,8,9.7Z"
+         id="path5"
+         style="fill:#4d4d4d" />
+      <path
+         d="M33.4,22.6l-7.9-8a2.1,2.1,0,0,0-2.7-.2,1.9,1.9,0,0,0-.2,3L27.2,22H4a2,2,0,0,0-2,2H2a2,2,0,0,0,2,2H27.2l-4.6,4.6a1.9,1.9,0,0,0,.2,3,2.1,2.1,0,0,0,2.7-.2l7.9-8A1.9,1.9,0,0,0,33.4,22.6Z"
+         id="path7"
+         style="fill:#4d4d4d" />
+    </g>
+  </g>
+</svg>

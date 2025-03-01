@@ -1,0 +1,19 @@
+columns:
+    name:
+        label: Наименование
+        type: text
+        searchable: true
+        sortable: true
+    sid:
+        label: Sid
+        type: text
+        searchable: true
+        sortable: true
+    active:
+        label: Активность
+        type: switch
+        sortable: true
+    updated_at:
+        label: Обновление
+        type: datetime
+        sortable: true
