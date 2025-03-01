@@ -3,22 +3,22 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class ThreesUnits extends Migration
+class M001Units extends Migration
 {
     public function up()
     {
         Schema::create('zen_threes_units', function($table)
         {
-            $table->string('tid')->primary();
+            $table->string('uid')->primary();
+            $table->string('name');
             $table->text('icon')->nullable();
             $table->string('icon_name')->nullable();
-            $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
             $table->smallInteger('active')->unsigned()->default(1);
             $table->timestamps();
 
-            $table->unique('tid', 'tid_unique');
+            $table->unique('uid', 'uid_unique');
         });
     }
 
