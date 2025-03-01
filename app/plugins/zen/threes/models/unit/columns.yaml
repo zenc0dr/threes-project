@@ -1,0 +1,22 @@
+columns:
+    name:
+        label: Название
+        type: text
+        searchable: true
+        sortable: true
+        width: 100%
+    active:
+        label: Активность
+        type: switch
+        searchable: true
+        sortable: true
+    tid:
+        label: Tid
+        type: text
+        searchable: true
+        sortable: true
+    icon:
+        label: i
+        type: partial
+        width: 40px
+        path: $/zen/threes/controllers/unitcontroller/partials/icon.php
