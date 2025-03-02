@@ -1,0 +1,12 @@
+fields:
+    name:
+        label: 'Название фрейма'
+        span: auto
+        type: text
+    fid:
+        label: 'Токен фрейма (fid)'
+        span: auto
+        preset:
+            field: name
+            type: slug
+        type: text

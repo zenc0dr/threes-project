@@ -1,0 +1,15 @@
+columns:
+    fid:
+        label: fid
+        type: text
+        searchable: true
+        sortable: true
+    name:
+        label: name
+        type: text
+        searchable: true
+        sortable: true
+    active:
+        label: active
+        type: switch
+        sortable: true

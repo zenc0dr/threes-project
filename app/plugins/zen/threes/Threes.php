@@ -24,6 +24,29 @@ class Threes extends Helpers
     }
 
     /**
+     * Рефлексивный метод вызова
+     * @param string $path
+     * @param mixed|null $constructor
+     * @param ...$arguments
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function exe(string $path, mixed $constructor = null, ...$arguments): mixed
+    {
+        $path = explode('.', $path);
+        $method = array_pop($path);
+        $path = join('\\', $path);
+        $class = "\\$path";
+        $is_static = (new \ReflectionMethod($class, $method))->isStatic();
+        if ($is_static) {
+            return $class::$method($arguments);
+        } else {
+            $instance = new $class($constructor);
+            return $instance->$method($arguments);
+        }
+    }
+
+    /**
      * Интерфейс для настроек
      * @param string $key
      * @return mixed

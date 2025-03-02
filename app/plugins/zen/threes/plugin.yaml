@@ -14,9 +14,9 @@ permissions:
     zen.threes.units:
         tab: Threes
         label: 'Units control'
-    zen.threes.sprites:
+    zen.threes.frames:
         tab: Threes
-        label: 'Sprites control'
+        label: 'Frames control'
 navigation:
     main:
         label: Threes
@@ -25,13 +25,6 @@ navigation:
         permissions:
             - zen.threes.main
         sideMenu:
-            sprites:
-                label: Спрайты
-                url: zen/threes/spritecontroller
-                icon: icon-play
-                permissions:
-                    - zen.threes.main
-                    - zen.threes.sprites
             units:
                 label: Юниты
                 url: zen/threes/unitcontroller
@@ -39,3 +32,10 @@ navigation:
                 permissions:
                     - zen.threes.main
                     - zen.threes.units
+            sprites:
+                label: Фреймы
+                url: zen/threes/framecontroller
+                icon: icon-play
+                permissions:
+                    - zen.threes.main
+                    - zen.threes.frames

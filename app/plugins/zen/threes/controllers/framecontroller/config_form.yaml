@@ -1,0 +1,10 @@
+name: FrameController
+form: $/zen/threes/models/frame/fields.yaml
+modelClass: Zen\Threes\Models\Frame
+defaultRedirect: zen/threes/framecontroller
+create:
+    redirect: 'zen/threes/framecontroller/update/:id'
+    redirectClose: zen/threes/framecontroller
+update:
+    redirect: zen/threes/framecontroller
+    redirectClose: zen/threes/framecontroller
