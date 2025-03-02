@@ -2,15 +2,15 @@ import { createWebHistory, createRouter } from "vue-router";
 
 const routes = [
     {
-        path: "/:backend/zen/threes/spritecontroller/create",
+        path: "/:backend/zen/threes/framecontroller/create",
         name: "CreateSprite",
-        component: () => import("../vue/pages/ThreesProgram.vue"),
+        component: () => import("../vue/pages/Frame.vue"),
         props: true,
     },
     {
-        path: "/:backend/zen/threes/spritecontroller/update/:sid",
+        path: "/:backend/zen/threes/framecontroller/update/:sid",
         name: "UpdateSprite",
-        component: () => import("../vue/pages/ThreesProgram.vue"),
+        component: () => import("../vue/pages/Frame.vue"),
         props: true,
     },
 ];

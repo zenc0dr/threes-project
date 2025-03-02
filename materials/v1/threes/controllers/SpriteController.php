@@ -1,6 +1,5 @@
 <?php namespace Zen\Threes\Controllers;
 
-use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
 

@@ -25,13 +25,6 @@ navigation:
         permissions:
             - zen.threes.main
         sideMenu:
-            units:
-                label: Юниты
-                url: zen/threes/unitcontroller
-                icon: icon-square
-                permissions:
-                    - zen.threes.main
-                    - zen.threes.units
             frames:
                 label: Фреймы
                 url: zen/threes/framecontroller
@@ -39,3 +32,10 @@ navigation:
                 permissions:
                     - zen.threes.main
                     - zen.threes.frames
+            units:
+                label: Юниты
+                url: zen/threes/unitcontroller
+                icon: icon-square
+                permissions:
+                    - zen.threes.main
+                    - zen.threes.units
