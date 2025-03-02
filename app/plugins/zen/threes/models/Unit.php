@@ -33,6 +33,8 @@ class Unit extends Model
         'name',
         'description',
         'active',
+        'fields', // Виртуальное поле (data.fields)
+        'layers' // Виртуальное поле (data.layers)
     ];
 
     protected array $dynamic_attributes = [];
@@ -48,13 +50,14 @@ class Unit extends Model
         }
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
         # Предотвращение сохранения модели
         # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
         static::saving(function ($model) {
+            #TODO: Старая механика сохранения данных нода
             if ($save_data = ths()->getState('unit.prevent_save')) {
                 ths()->sprites()->saveNodeSettings(
                     $save_data['node_uuid'],
@@ -133,7 +136,7 @@ class Unit extends Model
         }
 
         $author_token = ths()->settings('author_token') ?? 'project';
-        return $author_token . '.';
+        return $author_token . '.units.' . ths()->createToken();
     }
 
     /**
@@ -202,6 +205,22 @@ class Unit extends Model
         $this->data_dump['fields'] = $fields ?? [];
     }
 
+    #TODO: Тут следует сделать преобразование
+    // сохранять нужно в отдельную таблицу со слоями
+    // НО при этом тут хранить только lid`s для связывания и хранения порядка сортировки
+    public function getLayersAttribute()
+    {
+        return $this->data_dump['layers'] ?? [];
+    }
+
+    public function setLayersAttribute(?array $layers = null): void
+    {
+        $this->data_dump['layers'] = $layers ?? [];
+    }
+
+    /**
+     * @return array
+     */
     public function getAdditionalFieldsAttribute(): array
     {
         if ($this->fields) {
@@ -232,6 +251,9 @@ class Unit extends Model
 
     ### Options methods
 
+    /**
+     * @return string[]
+     */
     public function getSpanOptions(): array
     {
         return [
@@ -242,6 +264,9 @@ class Unit extends Model
         ];
     }
 
+    /**
+     * @return string[]
+     */
     public function getTypeOptions(): array
     {
         return [
@@ -269,6 +294,9 @@ class Unit extends Model
         ];
     }
 
+    /**
+     * @return string[]
+     */
     public function getSizeOptions(): array
     {
         return [
@@ -281,29 +309,7 @@ class Unit extends Model
         ];
     }
 
-    public function getIoTypeOptions(): array
-    {
-        return [
-            'string' => 'Строка',
-            'bool' => 'Булево',
-            'int' => 'Целое число',
-            'float' => 'Дробное число',
-            'array' => 'Массив',
-            'object' => 'Объект'
-        ];
-    }
-
-    public function getIoDirectionOptions(): array
-    {
-        return [
-            'input' => 'Вход',
-            'output' => 'Выход',
-            'event' => 'Событие'
-        ];
-    }
-
     ### Inner methods
-
     /**
      * Заполняет поля из настроек при загрузке fillSettings()
      * @return void

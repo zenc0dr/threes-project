@@ -9,4 +9,4 @@ toolbar:
     buttons: list_toolbar
     search:
         prompt: 'backend::lang.list.search_prompt'
-recordUrl: 'zen/threes/unitcontroller/update/:tid'
+recordUrl: 'zen/threes/unitcontroller/update/:uid'

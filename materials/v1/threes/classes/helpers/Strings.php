@@ -22,6 +22,6 @@ trait Strings
      */
     public function createToken(int $length = 8): string
     {
-        return Str::random($length);
+        return strtolower(Str::random($length));
     }
 }

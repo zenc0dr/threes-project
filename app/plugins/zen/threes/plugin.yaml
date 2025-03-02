@@ -1,9 +1,9 @@
 plugin:
-    name: 'zen.threes::lang.plugin.name'
-    description: 'zen.threes::lang.plugin.description'
-    author: 'October Studio'
+    name: Threes
+    description: 'Development system'
+    author: OS3
     icon: oc-icon-cubes
-    homepage: ''
+    homepage: 'https://os3.pro'
 permissions:
     zen.threes.main:
         tab: Threes

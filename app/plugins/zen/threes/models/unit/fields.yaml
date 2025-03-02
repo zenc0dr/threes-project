@@ -45,44 +45,12 @@ tabs:
                         type: repeater
                         form:
                             fields:
-                                 rule:
+                                rule:
                                     label: ''
                                     size: small
                                     language: plain_text
                                     span: full
                                     type: codeeditor
-        io:
-            label: ''
-            prompt: Добавить
-            displayMode: accordion
-            span: full
-            type: repeater
-            tab: Интеграция
-            form:
-                fields:
-                    io_key:
-                        label: Ключ
-                        span: auto
-                        type: text
-                    io_type:
-                        label: 'Тип данных'
-                        showSearch: true
-                        span: auto
-                        type: dropdown
-                    io_direction:
-                        label: Направление
-                        showSearch: true
-                        span: auto
-                        type: dropdown
-                    io_name:
-                        label: Название
-                        span: auto
-                        type: text
-                    io_description:
-                        label: Описание
-                        size: large
-                        span: full
-                        type: richeditor
         icon:
             label: 'SVG Иконка'
             span: full
@@ -90,14 +58,38 @@ tabs:
             language: php
             type: codeeditor
             tab: Иконка
+        layers:
+            label: Аспекты
+            prompt: 'Добавить аспект'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Аспекты
+            form:
+                fields:
+                    aspect_lid:
+                        label: 'Токен аспекта (lid)'
+                        span: auto
+                        type: text
+                    aspect_name:
+                        label: 'Название аспекта'
+                        span: auto
+                        type: text
+                    aspect_exe:
+                        label: 'Атрибут аспекта'
+                        size: large
+                        language: javascript
+                        span: full
+                        type: codeeditor
 fields:
     name:
         label: 'Название юнита'
         span: auto
         type: text
-    tid:
-        label: 'Адрес юнита'
+    uid:
+        label: 'Токен юнита (uid)'
         span: auto
+        required: 1
         type: text
     description:
         label: Описание

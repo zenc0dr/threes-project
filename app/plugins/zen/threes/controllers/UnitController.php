@@ -85,7 +85,7 @@ class UnitController extends Controller
             Flash::info('Настройки нода сохранены');
 
             $node_settings = request('Unit');
-            unset($node_settings['tid']);
+            unset($node_settings['uid']);
             unset($node_settings['name']);
             unset($node_settings['description']);
 
@@ -113,7 +113,7 @@ class UnitController extends Controller
         $data = $unit->data;
         $data['settings'] = array_diff_key($data['settings'], $keys_to_remove);
         \DB::table('zen_threes_units')
-            ->where('tid', $unit->tid)
+            ->where('uid', $unit->uid)
             ->update([
                 'data' => ths()->toJson($data),
             ]);
