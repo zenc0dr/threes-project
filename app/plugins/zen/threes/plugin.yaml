@@ -32,7 +32,7 @@ navigation:
                 permissions:
                     - zen.threes.main
                     - zen.threes.units
-            sprites:
+            frames:
                 label: Фреймы
                 url: zen/threes/framecontroller
                 icon: icon-play

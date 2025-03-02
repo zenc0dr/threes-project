@@ -1,8 +1,8 @@
 <?php namespace Zen\Threes\Controllers;
 
-use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
+use Zen\Threes\Models\Frame;
 
 class FrameController extends Controller
 {
@@ -15,14 +15,25 @@ class FrameController extends Controller
     public $listConfig = 'config_list.yaml';
 
     public $requiredPermissions = [
-        'zen.threes.main', 
-        'zen.threes.frames' 
+        'zen.threes.main',
+        'zen.threes.frames'
     ];
 
     public function __construct()
     {
         parent::__construct();
-        BackendMenu::setContext('Zen.Threes', 'main', 'sprites');
+        BackendMenu::setContext('Zen.Threes', 'main', 'frames');
+        $this->addCss(mix('css/threes.css', 'plugins/zen/threes/assets'));
+        $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);
+    }
+
+    public function update($fid)
+    {
+        // Ищем запись по fid
+        $frame = Frame::findByFid($fid);
+
+        // Передаём ID в стандартный update
+        return $this->asExtension('FormController')->update($frame->id);
     }
 
 }

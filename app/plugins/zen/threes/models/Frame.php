@@ -37,6 +37,11 @@ class Frame extends Model
 
     protected array $data_dump = [];
 
+    public static function findByFid($fid)
+    {
+        return self::where('fid', $fid)->firstOrFail();
+    }
+
     //region Фильтры
     public function scopeActive($query)
     {
