@@ -12,7 +12,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->exe('Zen.Threes.Classes.Units.OpcodeGenerator.generateOpcode');
+        ths()->nodes()->addNode('test1', 0);
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

@@ -24,4 +24,14 @@ class Helpers
     {
         return Units::getInstance();
     }
+
+    public function nodes(): Nodes
+    {
+        return Nodes::getInstance();
+    }
+
+    public function frames(): Frames
+    {
+        return Frames::getInstance();
+    }
 }

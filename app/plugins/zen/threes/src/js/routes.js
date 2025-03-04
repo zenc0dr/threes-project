@@ -8,7 +8,7 @@ const routes = [
         props: true,
     },
     {
-        path: "/:backend/zen/threes/framecontroller/update/:sid",
+        path: "/:backend/zen/threes/framecontroller/update/:fid",
         name: "UpdateSprite",
         component: () => import("../vue/pages/Frame.vue"),
         props: true,

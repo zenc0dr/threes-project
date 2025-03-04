@@ -81,6 +81,11 @@ tabs:
                         language: javascript
                         span: full
                         type: codeeditor
+                    aspect_desc:
+                        label: 'Описание аспекта'
+                        size: large
+                        span: full
+                        type: richeditor
 fields:
     name:
         label: 'Название юнита'
