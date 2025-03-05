@@ -4,36 +4,22 @@
 use System\Classes\PluginBase;
 use Zen\Threes\Console\Vector;
 
-/**
- * Plugin class
- */
 class Plugin extends PluginBase
 {
-    /**
-     * register method, called when the plugin is first registered.
-     */
     public function register(): void
     {
+        # Регистрация консольных команд
         $this->registerConsoleCommand('threes:vector', Vector::class);
     }
 
-    /**
-     * boot method, called right before the request route.
-     */
     public function boot()
     {
     }
 
-    /**
-     * registerComponents used by the frontend.
-     */
     public function registerComponents()
     {
     }
 
-    /**
-     * registerSettings used by the backend.
-     */
     public function registerSettings(): array
     {
         return [
@@ -58,7 +44,6 @@ namespace Zen\Threes;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Settings;
 use Zen\Threes\classes\Helpers;
-use Zen\Threes\Classes\Fitter;
 
 class Threes extends Helpers
 {
@@ -77,14 +62,37 @@ class Threes extends Helpers
         return app("Zen\Threes\Api\\$path")->{$method}(...$data);
     }
 
+    /**
+     * Рефлексивный метод вызова
+     * @param string $path
+     * @param mixed|null $constructor
+     * @param ...$arguments
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function exe(string $path, mixed $constructor = null, ...$arguments): mixed
+    {
+        $path = explode('.', $path);
+        $method = array_pop($path);
+        $path = join('\\', $path);
+        $class = "\\$path";
+        $is_static = (new \ReflectionMethod($class, $method))->isStatic();
+        if ($is_static) {
+            return $class::$method($arguments);
+        } else {
+            $instance = new $class($constructor);
+            return $instance->$method($arguments);
+        }
+    }
+
+    /**
+     * Интерфейс для настроек
+     * @param string $key
+     * @return mixed
+     */
     public function settings(string $key)
     {
         return Settings::get($key);
-    }
-
-    public function fitter(): Fitter
-    {
-        return Fitter::getInstance();
     }
 }
 
@@ -96,30 +104,15 @@ namespace Zen\Threes\Api\debug;
 
 use Zen\Threes\Models\Unit;
 use Zen\Threes\Console\Vector;
+use Zen\Threes\Classes\units\OpcodeGenerator;
+
+
 class Tests
 {
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-            require_once base_path('storage/temp/threes/pipelines/Pipelines5.php');
-            dd(\Threes\Pipelines\Pipelines5::logic());
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:pipelineTest?num=1
-    public function pipelineTest()
-    {
-        $num = intval(request('num'));
-        require_once base_path("storage/temp/threes/pipelines/Pipelines1.php");
-        dd(
-            \Threes\Pipelines\Pipelines1::exec($num)
-        );
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:loadUnit?tid=
-    public function loadUnit()
-    {
-        $unit = Unit::find(request('tid'));
-        dd($unit->toArray());
+        ths()->nodes()->addNode('test1', 0);
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -130,445 +123,90 @@ class Tests
 }
 
 ```
-`plugins/zen/threes/api/sprites/Program.php`
+`plugins/zen/threes/api/frames/Frame.php`
 ```<?php
 
-namespace Zen\Threes\Api\Sprites;
+namespace Zen\Threes\Api\Frames;
 
-use Zen\Threes\Models\Sprite;
-
-class Program
+class Frame
 {
-    # http://threes.dc/threes.api/Sprites.Program:save
-    public function save(): array
+    # http://threes.dc/threes.api/frames.Frame:saveProgram
+    public function saveProgram(): array
     {
-        ths()->sprites()->programSave(
-            request('sid'),
+        ths()->frames()->saveProgram(
+            request('fid'),
             request('program')
         );
-
-        return [
-            'success' => true
-        ];
+        return [];
     }
 
-    # http://threes.dc/threes.api/Sprites.Program:load?sid=acme
-    public function load(): array
+    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=test1
+    public function loadProgram(): array
     {
         return [
-            'success' => true,
-            'program' => Sprite::find(request('sid'))?->program
+            'program' => ths()->frames()->loadProgram(request('fid'))
         ];
     }
 
-    # http://threes.dc/threes.api/Sprites.Program:move
-    public function move(): array
+    # http://threes.dc/threes.api/frames.Frame:addLine?fid=test1
+    public function addLine()
     {
-        ths()->sprites()->moveNode(
-            request('sid'),
-            request('nid'),
-            request('after_nid')
-        );
-
-        return [
-            'success' => true,
-        ];
+        $fid = request('fid');
+        ths()->frames()->addLine($fid);
+        return [];
     }
 
-    # http://threes.dc/threes.api/Sprites.Program:copy
-    public function copy(): array
-    {
-        ths()->sprites()->copyNode(
-            request('sid'),
-            request('nid')
-        );
 
-        return [
-            'success' => true,
-        ];
-    }
-
-    # http://threes.dc/threes.api/Sprites.Program:delete
-    public function delete(): array
-    {
-        ths()->sprites()->deleteNode(
-            request('sid'),
-            request('nid')
-        );
-
-        return [
-            'success' => true,
-        ];
-    }
-
-    # http://threes.dc/threes.api/Sprites.Program:lineActions
-    public function lineActions(): array
-    {
-        ths()->sprites()->lineActions(
-            request('sid'),
-            request('action'),
-            request('line_index')
-        );
-        return [
-            'success' => true,
-        ];
-    }
-
-    # http://threes.dc/threes.api/Sprites.Program:buildCode?sid=test
-    public function buildCode()
-    {
-        ths()->sprites()->buildCode(request('sid'));
-        return [
-            'success' => true,
-        ];
-    }
 }
 
 ```
-`plugins/zen/threes/api/sprites/SelectNode.php`
+`plugins/zen/threes/api/nodes/Node.php`
 ```<?php
 
-namespace Zen\Threes\Api\Sprites;
+namespace Zen\Threes\Api\Nodes;
 
-class SelectNode
+class Node
 {
-    /**
-     * http://threes.dc/threes.api/Sprites.SelectNode:records
-     * @return array[]
-     */
-    public function records(): array
+    # http://threes.dc/threes.api/nodes.Node:Create?fid=test1&line_index=0
+    public function Create(): array
     {
-        $node_types = [
-            [
-                'type' => 'input',
-                'name' => 'Вход',
-                'icon' => 'input.svg',
-                'desc' => 'Входной пин для входных данных',
-            ],
-            [
-                'type' => 'unit',
-                'name' => 'Юнит',
-                'icon' => 'unit.svg',
-                'desc' => 'Нод подключающий юнит',
-            ],
-            [
-                'type' => 'if',
-                'name' => 'Условие',
-                'icon' => 'if.svg',
-                'desc' => 'Условие ЕСЛИ',
-            ],
-            [
-                'type' => 'else',
-                'name' => 'Условие',
-                'icon' => 'else.svg',
-                'desc' => 'Условие ИЛИ',
-            ],
-            [
-                'type' => 'do',
-                'name' => 'Делать',
-                'icon' => 'do.svg',
-                'desc' => 'Делать',
-            ],
-            [
-                'type' => 'for',
-                'name' => 'Цикл',
-                'icon' => 'for.svg',
-                'desc' => 'Выполняет код в цикле FOREACH перебирая элементы массива',
-            ],
-            [
-                'type' => 'end',
-                'name' => 'END',
-                'icon' => 'end.svg',
-                'desc' => 'Конец строки',
-            ],
-            [
-                'type' => 'set',
-                'name' => 'SET',
-                'icon' => 'set.svg',
-                'desc' => 'Записать переменную',
-            ],
-            [
-                'type' => 'var',
-                'name' => 'VAR',
-                'icon' => 'var.svg',
-                'desc' => 'Извлечь переменную',
-            ],
-        ];
-
-
-        return [
-            'node_types' => $node_types,
-        ];
+        $fid = request('fid');
+        $line_index = request('line_index');
+        ths()->nodes()->addNode($fid, $line_index);
+        return [];
     }
 }
 
 ```
-`plugins/zen/threes/api/sprites/Version.php`
-```<?php
-
-namespace Zen\Threes\Api\Sprites;
-
-class Version
-{
-    /**
-     * http://threes.dc/threes.api/Sprites.Version:getVersion?sid=test
-     * @return array
-     */
-    public function getVersion()
-    {
-        $sid = request('sid');
-        return ths()->sprites()->getVersion($sid);
-    }
-}
-
-```
-`plugins/zen/threes/api/units/Records.php`
-```<?php
-
-namespace Zen\Threes\Api\Units;
-
-class Records
-{
-    /**
-     * http://threes.dc/threes.api/Units.Records:get
-     * plugins/zen/threes/classes/units/Records.php
-     * @return void
-     */
-    public function get()
-    {
-        dd(
-            ths()->units()->getRecords()
-        );
-    }
-}
-
-```
-`plugins/zen/threes/api/units/SelectUnit.php`
-```<?php
-
-namespace Zen\Threes\Api\Units;
-
-use Zen\Threes\Models\Unit;
-
-class SelectUnit
-{
-    /**
-     * http://threes.dc/threes.api/Units.SelectUnit:records
-     */
-    public function records()
-    {
-        $units = Unit::active()->get();
-
-        $output = [];
-        foreach ($units as $unit) {
-            $output[] = [
-                'tid' => $unit->tid,
-                'name' => $unit->name,
-                'icon' => $unit->icon_path,
-                'description' => $unit->description,
-            ];
-        }
-
-        return [
-            'units' => $output
-        ];
-    }
-
-    /**
-     * http://threes.dc/threes.api/Units.SelectUnit:makeNode
-     * @return array
-     */
-    public function makeNode(): array
-    {
-        $tid = request('tid');
-        $unit = Unit::find($tid);
-        if (!$unit) {
-            return [
-                'success' => false
-            ];
-        }
-        return [
-            'success' => true,
-            'node' => [
-                'tid' => $tid,
-                'name' => $unit->name,
-                'icon' => env('APP_URL') . $unit->icon_path,
-                'io' => $unit->io,
-            ]
-        ];
-    }
-}
-
-```
-`plugins/zen/threes/classes/CodeBuilder.php`
+`plugins/zen/threes/classes/Frames.php`
 ```<?php
 
 namespace Zen\Threes\Classes;
 
-use Zen\Threes\Models\Sprite;
-
-class CodeBuilder
-{
-    private Sprite $sprite;
-    private array $nodes = [];
-    private int $pipeline_index = 0;
-
-    public function __construct(string $sid)
-    {
-        $this->sprite = Sprite::find($sid);
-    }
-
-    public function generate() {
-        $program = $this->sprite->program;
-        foreach ($program as $line) {
-            foreach ($line as $node) {
-                $this->nodes[] = $node;
-            }
-        }
-        $this->handleNodes();
-    }
-
-    private function addNode(array $node): void
-    {
-        $this->nodes[] = $node;
-    }
-
-    private function handleNodes()
-    {
-        $method = null;
-        $pipeline = [];
-
-        foreach ($this->nodes as $node) {
-            if (!isset($node['tid'])) {
-                if ($method) {
-                    $this->createPipeline($method, $pipeline);
-                    $pipeline = [];
-                }
-
-                $method = $node['type'];
-            } else {
-                $pipeline[] = $node;
-            }
-        }
-
-
-        $this->createPipeline($method, $pipeline);
-    }
-
-    private function createRoute()
-    {
-
-    }
-
-    private function createPipeline($method, $pipeline)
-    {
-//        if ($method === 'input') {
-//
-//        }
-
-
-        $this->pipeline_index++;
-        $file_name = "Pipelines" . $this->pipeline_index;
-
-        # Создаём класс спрайта
-        $pipelines_path = ths()->checkDir(storage_path("temp/threes/pipelines/$file_name.php"));
-
-        $file = [];
-        $file[] = '<?php';
-        $file[] = '';
-        $file[] = 'namespace Threes\Pipelines;';
-        $file[] = '';
-        $file[] = '';
-        $file[] = 'class Pipelines' . $this->pipeline_index;
-        $file[] = '{';
-
-        $exec_input = join(', ', $this->getIoKeysNodes($pipeline[0], 'input', '$'));
-        $file[] = "    public static function exec($exec_input)";
-        $file[] = '    {';
-
-        $methods = [];
-        $node_count = 0;
-        foreach ($pipeline as $node) {
-            $node_count++;
-            if ($node_count === 1) {
-                $inputs = join(', ', $this->getIoKeysNodes($node, 'input', '$'));
-            } else {
-                $inputs = '$result';
-            }
-            $file[] = '        $result = self::node' . $node_count . '(' . $inputs . ');';
-
-            $this->addMethod($methods, $node, $node_count);
-        }
-        $file[] = '        return $result;';
-        $file[] = '    }';
-
-        $file = array_merge($file, $methods);
-
-        $file[] = '}';
-        file_put_contents(
-            $pipelines_path,
-            join(PHP_EOL, $file)
-        );
-    }
-
-    private function addMethod(array &$methods, array $node, int $node_count)
-    {
-        $method_lines = [];
-        $unit = ths()->units()->get($node['tid']);
-        $call = $unit['call'];
-
-        $call_data = ths()->sprites()->parseClassMethod($call);
-        $class = $call_data['class'];
-        $method = $call_data['method'];
-        $method_lines[] = '    private static function node' . $node_count . '($input)';
-        $method_lines[] = '    {';
-        $method_lines[] = '        $node = new ' . $class . '();';
-        $method_lines[] = '        $result = $node->' . $method . '($input);';
-        $method_lines[] = '        return $result;';
-        $method_lines[] = '    }';
-        $method_lines[] = '';
-        $methods = array_merge($methods, $method_lines);
-    }
-
-
-    /**
-     * @param array $node
-     * @param string $type
-     * @param string $prefix
-     * @return array
-     */
-    private function getIoKeysNodes(
-        array $node,
-        string $type = 'input',
-        string $prefix = ''
-    ): array {
-        $inputs = [];
-        if (isset($node['io'])) {
-            foreach ($node['io'] as $pin) {
-                if ($pin['io_direction'] === $type) {
-                    $inputs[] = $prefix . $pin['io_key'];
-                }
-            }
-        }
-        return $inputs;
-    }
-}
-
-```
-`plugins/zen/threes/classes/Fitter.php`
-```<?php
-
-namespace Zen\Threes\Classes;
-
+use Zen\Threes\Models\Frame;
 use Zen\Threes\Traits\SingletonTrait;
 
-class Fitter
+class Frames
 {
     use SingletonTrait;
 
-    public function build(string $sid)
+    public function saveProgram(string $fid, array $program): void
     {
-        dd('ok', $sid);
+        Frame::findByFid($fid)->update(['program' => $program]);
+    }
+
+    public function loadProgram(string $fid): array
+    {
+        return Frame::findByFid($fid)->program;
+    }
+
+    public function addLine(string $fid): void
+    {
+        $frame = Frame::findByFid($fid);
+        $program = $frame->program;
+        $program[] = [];
+        $frame->program = $program;
+        $frame->save();
     }
 }
 
@@ -594,155 +232,59 @@ class Helpers
     use Yaml;     # Работа с YAML
     use Strings;  # Слой настроек
     use State;    # Управлением состоянием (сессия Threes)
-    use Carbon;
+    use Carbon;   # Создание объекта Carbon
 
     public function units(): Units
     {
         return Units::getInstance();
     }
 
-    public function sprites(string | null $sid = null): Sprites
+    public function nodes(): Nodes
     {
-        return Sprites::getInstance($sid);
+        return Nodes::getInstance();
     }
 
-    public function sets(): Set
+    public function frames(): Frames
     {
-        return Set::getInstance();
+        return Frames::getInstance();
     }
-
 }
 
 ```
-`plugins/zen/threes/classes/Set.php`
+`plugins/zen/threes/classes/Nodes.php`
 ```<?php
 
 namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
-use Illuminate\Support\Facades\DB;
 
-class Set
+use Zen\Threes\Models\Frame;
+
+class Nodes
 {
     use SingletonTrait;
 
     /**
-     * Сохранить сет
-     * @param string $uuid
-     * @param mixed $value
-     * @return void
+     * Добавить новый нод в программу
+     * @param string $fid
+     * @param int $line_index
+     * @return array
      */
-    public function set(string $uuid, mixed $value, ?string $scope = null, ?array $tags = null): void
+    public function addNode(string $fid, int $line_index): array
     {
-        if ($tags) {
-            $tags = collect($tags)->map(function ($tag) {
-                return ":$tag:";
-            })->join('');
-        }
-
-        DB::table('zen_threes_sets')->updateOrInsert(
-            ['uuid' => $uuid],
-            [
-                'data' => ths()->toJson([$value]),
-                'scope' => $scope,
-                'tags' => $tags,
+        $frame = Frame::findByFid($fid);
+        $program = $frame->program ?? [];
+        $program[$line_index][] = [
+            'nid' => ths()->createToken(),
+            'name' => '#',
+            'description' => null,
+            'layers' => [
+                'threes.units.oc@write' => '#'
             ]
-        );
-    }
-
-    /**
-     * Загрузить сет
-     * @param string $uuid
-     * @return mixed
-     */
-    public function get(string $uuid): mixed
-    {
-        $record = DB::table('zen_threes_sets')->where('uuid', $uuid)->first();
-        if (!$record) {
-            return null;
-        }
-        return ths()->fromJson($record->data)[0];
-    }
-
-    public function remove(string $uuid): void
-    {
-        DB::table('zen_threes_sets')->where('uuid', $uuid)->delete();
-    }
-
-    /**
-     * Загрузить пачку сетов
-     * @param array $uuids
-     * @return mixed[]
-     */
-    public function getBatch(?array $uuids = null, ?string $scope = null, ?array $tags = null): array
-    {
-        return DB::table('zen_threes_sets')
-            ->where(function ($query) use ($uuids, $scope, $tags) {
-                if ($uuids) {
-                    $query->whereIn('uuid', $uuids);
-                }
-                if ($scope) {
-                    $query->where('scope', $scope);
-                }
-                if ($tags) {
-                    foreach ($tags as $tag) {
-                        $query->orWhere('tags', 'like', "%:$tag:%");
-                    }
-                }
-            })
-            ->pluck('data', 'uuid')
-            ->toArray();
-    }
-}
-
-```
-`plugins/zen/threes/classes/Sprites.php`
-```<?php
-
-namespace Zen\Threes\Classes;
-
-use Zen\Threes\Traits\SingletonTrait;
-use Zen\Threes\Classes\Sprites\Program;
-use Zen\Threes\Classes\Sprites\Node;
-use Zen\Threes\Classes\Sprites\Version;
-use Zen\Threes\Models\Sprite;
-use Illuminate\Database\Eloquent\Builder;
-
-class Sprites
-{
-    use SingletonTrait;
-    use Program;
-    use Node;
-    use Version;
-
-    private ?string $sid = null;
-
-    public function __construct(string | null $sid = null)
-    {
-        $this->sid = $sid;
-    }
-
-    /**
-     * Вернуть экземпляр спрайта по sid
-     * @param string|null $sid
-     * @return Sprite|null
-     */
-    public function get(string | null $sid = null): Sprite | null
-    {
-        $sid = $sid ?? $this->sid;
-        if (!$sid) {
-            return null;
-        }
-        return Sprite::find($sid);
-    }
-
-    /**
-     * Вернуть конструктор запросов
-     * @return Builder
-     */
-    public function query(): Builder
-    {
-        return Sprite::query();
+        ];
+        $frame->program = $program;
+        $frame->save();
+        return [];
     }
 }
 
@@ -752,15 +294,11 @@ class Sprites
 
 namespace Zen\Threes\Classes;
 
-use Zen\Threes\Classes\Units\UnitRecords;
-use Zen\Threes\Classes\Units\UnitRecord;
 use Zen\Threes\Traits\SingletonTrait;
 
 class Units
 {
     use SingletonTrait;
-    use UnitRecords;
-    use UnitRecord;
 }
 
 ```
@@ -769,10 +307,9 @@ class Units
 
 namespace Zen\Threes\Classes\Helpers;
 
-
 trait Carbon
 {
-    function carbon($date = null, $format = null): \Carbon\Carbon
+    function carbon(?string $date = null, ?string $format = null): \Carbon\Carbon
     {
         return $format
             ? \Carbon\Carbon::createFromFormat($format, $date)
@@ -853,17 +390,17 @@ trait Files
 {
     /**
      * Проверить адрес файла и рекурсивно создать недостающие папки
-     * @param string $dir_path
+     * @param string $file_path
      * @param int $permissions
      * @return string
      */
-    public function checkDir(string $dir_path, int $permissions = 0777): string
+    public function checkDir(string $file_path, int $permissions = 0777): string
     {
-        $dirname = dirname($dir_path);
+        $dirname = dirname($file_path);
         if (!is_dir($dirname)) {
             mkdir($dirname, $permissions, true);
         }
-        return $dir_path;
+        return $file_path;
     }
 
     /**
@@ -1017,14 +554,23 @@ use Str;
 
 trait Strings
 {
+    /**
+     * Сгенерировать UUID
+     * @return string
+     */
     public function createUuid(): string
     {
         return Str::uuid()->toString();
     }
 
-    public function createToken($length = 8): string
+    /**
+     * Сгенерировать случайную строку с заданной длинной
+     * @param int $length
+     * @return string
+     */
+    public function createToken(int $length = 8): string
     {
-        return Str::random($length);
+        return strtolower(Str::random($length));
     }
 }
 
@@ -1098,466 +644,16 @@ trait Yaml
 }
 
 ```
-`plugins/zen/threes/classes/sprites/Node.php`
-```<?php
-
-namespace Zen\Threes\Classes\Sprites;
-
-use View;
-
-trait Node
-{
-    public function saveNodeSettings(string $node_uuid, array $settings): void
-    {
-        ths()->sets()->set($node_uuid, $settings, 'nodes');
-    }
-
-    public function loadNodeSettings(string $node_uuid): ?array
-    {
-        return ths()->sets()->get($node_uuid);
-    }
-
-    public function getNodeTitle(string $tid, string $sid, string $node_uuid): string
-    {
-        $unit = ths()->units()->get($tid);
-
-        return View::make("zen.threes::node.info", [
-            'tid' => $tid,
-            'unit_name' => $unit->name,
-            'sid' => $sid,
-            'nid' => $node_uuid,
-        ])->render();
-    }
-}
-
-```
-`plugins/zen/threes/classes/sprites/Program.php`
-```<?php
-
-namespace Zen\Threes\Classes\Sprites;
-
-use Zen\Threes\Models\Sprite;
-
-use Zen\Threes\Classes\CodeBuilder;
-
-trait Program
-{
-    /**
-     * Сохранить программу спрайта
-     * @param string $sid
-     * @param array $program
-     * @return string[]
-     */
-    public function programSave(string $sid, array $program): array
-    {
-        $this->stampUuids($program);
-
-        $sprite = Sprite::find($sid);
-        $sprite->program = $program;
-        $sprite->save();
-
-        return [
-            'success' => 'true',
-        ];
-    }
-
-    /**
-     * Проставить недостающие uuids у нод в программе
-     * @param array $program
-     * @return void
-     */
-    private function stampUuids(array &$program): void
-    {
-        foreach ($program as &$line) {
-            foreach ($line as &$node) {
-                if (isset($node['tid']) && !isset($node['node'])) {
-                    $node['node'] = \Str::uuid();
-                }
-            }
-        }
-    }
-
-    public function programLoad(string $sid): array
-    {
-        $sprite = Sprite::find($sid);
-        return [
-            'success' => true,
-            'program' => $sprite,
-        ];
-    }
-
-    /**
-     * Метод перемещения нодов
-     * @param string $sid
-     * @param string $nid
-     * @param string $after_nid
-     * @return void
-     */
-    public function moveNode(string $sid, string $nid, string $after_nid): void
-    {
-        $sprite = Sprite::find($sid);
-        $program = $sprite->program;
-
-        $node_dump = null;
-        $source_line_index = null;
-        $source_node_index = null;
-        $target_line_index = null;
-        $target_node_index = null;
-
-        $is_target_line_only = (!str_contains($after_nid, '.'));
-
-        foreach ($program as $line_index => &$line) {
-            foreach ($line as $node_index => $node) {
-                if ($nid === $line_index . '.' . $node_index) {
-                    $node_dump = $node;
-                    $source_line_index = $line_index;
-                    $source_node_index = $node_index;
-                }
-                if (!$is_target_line_only && $after_nid === $line_index . '.' . $node_index) {
-                    $target_line_index = $line_index;
-                    $target_node_index = $node_index;
-                }
-            }
-        }
-
-        if ($node_dump === null) {
-            return;
-        }
-
-        unset($program[$source_line_index][$source_node_index]);
-
-        $program[$source_line_index] = array_values($program[$source_line_index]);
-
-        if ($is_target_line_only) {
-            $target_line_index = $after_nid;
-            if (!isset($program[$target_line_index])) {
-                $program[$target_line_index] = [];
-            }
-            $program[$target_line_index][] = $node_dump;
-        } else {
-            if ($target_line_index === null) {
-                $program[0][] = $node_dump;
-            } else {
-                array_splice($program[$target_line_index], $target_node_index + 1, 0, [$node_dump]);
-            }
-        }
-
-        $sprite->program = $program;
-        $sprite->save();
-    }
-
-    public function copyNode(string $sid, string $nid): void
-    {
-        $sprite = Sprite::find($sid);
-        $program = $sprite->program;
-
-        $node_copy = null;
-        $source_line_index = null;
-
-        // Найти узел, который нужно скопировать
-        foreach ($program as $line_index => $line) {
-            foreach ($line as $node_index => $node) {
-                if ($nid === $line_index . '.' . $node_index) {
-                    $node_copy = $node;
-                    $node_copy['node'] = \Str::uuid();
-                    $source_line_index = $line_index;
-                    break 2; // Выход из обоих циклов
-                }
-            }
-        }
-
-        // Если узел не найден, выходим
-        if ($node_copy === null) {
-            return;
-        }
-
-        // Создаём уникальный идентификатор для копии узла
-        $node_copy['id'] = uniqid('node_', true);
-
-        // Добавляем копию узла в конец той же строки
-        $program[$source_line_index][] = $node_copy;
-
-        // Сохраняем изменения обратно в базу данных
-        $sprite->program = $program;
-        $sprite->save();
-    }
-
-    /**
-     * Удалить узел из программы спрайта
-     *
-     * @param string $sid ID спрайта
-     * @param string $nid ID узла
-     * @return void
-     */
-    public function deleteNode(string $sid, string $nid): void
-    {
-        $sprite = Sprite::find($sid);
-        $program = $sprite->program;
-
-        $found = false;
-
-        // Найти и удалить узел с указанным nid
-        foreach ($program as $line_index => &$line) {
-            foreach ($line as $node_index => $node) {
-                if ($nid === $line_index . '.' . $node_index) {
-
-                    if (isset($node['node'])) {
-                        ths()->sets()->remove($node['node']);
-                    }
-
-                    unset($line[$node_index]);
-                    $line = array_values($line); // Уплотняем индексы
-                    $found = true;
-                    break 2; // Выходим из обоих циклов
-                }
-            }
-        }
-
-        // Если узел не найден, выходим
-        if (!$found) {
-            return;
-        }
-
-        // Сохраняем обновлённую программу обратно в базу
-        $sprite->program = $program;
-        $sprite->save();
-    }
-
-    /**
-     * Произвести действие над линией
-     * @param string $sid
-     * @param string $action
-     * @param int $line_index
-     * @return void
-     */
-    public function lineActions(string $sid, string $action, int $line_index): void
-    {
-        if ($action === 'copy') {
-            $this->lineCopyAction($sid, $action, $line_index);
-        }
-        if ($action === 'delete') {
-            $this->lineDeleteAction($sid, $action, $line_index);
-        }
-    }
-
-    /**
-     * Копировать линию
-     * @param string $sid
-     * @param string $action
-     * @param int $line_index
-     * @return void
-     */
-    private function lineCopyAction(string $sid, string $action, int $line_index): void
-    {
-        $sprite = Sprite::find($sid);
-        if (!$sprite) {
-            return;
-        }
-
-        $program = $sprite->program;
-        if (!isset($program[$line_index])) {
-            return;
-        }
-
-        $line_to_copy = $program[$line_index];
-        $line_copy = [];
-        foreach ($line_to_copy as $node) {
-            $node_copy = $node;
-            $node_copy['node'] = \Str::uuid();
-            $line_copy[] = $node_copy;
-        }
-
-        array_splice($program, $line_index + 1, 0, [$line_copy]);
-
-        $sprite->program = $program;
-        $sprite->save();
-    }
-
-    /**
-     * Удалить линию
-     * @param string $sid
-     * @param string $action
-     * @param int $line_index
-     * @return void
-     */
-    private function lineDeleteAction(string $sid, string $action, int $line_index): void
-    {
-        $sprite = Sprite::find($sid);
-        if (!$sprite) {
-            return;
-        }
-
-        $program = $sprite->program;
-        if (!isset($program[$line_index])) {
-            return;
-        }
-
-        foreach ($program[$line_index] as $node) {
-            if (isset($node['node'])) {
-                ths()->sets()->remove($node['node']);
-            }
-        }
-
-        unset($program[$line_index]);
-
-        $program = array_values($program);
-
-        $sprite->program = $program;
-        $sprite->save();
-    }
-
-    /**
-     * На вход подаётся Zen.Units.TestClass.adder
-     * На выходе массив вида ['class' => '\Zen\Units\TestClass', 'method' => 'adder']
-     * @param string $identifier
-     * @return array
-     */
-    public function parseClassMethod(string $identifier): array
-    {
-        $parts = explode('.', $identifier);
-        $method = array_pop($parts);
-        $class = '\\' . implode('\\', $parts);
-        return [
-            'class' => $class,
-            'method' => $method,
-        ];
-    }
-
-    /**
-     * Построитель кода
-     * @param string $sid
-     * @return void
-     */
-    public function buildCode(string $sid)
-    {
-        $code_builder = new CodeBuilder($sid);
-        $code_builder->generate();
-    }
-}
-
-```
-`plugins/zen/threes/classes/sprites/Version.php`
-```<?php
-
-namespace Zen\Threes\Classes\Sprites;
-
-use Illuminate\Support\Facades\DB;
-
-trait Version
-{
-    public function getVersion(string $sid, ?int $version = null): array | null
-    {
-        $last_version = DB::table('zen_threes_versions')
-            ->where('sid', $sid)
-            ->where(function ($query) use ($version) {
-                if ($version) {
-                    $query->where('version', $version);
-                }
-            })
-            ->orderBy('version', 'desc')
-            ->first();
-
-        if (!$last_version) {
-            return [
-                'version' => 0,
-                'versions' => [
-                    [
-                        'id' => 0,
-                        'name' => "Сборок не обнаружено"
-                    ]
-                ]
-            ];
-        }
-
-        return [
-            'versions' => $this->spriteVersionsOptions($sid),
-            'version' => $last_version->version,
-        ];
-    }
-
-    public function spriteVersionsOptions(string $sid): array
-    {
-        $records = DB::table('zen_threes_versions')
-            ->where('sid', $sid)
-            ->get();
-        $output = [];
-        foreach ($records as $record) {
-            $time = ths()->carbon($record->time)->format('d.m.Y H:i');
-            $output[] = [
-                'id' => $record->version,
-                'name' => "Сборка: {$record->version} - $time"
-            ];
-        }
-
-        return $output;
-    }
-
-    public function setVersion(string $sid, array $data): void
-    {
-        $last_version = DB::table('zen_threes_versions')
-            ->where('sid', $sid)
-            ->orderBy('version', 'desc')
-            ->first();
-
-        if (!$last_version) {
-            DB::table('zen_threes_versions')
-                ->insert([
-                    'sid' => $sid,
-                    'version' => 1,
-                    'data' => ths()->toJson($data),
-                    'time' => now()
-                ]);
-        } else {
-            DB::table('zen_threes_versions')
-                ->insert([
-                    'sid' => $sid,
-                    'version' => $last_version->version + 1,
-                    'data' => ths()->toJson($data),
-                    'time' => now()
-                ]);
-        }
-    }
-}
-
-```
-`plugins/zen/threes/classes/units/UnitRecord.php`
+`plugins/zen/threes/classes/units/OpcodeGenerator.php`
 ```<?php
 
 namespace Zen\Threes\Classes\Units;
 
-use Zen\Threes\Models\Unit;
-
-trait UnitRecord
+class OpcodeGenerator
 {
-    public function getUnitData(string $tid): array | null
+    public static function generateOpcode()
     {
-        $unit = Unit::find($tid);
-        if (!$unit) {
-            return null;
-        }
-
-        return [
-            'io' => $unit->io,
-        ];
-    }
-
-    public function get(string $tid) : Unit | null
-    {
-        return Unit::find($tid);
-    }
-}
-
-```
-`plugins/zen/threes/classes/units/UnitRecords.php`
-```<?php
-
-namespace Zen\Threes\Classes\Units;
-
-trait UnitRecords
-{
-    public function getRecords()
-    {
-        dd('units records');
+        dd('OKAY');
     }
 }
 
@@ -1566,7 +662,6 @@ trait UnitRecords
 ```<?php namespace Zen\Threes\Console;
 
 use Illuminate\Console\Command;
-use Exception;
 
 /**
  * Vector Command
@@ -1611,10 +706,6 @@ class Vector extends Command
                 }
             }
 
-            if (str_contains($path, 'node_modules')) {
-                dd('stop', $path);
-            }
-
             $this->output->writeln("Render file: $path");
             $code = file_get_contents($path);
             $path = preg_replace('/^\/app\//', '', $path);
@@ -1632,14 +723,14 @@ class Vector extends Command
 }
 
 ```
-`plugins/zen/threes/controllers/SpriteController.php`
+`plugins/zen/threes/controllers/FrameController.php`
 ```<?php namespace Zen\Threes\Controllers;
 
-use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
+use Zen\Threes\Models\Frame;
 
-class SpriteController extends Controller
+class FrameController extends Controller
 {
     public $implement = [
         \Backend\Behaviors\FormController::class,
@@ -1649,24 +740,38 @@ class SpriteController extends Controller
     public $formConfig = 'config_form.yaml';
     public $listConfig = 'config_list.yaml';
 
+    public $requiredPermissions = [
+        'zen.threes.main',
+        'zen.threes.frames'
+    ];
+
     public function __construct()
     {
         parent::__construct();
-        BackendMenu::setContext('Zen.Threes', 'main', 'sprites');
+        BackendMenu::setContext('Zen.Threes', 'main', 'frames');
         $this->addCss(mix('css/threes.css', 'plugins/zen/threes/assets'));
         $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);
     }
+
+    public function update($fid)
+    {
+        // Ищем запись по fid
+        $frame = Frame::findByFid($fid);
+
+        // Передаём ID в стандартный update
+        return $this->asExtension('FormController')->update($frame->id);
+    }
+
 }
 
 ```
 `plugins/zen/threes/controllers/UnitController.php`
 ```<?php namespace Zen\Threes\Controllers;
 
-use Backend;
-use BackendMenu;
 use Backend\Classes\Controller;
-use Zen\Threes\Models\Unit;
+use BackendMenu;
 use Flash;
+use Zen\Threes\Models\Unit;
 
 class UnitController extends Controller
 {
@@ -1702,10 +807,10 @@ class UnitController extends Controller
         }
 
         $sid = request('sid');
-        $node_uuid = request('node');
+        $nid = request('nid');
 
         if ($sid) {
-            foreach (['name', 'tid', 'description', 'fields', 'io', 'icon'] as $field) {
+            foreach (['name', 'uid', 'description', 'fields', 'icon'] as $field) {
                 if ($form->getField($field)) {
                     $form->removeField($field);
                 }
@@ -1718,9 +823,9 @@ class UnitController extends Controller
             $form->addFields($unit->additional_fields, 'primary');
         }
 
-        // Загружаем настройки нода после добавления полей
-        if ($sid && $node_uuid) {
-            $node_settings = ths()->sprites()->loadNodeSettings($node_uuid);
+        # Загружаем настройки нода после добавления полей
+        if ($sid && $nid) {
+            $node_settings = ths()->sprites()->loadNodeSettings($nid);
 
             if ($node_settings) {
                 foreach ($node_settings as $key => $value) {
@@ -1739,7 +844,7 @@ class UnitController extends Controller
      * @return void
      * @throws \Exception
      */
-    public function formBeforeSave($model)
+    public function formBeforeSave($model): void
     {
         $sid = request('sid');
         $node_uuid = request('node');
@@ -1748,7 +853,7 @@ class UnitController extends Controller
             Flash::info('Настройки нода сохранены');
 
             $node_settings = request('Unit');
-            unset($node_settings['tid']);
+            unset($node_settings['uid']);
             unset($node_settings['name']);
             unset($node_settings['description']);
 
@@ -1766,7 +871,7 @@ class UnitController extends Controller
      * @param Unit $unit
      * @return void
      */
-    private function clearMissingFields(Unit $unit)
+    private function clearMissingFields(Unit $unit): void
     {
         $missing_fields = array_keys(array_diff_key($unit->settings, $unit->additional_fields));
         $keys_to_remove  = array_flip($missing_fields);
@@ -1776,7 +881,7 @@ class UnitController extends Controller
         $data = $unit->data;
         $data['settings'] = array_diff_key($data['settings'], $keys_to_remove);
         \DB::table('zen_threes_units')
-            ->where('tid', $unit->tid)
+            ->where('uid', $unit->uid)
             ->update([
                 'data' => ths()->toJson($data),
             ]);
@@ -1784,10 +889,10 @@ class UnitController extends Controller
 }
 
 ```
-`plugins/zen/threes/controllers/spritecontroller/_list_toolbar.php`
+`plugins/zen/threes/controllers/framecontroller/_list_toolbar.php`
 ```<div data-control="toolbar">
     <a
-        href="<?= Backend::url('zen/threes/spritecontroller/create') ?>"
+        href="<?= Backend::url('zen/threes/framecontroller/create') ?>"
         class="btn btn-primary oc-icon-plus">
         <?= e(trans('backend::lang.form.create')) ?>
     </a>
@@ -1803,43 +908,41 @@ class UnitController extends Controller
 </div>
 
 ```
-`plugins/zen/threes/controllers/spritecontroller/config_form.yaml`
-```name: SpriteController
-form: $/zen/threes/models/sprite/fields.yaml
-modelClass: Zen\Threes\Models\Sprite
-defaultRedirect: zen/threes/spritecontroller
+`plugins/zen/threes/controllers/framecontroller/config_form.yaml`
+```name: FrameController
+form: $/zen/threes/models/frame/fields.yaml
+modelClass: Zen\Threes\Models\Frame
+defaultRedirect: zen/threes/framecontroller
 create:
-    redirect: 'zen/threes/spritecontroller/update/:sid'
-    redirectClose: zen/threes/spritecontroller
+    redirect: 'zen/threes/framecontroller/update/:fid'
+    redirectClose: zen/threes/framecontroller
 update:
-    redirect: zen/threes/spritecontroller
-    redirectClose: zen/threes/spritecontroller
+    redirect: zen/threes/framecontroller
+    redirectClose: zen/threes/framecontroller
 
 ```
-`plugins/zen/threes/controllers/spritecontroller/config_list.yaml`
-```title: SpriteController
-modelClass: Zen\Threes\Models\Sprite
-list: $/zen/threes/models/sprite/columns.yaml
-recordUrl: 'zen/threes/spritecontroller/update/:sid'
+`plugins/zen/threes/controllers/framecontroller/config_list.yaml`
+```list: $/zen/threes/models/frame/columns.yaml
+modelClass: Zen\Threes\Models\Frame
+title: FrameController
 noRecordsMessage: 'backend::lang.list.no_records'
-recordsPerPage: 20
 showSetup: true
 showCheckboxes: true
-structure:
-    maxDepth: 0
-defaultSort:
-    column: sid
-    direction: asc
+recordsPerPage: 20
 toolbar:
     buttons: list_toolbar
     search:
         prompt: 'backend::lang.list.search_prompt'
+structure:
+    maxDepth: 0
+    treeExpanded: false
+recordUrl: 'zen/threes/framecontroller/update/:fid'
 
 ```
-`plugins/zen/threes/controllers/spritecontroller/create.php`
+`plugins/zen/threes/controllers/framecontroller/create.php`
 ```<?php Block::put('breadcrumb') ?>
     <ul>
-        <li><a href="<?= Backend::url('zen/threes/spritecontroller') ?>">SpriteController</a></li>
+        <li><a href="<?= Backend::url('zen/threes/framecontroller') ?>">FrameController</a></li>
         <li><?= e($this->pageTitle) ?></li>
     </ul>
 <?php Block::endPut() ?>
@@ -1872,7 +975,7 @@ toolbar:
                     <?= e(trans('backend::lang.form.create_and_close')) ?>
                 </button>
                 <span class="btn-text">
-                    <?= e(trans('backend::lang.form.or')) ?> <a href="<?= Backend::url('zen/threes/spritecontroller') ?>"><?= e(trans('backend::lang.form.cancel')) ?></a>
+                    <?= e(trans('backend::lang.form.or')) ?> <a href="<?= Backend::url('zen/threes/framecontroller') ?>"><?= e(trans('backend::lang.form.cancel')) ?></a>
                 </span>
             </div>
         </div>
@@ -1881,21 +984,17 @@ toolbar:
 
 <?php else: ?>
     <p class="flash-message static error"><?= e(trans($this->fatalError)) ?></p>
-    <p><a href="<?= Backend::url('zen/threes/spritecontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
+    <p><a href="<?= Backend::url('zen/threes/framecontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
 <?php endif ?>
 ```
-`plugins/zen/threes/controllers/spritecontroller/index.php`
+`plugins/zen/threes/controllers/framecontroller/index.php`
 ```<?= $this->listRender() ?>
 
 ```
-`plugins/zen/threes/controllers/spritecontroller/partials/scheme.php`
-```<div id="threes"></div>
-
-```
-`plugins/zen/threes/controllers/spritecontroller/preview.php`
+`plugins/zen/threes/controllers/framecontroller/preview.php`
 ```<?php Block::put('breadcrumb') ?>
     <ul>
-        <li><a href="<?= Backend::url('zen/threes/spritecontroller') ?>">SpriteController</a></li>
+        <li><a href="<?= Backend::url('zen/threes/framecontroller') ?>">FrameController</a></li>
         <li><?= e($this->pageTitle) ?></li>
     </ul>
 <?php Block::endPut() ?>
@@ -1911,15 +1010,15 @@ toolbar:
 <?php endif ?>
 
 <p>
-    <a href="<?= Backend::url('zen/threes/spritecontroller') ?>" class="btn btn-default oc-icon-chevron-left">
+    <a href="<?= Backend::url('zen/threes/framecontroller') ?>" class="btn btn-default oc-icon-chevron-left">
         <?= e(trans('backend::lang.form.return_to_list')) ?>
     </a>
 </p>
 ```
-`plugins/zen/threes/controllers/spritecontroller/update.php`
+`plugins/zen/threes/controllers/framecontroller/update.php`
 ```<?php Block::put('breadcrumb') ?>
     <ul>
-        <li><a href="<?= Backend::url('zen/threes/spritecontroller') ?>">SpriteController</a></li>
+        <li><a href="<?= Backend::url('zen/threes/framecontroller') ?>">FrameController</a></li>
         <li><?= e($this->pageTitle) ?></li>
     </ul>
 <?php Block::endPut() ?>
@@ -1929,6 +1028,7 @@ toolbar:
     <?= Form::open(['class' => 'layout']) ?>
 
         <div class="layout-row">
+            <div id="threes"></div>
             <?= $this->formRender() ?>
         </div>
 
@@ -1961,7 +1061,7 @@ toolbar:
                 </button>
 
                 <span class="btn-text">
-                    <?= e(trans('backend::lang.form.or')) ?> <a href="<?= Backend::url('zen/threes/spritecontroller') ?>"><?= e(trans('backend::lang.form.cancel')) ?></a>
+                    <?= e(trans('backend::lang.form.or')) ?> <a href="<?= Backend::url('zen/threes/framecontroller') ?>"><?= e(trans('backend::lang.form.cancel')) ?></a>
                 </span>
             </div>
         </div>
@@ -1969,7 +1069,7 @@ toolbar:
 
 <?php else: ?>
     <p class="flash-message static error"><?= e(trans($this->fatalError)) ?></p>
-    <p><a href="<?= Backend::url('zen/threes/spritecontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
+    <p><a href="<?= Backend::url('zen/threes/framecontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
 <?php endif ?>
 
 ```
@@ -2008,7 +1108,7 @@ form: $/zen/threes/models/unit/fields.yaml
 modelClass: Zen\Threes\Models\Unit
 defaultRedirect: zen/threes/unitcontroller
 create:
-    redirect: 'zen/threes/unitcontroller/update/:tid'
+    redirect: 'zen/threes/unitcontroller/update/:uid'
     redirectClose: zen/threes/unitcontroller
 update:
     redirect: zen/threes/unitcontroller
@@ -2027,7 +1127,7 @@ toolbar:
     buttons: list_toolbar
     search:
         prompt: 'backend::lang.list.search_prompt'
-recordUrl: 'zen/threes/unitcontroller/update/:tid'
+recordUrl: 'zen/threes/unitcontroller/update/:uid'
 
 ```
 `plugins/zen/threes/controllers/unitcontroller/create.php`
@@ -2190,77 +1290,95 @@ if (!function_exists('ths')) {
 }
 
 ```
-`plugins/zen/threes/lang/ru/lang.php`
-```<?php return [
-    'plugin' => [
-        'name' => 'Threes',
-        'description' => ''
-    ]
-];
-```
-`plugins/zen/threes/models/Settings.php`
-```<?php
-
-namespace Zen\Threes\Models;
-
-use Config;
-use October\Rain\Database\Model;
-use October\Rain\Database\Traits\Validation as ValidationTrait;
-
-class Settings extends Model
-{
-    use ValidationTrait;
-
-    public $implement = [
-        'System.Behaviors.SettingsModel',
-    ];
-
-    public $settingsCode = 'zen_threes_settings';
-
-    public $settingsFields = 'fields.yaml';
-
-    public $rules = [
-    ];
-}
-
-```
-`plugins/zen/threes/models/Sprite.php`
+`plugins/zen/threes/models/Frame.php`
 ```<?php namespace Zen\Threes\Models;
 
 use Model;
-use Zen\Threes\Traits\SimpleTree;
 use October\Rain\Database\Traits\Validation;
+use October\Rain\Database\Traits\Sortable;
+use October\Rain\Database\Traits\NestedTree;
 
 /**
- * @method static find(string $tid)
+ * @property string $fid - Токен фрейма
+ * @property string $name - Название фрейма
+ * @property string $description - Описание фрейма
+ * @property bool $active - Активность фрейма
+ * @property array $program - Программа фрейма
+ * @method static active() - Фильтр активности в запросе
+ * @method static find($fid) - Найти фрейм по токену
+ * @method static where(string $fid, int|string $value) - Условие where для фрейма
  */
-
-class Sprite extends Model
+class Frame extends Model
 {
     use Validation;
-    use SimpleTree;
+    use Sortable;
+    use NestedTree;
 
-    public $table = 'zen_threes_sprites';
-    protected $primaryKey = 'sid';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    public $table = 'zen_threes_frames';
+
     public $rules = [
-        'sid' => 'required|unique:zen_threes_sprites,sid',
+        'fid' => 'required|unique:zen_threes_frames,fid',
+        'name' => 'required',
     ];
 
     protected $fillable = [
-        'sid',
-        'parent_sid',
+        'id',
+        'fid',
         'name',
         'description',
-        'data',
         'active',
         'program',
     ];
 
     protected array $data_dump = [];
 
-    ### begin:Events
+    public static function findByFid($fid)
+    {
+        return self::where('fid', $fid)->firstOrFail();
+    }
+
+    //region Фильтры
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
+    //endregion
+
+    //region Геттеры
+    public function getDataAttribute(?string $record): array
+    {
+        if ($record) {
+            return ths()->fromJson($record) ?? [];
+        }
+        return [];
+    }
+
+    public function getProgramAttribute()
+    {
+        return $this->data_dump['program'] ?? [];
+    }
+    //endregion
+    //region Сеттеры
+    public function setDataAttribute(?array $record): void
+    {
+        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
+    }
+
+    public function setProgramAttribute(?array $fields = null): void
+    {
+        $this->data_dump['program'] = $fields ?? [];
+    }
+    //endregion
+    //region Методы
+    public function saveData(): void
+    {
+        if (empty($this->attributes['fid'])) {
+            $this->attributes['fid'] = $this->fid ?? ths()->createToken();
+        }
+        $this->attributes['data'] = ths()->toJson($this->data_dump);
+    }
+    //endregion
+    //region События
     public function afterFetch(): void
     {
         $this->data_dump = $this->data;
@@ -2270,39 +1388,30 @@ class Sprite extends Model
     {
         $this->saveData();
     }
+    //endregion
+}
 
-    ### end:Events
+```
+`plugins/zen/threes/models/Settings.php`
+```<?php
 
-    public function saveData(): void
-    {
-        if (empty($this->attributes['sid'])) {
-            $this->attributes['sid'] = $this->sid ?? 's_'. ths()->createToken();
-        }
-        $this->attributes['data'] = ths()->toJson($this->data_dump, true);
-    }
+namespace Zen\Threes\Models;
 
-    public function getDataAttribute(?string $record): array
-    {
-        if ($record) {
-            return ths()->fromJson($record) ?? [];
-        }
-        return [];
-    }
+use October\Rain\Database\Model;
+use October\Rain\Database\Traits\Validation as ValidationTrait;
 
-    public function setDataAttribute(?array $record): void
-    {
-        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
-    }
-
-    public function getProgramAttribute()
-    {
-        return $this->data_dump['program'] ?? [];
-    }
-
-    public function setProgramAttribute(?array $fields = null): void
-    {
-        $this->data_dump['program'] = $fields ?? [];
-    }
+/**
+ * Модель настроек
+ * Существует хелпер для получения параметров: ths()->settings('Ключ')
+ * Посмотреть ключи можно тут: app/plugins/zen/threes/models/settings/fields.yaml
+ */
+class Settings extends Model
+{
+    use ValidationTrait;
+    public $implement = ['System.Behaviors.SettingsModel'];
+    public string $settingsCode = 'zen_threes_settings';
+    public string $settingsFields = 'fields.yaml';
+    public $rules = [];
 }
 
 ```
@@ -2314,13 +1423,12 @@ use October\Rain\Database\Traits\Validation;
 
 /**
  * @property bool $active - Активность юнита
- * @property string $tid - ThreesID (Уникальный код юнита)
+ * @property string $uid - ThreesID (Уникальный код юнита)
  * @property string $name - Имя юнита
  * @property string $description - Описание юнита
  * @property string $icon - SVG-иконка из базы данных
  * @property string $icon_path - Путь до SVG иконки
- * @property array $io - Массив соединений (пинов)
- * @property array $fields - Поля настроек юнита
+ * @property array $fields - Поля интерфейса ???
  * @method static active - Активные юниты
  * @method static find(string $tid)
  */
@@ -2329,22 +1437,22 @@ class Unit extends Model
     use Validation;
 
     public $table = 'zen_threes_units';
-    protected $primaryKey = 'tid';
+    protected $primaryKey = 'uid';
     protected $keyType = 'string';
     public $incrementing = false;
     public $rules = [
-        'tid' => 'required|unique:zen_threes_units,tid',
+        'uid' => 'required|unique:zen_threes_units,uid',
     ];
 
     protected $fillable = [
+        'uid',
         'icon',
         'icon_path',
-        'tid',
-        'io',
         'name',
         'description',
         'active',
-        'fields',
+        'fields', // Виртуальное поле (data.fields)
+        'layers' // Виртуальное поле (data.layers)
     ];
 
     protected array $dynamic_attributes = [];
@@ -2360,13 +1468,14 @@ class Unit extends Model
         }
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
         # Предотвращение сохранения модели
         # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
         static::saving(function ($model) {
+            #TODO: Старая механика сохранения данных нода
             if ($save_data = ths()->getState('unit.prevent_save')) {
                 ths()->sprites()->saveNodeSettings(
                     $save_data['node_uuid'],
@@ -2377,11 +1486,21 @@ class Unit extends Model
         });
     }
 
-    public function scopeActive($query)
+    /**
+     * Фильтр активных юнитов
+     * @param $query
+     * @return mixed
+     */
+    public function scopeActive($query): mixed
     {
         return $query->where('active', 1);
     }
 
+    /**
+     * Определение нативного атрибута
+     * @param string $key
+     * @return bool
+     */
     private function hasAttribute(string $key): bool
     {
         return in_array($key, $this->fillable);
@@ -2402,26 +1521,16 @@ class Unit extends Model
      * Событие перед сохранением экземпляра
      * @return void
      */
-    public function beforeSave()
+    public function beforeSave(): void
     {
         $this->saveData();
         $this->saveSvgIcon();
     }
-
-    /**
-     * Событие после сохранения экземпляра
-     * @return void
-     */
-    /*
-    public function afterSave()
-    {
-    }
-    */
     //endregion
 
     /**
      * Сохраняет иконку в специальное место и возвращает её имя
-     * @return string|null
+     * @return void
      */
     private function saveSvgIcon(): void
     {
@@ -2438,23 +1547,31 @@ class Unit extends Model
     }
 
     ### Getters and setters
-
-    public function getTidAttribute($value)
+    public function getUidAttribute($value): string
     {
         if ($value) {
             return $value;
         }
 
         $author_token = ths()->settings('author_token') ?? 'project';
-        return $author_token . '.';
+        return $author_token . '.units.' . ths()->createToken();
     }
 
-    public function getSettingsAttribute()
+    /**
+     * Геттер для настроек
+     * @return array
+     */
+    public function getSettingsAttribute(): array
     {
         return $this->data_dump['settings'] ?? [];
     }
 
-    public function getIconAttribute($svg)
+    /**
+     * Геттер для иконки
+     * @param string|null $svg
+     * @return string
+     */
+    public function getIconAttribute(?string $svg = null): string
     {
         if (!$svg) {
             return file_get_contents(
@@ -2464,7 +1581,11 @@ class Unit extends Model
         return $svg;
     }
 
-    public function getIconPathAttribute()
+    /**
+     * Путь до SVG - иконки в стандартном каталоге
+     * @return string
+     */
+    public function getIconPathAttribute(): string
     {
         if (!$this->icon) {
             return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
@@ -2473,16 +1594,10 @@ class Unit extends Model
         return '/storage/app/uploads/public/threes/icons/' . $this->icon_name;
     }
 
-    public function setIoAttribute($io)
-    {
-        $this->data_dump['io'] = $io ?? [];
-    }
-
-    public function getIoAttribute()
-    {
-        return $this->data_dump['io'] ?? [];
-    }
-
+    /**
+     * @param string|null $data
+     * @return array
+     */
     public function getDataAttribute(?string $data): array
     {
         if ($data) {
@@ -2491,17 +1606,40 @@ class Unit extends Model
         return [];
     }
 
-    public function getFieldsAttribute()
+    /**
+     * @return array
+     */
+    public function getFieldsAttribute(): array
     {
         return $this->data_dump['fields'] ?? [];
     }
 
+    /**
+     * @param array|null $fields
+     * @return void
+     */
     public function setFieldsAttribute(?array $fields = null): void
     {
         $this->data_dump['fields'] = $fields ?? [];
     }
 
-    public function getAdditionalFieldsAttribute()
+    #TODO: Тут следует сделать преобразование
+    // сохранять нужно в отдельную таблицу со слоями
+    // НО при этом тут хранить только lid`s для связывания и хранения порядка сортировки
+    public function getLayersAttribute()
+    {
+        return $this->data_dump['layers'] ?? [];
+    }
+
+    public function setLayersAttribute(?array $layers = null): void
+    {
+        $this->data_dump['layers'] = $layers ?? [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getAdditionalFieldsAttribute(): array
     {
         if ($this->fields) {
             $add_fields = [];
@@ -2531,7 +1669,10 @@ class Unit extends Model
 
     ### Options methods
 
-    public function getSpanOptions()
+    /**
+     * @return string[]
+     */
+    public function getSpanOptions(): array
     {
         return [
             'auto' => 'Авто',
@@ -2541,7 +1682,10 @@ class Unit extends Model
         ];
     }
 
-    public function getTypeOptions()
+    /**
+     * @return string[]
+     */
+    public function getTypeOptions(): array
     {
         return [
             'text' => 'String',
@@ -2568,7 +1712,10 @@ class Unit extends Model
         ];
     }
 
-    public function getSizeOptions()
+    /**
+     * @return string[]
+     */
+    public function getSizeOptions(): array
     {
         return [
             null => ' -- ',
@@ -2580,30 +1727,7 @@ class Unit extends Model
         ];
     }
 
-    public function getIoTypeOptions()
-    {
-        return [
-            'string' => 'Строка',
-            'bool' => 'Булево',
-            'int' => 'Целое число',
-            'float' => 'Дробное число',
-            'array' => 'Массив',
-            'object' => 'Объект'
-        ];
-    }
-
-    public function getIoDirectionOptions()
-    {
-        return [
-            'input' => 'Вход',
-            'output' => 'Выход',
-            'event' => 'Событие'
-        ];
-    }
-
     ### Inner methods
-
-
     /**
      * Заполняет поля из настроек при загрузке fillSettings()
      * @return void
@@ -2618,16 +1742,49 @@ class Unit extends Model
         }
     }
 
-    public function saveData()
+    public function saveData(): void
     {
-        if (empty($this->attributes['tid'])) {
-            $this->attributes['tid'] = $this->tid ?? ths()->settings('author_token') ?? 'project';
+        if (empty($this->attributes['uid'])) {
+            $this->attributes['uid'] = $this->uid ?? ths()->settings('author_token') ?? 'project';
         }
         $settings = $this->dynamic_attributes;
         $this->data_dump['settings'] = $settings;
-        $this->attributes['data'] = ths()->toJson($this->data_dump, true);
+        $this->attributes['data'] = ths()->toJson($this->data_dump);
     }
 }
+
+```
+`plugins/zen/threes/models/frame/columns.yaml`
+```columns:
+    fid:
+        label: fid
+        type: text
+        searchable: true
+        sortable: true
+    name:
+        label: name
+        type: text
+        searchable: true
+        sortable: true
+    active:
+        label: active
+        type: switch
+        sortable: true
+
+```
+`plugins/zen/threes/models/frame/fields.yaml`
+```fields:
+    name:
+        label: 'Название фрейма'
+        span: auto
+        type: text
+    fid:
+        label: 'Токен фрейма (fid)'
+        span: auto
+        preset:
+            field: name
+            type: slug
+        type: text
 
 ```
 `plugins/zen/threes/models/settings/fields.yaml`
@@ -2637,54 +1794,6 @@ class Unit extends Model
         span: auto
         default: project
         type: text
-
-```
-`plugins/zen/threes/models/sprite/columns.yaml`
-```columns:
-    name:
-        label: Наименование
-        type: text
-        searchable: true
-        sortable: true
-    sid:
-        label: Sid
-        type: text
-        searchable: true
-        sortable: true
-    active:
-        label: Активность
-        type: switch
-        sortable: true
-    updated_at:
-        label: Обновление
-        type: datetime
-        sortable: true
-
-```
-`plugins/zen/threes/models/sprite/fields.yaml`
-```fields:
-    scheme:
-        label: ''
-        span: full
-        path: $/zen/threes/controllers/spritecontroller/partials/scheme.php
-        type: partial
-    name:
-        label: 'Название спрайта'
-        span: auto
-        type: text
-    sid:
-        label: 'Код спрайта'
-        span: auto
-        preset:
-            field: name
-            type: slug
-        required: 1
-        type: text
-    description:
-        label: Описание
-        size: large
-        span: auto
-        type: richeditor
 
 ```
 `plugins/zen/threes/models/unit/columns.yaml`
@@ -2760,44 +1869,12 @@ class Unit extends Model
                         type: repeater
                         form:
                             fields:
-                                 rule:
+                                rule:
                                     label: ''
                                     size: small
                                     language: plain_text
                                     span: full
                                     type: codeeditor
-        io:
-            label: ''
-            prompt: Добавить
-            displayMode: accordion
-            span: full
-            type: repeater
-            tab: Интеграция
-            form:
-                fields:
-                    io_key:
-                        label: Ключ
-                        span: auto
-                        type: text
-                    io_type:
-                        label: 'Тип данных'
-                        showSearch: true
-                        span: auto
-                        type: dropdown
-                    io_direction:
-                        label: Направление
-                        showSearch: true
-                        span: auto
-                        type: dropdown
-                    io_name:
-                        label: Название
-                        span: auto
-                        type: text
-                    io_description:
-                        label: Описание
-                        size: large
-                        span: full
-                        type: richeditor
         icon:
             label: 'SVG Иконка'
             span: full
@@ -2805,14 +1882,43 @@ class Unit extends Model
             language: php
             type: codeeditor
             tab: Иконка
+        layers:
+            label: Аспекты
+            prompt: 'Добавить аспект'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Аспекты
+            form:
+                fields:
+                    aspect_lid:
+                        label: 'Токен аспекта (lid)'
+                        span: auto
+                        type: text
+                    aspect_name:
+                        label: 'Название аспекта'
+                        span: auto
+                        type: text
+                    aspect_exe:
+                        label: 'Атрибут аспекта'
+                        size: large
+                        language: javascript
+                        span: full
+                        type: codeeditor
+                    aspect_desc:
+                        label: 'Описание аспекта'
+                        size: large
+                        span: full
+                        type: richeditor
 fields:
     name:
         label: 'Название юнита'
         span: auto
         type: text
-    tid:
-        label: 'Адрес юнита'
+    uid:
+        label: 'Токен юнита (uid)'
         span: auto
+        required: 1
         type: text
     description:
         label: Описание
@@ -2844,12 +1950,14 @@ fields:
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
+        "konva": "^9.3.18",
         "lodash": "^4.17.21",
         "md5": "^2.3.0",
         "primeicons": "^5.0.0",
         "primevue": "^3.10.0",
         "vue": "^3.5.13",
         "vue-click-outside-element": "^3.1.2",
+        "vue-konva": "^3.2.0",
         "vue-router": "^4.5.0",
         "vue-select": "^4.0.0-beta.6"
     }
@@ -2858,11 +1966,11 @@ fields:
 ```
 `plugins/zen/threes/plugin.yaml`
 ```plugin:
-    name: 'zen.threes::lang.plugin.name'
-    description: 'zen.threes::lang.plugin.description'
-    author: 'October Studio'
+    name: Threes
+    description: 'Development system'
+    author: OS3
     icon: oc-icon-cubes
-    homepage: ''
+    homepage: 'https://os3.pro'
 permissions:
     zen.threes.main:
         tab: Threes
@@ -2873,9 +1981,9 @@ permissions:
     zen.threes.units:
         tab: Threes
         label: 'Units control'
-    zen.threes.sprites:
+    zen.threes.frames:
         tab: Threes
-        label: 'Sprites control'
+        label: 'Frames control'
 navigation:
     main:
         label: Threes
@@ -2884,13 +1992,13 @@ navigation:
         permissions:
             - zen.threes.main
         sideMenu:
-            sprites:
-                label: Спрайты
-                url: zen/threes/spritecontroller
+            frames:
+                label: Фреймы
+                url: zen/threes/framecontroller
                 icon: icon-play
                 permissions:
                     - zen.threes.main
-                    - zen.threes.sprites
+                    - zen.threes.frames
             units:
                 label: Юниты
                 url: zen/threes/unitcontroller
@@ -2943,15 +2051,15 @@ require_once $generated_routes_path;
 
 const routes = [
     {
-        path: "/:backend/zen/threes/spritecontroller/create",
+        path: "/:backend/zen/threes/framecontroller/create",
         name: "CreateSprite",
-        component: () => import("../vue/pages/ThreesProgram.vue"),
+        component: () => import("../vue/pages/Frame.vue"),
         props: true,
     },
     {
-        path: "/:backend/zen/threes/spritecontroller/update/:sid",
+        path: "/:backend/zen/threes/framecontroller/update/:fid",
         name: "UpdateSprite",
-        component: () => import("../vue/pages/ThreesProgram.vue"),
+        component: () => import("../vue/pages/Frame.vue"),
         props: true,
     },
 ];
@@ -2973,6 +2081,7 @@ import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
+import VueKonva from 'vue-konva';
 import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
@@ -3061,6 +2170,7 @@ import vueClickOutsideElement from 'vue-click-outside-element';
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
+app.use(VueKonva);
 app.use(vueClickOutsideElement)
 app.component('FormFitter', FormFitter);
 app.component('FormSection', FormSection);
@@ -3781,307 +2891,6 @@ app.mount("#threes");
 }
 
 ```
-`plugins/zen/threes/traits/PipelinesTrait.php`
-```<?php
-
-namespace Zen\Threes\Traits;
-
-trait PipelinesTrait
-{
-    private static function exe(string $class, string $method, $input) {
-        $refMethod = new \ReflectionMethod($class, $method);
-        if ($refMethod->isStatic()) {
-            return $class::$method($input);
-        }
-        $instance = new $class();
-        return $instance->$method($input);
-    }
-}
-
-```
-`plugins/zen/threes/traits/SimpleTree.php`
-```<?php
-
-namespace Zen\Threes\Traits;
-
-use October\Rain\Database\Collection;
-use October\Rain\Database\TreeCollection;
-use Exception;
-
-/**
- * SimpleTree model trait
- *
- * Simple tree implementation, for advanced implementation see:
- * October\Rain\Database\Traits\NestedTree
- *
- * SimpleTree is the bare minimum needed for tree functionality, the
- * methods defined here should be implemented by all "tree" traits.
- *
- * Usage:
- *
- * Model table must have parent_sid table column.
- * In the model class definition:
- *
- *   use \October\Rain\Database\Traits\SimpleTree;
- *
- * General access methods:
- *
- *   $model->getChildren(); // Returns children of this node
- *   $model->getChildCount(); // Returns number of all children.
- *   $model->getAllChildren(); // Returns all children of this node
- *   $model->getAllRoot(); // Returns all root level nodes (eager loaded)
- *   $model->getAll(); // Returns everything in correct order.
- *
- * Query builder methods:
- *
- *   $query->listsNested(); // Returns an indented array of key and value columns.
- *
- * You can change the sort field used by declaring:
- *
- *   const PARENT_SID = 'my_parent_column';
- *
- * @package october\database
- * @author Alexey Bobkov, Samuel Georges
- */
-trait SimpleTree
-{
-    /**
-     * initializeSimpleTree constructor
-     */
-    public function initializeSimpleTree()
-    {
-        // Define relationships
-        $this->hasMany['children'] = [
-            static::class,
-            'key' => $this->getParentColumnName(),
-            'replicate' => false
-        ];
-
-        $this->belongsTo['parent'] = [
-            static::class,
-            'key' => $this->getParentColumnName(),
-            'replicate' => false
-        ];
-
-        // Multisite
-        if (
-            $this->isClassInstanceOf(\October\Contracts\Database\MultisiteInterface::class) &&
-            $this->isMultisiteSyncEnabled() &&
-            $this->getMultisiteConfig('structure', true)
-        ) {
-            $this->addPropagatable(['children', 'parent']);
-        }
-    }
-
-    /**
-     * getAll returns all nodes and children.
-     * @return \October\Rain\Database\Collection
-     */
-    public function getAll()
-    {
-        $collection = [];
-        foreach ($this->getAllRoot() as $rootNode) {
-            $collection[] = $rootNode;
-            $collection = $collection + $rootNode->getAllChildren()->getDictionary();
-        }
-
-        return new Collection($collection);
-    }
-
-    /**
-     * getAllChildren gets a list of children records, with their children (recursive)
-     * @return \October\Rain\Database\Collection
-     */
-    public function getAllChildren()
-    {
-        $result = [];
-        $children = $this->getChildren();
-
-        foreach ($children as $child) {
-            $result[] = $child;
-
-            $childResult = $child->getAllChildren();
-            foreach ($childResult as $subChild) {
-                $result[] = $subChild;
-            }
-        }
-
-        return new Collection($result);
-    }
-
-    /**
-     * getChildren returns direct child nodes.
-     * @return \October\Rain\Database\Collection
-     */
-    public function getChildren()
-    {
-        return $this->children;
-    }
-
-    /**
-     * getChildCount returns number of all children below it.
-     * @return int
-     */
-    public function getChildCount()
-    {
-        return count($this->getAllChildren());
-    }
-
-    /**
-     * getParents returns an array of parents, this is a heavy query and can produce
-     * in multiple queries.
-     */
-    public function getParents()
-    {
-        $result = [];
-
-        $parent = $this;
-        $result[] = $parent;
-
-        while ($parent = $parent->parent) {
-            $result[] = $parent;
-        }
-
-        return array_reverse($result);
-    }
-
-    //
-    // Scopes
-    //
-
-    /**
-     * scopeGetAllRoot returns a list of all root nodes, without eager loading.
-     * @return \October\Rain\Database\Collection
-     */
-    public function scopeGetAllRoot($query)
-    {
-        return $query->where($this->getParentColumnName(), null)->get();
-    }
-
-    /**
-     * scopeGetNested is a non-chaining scope, returns an eager loaded hierarchy tree.
-     * Children are eager loaded inside the $model->children relation.
-     * @return Collection A collection
-     */
-    public function scopeGetNested($query)
-    {
-        return $query->get()->toNested();
-    }
-
-    /**
-     * scopeListsNested gets an array with values of a given column. Values are indented
-     * according to their depth.
-     * @param  string $column Array values
-     * @param  string $key    Array keys
-     * @param  string $indent Character to indent depth
-     * @return array
-     */
-    public function scopeListsNested($query, $column, $key = null, $indent = '&nbsp;&nbsp;&nbsp;')
-    {
-        $idName = $this->getKeyName();
-        $parentName = $this->getParentColumnName();
-
-        $columns = [$idName, $parentName, $column];
-        if ($key !== null) {
-            $columns[] = $key;
-        }
-
-        $collection = $query->getQuery()->get($columns);
-
-        // Assign all child nodes to their parents
-        $pairMap = [];
-        $rootItems = [];
-        foreach ($collection as $record) {
-            if ($parentId = $record->{$parentName}) {
-                if (!isset($pairMap[$parentId])) {
-                    $pairMap[$parentId] = [];
-                }
-                $pairMap[$parentId][] = $record;
-            }
-            else {
-                $rootItems[] = $record;
-            }
-        }
-
-        // Recursive helper function
-        $buildCollection = function(
-            $items,
-            $map,
-            $depth = 0
-        ) use (
-            &$buildCollection,
-            $column,
-            $key,
-            $indent,
-            $idName
-        ) {
-            $result = [];
-
-            $indentString = str_repeat($indent, $depth);
-
-            foreach ($items as $item) {
-                if (!property_exists($item, $column)) {
-                    throw new Exception('Column mismatch in listsNested method. Are you sure the columns exist?');
-                }
-
-                if ($key !== null) {
-                    $result[$item->{$key}] = $indentString . $item->{$column};
-                }
-                else {
-                    $result[] = $indentString . $item->{$column};
-                }
-
-                // Add the children
-                $childItems = array_get($map, $item->{$idName}, []);
-                if (count($childItems) > 0) {
-                    $result = $result + $buildCollection($childItems, $map, $depth + 1);
-                }
-            }
-
-            return $result;
-        };
-
-        // Build a nested collection
-        return $buildCollection($rootItems, $pairMap);
-    }
-
-    /**
-     * getParentColumnName
-     * @return string
-     */
-    public function getParentColumnName()
-    {
-        return defined('static::PARENT_SID') ? static::PARENT_SID : 'parent_sid';
-    }
-
-    /**
-     * getQualifiedParentColumnName
-     * @return string
-     */
-    public function getQualifiedParentColumnName()
-    {
-        return $this->getTable(). '.' .$this->getParentColumnName();
-    }
-
-    /**
-     * getParentId gets value of the model parent_sid column.
-     * @return int
-     */
-    public function getParentId()
-    {
-        return $this->getAttribute($this->getParentColumnName());
-    }
-
-    /**
-     * newCollection returns a custom TreeCollection collection.
-     */
-    public function newCollection(array $models = [])
-    {
-        return new TreeCollection($models);
-    }
-}
-
-```
 `plugins/zen/threes/traits/SingletonTrait.php`
 ```<?php
 
@@ -4107,89 +2916,28 @@ trait SingletonTrait
 }
 
 ```
-`plugins/zen/threes/updates/builder_table_create_zen_threes_sets.php`
+`plugins/zen/threes/updates/m001_units.php`
 ```<?php namespace Zen\Threes\Updates;
 
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class BuilderTableCreateZenThreesSets extends Migration
-{
-    public function up()
-    {
-        Schema::create('zen_threes_sets', function($table)
-        {
-            $table->string('uuid');
-            $table->string('scope')->nullable();
-            $table->text('tags')->nullable();
-            $table->text('data')->nullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
-            $table->primary(['uuid']);
-            $table->unique('uuid', 'uuid_unique');
-            $table->index('scope');
-            $table->index('tags');
-        });
-    }
-    
-    public function down()
-    {
-        Schema::dropIfExists('zen_threes_sets');
-    }
-}
-```
-`plugins/zen/threes/updates/builder_table_create_zen_threes_sprites.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class BuilderTableCreateZenThreesSprites extends Migration
-{
-    public function up()
-    {
-        Schema::create('zen_threes_sprites', function($table)
-        {
-            $table->string('sid')->primary();
-            $table->string('parent_sid')->nullable();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->text('data')->nullable();
-            $table->smallInteger('active')->unsigned()->default(1);
-            $table->timestamps();
-
-            $table->unique('sid', 'sid_unique');
-        });
-    }
-    
-    public function down()
-    {
-        Schema::dropIfExists('zen_threes_sprites');
-    }
-}
-```
-`plugins/zen/threes/updates/builder_table_create_zen_threes_units.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class BuilderTableCreateZenThreesUnits extends Migration
+class M001Units extends Migration
 {
     public function up()
     {
         Schema::create('zen_threes_units', function($table)
         {
-            $table->string('tid')->primary();
+            $table->string('uid')->primary();
+            $table->string('name');
             $table->text('icon')->nullable();
             $table->string('icon_name')->nullable();
-            $table->string('name');
             $table->text('description')->nullable();
             $table->text('data')->nullable();
             $table->smallInteger('active')->unsigned()->default(1);
             $table->timestamps();
 
-            $table->unique('tid', 'tid_unique');
+            $table->unique('uid', 'uid_unique');
         });
     }
 
@@ -4199,98 +2947,51 @@ class BuilderTableCreateZenThreesUnits extends Migration
     }
 }
 ```
-`plugins/zen/threes/updates/builder_table_create_zen_threes_versions.php`
+`plugins/zen/threes/updates/m002_frames.php`
 ```<?php namespace Zen\Threes\Updates;
 
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class BuilderTableCreateZenThreesVersions extends Migration
+class M002Frames extends Migration
 {
     public function up()
     {
-        Schema::create('zen_threes_versions', function($table)
+        Schema::create('zen_threes_frames', function($table)
         {
-            $table->string('sid');
-            $table->integer('version')->unsigned()->default(1);
-            $table->text('data')->nullable();
-            $table->string('hash')->nullable();
-            $table->dateTime('time')->nullable();
+            $table->increments('id')->comment('Не используется по назначению'); # Стандартный id, нигде не должен играть роль кроме дерева
+            $table->integer('parent_id')->unsigned()->nullable()->comment('Родительский фрейм');
+            $table->string('fid')->comment('Идентификатор фрейма');
+            $table->string('name')->comment('Название фрейма');
+            $table->text('description')->nullable()->comment('Описание фрейма');
+            $table->smallInteger('active')->unsigned()->default(1)->comment('Активность фрейма');
+            $table->integer('sort_order')->unsigned()->default(0)->comment('Порядок сортировки');
+            $table->integer('nest_left')->unsigned()->comment('Левая граница узла');
+            $table->integer('nest_right')->unsigned()->comment('Правая граница узла');
+            $table->integer('nest_depth')->unsigned()->comment('Уровень вложенности');
+            $table->timestamps();
+            $table->text('data')->nullable()->comment('Данные фрейма');
+
+            # Индексируем fid
+            $table->unique('fid', 'fid_unique');
         });
     }
-    
+
     public function down()
     {
-        Schema::dropIfExists('zen_threes_versions');
+        Schema::dropIfExists('zen_threes_frames');
     }
 }
-
 ```
 `plugins/zen/threes/updates/version.yaml`
 ```v1.0.1:
     - 'Initialize plugin'
 v1.0.2:
-    - 'Create units'
-    - builder_table_create_zen_threes_units.php
+    - 'Create Units'
+    - m001_units.php
 v1.0.3:
-    - 'Create sprites'
-    - builder_table_create_zen_threes_sprites.php
-v1.0.4:
-    - 'Created sets'
-    - builder_table_create_zen_threes_sets.php
-v1.0.5:
-    - 'Created table zen_threes_versions'
-    - builder_table_create_zen_threes_versions.php
-
-```
-`plugins/zen/threes/views/node/info.htm`
-```<div class="threes-node-title">
-    <div>
-        <span>Спрайт:</span>
-        <span>{{ sid }}</span>
-    </div>
-    <div>
-        <span>Юнит:</span>
-        <span>{{ unit_name }} [{{ tid }}]</span>
-    </div>
-    <div>
-        <span>Токен:</span>
-        <span>{{ nid }}</span>
-    </div>
-</div>
-<style>
-.threes-node-title {
-    display: flex;
-    padding: 10px;
-    background: #457b8a;
-    color: #ffffff;
-    font-size: 18px;
-    border-radius: 4px;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 30px;
-}
-.threes-node-title > div {
-    margin: 0 15px;
-}
-.threes-node-title > div {
-    padding-right: 5px;
-}
-.threes-node-title > div > span {
-
-}
-.threes-node-title > div > span:first-child {
-    margin-right: 5px;
-    font-weight: bold;
-}
-.threes-node-title > div > span:last-child {
-    background: #345d69;
-    padding: 7px 10px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-}
-</style>
+    - 'Create Frames'
+    - m002_frames.php
 
 ```
 `plugins/zen/threes/webpack.mix.js`
@@ -4334,11 +3035,11 @@ mix.sass('src/scss/threes.scss', 'css')
         ],
     });
 
-mix.js('src/js/threes.js', 'js').vue(); // Обработка Vue.js файлов
-mix.setPublicPath('assets'); // Путь к папке публичных файлов
+mix.js('src/js/threes.js', 'js').vue();
+mix.setPublicPath('assets');
 
 if (mix.inProduction()) {
-    mix.version(); // Версионирование файлов в продакшене
+    mix.version();
 }
 
 // Настройка alias для удобства работы с путями

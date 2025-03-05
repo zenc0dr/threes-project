@@ -6,6 +6,7 @@ import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
+import VueKonva from 'vue-konva';
 import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
@@ -94,6 +95,7 @@ import vueClickOutsideElement from 'vue-click-outside-element';
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
+app.use(VueKonva);
 app.use(vueClickOutsideElement)
 app.component('FormFitter', FormFitter);
 app.component('FormSection', FormSection);
