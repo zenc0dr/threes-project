@@ -11,13 +11,12 @@
             @end="saveProgram"
         >
             <template #item="{ element: node }">
-                <div
+                <Node
                     class="frame__node"
                     :style="getNodeStyle(node)"
+                    :node="node"
                     @click="handleNodeClick(node, $event)"
-                >
-                    <component :is="getNodeComponent(node)" :node="node" />
-                </div>
+                />
             </template>
         </draggable>
         <div @dblclick="createNodeAtPosition" class="frame__add-line">+</div>
@@ -26,10 +25,14 @@
 
 <script>
 import draggable from 'vuedraggable';
+import Node from '../components/Node.vue';
 
 export default {
     name: 'Frame',
-    components: { draggable },
+    components: {
+        draggable,
+        Node
+    },
     props: ['backend', 'fid'],
     data() {
         return {
@@ -41,9 +44,15 @@ export default {
         this.loadProgram();
     },
     methods: {
+        // Стили нода прописаны глобально
         getNodeStyle(node) {
-            const cssLayer = node.layers['threes.units.ui@css'];
-            return cssLayer ? JSON.parse(cssLayer) : { padding: '5px 7px', background: '#e9e9e9', borderRadius: '3px' };
+            const cssLayer = node.layers['threes.units.ui@css']; // Уникальный слой со стилями
+            return cssLayer ? JSON.parse(cssLayer) : {
+                padding: '5px 7px',
+                background: '#6eb39d',
+                borderRadius: '3px',
+                width: '50px'
+            };
         },
         getNodeComponent(node) {
             // Логика выбора компонента на основе слоёв
@@ -70,21 +79,30 @@ export default {
         createNode(line_index) {
             ths.api({
                 api: 'nodes.Node:Create',
-                data: { fid: this.fid, line_index: line_index },
-                then: () => this.loadProgram(),
+                data: {
+                    fid: this.fid,
+                    line_index: line_index
+                },
+                then: () => {
+                    this.loadProgram()
+                },
             });
         },
         addProgramLine() {
             ths.api({
                 api: 'frames.Frame:addLine',
                 data: { fid: this.fid },
-                then: () => this.loadProgram(),
+                then: () => {
+                    this.loadProgram()
+                },
             });
         },
         loadProgram() {
             ths.api({
                 api: 'frames.Frame:loadProgram',
-                data: { fid: this.fid },
+                data: {
+                    fid: this.fid
+                },
                 then: response => {
                     this.program = response.program.map(line => line.map(node => ({
                         ...node,
@@ -108,6 +126,10 @@ export default {
 .frame {
     border: 1px solid #ddd;
     padding: 10px;
+
+    .node-test {
+        background: #4795b1;
+    }
 
     &__line {
         display: flex;
