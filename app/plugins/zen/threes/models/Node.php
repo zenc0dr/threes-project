@@ -14,8 +14,9 @@ class Node extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
-
-    public $rules = [];
+    public $rules = [
+        'nid' => 'required|unique:zen_threes_nodes,nid',
+    ];
 
     protected $fillable = [
         'nid',
@@ -23,34 +24,32 @@ class Node extends Model
         'description',
     ];
 
-    public static function set(array $data): void
+    public static function set(array $data = []): self
     {
-        $nid = $data['nid'];
-        $name = $data['name'] ?? 'Без названия';
-        $description = $data['description'] ?? null;
-
-        $data_to_save = [
-            'nid' => $nid,
-            'name' => $name,
-            'description' => $description,
-        ];
-
-        $exists = DB::table('zen_threes_nodes')
-            ->where('nid', $nid)
-            ->exists();
-
-        if ($exists) {
-            DB::table('zen_threes_nodes')
-                ->where('nid', $nid)
-                ->update($data_to_save);
+        $nid = $data['nid'] ?? null;
+        if ($nid) {
+            $node = self::find($nid)
+                ->update([
+                    'name' => $data['name'] ?? 'Без названия',
+                    'description' => $data['description'] ?? null,
+                ]);
         } else {
-            DB::table('zen_threes_nodes')
-                ->insert($data_to_save);
+            $node = self::create([
+                'nid' => ths()->createToken(),
+                'name' => '#',
+                'description' => '',
+            ]);
         }
+
+        return $node;
     }
 
-    public static function fabric(string $fid, int $line_index = 0)
+    public function getDslAttribute(): array
     {
-        # Тут нужно создать новый нод для фрейма с токеном $fid который добавиться в конец линии $line_index
+        return [
+            'nid' => $this->nid,
+            'name' => $this->name,
+            'description' => $this->description
+        ];
     }
 }

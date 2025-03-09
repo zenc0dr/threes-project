@@ -2,7 +2,6 @@
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use Illuminate\Support\Facades\DB;
 
 class Layer extends Model
 {
@@ -10,48 +9,57 @@ class Layer extends Model
 
     public $timestamps = false;
     public $table = 'zen_threes_layers';
-    public $rules = [];
-
-    protected $primaryKey = null; // Оставляем null, так как нет единого PK
+    protected $primaryKey = 'lid';
+    protected $keyType = 'string';
     public $incrementing = false;
 
+    public $rules = [
+        'lid' => 'required|unique:zen_threes_layers,lid',
+    ];
+
     protected $fillable = [
-        'nid',
         'lid',
         'name',
         'description',
-        'exe',
+        'aspect', # Аспект слоя
+        'exe', # Атрибут аспекта слоя
         'updated_at',
     ];
 
-    public static function set(array $layer): void
+    public static function set(array $data = [])
     {
-        $nid = $layer['nid'];
-        $lid = $layer['lid'];
-        $data = [
-            'nid' => $nid,
-            'lid' => $lid,
-            'name' => $layer['name'] ?? 'Без названия',
-            'description' => $layer['description'] ?? null,
-            'exe' => $layer['exe'],
-            'updated_at' => now(),
-        ];
+        $lid = $data['lid'] ?? null;
 
-        // Проверяем существование записи
-        $exists = DB::table('zen_threes_layers')
-            ->where('nid', $nid)
-            ->where('lid', $lid)
-            ->exists();
-
-        if ($exists) {
-            // Обновляем запись напрямую через DB facade
-            DB::table('zen_threes_layers')
-                ->where('nid', $nid)
-                ->where('lid', $lid)
-                ->update($data);
+        if ($lid) {
+            $layer = self::find($lid)
+                ->update([
+                    'lid' => $data['lid'],
+                    'name' => $data['name'] ?? 'Без названия',
+                    'description' => $data['description'] ?? null,
+                    'updated_at' => now(),
+                ]);
         } else {
-            // Создаем новую запись
-            DB::table('zen_threes_layers')->insert($data);
+            $layer = self::create([
+                'lid' => ths()->createToken(),
+                'name' => '#',
+                'description' => '',
+                'aspect' => 'threes.units.oc@write',
+                'exe' => '#',
+                'updated_at' => now(),
+            ]);
         }
+
+        return $layer;
+    }
+
+    public function getDslAttribute(): array
+    {
+        return [
+            'nid' => $this->lid,
+            'name' => $this->name,
+            'description' => $this->description,
+            'aspect' => $this->aspect,
+            'exe' => $this->exe
+        ];
     }
 }

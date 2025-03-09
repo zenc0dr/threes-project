@@ -19,23 +19,23 @@ class Frames
 
         foreach ($program as $line_index => $line) {
             foreach ($line as $node) {
-                $nid = $node['nid'];
-                $description = $node['description'];
-
                 Node::set([
-                    'fid' => $fid,
-                    'nid' => $nid,
+                    'nid' => $node['nid'],
                     'name' => $node['name'],
-                    'description' => $description,
+                    'description' => $node['description'],
                 ]);
 
+                $layers = [];
                 if (isset($node['layers'])) {
-                    foreach ($node['layers'] as $lid => $attribute) {
+                    foreach ($node['layers'] as $layer) {
                         Layer::set([
-                            'nid' => $nid,
-                            'lid' => $lid,
-                            'exe' => $attribute,
+                            'lid' => $layer['lid'],
+                            'name' => $layer['name'],
+                            'description' => $layer['description'],
+                            'aspects' => $layer['aspects'],
+                            'exe' => $layer['exe'],
                         ]);
+                        $layers[] = $layer['lid'];
                     }
                 }
 
@@ -51,7 +51,25 @@ class Frames
 
     public function loadProgram(string $fid): array
     {
-        return Frame::findByFid($fid)->program;
+        $program = Frame::findByFid($fid)->program;
+        $dsl = [];
+        foreach ($program as $line) {
+            $dsl_line = [];
+            foreach ($line as $nodes) {
+                foreach ($nodes as $nid => $lids) {
+                    $node = Node::find($nid)->dsl;
+                    $layers = [];
+                    foreach ($lids as $lid) {
+                        $layer = Layer::find($lid)->dsl;
+                        $layers[] = $layer;
+                    }
+                    $node['layers'] = $layers;
+                }
+                $dsl_line[] = $node;
+            }
+            $dsl[] = $dsl_line;
+        }
+        return $program;
     }
 
     public function addLine(string $fid): void

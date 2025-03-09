@@ -13,11 +13,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $layer_data = ths()->fromJsonFile(
-            storage_path('layer_data.json')
-        );
-
-        Layer::set($layer_data);
+        ths()->frames()->loadProgram('grok');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

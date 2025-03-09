@@ -5,6 +5,8 @@ namespace Zen\Threes\Classes;
 use Zen\Threes\Traits\SingletonTrait;
 
 use Zen\Threes\Models\Frame;
+use Zen\Threes\Models\Node;
+use Zen\Threes\Models\Layer;
 
 class Nodes
 {
@@ -16,18 +18,28 @@ class Nodes
      * @param int $line_index
      * @return array
      */
-    public function addNode(string $fid, int $line_index): array
+    public function addNode(string $fid, int $line_index)
     {
         $frame = Frame::findByFid($fid);
-        $program = $frame->program ?? [];
-        $program[$line_index][] = [
-            'nid' => ths()->createToken(),
-            'name' => '#',
-            'description' => null,
-            'layers' => [
-                'threes.units.oc@write' => '#'
+
+        $node = Node::set();
+        $layer = Layer::set();
+        $program = $frame->program;
+
+        $node = [
+            $node->nid => [
+                $layer->lid
             ]
         ];
+
+        # Заполнить программу отсутствующими пустыми линиями
+        for ($i = 0; $i <= $line_index; $i++) {
+            if (!isset($program[$i])) {
+                $program[$i] = [];
+            }
+        }
+
+        $program[$line_index][] = $node;
         $frame->program = $program;
         $frame->save();
         return [];

@@ -23,7 +23,7 @@ class Frame
         ];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:addLine?fid=test1
+    # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
     public function addLine()
     {
         $fid = request('fid');
