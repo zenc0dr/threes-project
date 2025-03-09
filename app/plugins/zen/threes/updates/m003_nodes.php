@@ -9,11 +9,11 @@ class M003Nodes extends Migration
     {
         Schema::create('zen_threes_nodes', function($table)
         {
-            $table->string('fid')->index()->comment('Токен фрейма');
-            $table->string('nid')->index()->comment('Токен нода');
+            $table->string('nid')->primary()->comment('Токен нода');
             $table->string('name')->nullable()->comment('Имя нода');
             $table->string('description')->nullable()->comment('Описание нода');
-            $table->unique(['fid', 'nid'], 'zen_threes_nodes_fid_nid_unique');
+
+            $table->unique('nid', 'nid_unique');
         });
     }
 

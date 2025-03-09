@@ -10,13 +10,14 @@ class Node extends Model
 
     public $timestamps = false;
     public $table = 'zen_threes_nodes';
-    public $rules = [];
-
-    protected $primaryKey = null;
+    protected $primaryKey = 'nid';
+    protected $keyType = 'string';
     public $incrementing = false;
 
+
+    public $rules = [];
+
     protected $fillable = [
-        'fid',
         'nid',
         'name',
         'description',
@@ -24,26 +25,22 @@ class Node extends Model
 
     public static function set(array $data): void
     {
-        $fid = $data['fid'];
         $nid = $data['nid'];
         $name = $data['name'] ?? 'Без названия';
         $description = $data['description'] ?? null;
 
         $data_to_save = [
-            'fid' => $fid,
             'nid' => $nid,
             'name' => $name,
             'description' => $description,
         ];
 
         $exists = DB::table('zen_threes_nodes')
-            ->where('fid', $fid)
             ->where('nid', $nid)
             ->exists();
 
         if ($exists) {
             DB::table('zen_threes_nodes')
-                ->where('fid', $fid)
                 ->where('nid', $nid)
                 ->update($data_to_save);
         } else {

@@ -9,16 +9,16 @@ class M004Layers extends Migration
     {
         Schema::create('zen_threes_layers', function($table)
         {
-            $table->string('nid')->comment('Токен нода');
             $table->string('lid')->comment('Токен слоя');
-            $table->string('name')
-                ->nullable()->default('Без названия')->comment('Название слоя');
+            $table->string('name')->nullable()->default('Без названия')->comment('Название слоя');
             $table->string('description')->nullable()->comment('Описание аспекта');
-            $table->string('exe')->nullable()->comment('Атрибут выполнения аспекта');
+
+            $table->string('aspect')->default('threes.units.oc@write')->comment('Аспект слоя');
+            $table->string('exe')->nullable()->comment('Атрибут аспекта');
+
             $table->timestamp('updated_at')->nullable()->comment('Время последнего обновления');
 
-            # уникальный составной ключ на nid и lid
-            $table->primary(['nid', 'lid']);
+            $table->unique('lid', 'lid_unique');
         });
     }
 
