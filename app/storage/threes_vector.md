@@ -102,6 +102,7 @@ class Threes extends Helpers
 
 namespace Zen\Threes\Api\debug;
 
+use Zen\Threes\Models\Layer;
 use Zen\Threes\Models\Unit;
 use Zen\Threes\Console\Vector;
 use Zen\Threes\Classes\units\OpcodeGenerator;
@@ -112,7 +113,11 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->nodes()->addNode('test1', 0);
+        $layer_data = ths()->fromJsonFile(
+            storage_path('layer_data.json')
+        );
+
+        Layer::set($layer_data);
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -133,6 +138,7 @@ class Frame
     # http://threes.dc/threes.api/frames.Frame:saveProgram
     public function saveProgram(): array
     {
+        ths()->requestDebug('saveProgram');
         ths()->frames()->saveProgram(
             request('fid'),
             request('program')
@@ -185,6 +191,8 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Models\Frame;
 use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Models\Node;
+use Zen\Threes\Models\Layer;
 
 class Frames
 {
@@ -192,7 +200,43 @@ class Frames
 
     public function saveProgram(string $fid, array $program): void
     {
-        Frame::findByFid($fid)->update(['program' => $program]);
+        //Frame::findByFid($fid)->update(['program' => $program]);
+
+        $dsl = [];
+
+        foreach ($program as $line_index => $line) {
+            foreach ($line as $node) {
+                $nid = $node['nid'];
+                $description = $node['description'];
+
+                Node::set([
+                    'fid' => $fid,
+                    'nid' => $nid,
+                    'name' => $node['name'],
+                    'description' => $description,
+                ]);
+
+                if (isset($node['layers'])) {
+                    $layer_index = 0;
+                    foreach ($node['layers'] as $lid => $attribute) {
+                        Layer::set([
+                            'nid' => $nid,
+                            'lid' => $lid,
+                            'exe' => $attribute,
+                            'sort_order' => $layer_index,
+                        ]);
+                        $layer_index++;
+                    }
+                }
+
+                $dsl[$line_index][] = $node['nid'];
+            }
+            if (!isset($dsl[$line_index])) {
+                $dsl[$line_index] = [];
+            }
+        }
+
+        dd($dsl);
     }
 
     public function loadProgram(string $fid): array
@@ -1392,6 +1436,130 @@ class Frame extends Model
 }
 
 ```
+`plugins/zen/threes/models/Layer.php`
+```<?php namespace Zen\Threes\Models;
+
+use Model;
+use October\Rain\Database\Traits\Validation;
+use Illuminate\Support\Facades\DB;
+
+class Layer extends Model
+{
+    use Validation;
+
+    public $timestamps = false;
+    public $table = 'zen_threes_layers';
+    public $rules = [];
+
+    protected $primaryKey = null; // Оставляем null, так как нет единого PK
+    public $incrementing = false;
+
+    protected $fillable = [
+        'nid',
+        'lid',
+        'name',
+        'description',
+        'exe',
+        'sort_order',
+        'updated_at',
+    ];
+
+    public static function set(array $layer): void
+    {
+        $nid = $layer['nid'];
+        $lid = $layer['lid'];
+        $data = [
+            'nid' => $nid,
+            'lid' => $lid,
+            'name' => $layer['name'] ?? 'Без названия',
+            'description' => $layer['description'] ?? null,
+            'exe' => $layer['exe'],
+            'sort_order' => $layer['sort_order'],
+            'updated_at' => now(),
+        ];
+
+        // Проверяем существование записи
+        $exists = DB::table('zen_threes_layers')
+            ->where('nid', $nid)
+            ->where('lid', $lid)
+            ->exists();
+
+        if ($exists) {
+            // Обновляем запись напрямую через DB facade
+            DB::table('zen_threes_layers')
+                ->where('nid', $nid)
+                ->where('lid', $lid)
+                ->update($data);
+        } else {
+            // Создаем новую запись
+            DB::table('zen_threes_layers')->insert($data);
+        }
+    }
+}
+
+```
+`plugins/zen/threes/models/Node.php`
+```<?php namespace Zen\Threes\Models;
+
+use Model;
+use October\Rain\Database\Traits\Validation;
+use Illuminate\Support\Facades\DB;
+
+class Node extends Model
+{
+    use Validation;
+
+    public $timestamps = false;
+    public $table = 'zen_threes_nodes';
+    public $rules = [];
+
+    protected $primaryKey = null; // Нет единого PK
+    public $incrementing = false;
+
+    protected $fillable = [
+        'fid',
+        'nid',
+        'name',
+        'description',
+    ];
+
+    public static function set(array $data): void
+    {
+        $fid = $data['fid'];
+        $nid = $data['nid'];
+        $name = $data['name'] ?? 'Без названия';
+        $description = $data['description'] ?? null;
+
+        $data_to_save = [
+            'fid' => $fid,
+            'nid' => $nid,
+            'name' => $name,
+            'description' => $description,
+        ];
+
+        $exists = DB::table('zen_threes_nodes')
+            ->where('fid', $fid)
+            ->where('nid', $nid)
+            ->exists();
+
+        if ($exists) {
+            DB::table('zen_threes_nodes')
+                ->where('fid', $fid)
+                ->where('nid', $nid)
+                ->update($data_to_save);
+        } else {
+            DB::table('zen_threes_nodes')
+                ->insert($data_to_save);
+        }
+    }
+
+    public static function fabric(string $fid, int $line_index = 0)
+    {
+        # Тут нужно создать новый нод для фрейма с токеном $fid который добавиться в конец линии $line_index
+    }
+}
+
+```
 `plugins/zen/threes/models/Settings.php`
 ```<?php
 
@@ -1950,16 +2118,15 @@ fields:
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
-        "konva": "^9.3.18",
         "lodash": "^4.17.21",
         "md5": "^2.3.0",
         "primeicons": "^5.0.0",
         "primevue": "^3.10.0",
         "vue": "^3.5.13",
         "vue-click-outside-element": "^3.1.2",
-        "vue-konva": "^3.2.0",
         "vue-router": "^4.5.0",
-        "vue-select": "^4.0.0-beta.6"
+        "vue-select": "^4.0.0-beta.6",
+        "vuedraggable": "^4.1.0"
     }
 }
 
@@ -2081,7 +2248,7 @@ import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
-import VueKonva from 'vue-konva';
+import vuedraggable from 'vuedraggable';
 import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
@@ -2170,10 +2337,10 @@ import vueClickOutsideElement from 'vue-click-outside-element';
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
-app.use(VueKonva);
 app.use(vueClickOutsideElement)
 app.component('FormFitter', FormFitter);
 app.component('FormSection', FormSection);
+app.component('draggable', vuedraggable);
 app.mount("#threes");
 
 ```
@@ -2983,6 +3150,63 @@ class M002Frames extends Migration
     }
 }
 ```
+`plugins/zen/threes/updates/m003_nodes.php`
+```<?php namespace Zen\Threes\Updates;
+
+use Schema;
+use October\Rain\Database\Updates\Migration;
+
+class M003Nodes extends Migration
+{
+    public function up()
+    {
+        Schema::create('zen_threes_nodes', function($table)
+        {
+            $table->string('fid')->index()->comment('Токен фрейма');
+            $table->string('nid')->index()->comment('Токен нода');
+            $table->string('name')->nullable()->comment('Имя нода');
+            $table->string('description')->nullable()->comment('Описание нода');
+            $table->unique(['fid', 'nid'], 'zen_threes_nodes_fid_nid_unique');
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('zen_threes_nodes');
+    }
+}
+```
+`plugins/zen/threes/updates/m004_layers.php`
+```<?php namespace Zen\Threes\Updates;
+
+use Schema;
+use October\Rain\Database\Updates\Migration;
+
+class M004Layers extends Migration
+{
+    public function up()
+    {
+        Schema::create('zen_threes_layers', function($table)
+        {
+            $table->string('nid')->comment('Токен нода');
+            $table->string('lid')->comment('Токен слоя');
+            $table->string('name')
+                ->nullable()->default('Без названия')->comment('Название слоя');
+            $table->string('description')->nullable()->comment('Описание аспекта');
+            $table->string('exe')->nullable()->comment('Атрибут выполнения аспекта');
+            $table->timestamp('updated_at')->nullable()->comment('Время последнего обновления');
+
+            # уникальный составной ключ на nid и lid
+            $table->primary(['nid', 'lid']);
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('zen_threes_layers');
+    }
+}
+```
 `plugins/zen/threes/updates/version.yaml`
 ```v1.0.1:
     - 'Initialize plugin'
@@ -2992,6 +3216,12 @@ v1.0.2:
 v1.0.3:
     - 'Create Frames'
     - m002_frames.php
+v1.0.4:
+    - 'Create Nodes'
+    - m003_nodes.php
+v1.0.5:
+    - 'Create Layers'
+    - m004_layers.php
 
 ```
 `plugins/zen/threes/webpack.mix.js`

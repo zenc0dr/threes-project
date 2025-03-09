@@ -7,6 +7,7 @@ class Frame
     # http://threes.dc/threes.api/frames.Frame:saveProgram
     public function saveProgram(): array
     {
+        ths()->requestDebug('saveProgram');
         ths()->frames()->saveProgram(
             request('fid'),
             request('program')
