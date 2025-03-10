@@ -7,7 +7,6 @@ class Frame
     # http://threes.dc/threes.api/frames.Frame:saveProgram
     public function saveProgram(): array
     {
-        ths()->requestDebug('saveProgram');
         ths()->frames()->saveProgram(
             request('fid'),
             request('program')
@@ -15,7 +14,7 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=test1
+    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=grok
     public function loadProgram(): array
     {
         return [
@@ -26,8 +25,7 @@ class Frame
     # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
     public function addLine()
     {
-        $fid = request('fid');
-        ths()->frames()->addLine($fid);
+        ths()->frames()->addLine(request('fid'));
         return [];
     }
 

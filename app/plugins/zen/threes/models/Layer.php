@@ -55,7 +55,7 @@ class Layer extends Model
     public function getDslAttribute(): array
     {
         return [
-            'nid' => $this->lid,
+            'lid' => $this->lid,
             'name' => $this->name,
             'description' => $this->description,
             'aspect' => $this->aspect,

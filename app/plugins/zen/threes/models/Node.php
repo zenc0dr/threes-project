@@ -2,8 +2,11 @@
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use Illuminate\Support\Facades\DB;
 
+
+/**
+ * @property static find($nid)
+ */
 class Node extends Model
 {
     use Validation;
@@ -27,12 +30,16 @@ class Node extends Model
     public static function set(array $data = []): self
     {
         $nid = $data['nid'] ?? null;
+
         if ($nid) {
-            $node = self::find($nid)
-                ->update([
+            $node = self::find($nid);
+
+            if ($node) {
+                $node->update([
                     'name' => $data['name'] ?? 'Без названия',
                     'description' => $data['description'] ?? null,
                 ]);
+            }
         } else {
             $node = self::create([
                 'nid' => ths()->createToken(),

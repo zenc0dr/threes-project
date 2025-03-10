@@ -19,7 +19,7 @@
                 />
             </template>
         </draggable>
-        <div @dblclick="createNodeAtPosition" class="frame__add-line">+</div>
+        <div @click="addProgramLine" class="frame__add-line">+</div>
     </div>
 </template>
 
@@ -46,7 +46,8 @@ export default {
     methods: {
         // Стили нода прописаны глобально
         getNodeStyle(node) {
-            const cssLayer = node.layers['threes.units.ui@css']; // Уникальный слой со стилями
+            const cssLayer = node.layers?.['threes.units.ui@css'] // Уникальный слой со стилями
+
             return cssLayer ? JSON.parse(cssLayer) : {
                 padding: '5px 7px',
                 background: '#6eb39d',
@@ -104,10 +105,13 @@ export default {
                     fid: this.fid
                 },
                 then: response => {
-                    this.program = response.program.map(line => line.map(node => ({
-                        ...node,
-                        x: 0, // x не нужен, так как позиция управляется через Flexbox
-                    })));
+                    this.program = response.program
+
+
+                    // this.program = response.program.map(line => line.map(node => ({
+                    //     ...node,
+                    //     x: 0, // x не нужен, так как позиция управляется через Flexbox
+                    // })));
                 },
             });
         },

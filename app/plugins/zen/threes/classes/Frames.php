@@ -13,8 +13,6 @@ class Frames
 
     public function saveProgram(string $fid, array $program): void
     {
-        //Frame::findByFid($fid)->update(['program' => $program]);
-
         $dsl = [];
 
         foreach ($program as $line_index => $line) {
@@ -24,7 +22,6 @@ class Frames
                     'name' => $node['name'],
                     'description' => $node['description'],
                 ]);
-
                 $layers = [];
                 if (isset($node['layers'])) {
                     foreach ($node['layers'] as $layer) {
@@ -32,26 +29,34 @@ class Frames
                             'lid' => $layer['lid'],
                             'name' => $layer['name'],
                             'description' => $layer['description'],
-                            'aspects' => $layer['aspects'],
+                            'aspect' => $layer['aspect'],
                             'exe' => $layer['exe'],
                         ]);
                         $layers[] = $layer['lid'];
                     }
                 }
 
-                $dsl[$line_index][] = $node['nid'];
+                $dsl_node = [
+                    $node['nid'] => $layers
+                ];
+
+
+                $dsl[$line_index][] = $dsl_node;
             }
             if (!isset($dsl[$line_index])) {
                 $dsl[$line_index] = [];
             }
         }
 
-        dd($dsl);
+        Frame::findByFid($fid)->update([
+            'program' => $dsl,
+        ]);
     }
 
     public function loadProgram(string $fid): array
     {
         $program = Frame::findByFid($fid)->program;
+
         $dsl = [];
         foreach ($program as $line) {
             $dsl_line = [];
@@ -69,7 +74,7 @@ class Frames
             }
             $dsl[] = $dsl_line;
         }
-        return $program;
+        return $dsl;
     }
 
     public function addLine(string $fid): void
