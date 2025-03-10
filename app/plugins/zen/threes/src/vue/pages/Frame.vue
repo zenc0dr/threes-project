@@ -8,11 +8,15 @@
             class="frame__line"
             group="nodes"
             item-key="nid"
+            :multi-drag="true"
+            :selected-items="selectedNodes"
             @end="saveProgram"
+            @dblclick="createNode(line_index)"
         >
-            <template #item="{ element: node }">
+            <template #item="{element:node}">
                 <Node
                     class="frame__node"
+                    :class="{'selected':isNodeSelected(node.nid)}"
                     :style="getNodeStyle(node)"
                     :node="node"
                     @click="handleNodeClick(node, $event)"
@@ -37,17 +41,15 @@ export default {
     data() {
         return {
             program: [],
-            selectedNodes: [],
+            selectedNodes: [], // Массив nid выбранных нодов
         };
     },
     mounted() {
         this.loadProgram();
     },
     methods: {
-        // Стили нода прописаны глобально
         getNodeStyle(node) {
-            const cssLayer = node.layers?.['threes.units.ui@css'] // Уникальный слой со стилями
-
+            const cssLayer = node.layers?.['threes.units.ui@css'];
             return cssLayer ? JSON.parse(cssLayer) : {
                 padding: '5px 7px',
                 background: '#6eb39d',
@@ -56,26 +58,36 @@ export default {
             };
         },
         getNodeComponent(node) {
-            // Логика выбора компонента на основе слоёв
-            if (node.layers['threes.units.chart_js']) {
-                return 'ChartNode'; // Компонент для графиков
-            } else if (node.layers['threes.units.ui@button']) {
-                return 'ButtonNode'; // Компонент для кнопок
+            if (node.layers?.['threes.units.chart_js']) {
+                return 'ChartNode';
+            } else if (node.layers?.['threes.units.ui@button']) {
+                return 'ButtonNode';
             }
-            return 'DefaultNode'; // По умолчанию
+            return 'DefaultNode';
+        },
+        isNodeSelected(nid) {
+            return this.selectedNodes.includes(nid);
         },
         handleNodeClick(node, event) {
+            if (event.detail === 2) return; // Пропускаем двойной клик
+
+            const nid = node.nid;
             if (event.ctrlKey) {
-                const index = this.selectedNodes.indexOf(node.nid);
-                if (index === -1) this.selectedNodes.push(node.nid);
-                else this.selectedNodes.splice(index, 1);
+                // Множественный выбор с Ctrl
+                const index = this.selectedNodes.indexOf(nid);
+                if (index === -1) {
+                    this.selectedNodes.push(nid); // Добавляем, если не выбран
+                } else {
+                    this.selectedNodes.splice(index, 1); // Убираем, если уже выбран
+                }
             } else {
-                this.selectedNodes = [node.nid];
+                // Одиночный выбор без Ctrl
+                if (this.selectedNodes.length === 1 && this.selectedNodes[0] === nid) {
+                    this.selectedNodes = []; // Снимаем выбор, если кликнули на уже выбранный
+                } else {
+                    this.selectedNodes = [nid]; // Выбираем только этот нод
+                }
             }
-        },
-        createNodeAtPosition(event) {
-            const line_index = Math.floor(event.offsetY / 40); // Пример высоты строки
-            this.createNode(line_index);
         },
         createNode(line_index) {
             ths.api({
@@ -85,7 +97,7 @@ export default {
                     line_index: line_index
                 },
                 then: () => {
-                    this.loadProgram()
+                    this.loadProgram();
                 },
             });
         },
@@ -94,7 +106,7 @@ export default {
                 api: 'frames.Frame:addLine',
                 data: { fid: this.fid },
                 then: () => {
-                    this.loadProgram()
+                    this.loadProgram();
                 },
             });
         },
@@ -105,21 +117,20 @@ export default {
                     fid: this.fid
                 },
                 then: response => {
-                    this.program = response.program
-
-
-                    // this.program = response.program.map(line => line.map(node => ({
-                    //     ...node,
-                    //     x: 0, // x не нужен, так как позиция управляется через Flexbox
-                    // })));
+                    this.program = response.program;
                 },
             });
         },
         saveProgram() {
             ths.api({
                 api: 'frames.Frame:saveProgram',
-                data: { fid: this.fid, program: this.program },
-                then: () => this.loadProgram(),
+                data: {
+                    fid: this.fid,
+                    program: this.program
+                },
+                then: () => {
+                    this.loadProgram();
+                },
             });
         },
     },
@@ -145,6 +156,11 @@ export default {
 
     &__node {
         cursor: move;
+
+        &.selected {
+            outline: 2px solid #007bff; // Визуальный индикатор выбора
+            outline-offset: 2px;
+        }
     }
 
     &__add-line {
