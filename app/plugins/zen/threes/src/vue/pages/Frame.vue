@@ -1,5 +1,5 @@
 <template>
-    <div class="frame">
+    <div class="frame" @click="clearSelection($event)">
         <draggable
             v-for="(line, line_index) in program"
             :key="line_index"
@@ -9,7 +9,7 @@
             group="nodes"
             item-key="nid"
             :multi-drag="true"
-            :selected-items="selectedNodes"
+            :selected-items="selected_nodes"
             @end="saveProgram"
             @dblclick="createNode(line_index)"
         >
@@ -41,13 +41,19 @@ export default {
     data() {
         return {
             program: [],
-            selectedNodes: [], // Массив nid выбранных нодов
+            selected_nodes: [], // Массив nid выбранных нодов
         };
     },
     mounted() {
         this.loadProgram();
     },
     methods: {
+        // Очистить выбранные ноды
+        clearSelection(event) {
+            if (event.target.classList.contains('frame') || event.target.classList.contains('frame__line')) {
+                this.selected_nodes = [];
+            }
+        },
         getNodeStyle(node) {
             const cssLayer = node.layers?.['threes.units.ui@css'];
             return cssLayer ? JSON.parse(cssLayer) : {
@@ -66,7 +72,7 @@ export default {
             return 'DefaultNode';
         },
         isNodeSelected(nid) {
-            return this.selectedNodes.includes(nid);
+            return this.selected_nodes.includes(nid);
         },
         handleNodeClick(node, event) {
             if (event.detail === 2) return; // Пропускаем двойной клик
@@ -74,18 +80,18 @@ export default {
             const nid = node.nid;
             if (event.ctrlKey) {
                 // Множественный выбор с Ctrl
-                const index = this.selectedNodes.indexOf(nid);
+                const index = this.selected_nodes.indexOf(nid);
                 if (index === -1) {
-                    this.selectedNodes.push(nid); // Добавляем, если не выбран
+                    this.selected_nodes.push(nid); // Добавляем, если не выбран
                 } else {
-                    this.selectedNodes.splice(index, 1); // Убираем, если уже выбран
+                    this.selected_nodes.splice(index, 1); // Убираем, если уже выбран
                 }
             } else {
                 // Одиночный выбор без Ctrl
-                if (this.selectedNodes.length === 1 && this.selectedNodes[0] === nid) {
-                    this.selectedNodes = []; // Снимаем выбор, если кликнули на уже выбранный
+                if (this.selected_nodes.length === 1 && this.selected_nodes[0] === nid) {
+                    this.selected_nodes = []; // Снимаем выбор, если кликнули на уже выбранный
                 } else {
-                    this.selectedNodes = [nid]; // Выбираем только этот нод
+                    this.selected_nodes = [nid]; // Выбираем только этот нод
                 }
             }
         },
@@ -122,6 +128,7 @@ export default {
             });
         },
         saveProgram() {
+            this.selected_nodes = []
             ths.api({
                 api: 'frames.Frame:saveProgram',
                 data: {
