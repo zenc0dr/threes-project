@@ -48,20 +48,29 @@ export default {
         this.loadProgram();
     },
     methods: {
-        // Очистить выбранные ноды
+        // Очистить множественное выделение
         clearSelection(event) {
             if (event.target.classList.contains('frame') || event.target.classList.contains('frame__line')) {
                 this.selected_nodes = [];
             }
         },
+        // Оформить стиль нода в зависимости от его слоя css
         getNodeStyle(node) {
-            const cssLayer = node.layers?.['threes.units.ui@css'];
-            return cssLayer ? JSON.parse(cssLayer) : {
+            let style = {
                 padding: '5px 7px',
                 background: '#6eb39d',
                 borderRadius: '3px',
                 width: '50px'
-            };
+            }
+            for (let i in node.layers) {
+                let layer = node.layers[i]
+                if (layer.aspect === 'threes.units.ui@css') {
+                    style = JSON.parse(layer.exe)
+                    console.log('STYLE', style)
+                    break
+                }
+            }
+            return style
         },
         getNodeComponent(node) {
             if (node.layers?.['threes.units.chart_js']) {
@@ -82,16 +91,16 @@ export default {
                 // Множественный выбор с Ctrl
                 const index = this.selected_nodes.indexOf(nid);
                 if (index === -1) {
-                    this.selected_nodes.push(nid); // Добавляем, если не выбран
+                    this.selected_nodes.push(nid) // Добавляем, если не выбран
                 } else {
                     this.selected_nodes.splice(index, 1); // Убираем, если уже выбран
                 }
             } else {
                 // Одиночный выбор без Ctrl
                 if (this.selected_nodes.length === 1 && this.selected_nodes[0] === nid) {
-                    this.selected_nodes = []; // Снимаем выбор, если кликнули на уже выбранный
+                    this.selected_nodes = [] // Снимаем выбор, если кликнули на уже выбранный
                 } else {
-                    this.selected_nodes = [nid]; // Выбираем только этот нод
+                    this.selected_nodes = [nid] // Выбираем только этот нод
                 }
             }
         },
@@ -103,7 +112,7 @@ export default {
                     line_index: line_index
                 },
                 then: () => {
-                    this.loadProgram();
+                    this.loadProgram()
                 },
             });
         },
@@ -112,7 +121,7 @@ export default {
                 api: 'frames.Frame:addLine',
                 data: { fid: this.fid },
                 then: () => {
-                    this.loadProgram();
+                    this.loadProgram()
                 },
             });
         },
