@@ -31,7 +31,7 @@
 
 <script>
 export default {
-    name: "ThreesModal",
+    name: "modal",
     emits: ['close'],
     props: {
         show: {

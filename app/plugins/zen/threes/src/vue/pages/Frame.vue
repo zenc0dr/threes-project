@@ -16,44 +16,63 @@
             <template #item="{element:node}">
                 <Node
                     class="frame__node"
-                    :class="{'selected':isNodeSelected(node.nid)}"
+                    :class="{'selected':isNodeSelected(node)}"
                     :style="getNodeStyle(node)"
                     :node="node"
                     @click="handleNodeClick(node, $event)"
+                    @contextmenu.prevent="handleNodeRightClick(node, $event)"
                 />
             </template>
         </draggable>
         <div @click="addProgramLine" class="frame__add-line">+</div>
+        <NodePanel
+            :node="node_in_panel"
+            @close="closeNodePanel"
+        />
     </div>
 </template>
 
 <script>
 import draggable from 'vuedraggable';
 import Node from '../components/Node.vue';
+import NodePanel from '../components/ux/forms/NodePanel.vue';
 
 export default {
     name: 'Frame',
     components: {
         draggable,
-        Node
+        Node,
+        NodePanel
     },
     props: ['backend', 'fid'],
     data() {
         return {
-            program: [],
+            program: [], // DSL программа
             selected_nodes: [], // Массив nid выбранных нодов
+            node_in_panel: null // Сюда вставить нод чтобы открыть панель
         };
     },
     mounted() {
         this.loadProgram();
     },
     methods: {
+        // Открыть панель нода
+        openNodePanel(node) {
+            this.node_in_panel = node
+        },
+
+        // Закрыть панель нода
+        closeNodePanel() {
+            this.node_in_panel = null
+        },
+
         // Очистить множественное выделение
         clearSelection(event) {
-            if (event.target.classList.contains('frame') || event.target.classList.contains('frame__line')) {
+            if (event.target.matches('.frame, .frame__line')) {
                 this.selected_nodes = [];
             }
         },
+
         // Оформить стиль нода в зависимости от его слоя css
         getNodeStyle(node) {
             let style = {
@@ -72,17 +91,13 @@ export default {
             }
             return style
         },
-        getNodeComponent(node) {
-            if (node.layers?.['threes.units.chart_js']) {
-                return 'ChartNode';
-            } else if (node.layers?.['threes.units.ui@button']) {
-                return 'ButtonNode';
-            }
-            return 'DefaultNode';
+
+        // Если нод выделен
+        isNodeSelected(node) {
+            return this.selected_nodes.includes(node.nid);
         },
-        isNodeSelected(nid) {
-            return this.selected_nodes.includes(nid);
-        },
+
+        // Нажатие левой кнопкой мыши на ноде
         handleNodeClick(node, event) {
             if (event.detail === 2) return; // Пропускаем двойной клик
 
@@ -104,6 +119,13 @@ export default {
                 }
             }
         },
+
+        // Нажатие правой кнопкой мыши на ноде
+        handleNodeRightClick(node, event) {
+            this.openNodePanel(node)
+        },
+
+        // Создать нод
         createNode(line_index) {
             ths.api({
                 api: 'nodes.Node:Create',
@@ -116,6 +138,8 @@ export default {
                 },
             });
         },
+
+        // Добавить программную линию
         addProgramLine() {
             ths.api({
                 api: 'frames.Frame:addLine',
@@ -125,6 +149,8 @@ export default {
                 },
             });
         },
+
+        // Загрузить программу
         loadProgram() {
             ths.api({
                 api: 'frames.Frame:loadProgram',
@@ -136,6 +162,8 @@ export default {
                 },
             });
         },
+
+        // Сохранить программу
         saveProgram() {
             this.selected_nodes = []
             ths.api({

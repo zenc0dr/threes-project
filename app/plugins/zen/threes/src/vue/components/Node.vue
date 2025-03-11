@@ -1,24 +1,25 @@
 <template>
 <div v-if="node.nid" class="threes-node">
-    <component :is="getNodeComponent(node)" :node="node" />
+    <template v-for="layer in node.layers">
+        <template v-if="layer.aspect === 'threes.units.oc@write'">
+            <NodeCode :node="node" :layer="layer" />
+        </template>
+    </template>
 </div>
 </template>
 <script>
+import NodeCode from "./nodes/NodeCode.vue";
+
 export default {
     name: "Node",
+    components: {
+        NodeCode
+    },
     props: {
         node: null
     },
     methods: {
-        getNodeComponent(node) {
-            // Логика выбора компонента на основе слоёв
-            if (node.layers['threes.units.chart_js']) {
-                return 'ChartNode'; // Компонент для графиков
-            } else if (node.layers['threes.units.ui@button']) {
-                return 'ButtonNode'; // Компонент для кнопок
-            }
-            return 'DefaultNode'; // По умолчанию
-        },
+
     }
 }
 </script>
