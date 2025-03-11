@@ -11,6 +11,11 @@ class Frames
 {
     use SingletonTrait;
 
+    public function get(string $fid)
+    {
+        return Frame::findByFid($fid);
+    }
+
     public function saveProgram(string $fid, array $program): void
     {
         $dsl = [];
@@ -51,6 +56,8 @@ class Frames
         Frame::findByFid($fid)->update([
             'program' => $dsl,
         ]);
+
+        //$this->abstractor($fid);
     }
 
     public function loadProgram(string $fid): array
@@ -84,5 +91,40 @@ class Frames
         $program[] = [];
         $frame->program = $program;
         $frame->save();
+    }
+
+    public function abstractor(string $fid): void
+    {
+        $program = $this->loadProgram($fid);
+
+        $layers = [];
+        foreach ($program as $line) {
+            foreach ($line as $node) {
+                foreach ($node['layers'] as $layer) {
+                    $layers[] = [
+                        'aspect' => $layer['aspect'],
+                        'exe' => $layer['exe'],
+                    ];
+                }
+            }
+        }
+
+        $layers_count = count($layers);
+        $layer_index = 0;
+        foreach ($layers as $layer) {
+            $program_stage = null;
+            if ($layer_index === 0) {
+                $program_stage = 'start';
+            }
+            $aspect = explode('@', $layer['aspect']);
+            $uid = $aspect[0];
+            $method = $aspect[1];
+            $exe = $layer['exe'];
+            if ($layer_index === $layers_count) {
+                $program_stage = 'end';
+            }
+            ths()->layers()->callAspect($fid, $uid, $method, $exe, $program_stage);
+            $layer_index++;
+        }
     }
 }

@@ -12,6 +12,7 @@ import NodeCode from "./nodes/NodeCode.vue";
 
 export default {
     name: "Node",
+    emits: ['update'],
     components: {
         NodeCode
     },

@@ -57,10 +57,12 @@ class Nodes
      */
     public function updateNode(string $fid, array $node): array
     {
+        Node::set($node);
         # Сюда пришёл DSL-развёрнутый нод со слоями
         $this->attachLayers($fid, $node);
         return $this->getDsl($fid, $node['nid']);
     }
+
 
     private function attachLayers(string $fid, array $node): void
     {

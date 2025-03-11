@@ -37,12 +37,18 @@ class Threes extends Helpers
         $method = array_pop($path);
         $path = join('\\', $path);
         $class = "\\$path";
-        $is_static = (new \ReflectionMethod($class, $method))->isStatic();
+
+        try {
+            $is_static = (new \ReflectionMethod($class, $method))->isStatic();
+        } catch (\Exception $e) {
+            return null;
+        }
+
         if ($is_static) {
-            return $class::$method($arguments);
+            return $class::$method(...$arguments);
         } else {
             $instance = new $class($constructor);
-            return $instance->$method($arguments);
+            return $instance->$method(...$arguments);
         }
     }
 

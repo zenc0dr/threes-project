@@ -47,4 +47,35 @@ class Layers
         }
         return $layer->lid;
     }
+
+    public function callAspect(
+        string $fid,
+        string $uid,
+        string $method,
+        string $exe,
+        ?string $program_stage = null
+    ) {
+
+//        dump([
+//            '$fid' => $fid,
+//            '$uid' => $uid,
+//            '$method' => $method,
+//            '$exe' => $exe,
+//            '$program_stage' => $program_stage,
+//        ]);
+
+
+        $unit = ths()->units()->get($uid);
+        $aspect = null;
+        foreach ($unit->layers as $unit_layer) {
+            if ($unit_layer['aspect_lid'] === $method) {
+                $aspect = $unit_layer['aspect_exe'];
+            }
+        }
+        if (!$aspect) {
+            return;
+        }
+
+        ths()->exe($aspect, null, $exe, $fid, $program_stage);
+    }
 }

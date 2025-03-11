@@ -71,7 +71,7 @@ export default {
         },
         exeStringifier(node, fn) {
             for (let i in node.layers) {
-                if (typeof node.layers[i].exe === 'string') {
+                if (typeof node.layers[i].exe !== 'string') {
                     node.layers[i].exe = JSON.stringify(node.layers[i].exe)
                 }
             }

@@ -201,6 +201,7 @@ export default {
         flex-wrap: wrap;
         gap: 5px;
         min-height: 40px;
+        margin-bottom: 4px;
     }
 
     &__node {

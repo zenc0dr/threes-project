@@ -18,5 +18,9 @@ export default {
 <style lang="scss">
 .node-code {
     user-select: none;
+    background: #c7ffc2;
+    color: #325235;
+    padding: 5px 9px;
+    border-radius: 4px;
 }
 </style>
