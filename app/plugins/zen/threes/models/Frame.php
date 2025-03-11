@@ -23,6 +23,8 @@ class Frame extends Model
 
     public $table = 'zen_threes_frames';
 
+    protected $primaryKey = 'id';
+
     public $rules = [
         'fid' => 'required|unique:zen_threes_frames,fid',
         'name' => 'required',

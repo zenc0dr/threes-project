@@ -27,13 +27,9 @@ class FrameController extends Controller
         $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);
     }
 
-    public function update($fid)
+    public function formFindModelObject($recordId)
     {
-        // Ищем запись по fid
-        $frame = Frame::findByFid($fid);
-
-        // Передаём ID в стандартный update
-        return $this->asExtension('FormController')->update($frame->id);
+        // Переопределяем поиск модели по fid
+        return Frame::findByFid($recordId);
     }
-
 }

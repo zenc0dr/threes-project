@@ -102,10 +102,10 @@ class Threes extends Helpers
 
 namespace Zen\Threes\Api\debug;
 
+use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Layer;
 use Zen\Threes\Models\Unit;
-use Zen\Threes\Console\Vector;
-use Zen\Threes\Classes\units\OpcodeGenerator;
+use Zen\Threes\Models\Frame;
 
 
 class Tests
@@ -113,17 +113,16 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $layer_data = ths()->fromJsonFile(
-            storage_path('layer_data.json')
-        );
-
-        Layer::set($layer_data);
+        ths()->nodes()->getDsl('test2', 'nhnopd9a');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
-        dd('Threes api works!');
+        Node::truncate();
+        Layer::truncate();
+
+        //dd('Threes api works!');
     }
 }
 
@@ -138,7 +137,6 @@ class Frame
     # http://threes.dc/threes.api/frames.Frame:saveProgram
     public function saveProgram(): array
     {
-        ths()->requestDebug('saveProgram');
         ths()->frames()->saveProgram(
             request('fid'),
             request('program')
@@ -146,7 +144,7 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=test1
+    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=grok
     public function loadProgram(): array
     {
         return [
@@ -154,11 +152,10 @@ class Frame
         ];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:addLine?fid=test1
+    # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
     public function addLine()
     {
-        $fid = request('fid');
-        ths()->frames()->addLine($fid);
+        ths()->frames()->addLine(request('fid'));
         return [];
     }
 
@@ -173,13 +170,26 @@ namespace Zen\Threes\Api\Nodes;
 
 class Node
 {
-    # http://threes.dc/threes.api/nodes.Node:Create?fid=test1&line_index=0
-    public function Create(): array
+    # http://threes.dc/threes.api/nodes.Node:create?fid=grok&line_index=0
+    public function create(): array
     {
-        $fid = request('fid');
-        $line_index = request('line_index');
-        ths()->nodes()->addNode($fid, $line_index);
+        ths()->nodes()->addNode(
+            request('fid'),
+            request('line_index')
+        );
         return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.Node:update
+    public function update(): array
+    {
+        ths()->requestDebug('node_update_data');
+        return [
+            'json' => ths()->nodes()->updateNode(
+                request('fid'),
+                request('node')
+            )
+        ];
     }
 }
 
@@ -200,48 +210,68 @@ class Frames
 
     public function saveProgram(string $fid, array $program): void
     {
-        //Frame::findByFid($fid)->update(['program' => $program]);
-
         $dsl = [];
 
         foreach ($program as $line_index => $line) {
             foreach ($line as $node) {
-                $nid = $node['nid'];
-                $description = $node['description'];
-
                 Node::set([
-                    'fid' => $fid,
-                    'nid' => $nid,
+                    'nid' => $node['nid'],
                     'name' => $node['name'],
-                    'description' => $description,
+                    'description' => $node['description'],
                 ]);
-
+                $layers = [];
                 if (isset($node['layers'])) {
-                    $layer_index = 0;
-                    foreach ($node['layers'] as $lid => $attribute) {
+                    foreach ($node['layers'] as $layer) {
                         Layer::set([
-                            'nid' => $nid,
-                            'lid' => $lid,
-                            'exe' => $attribute,
-                            'sort_order' => $layer_index,
+                            'lid' => $layer['lid'],
+                            'name' => $layer['name'],
+                            'description' => $layer['description'],
+                            'aspect' => $layer['aspect'],
+                            'exe' => $layer['exe'],
                         ]);
-                        $layer_index++;
+                        $layers[] = $layer['lid'];
                     }
                 }
 
-                $dsl[$line_index][] = $node['nid'];
+                $dsl_node = [
+                    $node['nid'] => $layers
+                ];
+
+
+                $dsl[$line_index][] = $dsl_node;
             }
             if (!isset($dsl[$line_index])) {
                 $dsl[$line_index] = [];
             }
         }
 
-        dd($dsl);
+        Frame::findByFid($fid)->update([
+            'program' => $dsl,
+        ]);
     }
 
     public function loadProgram(string $fid): array
     {
-        return Frame::findByFid($fid)->program;
+        $program = Frame::findByFid($fid)->program;
+
+        $dsl = [];
+        foreach ($program as $line) {
+            $dsl_line = [];
+            foreach ($line as $nodes) {
+                foreach ($nodes as $nid => $lids) {
+                    $node = Node::find($nid)->dsl;
+                    $layers = [];
+                    foreach ($lids as $lid) {
+                        $layer = Layer::find($lid)->dsl;
+                        $layers[] = $layer;
+                    }
+                    $node['layers'] = $layers;
+                }
+                $dsl_line[] = $node;
+            }
+            $dsl[] = $dsl_line;
+        }
+        return $dsl;
     }
 
     public function addLine(string $fid): void
@@ -292,6 +322,64 @@ class Helpers
     {
         return Frames::getInstance();
     }
+
+    public function layers(): Layers
+    {
+        return Layers::getInstance();
+    }
+}
+
+```
+`plugins/zen/threes/classes/Layers.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Models\Layer;
+
+class Layers
+{
+    use SingletonTrait;
+
+    public function handle(
+        string $fid, # токен фрейма
+        string $nid, # Токен нода
+        array | string $layer # DSL-слой
+    ): string {
+        $lid = $layer['lid'] ?? null;
+
+        if ($lid) {
+            Layer::set($layer); // Обновить слой
+        } else {
+            $lid = $this->handleAspect($layer); // Создать слой
+        }
+
+        return $lid;
+    }
+
+    public function handleAspect(string $aspect): string
+    {
+        $aspect = explode('@', $aspect);
+        $uid = $aspect[0];
+        $method = $aspect[1];
+
+        $unit = ths()->units()->get($uid);
+        $layer = null;
+        foreach ($unit->layers as $unit_layer) {
+            $layer_method = $unit_layer['aspect_lid'];
+            if ($method === $layer_method) {
+                $layer = Layer::set([
+                    'name' => $unit_layer['aspect_name'],
+                    'description' => $unit_layer['aspect_desc'],
+                    'aspect' => "$uid@$method",
+                    'exe' => $unit_layer['aspect_exe'],
+                ]);
+                break;
+            }
+        }
+        return $layer->lid;
+    }
 }
 
 ```
@@ -303,6 +391,8 @@ namespace Zen\Threes\Classes;
 use Zen\Threes\Traits\SingletonTrait;
 
 use Zen\Threes\Models\Frame;
+use Zen\Threes\Models\Node;
+use Zen\Threes\Models\Layer;
 
 class Nodes
 {
@@ -314,21 +404,103 @@ class Nodes
      * @param int $line_index
      * @return array
      */
-    public function addNode(string $fid, int $line_index): array
+    public function addNode(string $fid, int $line_index)
     {
         $frame = Frame::findByFid($fid);
-        $program = $frame->program ?? [];
-        $program[$line_index][] = [
-            'nid' => ths()->createToken(),
-            'name' => '#',
-            'description' => null,
-            'layers' => [
-                'threes.units.oc@write' => '#'
+
+        $node = Node::set();
+        $layer = Layer::set();
+        $program = $frame->program;
+
+        $node = [
+            $node->nid => [
+                $layer->lid
             ]
         ];
+
+        # Заполнить программу отсутствующими пустыми линиями
+        for ($i = 0; $i <= $line_index; $i++) {
+            if (!isset($program[$i])) {
+                $program[$i] = [];
+            }
+        }
+
+        $program[$line_index][] = $node;
         $frame->program = $program;
         $frame->save();
         return [];
+    }
+
+    public function get(string $nid)
+    {
+        return Node::find($nid);
+    }
+
+    /**
+     * Обновить нод
+     * @param string $nid
+     * @return array
+     */
+    public function updateNode(string $fid, array $node): array
+    {
+        # Сюда пришёл DSL-развёрнутый нод со слоями
+        $this->attachLayers($fid, $node);
+        return $this->getDsl($fid, $node['nid']);
+    }
+
+    private function attachLayers(string $fid, array $node): void
+    {
+        $layers = $node['layers'] ?? null;
+
+        if (!$layers) {
+            return;
+        }
+
+        $updated_layers_lids = [];
+        foreach ($layers as $layer) {
+            $updated_layers_lids[] = ths()->layers()->handle($fid, $node['nid'], $layer);
+        }
+
+        $frame = Frame::findByFid($fid);
+        $program = $frame->program;
+        foreach ($program as &$line) {
+            foreach ($line as &$line_node) {
+                foreach ($line_node as $nid => &$layers) {
+                    if ($nid === $node['nid']) {
+                        $layers = $updated_layers_lids;
+                        break 3;
+                    }
+                }
+            }
+        }
+        $frame->program = $program;
+        $frame->save();
+    }
+
+    /**
+     * Вернуть Полный DSL-узел
+     * @param string $fid
+     * @param string $nid
+     * @return array
+     */
+    public function getDsl(string $fid, string $nid): array
+    {
+        $frame = Frame::findByFid($fid);
+        $node = Node::find($nid);
+        $node_dsl = $node->dsl;
+        $node_dsl['layers'] = [];
+        foreach ($frame->program as $line) {
+            foreach ($line as $line_node) {
+                foreach ($line_node as $nid => $layers) {
+                    if ($nid === $node['nid']) {
+                        foreach ($layers as $lid) {
+                            $node_dsl['layers'][] = Layer::find($lid)->dsl;
+                        }
+                    }
+                }
+            }
+        }
+        return $node_dsl;
     }
 }
 
@@ -339,10 +511,16 @@ class Nodes
 namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Models\Unit;
 
 class Units
 {
     use SingletonTrait;
+
+    public function get(string $uid)
+    {
+        return Unit::find($uid);
+    }
 }
 
 ```
@@ -684,20 +862,6 @@ trait Yaml
                 $indent
             )
         );
-    }
-}
-
-```
-`plugins/zen/threes/classes/units/OpcodeGenerator.php`
-```<?php
-
-namespace Zen\Threes\Classes\Units;
-
-class OpcodeGenerator
-{
-    public static function generateOpcode()
-    {
-        dd('OKAY');
     }
 }
 
@@ -1432,7 +1596,6 @@ class Frame extends Model
     {
         $this->saveData();
     }
-    //endregion
 }
 
 ```
@@ -1441,7 +1604,6 @@ class Frame extends Model
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use Illuminate\Support\Facades\DB;
 
 class Layer extends Model
 {
@@ -1449,51 +1611,61 @@ class Layer extends Model
 
     public $timestamps = false;
     public $table = 'zen_threes_layers';
-    public $rules = [];
-
-    protected $primaryKey = null; // Оставляем null, так как нет единого PK
+    protected $primaryKey = 'lid';
+    protected $keyType = 'string';
     public $incrementing = false;
 
+    public $rules = [
+        'lid' => 'required|unique:zen_threes_layers,lid',
+    ];
+
     protected $fillable = [
-        'nid',
         'lid',
         'name',
         'description',
-        'exe',
-        'sort_order',
+        'aspect', # Аспект слоя
+        'exe', # Атрибут аспекта слоя
         'updated_at',
     ];
 
-    public static function set(array $layer): void
+    public static function set(array $data = [])
     {
-        $nid = $layer['nid'];
-        $lid = $layer['lid'];
-        $data = [
-            'nid' => $nid,
-            'lid' => $lid,
-            'name' => $layer['name'] ?? 'Без названия',
-            'description' => $layer['description'] ?? null,
-            'exe' => $layer['exe'],
-            'sort_order' => $layer['sort_order'],
-            'updated_at' => now(),
-        ];
+        $lid = $data['lid'] ?? null;
 
-        // Проверяем существование записи
-        $exists = DB::table('zen_threes_layers')
-            ->where('nid', $nid)
-            ->where('lid', $lid)
-            ->exists();
-
-        if ($exists) {
-            // Обновляем запись напрямую через DB facade
-            DB::table('zen_threes_layers')
-                ->where('nid', $nid)
-                ->where('lid', $lid)
-                ->update($data);
+        if ($lid) {
+            self::find($lid)
+                ->update([
+                    'lid' => $data['lid'],
+                    'name' => $data['name'] ?? 'Без названия',
+                    'description' => $data['description'] ?? null,
+                    'aspect' => $data['aspect'],
+                    'exe' => $data['exe'],
+                    'updated_at' => now(),
+                ]);
+            $layer = Layer::find($lid);
         } else {
-            // Создаем новую запись
-            DB::table('zen_threes_layers')->insert($data);
+            $layer = self::create([
+                'lid' => ths()->createToken(),
+                'name' => $data['name'] ?? '#',
+                'description' => $data['description'] ?? '',
+                'aspect' => $data['aspect'] ?? 'threes.units.oc@write',
+                'exe' => $data['exe'] ?? '#',
+                'updated_at' => now(),
+            ]);
         }
+
+        return $layer;
+    }
+
+    public function getDslAttribute(): array
+    {
+        return [
+            'lid' => $this->lid,
+            'name' => $this->name,
+            'description' => $this->description,
+            'aspect' => $this->aspect,
+            'exe' => $this->exe
+        ];
     }
 }
 
@@ -1503,59 +1675,63 @@ class Layer extends Model
 
 use Model;
 use October\Rain\Database\Traits\Validation;
-use Illuminate\Support\Facades\DB;
 
+
+/**
+ * @property array $dsl
+ * @method static find($nid)
+ */
 class Node extends Model
 {
     use Validation;
 
     public $timestamps = false;
     public $table = 'zen_threes_nodes';
-    public $rules = [];
-
-    protected $primaryKey = null; // Нет единого PK
+    protected $primaryKey = 'nid';
+    protected $keyType = 'string';
     public $incrementing = false;
 
+    public $rules = [
+        'nid' => 'required|unique:zen_threes_nodes,nid',
+    ];
+
     protected $fillable = [
-        'fid',
         'nid',
         'name',
         'description',
     ];
 
-    public static function set(array $data): void
+    public static function set(array $data = []): self
     {
-        $fid = $data['fid'];
-        $nid = $data['nid'];
-        $name = $data['name'] ?? 'Без названия';
-        $description = $data['description'] ?? null;
+        $nid = $data['nid'] ?? null;
 
-        $data_to_save = [
-            'fid' => $fid,
-            'nid' => $nid,
-            'name' => $name,
-            'description' => $description,
-        ];
+        if ($nid) {
+            $node = self::find($nid);
 
-        $exists = DB::table('zen_threes_nodes')
-            ->where('fid', $fid)
-            ->where('nid', $nid)
-            ->exists();
-
-        if ($exists) {
-            DB::table('zen_threes_nodes')
-                ->where('fid', $fid)
-                ->where('nid', $nid)
-                ->update($data_to_save);
+            if ($node) {
+                $node->update([
+                    'name' => $data['name'] ?? 'Без названия',
+                    'description' => $data['description'] ?? null,
+                ]);
+            }
         } else {
-            DB::table('zen_threes_nodes')
-                ->insert($data_to_save);
+            $node = self::create([
+                'nid' => ths()->createToken(),
+                'name' => '#',
+                'description' => '',
+            ]);
         }
+
+        return $node;
     }
 
-    public static function fabric(string $fid, int $line_index = 0)
+    public function getDslAttribute(): array
     {
-        # Тут нужно создать новый нод для фрейма с токеном $fid который добавиться в конец линии $line_index
+        return [
+            'nid' => $this->nid,
+            'name' => $this->name,
+            'description' => $this->description
+        ];
     }
 }
 
@@ -2124,8 +2300,10 @@ fields:
         "primevue": "^3.10.0",
         "vue": "^3.5.13",
         "vue-click-outside-element": "^3.1.2",
+        "vue-draggable-plus": "^0.6.0",
         "vue-router": "^4.5.0",
         "vue-select": "^4.0.0-beta.6",
+        "vue3-json-editor": "^1.1.5",
         "vuedraggable": "^4.1.0"
     }
 }
@@ -3162,11 +3340,11 @@ class M003Nodes extends Migration
     {
         Schema::create('zen_threes_nodes', function($table)
         {
-            $table->string('fid')->index()->comment('Токен фрейма');
-            $table->string('nid')->index()->comment('Токен нода');
+            $table->string('nid')->primary()->comment('Токен нода');
             $table->string('name')->nullable()->comment('Имя нода');
             $table->string('description')->nullable()->comment('Описание нода');
-            $table->unique(['fid', 'nid'], 'zen_threes_nodes_fid_nid_unique');
+
+            $table->unique('nid', 'nid_unique');
         });
     }
 
@@ -3188,16 +3366,16 @@ class M004Layers extends Migration
     {
         Schema::create('zen_threes_layers', function($table)
         {
-            $table->string('nid')->comment('Токен нода');
             $table->string('lid')->comment('Токен слоя');
-            $table->string('name')
-                ->nullable()->default('Без названия')->comment('Название слоя');
+            $table->string('name')->nullable()->default('Без названия')->comment('Название слоя');
             $table->string('description')->nullable()->comment('Описание аспекта');
-            $table->string('exe')->nullable()->comment('Атрибут выполнения аспекта');
+
+            $table->string('aspect')->default('threes.units.oc@write')->comment('Аспект слоя');
+            $table->string('exe')->nullable()->comment('Атрибут аспекта');
+
             $table->timestamp('updated_at')->nullable()->comment('Время последнего обновления');
 
-            # уникальный составной ключ на nid и lid
-            $table->primary(['nid', 'lid']);
+            $table->unique('lid', 'lid_unique');
         });
     }
 

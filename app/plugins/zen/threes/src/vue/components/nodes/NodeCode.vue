@@ -17,6 +17,6 @@ export default {
 </script>
 <style lang="scss">
 .node-code {
-
+    user-select: none;
 }
 </style>

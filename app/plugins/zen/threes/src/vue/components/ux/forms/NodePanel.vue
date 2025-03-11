@@ -42,7 +42,10 @@ export default {
         node: {
             handler(node) {
                 if (node) {
-                    this.json = JSON.parse(JSON.stringify(node))
+                    node = JSON.parse(JSON.stringify(node))
+                    this.exeParser(node, node => {
+                        this.json = node
+                    })
                 }
             },
             deep: true,
@@ -58,6 +61,30 @@ export default {
         },
     },
     methods: {
+        exeParser(node, fn) {
+            for (let i in node.layers) {
+                if (this.isJsonString(node.layers[i].exe)) {
+                    node.layers[i].exe = JSON.parse(node.layers[i].exe)
+                }
+            }
+            fn(node)
+        },
+        exeStringifier(node, fn) {
+            for (let i in node.layers) {
+                if (typeof node.layers[i].exe === 'string') {
+                    node.layers[i].exe = JSON.stringify(node.layers[i].exe)
+                }
+            }
+            fn(node)
+        },
+        isJsonString(str) {
+            try {
+                JSON.parse(str);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        },
         close() {
             this.$emit("close");
         },
@@ -68,17 +95,21 @@ export default {
             if (!this.updated) {
                 return;
             }
-            ths.api({
-                api: 'nodes.Node:update',
-                data: {
-                    fid: this.fid,
-                    node: this.updated
-                },
-                then: response => {
-                    this.$emit("update", response.json)
-                    this.updated = null
-                },
-            });
+
+            let node = this.updated
+            this.exeStringifier(node, node => {
+                ths.api({
+                    api: 'nodes.Node:update',
+                    data: {
+                        fid: this.fid,
+                        node
+                    },
+                    then: response => {
+                        this.$emit("update", response.json)
+                        this.updated = null
+                    },
+                });
+            })
         }
     }
 }

@@ -1,0 +1,12 @@
+{
+    "$fid": "token",
+    "post": {
+        "_session_key": "k6N0Bqs5vlKrgAdMljWzzB02pTfHf8Eq3x0h6oI5",
+        "_token": "jUZeQt43TUmNPlLWNOpnaMGKF7Dl2Fm7wYkN6gi3",
+        "Frame": {
+            "name": "name",
+            "fid": "token"
+        },
+        "redirect": "0"
+    }
+}

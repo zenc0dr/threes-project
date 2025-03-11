@@ -191,7 +191,6 @@ export default {
 <style lang="scss">
 .frame {
     border: 1px solid #ddd;
-    padding: 10px;
 
     .node-test {
         background: #4795b1;
@@ -201,16 +200,14 @@ export default {
         display: flex;
         flex-wrap: wrap;
         gap: 5px;
-        min-height: 34px;
-        margin-bottom: 10px;
+        min-height: 40px;
     }
 
     &__node {
         cursor: move;
 
         &.selected {
-            outline: 2px solid #007bff; // Визуальный индикатор выбора
-            outline-offset: 2px;
+            box-shadow: inset 0 0 0 2px #007bff;
         }
     }
 
