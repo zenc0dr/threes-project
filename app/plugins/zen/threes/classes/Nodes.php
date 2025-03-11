@@ -59,9 +59,7 @@ class Nodes
     {
         # Сюда пришёл DSL-развёрнутый нод со слоями
         $this->attachLayers($fid, $node);
-
-
-        return [];
+        return $this->getDsl($fid, $node['nid']);
     }
 
     private function attachLayers(string $fid, array $node): void
@@ -91,5 +89,31 @@ class Nodes
         }
         $frame->program = $program;
         $frame->save();
+    }
+
+    /**
+     * Вернуть Полный DSL-узел
+     * @param string $fid
+     * @param string $nid
+     * @return array
+     */
+    public function getDsl(string $fid, string $nid): array
+    {
+        $frame = Frame::findByFid($fid);
+        $node = Node::find($nid);
+        $node_dsl = $node->dsl;
+        $node_dsl['layers'] = [];
+        foreach ($frame->program as $line) {
+            foreach ($line as $line_node) {
+                foreach ($line_node as $nid => $layers) {
+                    if ($nid === $node['nid']) {
+                        foreach ($layers as $lid) {
+                            $node_dsl['layers'][] = Layer::find($lid)->dsl;
+                        }
+                    }
+                }
+            }
+        }
+        return $node_dsl;
     }
 }

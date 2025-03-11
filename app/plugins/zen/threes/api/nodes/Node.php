@@ -18,11 +18,11 @@ class Node
     public function update(): array
     {
         ths()->requestDebug('node_update_data');
-        #return [];
-        ths()->nodes()->updateNode(
-            request('fid'),
-            request('node')
-        );
-        return [];
+        return [
+            'json' => ths()->nodes()->updateNode(
+                request('fid'),
+                request('node')
+            )
+        ];
     }
 }

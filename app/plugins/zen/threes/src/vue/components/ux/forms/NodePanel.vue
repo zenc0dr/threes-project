@@ -12,6 +12,9 @@
                     @json-change="onNodeChange"
                 />
             </template>
+            <template #footer>
+                <div @click="saveChanges" class="btn btn-default">Применить изменения</div>
+            </template>
         </modal>
     </div>
 </template>
@@ -29,15 +32,24 @@ export default {
         modal,
         Vue3JsonEditor
     },
-    computed: {
-        json: {
-            get() {
-                return this.node
+    data() {
+        return {
+            json: this.node ? JSON.parse(JSON.stringify(this.node)) : null,
+            updated: null,
+        }
+    },
+    watch: {
+        node: {
+            handler(node) {
+                if (node) {
+                    this.json = JSON.parse(JSON.stringify(node))
+                }
             },
-            set() {
-
-            }
-        },
+            deep: true,
+            immediate: true
+        }
+    },
+    computed: {
         title() {
             if (this.node) {
                 return `Нод: [${this.node.nid}] ${this.node.name}`;
@@ -50,14 +62,21 @@ export default {
             this.$emit("close");
         },
         onNodeChange(node) {
+            this.updated = node
+        },
+        saveChanges() {
+            if (!this.updated) {
+                return;
+            }
             ths.api({
                 api: 'nodes.Node:update',
                 data: {
                     fid: this.fid,
-                    node
+                    node: this.updated
                 },
-                then: () => {
-                    this.$emit("update");
+                then: response => {
+                    this.$emit("update", response.json)
+                    this.updated = null
                 },
             });
         }

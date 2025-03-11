@@ -98,11 +98,6 @@ export default {
             return this.selected_nodes.includes(node.nid);
         },
 
-        // При обновлении нода
-        onNodeUpdated() {
-            this.loadProgram()
-        },
-
         // Нажатие левой кнопкой мыши на ноде
         handleNodeClick(node, event) {
             if (event.detail === 2) return; // Пропускаем двойной клик
@@ -143,6 +138,12 @@ export default {
                     this.loadProgram()
                 },
             });
+        },
+
+        // При обновлении нода
+        onNodeUpdated(node) {
+            this.node_in_panel = node
+            this.loadProgram()
         },
 
         // Добавить программную линию

@@ -13,7 +13,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->frames()->loadProgram('grok');
+        ths()->nodes()->getDsl('test2', 'nhnopd9a');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
