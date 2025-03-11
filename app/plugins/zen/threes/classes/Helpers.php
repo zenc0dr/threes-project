@@ -34,4 +34,9 @@ class Helpers
     {
         return Frames::getInstance();
     }
+
+    public function layers(): Layers
+    {
+        return Layers::getInstance();
+    }
 }

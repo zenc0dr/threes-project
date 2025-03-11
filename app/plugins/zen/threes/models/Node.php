@@ -5,7 +5,7 @@ use October\Rain\Database\Traits\Validation;
 
 
 /**
- * @property static find($nid)
+ * @method static find($nid)
  */
 class Node extends Model
 {

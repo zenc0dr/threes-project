@@ -44,4 +44,52 @@ class Nodes
         $frame->save();
         return [];
     }
+
+    public function get(string $nid)
+    {
+        return Node::find($nid);
+    }
+
+    /**
+     * Обновить нод
+     * @param string $nid
+     * @return array
+     */
+    public function updateNode(string $fid, array $node): array
+    {
+        # Сюда пришёл DSL-развёрнутый нод со слоями
+        $this->attachLayers($fid, $node);
+
+
+        return [];
+    }
+
+    private function attachLayers(string $fid, array $node): void
+    {
+        $layers = $node['layers'] ?? null;
+
+        if (!$layers) {
+            return;
+        }
+
+        $updated_layers_lids = [];
+        foreach ($layers as $layer) {
+            $updated_layers_lids[] = ths()->layers()->handle($fid, $node['nid'], $layer);
+        }
+
+        $frame = Frame::findByFid($fid);
+        $program = $frame->program;
+        foreach ($program as &$line) {
+            foreach ($line as &$line_node) {
+                foreach ($line_node as $nid => &$layers) {
+                    if ($nid === $node['nid']) {
+                        $layers = $updated_layers_lids;
+                        break 3;
+                    }
+                }
+            }
+        }
+        $frame->program = $program;
+        $frame->save();
+    }
 }

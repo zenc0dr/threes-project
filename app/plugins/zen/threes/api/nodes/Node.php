@@ -4,12 +4,25 @@ namespace Zen\Threes\Api\Nodes;
 
 class Node
 {
-    # http://threes.dc/threes.api/nodes.Node:Create?fid=grok&line_index=0
-    public function Create(): array
+    # http://threes.dc/threes.api/nodes.Node:create?fid=grok&line_index=0
+    public function create(): array
     {
-        $fid = request('fid');
-        $line_index = request('line_index');
-        ths()->nodes()->addNode($fid, $line_index);
+        ths()->nodes()->addNode(
+            request('fid'),
+            request('line_index')
+        );
+        return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.Node:update
+    public function update(): array
+    {
+        ths()->requestDebug('node_update_data');
+        #return [];
+        ths()->nodes()->updateNode(
+            request('fid'),
+            request('node')
+        );
         return [];
     }
 }

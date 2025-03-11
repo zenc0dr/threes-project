@@ -95,5 +95,4 @@ class Frame extends Model
     {
         $this->saveData();
     }
-    //endregion
 }

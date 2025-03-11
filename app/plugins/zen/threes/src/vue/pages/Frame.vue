@@ -27,7 +27,9 @@
         <div @click="addProgramLine" class="frame__add-line">+</div>
         <NodePanel
             :node="node_in_panel"
+            :fid="fid"
             @close="closeNodePanel"
+            @update="onNodeUpdated"
         />
     </div>
 </template>
@@ -85,7 +87,6 @@ export default {
                 let layer = node.layers[i]
                 if (layer.aspect === 'threes.units.ui@css') {
                     style = JSON.parse(layer.exe)
-                    console.log('STYLE', style)
                     break
                 }
             }
@@ -95,6 +96,11 @@ export default {
         // Если нод выделен
         isNodeSelected(node) {
             return this.selected_nodes.includes(node.nid);
+        },
+
+        // При обновлении нода
+        onNodeUpdated() {
+            this.loadProgram()
         },
 
         // Нажатие левой кнопкой мыши на ноде
@@ -128,7 +134,7 @@ export default {
         // Создать нод
         createNode(line_index) {
             ths.api({
-                api: 'nodes.Node:Create',
+                api: 'nodes.Node:create',
                 data: {
                     fid: this.fid,
                     line_index: line_index

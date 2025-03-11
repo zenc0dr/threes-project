@@ -31,20 +31,23 @@ class Layer extends Model
         $lid = $data['lid'] ?? null;
 
         if ($lid) {
-            $layer = self::find($lid)
+            self::find($lid)
                 ->update([
                     'lid' => $data['lid'],
                     'name' => $data['name'] ?? 'Без названия',
                     'description' => $data['description'] ?? null,
+                    'aspect' => $data['aspect'],
+                    'exe' => $data['exe'],
                     'updated_at' => now(),
                 ]);
+            $layer = Layer::find($lid);
         } else {
             $layer = self::create([
                 'lid' => ths()->createToken(),
-                'name' => '#',
-                'description' => '',
-                'aspect' => 'threes.units.oc@write',
-                'exe' => '#',
+                'name' => $data['name'] ?? '#',
+                'description' => $data['description'] ?? '',
+                'aspect' => $data['aspect'] ?? 'threes.units.oc@write',
+                'exe' => $data['exe'] ?? '#',
                 'updated_at' => now(),
             ]);
         }
