@@ -10,8 +10,8 @@ columns:
         type: switch
         searchable: true
         sortable: true
-    tid:
-        label: Tid
+    uid:
+        label: uid
         type: text
         searchable: true
         sortable: true
