@@ -5,12 +5,22 @@
                 {{ title }}
             </template>
             <template #default>
-                <Vue3JsonEditor
-                    v-model="json"
-                    :show-btns="false"
-                    :expandedOnStart="true"
-                    @json-change="onNodeChange"
-                />
+                <div class="node-panel__tabs">
+                    <NodeTabs :active_tab="active_tab" @select_tab="selectTab" />
+                </div>
+                <div class="node-panel__body">
+                    <div v-show="active_tab === 'scheme'" class="node-panel__content">
+                        <Vue3JsonEditor
+                            v-model="json"
+                            :show-btns="false"
+                            :expandedOnStart="true"
+                            @json-change="onNodeChange"
+                        />
+                    </div>
+                    <div v-show="active_tab === 'layers'" class="node-panel__content">
+                        <Layers :node="node" />
+                    </div>
+                </div>
             </template>
             <template #footer>
                 <div @click="saveChanges" class="btn btn-default">Применить изменения</div>
@@ -21,6 +31,9 @@
 <script>
 import modal from "../elements/modal.vue";
 import { Vue3JsonEditor } from 'vue3-json-editor'
+import NodeTabs from "../elements/NodeTabs.vue";
+import Layers from "../elements/Layers.vue";
+
 export default {
     name: "NodePanel",
     props: {
@@ -30,12 +43,15 @@ export default {
     emits: ['close', 'update'],
     components: {
         modal,
-        Vue3JsonEditor
+        Vue3JsonEditor,
+        NodeTabs,
+        Layers
     },
     data() {
         return {
             json: this.node ? JSON.parse(JSON.stringify(this.node)) : null,
             updated: null,
+            active_tab: 'layers'
         }
     },
     watch: {
@@ -61,6 +77,11 @@ export default {
         },
     },
     methods: {
+        selectTab(tab) {
+            console.log('Выбираю', tab)
+            this.active_tab = tab
+        },
+        // Преобразует атрибут exe из строки в объект в случае существования
         exeParser(node, fn) {
             for (let i in node.layers) {
                 if (this.isJsonString(node.layers[i].exe)) {
@@ -69,14 +90,18 @@ export default {
             }
             fn(node)
         },
+        // Преобразует атрибут exe из объекта в строку в случае существования
         exeStringifier(node, fn) {
-            for (let i in node.layers) {
-                if (typeof node.layers[i].exe !== 'string') {
-                    node.layers[i].exe = JSON.stringify(node.layers[i].exe)
+            node.layers.forEach(layer => {
+                if (layer.hasOwnProperty('exe')) {
+                    if (typeof layer.exe !== 'string') {
+                        layer.exe = JSON.stringify(layer.exe);
+                    }
                 }
-            }
+            });
             fn(node)
         },
+        // Проверяет, не является ли эта строка json-строкой
         isJsonString(str) {
             try {
                 JSON.parse(str);
@@ -85,12 +110,15 @@ export default {
                 return false;
             }
         },
+        // Метод эмитирует событие close родителя
         close() {
             this.$emit("close");
         },
+        // Событие с обновлённым нодом + обновление открытого нода
         onNodeChange(node) {
             this.updated = node
         },
+        // Сохранить данные нода
         saveChanges() {
             if (!this.updated) {
                 return;
@@ -117,5 +145,16 @@ export default {
 <style lang="scss">
 .node-panel {
 
+    &__tabs {
+
+    }
+
+    &__body {
+
+    }
+
+    &__content {
+
+    }
 }
 </style>

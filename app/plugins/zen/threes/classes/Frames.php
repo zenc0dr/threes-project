@@ -6,6 +6,7 @@ use Zen\Threes\Models\Frame;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Layer;
+use Zen\Threes\Models\Unit;
 
 class Frames
 {
@@ -16,6 +17,12 @@ class Frames
         return Frame::findByFid($fid);
     }
 
+    /**
+     * Сохранить DSL-программу, преобразовав её в сжатый вариант
+     * @param string $fid
+     * @param array $program
+     * @return void
+     */
     public function saveProgram(string $fid, array $program): void
     {
         $dsl = [];
@@ -60,30 +67,75 @@ class Frames
         //$this->abstractor($fid);
     }
 
+    /**
+     * Загрузка полной DSL-схемы фрейма
+     * @param string $fid
+     * @return array
+     */
     public function loadProgram(string $fid): array
     {
         $program = Frame::findByFid($fid)->program;
 
         $dsl = [];
+        $aspects = [];
         foreach ($program as $line) {
             $dsl_line = [];
             foreach ($line as $nodes) {
+                $node = null;
                 foreach ($nodes as $nid => $lids) {
                     $node = Node::find($nid)->dsl;
                     $layers = [];
                     foreach ($lids as $lid) {
                         $layer = Layer::find($lid)->dsl;
+                        $aspects[] = $layer['aspect'];
                         $layers[] = $layer;
                     }
                     $node['layers'] = $layers;
                 }
-                $dsl_line[] = $node;
+                if ($node !== null) {
+                    $dsl_line[] = $node;
+                }
             }
             $dsl[] = $dsl_line;
         }
+
+        $this->addIconsToLayers($aspects, $dsl);
+
         return $dsl;
     }
 
+    /**
+     * Мягко добавляем иконки к слоям
+     * @param array $aspects
+     * @param array $dsl
+     * @return void
+     */
+    public function addIconsToLayers(array $aspects, array &$dsl): void
+    {
+        $uids = collect($aspects)->map(function ($aspect) {
+            return explode('@', $aspect)[0];
+        })->toArray();
+
+        $units = Unit::whereIn('uid', $uids)
+            ->get()->mapWithKeys(function ($unit) {
+                return [$unit->uid => $unit->icon_path];
+            })->toArray();
+
+        foreach ($dsl as &$line) {
+            foreach ($line as &$node) {
+                foreach ($node['layers'] as &$layer) {
+                    $aspect = explode('@', $layer['aspect'])[0];
+                    $layer['icon'] = $units[$aspect];
+                }
+            }
+        }
+    }
+
+    /**
+     * Добавить линию
+     * @param string $fid
+     * @return void
+     */
     public function addLine(string $fid): void
     {
         $frame = Frame::findByFid($fid);
@@ -93,6 +145,11 @@ class Frames
         $frame->save();
     }
 
+    /**
+     * Абстрактор фрейма
+     * @param string $fid
+     * @return void
+     */
     public function abstractor(string $fid): void
     {
         $program = $this->loadProgram($fid);

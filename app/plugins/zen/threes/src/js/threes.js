@@ -15,12 +15,14 @@ window.ths = {
     auth_token: null,
 
     // Объект для хранения глобальных данных
+
     data: reactive({
-        mouse: {
-            x: 0,
-            y: 0,
-        },
+        // mouse: {
+        //     x: 0,
+        //     y: 0,
+        // },
         sprite_pins: [], // Соединения в спрайте
+        ui_streams: [],
     }),
 
     api(opts) {
@@ -86,6 +88,9 @@ window.ths = {
     pushAlerts(alerts) {
         console.log('Alerts', alerts)
     },
+    nodesUiStreamsRun() {
+
+    }
 }
 
 import FormFitter from "../vue/components/ux/forms/FormFitter.vue";

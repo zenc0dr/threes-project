@@ -23,11 +23,9 @@ class Frame
     }
 
     # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
-    public function addLine()
+    public function addLine(): array
     {
         ths()->frames()->addLine(request('fid'));
         return [];
     }
-
-
 }
