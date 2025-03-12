@@ -3,6 +3,11 @@
 use Model;
 use October\Rain\Database\Traits\Validation;
 
+/**
+ * Модель фрейма
+ * @property string $icon
+ * @property string $exe
+ */
 class Layer extends Model
 {
     use Validation;
@@ -62,7 +67,15 @@ class Layer extends Model
             'name' => $this->name,
             'description' => $this->description,
             'aspect' => $this->aspect,
-            'exe' => $this->exe
+            'exe' => $this->exe,
+            'icon' => $this->icon
         ];
+    }
+
+    public function getIconAttribute()
+    {
+        $uid = explode('@', $this->aspect)[0];
+        $unit = Unit::find($uid);
+        return $unit->icon_path;
     }
 }

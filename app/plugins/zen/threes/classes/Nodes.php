@@ -60,7 +60,7 @@ class Nodes
         Node::set($node);
         # Сюда пришёл DSL-развёрнутый нод со слоями
         $this->attachLayers($fid, $node);
-        return $this->getDsl($fid, $node['nid']);
+        return $this->getNodeDsl($fid, $node['nid']);
     }
 
 
@@ -99,7 +99,7 @@ class Nodes
      * @param string $nid
      * @return array
      */
-    public function getDsl(string $fid, string $nid): array
+    public function getNodeDsl(string $fid, string $nid): array
     {
         $frame = Frame::findByFid($fid);
         $node = Node::find($nid);

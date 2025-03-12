@@ -18,7 +18,7 @@
                         />
                     </div>
                     <div v-show="active_tab === 'layers'" class="node-panel__content">
-                        <Layers :node="node" />
+                        <Layers :node="node" @update="onNodeChange" />
                     </div>
                 </div>
             </template>
@@ -115,8 +115,11 @@ export default {
             this.$emit("close");
         },
         // Событие с обновлённым нодом + обновление открытого нода
-        onNodeChange(node) {
+        onNodeChange(node, save) {
             this.updated = node
+            if (save) {
+                this.saveChanges()
+            }
         },
         // Сохранить данные нода
         saveChanges() {
