@@ -75,17 +75,17 @@ tabs:
                         label: 'Название аспекта'
                         span: auto
                         type: text
+                    aspect_desc:
+                        label: 'Описание аспекта'
+                        size: large
+                        span: full
+                        type: richeditor
                     aspect_exe:
                         label: 'Атрибут аспекта'
                         size: large
                         language: javascript
                         span: full
                         type: codeeditor
-                    aspect_desc:
-                        label: 'Описание аспекта'
-                        size: large
-                        span: full
-                        type: richeditor
                     aspect_ui:
                         label: 'Интерфейс аспекта (YAML)'
                         span: full

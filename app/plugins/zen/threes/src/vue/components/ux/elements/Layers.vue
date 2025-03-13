@@ -15,7 +15,8 @@
                         </div>
                         <div class="threes-layers__title">
                             <div class="threes-layers__name">
-                                {{ layer.name }}
+                                <span class="threes-layers__aspect">{{ layer.aspect }}</span>
+                                <span>{{ layer.name }}</span>
                             </div>
                             <div class="threes-layers__description" v-html="layer.description"></div>
                         </div>
@@ -114,8 +115,20 @@ export default {
     }
 
     &__name {
+        display: flex;
         font-size: 17px;
         color: #37375d;
+        align-items: center;
+        align-content: center;
+    }
+
+    &__aspect {
+        background: #dcdcdc;
+        font-size: 13px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #3f3f3f;
+        margin-right: 8px;
     }
 
     &__description {
