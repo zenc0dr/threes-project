@@ -205,9 +205,6 @@ class Unit extends Model
         $this->data_dump['fields'] = $fields ?? [];
     }
 
-    #TODO: Тут следует сделать преобразование
-    // сохранять нужно в отдельную таблицу со слоями
-    // НО при этом тут хранить только lid`s для связывания и хранения порядка сортировки
     public function getLayersAttribute()
     {
         return $this->data_dump['layers'] ?? [];

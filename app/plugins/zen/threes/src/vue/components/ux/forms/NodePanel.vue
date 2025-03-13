@@ -23,7 +23,7 @@
                 </div>
             </template>
             <template #footer>
-                <div @click="saveChanges" class="btn btn-default">Применить изменения</div>
+                <div @click="saveChanges" class="btn btn-default oc-icon-wrench">Применить</div>
             </template>
         </modal>
     </div>

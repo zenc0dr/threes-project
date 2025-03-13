@@ -86,6 +86,12 @@ tabs:
                         size: large
                         span: full
                         type: richeditor
+                    aspect_ui:
+                        label: 'Интерфейс аспекта (YAML)'
+                        span: full
+                        size: large
+                        language: plain_text
+                        type: codeeditor
 fields:
     name:
         label: 'Название юнита'

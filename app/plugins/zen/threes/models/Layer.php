@@ -7,6 +7,7 @@ use October\Rain\Database\Traits\Validation;
  * Модель фрейма
  * @property string $icon
  * @property string $exe
+ * @method static find($lid)
  */
 class Layer extends Model
 {
@@ -31,7 +32,12 @@ class Layer extends Model
         'updated_at',
     ];
 
-    public static function set(array $data = [])
+    /**
+     * Создать или обновить слой
+     * @param array $data
+     * @return Layer
+     */
+    public static function set(array $data = []): Layer
     {
         $lid = $data['lid'] ?? null;
 
@@ -60,6 +66,10 @@ class Layer extends Model
         return $layer;
     }
 
+    /**
+     * Получить DSL-узел нода
+     * @return array
+     */
     public function getDslAttribute(): array
     {
         return [
@@ -72,10 +82,18 @@ class Layer extends Model
         ];
     }
 
-    public function getIconAttribute()
+    /**
+     * Возвращает иконку юнита к которому принадлежит слой
+     * @return string
+     */
+    public function getIconAttribute(): string
     {
         $uid = explode('@', $this->aspect)[0];
+        $state_key = "node:icon_path:$uid";
+        if ($icon_path = ths()->getState($state_key)) {
+            return $icon_path;
+        }
         $unit = Unit::find($uid);
-        return $unit->icon_path;
+        return ths()->setState($state_key, $unit->icon_path);
     }
 }

@@ -77,7 +77,7 @@ class Frames
         $program = Frame::findByFid($fid)->program;
 
         $dsl = [];
-        $aspects = [];
+        //$aspects = [];
         foreach ($program as $line) {
             $dsl_line = [];
             foreach ($line as $nodes) {
@@ -87,7 +87,7 @@ class Frames
                     $layers = [];
                     foreach ($lids as $lid) {
                         $layer = Layer::find($lid)->dsl;
-                        $aspects[] = $layer['aspect'];
+                        //$aspects[] = $layer['aspect'];
                         $layers[] = $layer;
                     }
                     $node['layers'] = $layers;
@@ -99,7 +99,7 @@ class Frames
             $dsl[] = $dsl_line;
         }
 
-        $this->addIconsToLayers($aspects, $dsl);
+        //$this->addIconsToLayers($aspects, $dsl);
 
         return $dsl;
     }

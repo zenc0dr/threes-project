@@ -16,9 +16,9 @@ trait State
      * @param mixed $value
      * @return void
      */
-    public function setState(string $key, mixed $value): void
+    public function setState(string $key, mixed $value): mixed
     {
-        $this->state[$key] = $value;
+        return $this->state[$key] = $value;
     }
 
     /**
