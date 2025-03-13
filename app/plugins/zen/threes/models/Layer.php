@@ -7,6 +7,7 @@ use October\Rain\Database\Traits\Validation;
  * Модель фрейма
  * @property string $icon
  * @property string $exe
+ * @property array $layers
  * @method static find($lid)
  */
 class Layer extends Model

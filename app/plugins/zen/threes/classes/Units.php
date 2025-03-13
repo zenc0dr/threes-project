@@ -9,7 +9,7 @@ class Units
 {
     use SingletonTrait;
 
-    public function get(string $uid)
+    public function get(string $uid): Unit
     {
         return Unit::find($uid);
     }

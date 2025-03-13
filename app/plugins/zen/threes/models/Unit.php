@@ -10,6 +10,7 @@ use October\Rain\Database\Traits\Validation;
  * @property string $description - Описание юнита
  * @property string $icon - SVG-иконка из базы данных
  * @property string $icon_path - Путь до SVG иконки
+ * @property array $layers - Слои юнита
  * @property array $fields - Поля интерфейса ???
  * @method static active - Активные юниты
  * @method static find(string $tid)
@@ -129,6 +130,12 @@ class Unit extends Model
     }
 
     ### Getters and setters
+
+    /**
+     *  Геттер - Получить токен юнита
+     * @param $value
+     * @return string
+     */
     public function getUidAttribute($value): string
     {
         if ($value) {

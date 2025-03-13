@@ -52,18 +52,24 @@ class Nodes
 
     /**
      * Обновить нод
-     * @param string $nid
+     * @param string $fid - Токен фрейма
+     * @param array $node - DSL-нода (развёрнутый)
      * @return array
      */
     public function updateNode(string $fid, array $node): array
     {
         Node::set($node);
-        # Сюда пришёл DSL-развёрнутый нод со слоями
         $this->attachLayers($fid, $node);
         return $this->getNodeDsl($fid, $node['nid']);
     }
 
 
+    /**
+     * Прикрепить слои
+     * @param string $fid
+     * @param array $node
+     * @return void
+     */
     private function attachLayers(string $fid, array $node): void
     {
         $layers = $node['layers'] ?? null;

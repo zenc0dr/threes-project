@@ -25,6 +25,11 @@ class Layers
         return $lid;
     }
 
+    /**
+     * Создаёт из аспекта DSL-узел слоя
+     * @param string $aspect
+     * @return string
+     */
     public function handleAspect(string $aspect): string
     {
         $aspect = explode('@', $aspect);
@@ -48,23 +53,23 @@ class Layers
         return $layer->lid;
     }
 
+    /**
+     * Вызвать аспект
+     * @param string $fid
+     * @param string $uid
+     * @param string $method
+     * @param string $exe
+     * @param string|null $program_stage
+     * @return void
+     * @throws \ReflectionException
+     */
     public function callAspect(
-        string $fid,
-        string $uid,
-        string $method,
-        string $exe,
-        ?string $program_stage = null
-    ) {
-
-//        dump([
-//            '$fid' => $fid,
-//            '$uid' => $uid,
-//            '$method' => $method,
-//            '$exe' => $exe,
-//            '$program_stage' => $program_stage,
-//        ]);
-
-
+        string $fid, # Токен фрейма
+        string $uid, # Токен юнита
+        string $method, # Метод
+        string $exe, # Атрибут
+        ?string $program_stage = null # Стадия программы ('start' - Начало программы, 'end' - конец программы)
+    ): void {
         $unit = ths()->units()->get($uid);
         $aspect = null;
         foreach ($unit->layers as $unit_layer) {
@@ -72,6 +77,7 @@ class Layers
                 $aspect = $unit_layer['aspect_exe'];
             }
         }
+
         if (!$aspect) {
             return;
         }
