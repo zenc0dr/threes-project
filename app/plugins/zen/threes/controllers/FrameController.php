@@ -25,6 +25,10 @@ class FrameController extends Controller
         BackendMenu::setContext('Zen.Threes', 'main', 'frames');
         $this->addCss(mix('css/threes.css', 'plugins/zen/threes/assets'));
         $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);
+
+        $this->addJs('/modules/backend/widgets/form/assets/js/october.form.js', 'core');
+        $this->addJs('/modules/backend/formwidgets/repeater/assets/js/repeater-min.js', 'core');
+
     }
 
     public function formFindModelObject($recordId)

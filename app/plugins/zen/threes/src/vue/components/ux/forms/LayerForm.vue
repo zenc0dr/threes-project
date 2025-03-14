@@ -1,6 +1,6 @@
 <template>
     <div class="layer-form" v-html="formHtml"></div>
-    <button class="btn btn-default" @click="submitForm">Сохранить</button>
+    <div class="btn btn-default" @click="submitForm">Сохранить</div>
 </template>
 <script>
 
@@ -11,45 +11,29 @@ export default {
     },
     data() {
         return {
-            formHtml: ''  // здесь будет храниться HTML код загруженной формы
-        };
+            formHtml: ''
+        }
     },
     watch: {
         layer: {
-            handler(layer, old_layer) {
-                console.log('layer, old_layer', layer, old_layer);
-
+            handler(layer) {
                 if (layer) {
                     this.loadForm();
                 } else {
-                    this.formHtml = '';
+                    this.formHtml = ''
                 }
             },
-            immediate: true // Важно!
+            immediate: true
         }
     },
     methods: {
         loadForm() {
-
-            // console/zen/threes/layercontroller/update/sgolxee9
-
             ths.api({
                 url: '/console/zen/threes/layercontroller/update/sgolxee9',// Путь к новому API-классу
                 then: response => {
                     this.formHtml = response  // Ответ, содержащий HTML формы
                 }
             });
-
-
-            // ths.api({
-            //     api: 'layers.Layer:loadForm',  // Путь к новому API-классу
-            //     data: {
-            //         lid: 'sgolxee9'
-            //     },
-            //     then: response => {
-            //         this.formHtml = response.formHtml;  // Ответ, содержащий HTML формы
-            //     }
-            // });
         },
         submitForm() {
 

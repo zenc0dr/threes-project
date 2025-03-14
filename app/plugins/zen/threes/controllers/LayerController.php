@@ -16,6 +16,9 @@ class LayerController extends Controller
     public function __construct()
     {
         parent::__construct();
+        // Теперь подключаем правильные скрипты формы и репитера
+        $this->addJs('/modules/backend/widgets/form/assets/js/october.form.js', 'core');
+        $this->addJs('/modules/backend/formwidgets/repeater/assets/js/repeater-min.js', 'core');
     }
 
     public function index()
@@ -33,7 +36,7 @@ class LayerController extends Controller
     public function update($recordId = null)
     {
         // Отключаем использование главного шаблона
-        $this->layout = null;
+        #$this->layout = null;
 
         // Вызываем стандартный рендер формы
         return $this->asExtension(\Backend\Behaviors\FormController::class)->update($recordId);

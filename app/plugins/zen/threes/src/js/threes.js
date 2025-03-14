@@ -1,13 +1,25 @@
 
 const axios = require('axios');
 const md5 = require('md5');
-
 import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
 import vuedraggable from 'vuedraggable';
 import Threes from '../vue/Threes.vue'
+
+$.ajaxSetup({
+    beforeSend: function() {
+        if (typeof $.oc === "undefined") {
+            console.warn("OctoberCMS not loaded yet, retrying...");
+        }
+    },
+    complete: function() {
+        if (typeof $.oc !== "undefined") {
+            $(document).trigger("render");
+        }
+    }
+});
 
 window._ = require('lodash');
 window.ths = {
