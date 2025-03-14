@@ -28,13 +28,20 @@ window.ths = {
     api(opts) {
         let domain = location.origin
         let data = (opts.data) ? opts.data : null
-        let api_url = domain + opts.url + opts.api
-        let request_key = md5(api_url)
         let axios_options = null
+        let api_url = domain
 
         if (opts.api) {
-            api_url = domain + '/threes.api/' + opts.api
+            api_url = '/threes.api/' + opts.api
+        } else {
+            api_url = opts.url
         }
+
+        let request_key = md5(api_url + JSON.stringify(data))
+
+        // if (opts.api) {
+        //     api_url = domain + '/threes.api/' + opts.api
+        // }
 
         // For debug
         console.log('Threes query [' + request_key + ']: ' + api_url, data)

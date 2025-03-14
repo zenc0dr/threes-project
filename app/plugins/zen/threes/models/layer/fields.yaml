@@ -1,5 +1,10 @@
 fields:
-    lid:
-        label: lid
-        span: auto
+    name:
+        label: 'Название слоя'
+        span: full
         type: text
+    description:
+        label: 'Описание слоя'
+        span: full
+        size: large
+        type: richeditor

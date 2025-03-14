@@ -1,0 +1,290 @@
+logotype:
+    label: 'Логотип в главном меню'
+    mode: image
+    span: full
+    type: mediafinder
+    tab: 'Стайлинг'
+site_name:
+    label: 'Название сайта'
+    span: full
+    type: text
+    default: 'Winline'
+    tab: 'Стайлинг'
+main_page_title:
+    label: 'screen1 h1'
+    span: full
+    type: text
+    default: 'Играй за&nbsp;команду Winline'
+    tab: 'Главная страница'
+main_page_slogan:
+    label: 'screen1 text-and-search__text'
+    span: full
+    type: text
+    default: 'Winline не&nbsp;просто букмекер, а&nbsp;целая вселенная спортивных ставок и&nbsp;ярких эмоций!'
+    tab: 'Главная страница'
+main_page_sub_title:
+    label: 'Подзаголовок на главной (под полоской логотипов)'
+    span: full
+    type: text
+    default: 'Winline'
+    tab: 'Главная страница'
+main_page_sub_slogan:
+    label: 'Слоган на главной странице (под подзаголовком)'
+    span: full
+    type: text
+    default: '— это стабильный лидер среди отечественных букмекеров, поэтому мы ищем профессионалов'
+    tab: 'Главная страница'
+main_page_ears:
+    label: 'Сколько лет'
+    span: full
+    type: text
+    default: '15+ лет'
+    tab: 'Главная страница'
+main_page_ears_text:
+    label: 'Сколько лет - Текстовка'
+    span: full
+    type: text
+    default: 'мы инвестируем в&nbsp;спорт и&nbsp;делаем его&nbsp;более популярным и зрелищным'
+    tab: 'Главная страница'
+main_page_matches:
+    label: 'Сколько матчей'
+    span: full
+    type: text
+    default: '3500'
+    tab: 'Главная страница'
+main_page_hot_1:
+    label: 'Заголовок горячих вакансий 1'
+    span: full
+    type: text
+    default: 'вакансии'
+    tab: 'Главная страница'
+main_page_hot_2:
+    label: 'Заголовок горячих вакансий 2'
+    span: full
+    type: text
+    default: 'HOT'
+    tab: 'Главная страница'
+main_page_matches_text:
+    label: 'Сколько матчей - текстовка'
+    span: full
+    type: text
+    default: 'матчей каждый день проходят с&nbsp;нашими ставками'
+    tab: 'Главная страница'
+main_page_features_1:
+    label: 'Фишки - Строка 1'
+    span: full
+    type: text
+    default: 'фишки работы'
+    tab: 'Главная страница'
+main_page_features_2:
+    label: 'Фишки - Строка 2'
+    span: full
+    type: text
+    default: 'нашей команды'
+    tab: 'Главная страница'
+mp_directions_span1:
+    label: 'Направления - Строка 1'
+    span: full
+    type: text
+    default: 'Выбирай свое'
+    tab: 'Главная страница'
+mp_directions_span2:
+    label: 'Направления - Строка 2'
+    span: full
+    type: text
+    default: 'направление'
+    tab: 'Главная страница'
+main_offices_span1:
+    label: 'offices span 1'
+    span: full
+    type: text
+    default: 'Уютные офисы'
+    tab: 'Главная страница'
+main_offices_span2:
+    label: 'offices span 2'
+    span: full
+    type: text
+    default: 'в Москве'
+    tab: 'Главная страница'
+feedback_form_main_title_1:
+    label: 'Заголовок формы обратной связи - Строка 1'
+    span: full
+    type: text
+    default: 'Okaaay,'
+    tab: 'Главная страница'
+feedback_form_main_title_2:
+    label: 'Заголовок формы обратной связи - Строка 2'
+    span: full
+    type: text
+    default: 'let’s go!'
+    tab: 'Главная страница'
+advantages:
+    label: 'Блоки преимуществ'
+    prompt: 'Добавить блок'
+    displayMode: accordion
+    span: full
+    type: repeater
+    tab: 'Преимущества'
+    form:
+        fields:
+            title:
+                label: 'Заголовок блока'
+                span: full
+                type: text
+                comment: 'Можно включать непечатные символы'
+            code:
+                label: 'data-аттрибут'
+                span: left
+                type: text
+            class:
+                label: 'css-класс'
+                span: left
+                type: text
+            description:
+                label: Описание
+                span: full
+                type: text
+                comment: 'Можно включать непечатные символы'
+            image:
+                label: Иконка
+                span: auto
+                mode: file
+                type: mediafinder
+            background_color:
+                label: 'Выбор цвета фона'
+                span: auto
+                allowEmpty: true
+                allowCustom: true
+                type: colorpicker
+our_principles:
+    label: 'Наши принципы'
+    prompt: Добавить
+    displayMode: accordion
+    span: full
+    type: repeater
+    tab: 'Принципы'
+    form:
+        fields:
+            icon:
+                label: 'Media Finder'
+                mode: file
+                thumbOptions:
+                    mode: fit
+                    extension: svg
+                span: full
+                type: mediafinder
+            name:
+                label: Название
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+            caption:
+                label: Подзаголовок
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+reviews:
+    label: 'Отзывы'
+    prompt: Добавить
+    displayMode: accordion
+    span: full
+    type: repeater
+    tab: 'Отзывы'
+    form:
+        fields:
+            photo:
+                label: Фото
+                mode: image
+                thumbOptions:
+                    mode: fit
+                    extension: auto
+                span: full
+                type: mediafinder
+            name:
+                label: Имя
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+            position:
+                label: Должность
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+            text:
+                label: Описание
+                span: full
+                size: large
+                type: richeditor
+path_to_company_line_1:
+    label: 'Заголовок - Строка 1'
+    span: full
+    type: text
+    default: 'Как к нам'
+    tab: 'Присоединиться'
+path_to_company_line_2:
+    label: 'Заголовок - Строка 2'
+    span: full
+    type: text
+    default: 'присоединиться'
+    tab: 'Присоединиться'
+path_to_company_caption:
+    label: 'Подпись'
+    span: full
+    type: text
+    default: 'путь в&nbsp;команду состоит из&nbsp;3&nbsp;шагов. мы&nbsp;рады как опытным игрокам своей профессии, так и&nbsp;новичкам с&nbsp;азартом'
+    tab: 'Присоединиться'
+path_to_company:
+    label: 'Как к нам присоединиться'
+    prompt: Добавить
+    displayMode: accordion
+    span: full
+    type: repeater
+    tab: 'Присоединиться'
+    form:
+        fields:
+            time:
+                label: Время
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+            title:
+                label: Заголовок
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+            text:
+                label: Текст
+                span: full
+                size: large
+                type: richeditor
+faq_line_1:
+    label: 'Заголовок FAQ - Строка 1'
+    span: full
+    type: text
+    default: 'FAQ'
+    tab: 'FAQ'
+faq_line_2:
+    label: 'Заголовок FAQ - Строка 2'
+    span: full
+    type: text
+    default: ''
+    tab: 'FAQ'
+faq:
+    label: 'FAQ'
+    prompt: Добавить
+    displayMode: accordion
+    span: full
+    type: repeater
+    tab: 'FAQ'
+    form:
+        fields:
+            question:
+                label: Вопрос
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'
+            answer:
+                label: Ответ
+                span: full
+                type: text
+                comment: 'Поддерживает непечатные символы'

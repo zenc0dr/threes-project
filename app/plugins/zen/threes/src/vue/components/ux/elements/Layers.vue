@@ -9,7 +9,7 @@
                 @end="onDragEnd"
             >
                 <template #item="{ element: layer }">
-                    <div class="threes-layers__layer">
+                    <div @contextmenu.prevent="openLayer(layer)" class="threes-layers__layer">
                         <div class="threes-layers__icon">
                             <icon :src="layer.icon" />
                         </div>
@@ -25,15 +25,19 @@
             </draggable>
         </div>
         <div class="threes-layers__panel">
-            <LayerForm/>
+            right pan
         </div>
     </div>
+    <modal :show="open_layer !== null" @close="open_layer = null">
+        <LayerForm :layer="open_layer" />
+    </modal>
 </template>
 
 <script>
 import draggable from 'vuedraggable';
 import icon from './icon.vue';
 import LayerForm from "../forms/LayerForm.vue";
+import modal from './modal.vue';
 
 export default {
     name: "Layers",
@@ -46,11 +50,13 @@ export default {
     components: {
         draggable,
         icon,
-        LayerForm
+        modal,
+        LayerForm,
     },
     data() {
         return {
-            local_layers: []
+            local_layers: [],
+            open_layer: null
         };
     },
     computed: {
@@ -69,6 +75,9 @@ export default {
         this.local_layers = [...this.layers];
     },
     methods: {
+        openLayer(layer) {
+            this.open_layer = layer;
+        },
         onDragEnd() {
             // Эмитируем событие обновления порядка слоев наверх
             this.$emit('update', {

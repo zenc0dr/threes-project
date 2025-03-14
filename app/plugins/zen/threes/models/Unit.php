@@ -13,7 +13,7 @@ use October\Rain\Database\Traits\Validation;
  * @property array $layers - Слои юнита
  * @property array $fields - Поля интерфейса ???
  * @method static active - Активные юниты
- * @method static find(string $tid)
+ * @method static find(string $uid)
  */
 class Unit extends Model
 {
