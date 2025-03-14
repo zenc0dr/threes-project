@@ -97,4 +97,28 @@ class Layer extends Model
         $unit = Unit::find($uid);
         return ths()->setState($state_key, $unit->icon_path);
     }
+
+    /**
+     * Сохраняет данные слоя в json-массив
+     * @param string|null $value
+     * @return array
+     */
+    public function getDataAttribute(?string $value = null): array
+    {
+        return $value ? ths()->fromJson($value) : [];
+    }
+
+    /**
+     * Извлекает данные слоя из json-массива
+     * @param array|null $value
+     * @return void
+     */
+    public function setDataAttribute(?array $value = null): void
+    {
+        if (!$value) {
+            $value = [];
+        }
+
+        $this->attributes['data'] = ths()->toJson($value);
+    }
 }

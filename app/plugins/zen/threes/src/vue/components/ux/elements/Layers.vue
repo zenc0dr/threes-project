@@ -25,7 +25,7 @@
             </draggable>
         </div>
         <div class="threes-layers__panel">
-            SECOND
+            <LayerForm/>
         </div>
     </div>
 </template>
@@ -33,6 +33,7 @@
 <script>
 import draggable from 'vuedraggable';
 import icon from './icon.vue';
+import LayerForm from "../forms/LayerForm.vue";
 
 export default {
     name: "Layers",
@@ -44,7 +45,8 @@ export default {
     ],
     components: {
         draggable,
-        icon
+        icon,
+        LayerForm
     },
     data() {
         return {

@@ -150,8 +150,11 @@ export default {
         addProgramLine() {
             ths.api({
                 api: 'frames.Frame:addLine',
-                data: { fid: this.fid },
-                then: () => {
+                data: {
+                    fid:
+                    this.fid
+                },
+                then: response => {
                     this.loadProgram()
                 },
             });

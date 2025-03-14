@@ -15,6 +15,7 @@ class M004Layers extends Migration
 
             $table->string('aspect')->default('threes.units.oc@write')->comment('Аспект слоя');
             $table->string('exe')->nullable()->comment('Атрибут аспекта');
+            $table->text('data')->nullable()->comment('данные слоя');
 
             $table->timestamp('updated_at')->nullable()->comment('Время последнего обновления');
 

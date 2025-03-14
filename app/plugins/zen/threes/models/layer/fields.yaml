@@ -1,0 +1,5 @@
+fields:
+    lid:
+        label: lid
+        span: auto
+        type: text

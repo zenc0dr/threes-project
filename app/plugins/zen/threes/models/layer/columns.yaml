@@ -1,0 +1,4 @@
+columns:
+    lid:
+        label: lid
+        type: text
