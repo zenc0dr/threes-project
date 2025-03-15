@@ -28,6 +28,9 @@
                                 Настройки
                             </div>
                         </div>
+                        <div class="threes-layers__remove">
+                            <i @click="removeLayer(layer)" class="icon-trash-1"></i>
+                        </div>
                     </div>
                 </template>
             </draggable>
@@ -114,7 +117,14 @@ export default {
                 location.origin + `/${this.backend}/zen/threes/layercontroller/update/` + layer.lid,
                 '_blank'
             )
-        }
+        },
+        removeLayer(layer) {
+            this.local_layers = this.local_layers.filter(l => l.lid !== layer.lid);
+            this.$emit('update', {
+                ...this.node,
+                layers: [...this.local_layers]
+            }, true);
+        },
     }
 };
 </script>
@@ -203,6 +213,18 @@ export default {
             &:active {
                 transform: scale(0.95);
             }
+        }
+    }
+
+    &__remove {
+        display: flex;
+        align-items: center;
+        margin-left: 10px;
+        cursor: pointer;
+        transition: 200ms;
+
+        &:hover {
+            color: red;
         }
     }
 }

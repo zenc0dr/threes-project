@@ -295,7 +295,6 @@ class Unit extends Model
         ];
     }
 
-    ### Inner methods
     /**
      * Заполняет поля из настроек при загрузке fillSettings()
      * @return void

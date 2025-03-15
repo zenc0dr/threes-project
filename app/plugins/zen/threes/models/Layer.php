@@ -49,6 +49,11 @@ class Layer extends Model
         });
     }
 
+    public function afterFetch(): void
+    {
+        $this->fillSettings($this->data);
+    }
+
     /**
      * Создать или обновить слой
      * @param array $data
@@ -159,5 +164,24 @@ class Layer extends Model
                 'description' => $description,
                 'data' => ths()->toJson($data)
             ]);
+    }
+
+    /**
+     * Подгружает поля слоя
+     * @param $settings
+     * @return void
+     */
+    private function fillSettings($settings): void
+    {
+        # На всякий случай
+        unset($settings['lid']);
+        unset($settings['name']);
+        unset($settings['description']);
+
+        if ($settings) {
+            foreach ($settings as $field => $value) {
+                $this->attributes[$field] = $value;
+            }
+        }
     }
 }

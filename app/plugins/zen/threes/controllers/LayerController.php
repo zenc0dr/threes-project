@@ -4,6 +4,7 @@ use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
 use Zen\Threes\Models\Layer;
+use Zen\Threes\Models\Unit;
 use Flash;
 
 class LayerController extends Controller
@@ -45,10 +46,17 @@ class LayerController extends Controller
 
     public function formExtendFields($form): void
     {
-
-        $fields = ths()->fromYamlFile(storage_path('test_fields.yaml'));
-
-        $form->addFields($fields, 'primary');
+        $aspect = explode('@', $form->model->aspect);
+        $unit = Unit::find($aspect[0]);
+        $ui = null;
+        foreach ($unit->layers as $layer) {
+            if ($layer['aspect_lid'] === $aspect[1]) {
+                $ui = $layer['aspect_ui'];
+                break;
+            }
+        }
+        $ui = ths()->fromYaml($ui);
+        $form->addFields($ui, 'primary');
     }
 
     public function formBeforeSave($model): void

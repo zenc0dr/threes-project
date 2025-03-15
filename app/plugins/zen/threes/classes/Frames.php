@@ -77,7 +77,7 @@ class Frames
         $program = Frame::findByFid($fid)->program;
 
         $dsl = [];
-        //$aspects = [];
+        //$aspects = []; todo:deprecated
         foreach ($program as $line) {
             $dsl_line = [];
             foreach ($line as $nodes) {
@@ -87,7 +87,7 @@ class Frames
                     $layers = [];
                     foreach ($lids as $lid) {
                         $layer = Layer::find($lid)->dsl;
-                        //$aspects[] = $layer['aspect'];
+                        //$aspects[] = $layer['aspect']; todo:deprecated
                         $layers[] = $layer;
                     }
                     $node['layers'] = $layers;
@@ -99,13 +99,13 @@ class Frames
             $dsl[] = $dsl_line;
         }
 
-        //$this->addIconsToLayers($aspects, $dsl);
+        //$this->addIconsToLayers($aspects, $dsl); todo:deprecated
 
         return $dsl;
     }
 
     /**
-     * Мягко добавляем иконки к слоям
+     * Мягко добавляем иконки к слоям todo:deprecated
      * @param array $aspects
      * @param array $dsl
      * @return void
