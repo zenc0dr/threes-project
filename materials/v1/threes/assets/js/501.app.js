@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkthrees=self.webpackChunkthrees||[]).push([[501],{501:(e,n,r)=>{r.r(n),r.d(n,{default:()=>u});var t=r(726);const s={name:"SpriteScheme"};const u=(0,r(262).A)(s,[["render",function(e,n,r,s,u,c){return(0,t.uX)(),(0,t.CE)("div",null,"Тут спрайт и всё такое")}]])}}]);
