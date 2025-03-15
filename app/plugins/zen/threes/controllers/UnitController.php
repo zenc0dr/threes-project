@@ -39,40 +39,11 @@ class UnitController extends Controller
             return;
         }
 
-        $lid = request('lid');
-
-        if ($lid) {
-            foreach (['name', 'uid', 'description', 'fields', 'icon'] as $field) {
-                if ($form->getField($field)) {
-                    $form->removeField($field);
-                }
-            }
-
-            $layer = Layer::find($lid);
-
-            //dd($layer);
-
-        }
-
-
         $unit = Unit::find($this->params[0]);
         if ($unit && $unit->additional_fields) {
             $this->clearMissingFields($unit);
             $form->addFields($unit->additional_fields, 'primary');
         }
-
-//        # Загружаем настройки нода после добавления полей
-//        if ($sid && $nid) {
-//            $node_settings = ths()->sprites()->loadNodeSettings($nid);
-//
-//            if ($node_settings) {
-//                foreach ($node_settings as $key => $value) {
-//                    if ($form->getField($key)) {
-//                        $form->getField($key)->value = $value;
-//                    }
-//                }
-//            }
-//        }
     }
 
 

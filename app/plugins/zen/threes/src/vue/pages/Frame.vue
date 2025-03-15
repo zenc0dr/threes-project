@@ -143,7 +143,9 @@ export default {
 
         // При обновлении нода
         onNodeUpdated(node) {
-            this.node_in_panel = node
+            if (node) {
+                this.node_in_panel = node
+            }
             this.loadProgram()
         },
 

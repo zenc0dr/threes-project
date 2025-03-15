@@ -2,6 +2,7 @@
 
 use Model;
 use October\Rain\Database\Traits\Validation;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Модель фрейма
@@ -32,6 +33,21 @@ class Layer extends Model
         'exe', # Атрибут аспекта слоя
         'updated_at',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        # Предотвращение сохранения модели
+        # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
+        static::saving(function ($model) {
+            #TODO: Старая механика сохранения данных нода
+            if ($save_data = ths()->getState('layer.prevent_save')) {
+                self::updateLayerData($model->lid, $save_data);
+                return false;
+            }
+        });
+    }
 
     /**
      * Создать или обновить слой
@@ -120,5 +136,28 @@ class Layer extends Model
         }
 
         $this->attributes['data'] = ths()->toJson($value);
+    }
+
+    private static function updateLayerData(string $lid, array $data): void
+    {
+        ths()->toJsonFile(
+            storage_path('test_layer_data2.json'),
+            $data
+        );
+
+
+        $name = $data['name'];
+        $description = $data['description'] ?? null;
+        unset($data['name']);
+        unset($data['description']);
+
+
+        DB::table('zen_threes_layers')
+            ->where('lid', $lid)
+            ->update([
+                'name' => $name,
+                'description' => $description,
+                'data' => ths()->toJson($data)
+            ]);
     }
 }

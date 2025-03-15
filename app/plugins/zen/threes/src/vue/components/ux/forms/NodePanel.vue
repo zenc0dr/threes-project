@@ -27,7 +27,10 @@
                 </div>
             </template>
             <template #footer>
-                <div @click="saveChanges" class="btn btn-default oc-icon-wrench">Применить</div>
+                <div class="node-panel__footer">
+                    <div @click="saveChanges" class="btn btn-default oc-icon-wrench">Применить</div>
+                    <div @click="reloadNode" class="btn btn-default oc-icon-refresh">Обновить</div>
+                </div>
             </template>
         </modal>
     </div>
@@ -146,6 +149,18 @@ export default {
                     },
                 });
             })
+        },
+        reloadNode() {
+            ths.api({
+                api: 'nodes.Node:getNodeDsl',
+                data: {
+                    fid: this.fid,
+                    nid: this.node.nid
+                },
+                then: response => {
+                    this.$emit("update", response.node)
+                }
+            })
         }
     }
 }
@@ -163,6 +178,12 @@ export default {
 
     &__content {
 
+    }
+
+    &__footer {
+        .btn:not(:first-child) {
+            margin-left: 10px;
+        }
     }
 }
 </style>

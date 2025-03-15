@@ -174,7 +174,10 @@ export default {
     }
 
     &__description {
-        // Можно добавить дополнительные стили если нужно
+        margin-right: 10px;
+        p {
+            margin-bottom: 10px;
+        }
     }
 
     &__control {

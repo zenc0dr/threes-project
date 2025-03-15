@@ -24,4 +24,15 @@ class Node
             )
         ];
     }
+
+    # http://threes.dc/threes.api/nodes.Node:getNodeDsl?fid=test&nid=mf6ddtu7
+    public function getNodeDsl(): array
+    {
+        return [
+            'node' => ths()->nodes()->getNodeDsl(
+                request('fid'),
+                request('nid')
+            )
+        ];
+    }
 }

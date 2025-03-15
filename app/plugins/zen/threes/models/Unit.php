@@ -51,24 +51,6 @@ class Unit extends Model
         }
     }
 
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        # Предотвращение сохранения модели
-        # Устанавливается в plugins/zen/threes/controllers/UnitController@formBeforeSave
-        static::saving(function ($model) {
-            #TODO: Старая механика сохранения данных нода
-            if ($save_data = ths()->getState('unit.prevent_save')) {
-                ths()->sprites()->saveNodeSettings(
-                    $save_data['node_uuid'],
-                    $save_data['settings']
-                );
-                return false;
-            }
-        });
-    }
-
     /**
      * Фильтр активных юнитов
      * @param $query

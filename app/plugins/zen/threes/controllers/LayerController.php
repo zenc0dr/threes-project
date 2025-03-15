@@ -4,6 +4,7 @@ use Backend;
 use BackendMenu;
 use Backend\Classes\Controller;
 use Zen\Threes\Models\Layer;
+use Flash;
 
 class LayerController extends Controller
 {
@@ -11,7 +12,7 @@ class LayerController extends Controller
         \Backend\Behaviors\FormController::class
     ];
 
-    public $formConfig = 'config_form.yaml';
+    public string $formConfig = 'config_form.yaml';
 
     public function __construct()
     {
@@ -48,5 +49,14 @@ class LayerController extends Controller
         $fields = ths()->fromYamlFile(storage_path('test_fields.yaml'));
 
         $form->addFields($fields, 'primary');
+    }
+
+    public function formBeforeSave($model): void
+    {
+        # Останавливаем дальнейшее выполнение сохранения
+        # Проверяется в plugins/zen/threes/models/Layer@boot
+        ths()->setState('layer.prevent_save', request('Layer'));
+
+        Flash::info('Настройки нода сохранены');
     }
 }

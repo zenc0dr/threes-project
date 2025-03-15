@@ -48,7 +48,7 @@
 import Editor from 'primevue/editor'; // https://www.primefaces.org/primevue/editor
 // https://github.com/quilljs/quill/blob/develop/docs/_includes/standalone/full.html
 export default {
-    name: "DwarfTextEditor",
+    name: "TextEditor",
     components: {
         Editor
     },
@@ -62,10 +62,6 @@ export default {
         label: {
             type: [String, Function],
             default: null
-        },
-        crypto: {
-            type: Boolean,
-            default: false
         },
     },
     computed: {
@@ -101,8 +97,6 @@ export default {
         font-size: 15px;
         color: #1a1a1a;
         line-height: 23px;
-        padding: 40px 50px;
-        padding-bottom: 60px;
         margin-bottom: 30px;
     }
 
