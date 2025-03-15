@@ -28,6 +28,7 @@
         <NodePanel
             :node="node_in_panel"
             :fid="fid"
+            :backend="backend"
             @close="closeNodePanel"
             @update="onNodeUpdated"
         />

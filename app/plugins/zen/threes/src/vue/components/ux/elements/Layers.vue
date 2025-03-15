@@ -9,7 +9,7 @@
                 @end="onDragEnd"
             >
                 <template #item="{ element: layer }">
-                    <div @contextmenu.prevent="openLayer(layer)" class="threes-layers__layer">
+                    <div class="threes-layers__layer">
                         <div class="threes-layers__icon">
                             <icon :src="layer.icon" />
                         </div>
@@ -20,6 +20,14 @@
                             </div>
                             <div class="threes-layers__description" v-html="layer.description"></div>
                         </div>
+                        <div class="threes-layers__control">
+                            <div @click="openParams(layer)" class="threes-layers__control__button">
+                                Параметры
+                            </div>
+                            <div @click="openSettings(layer)" class="threes-layers__control__button">
+                                Настройки
+                            </div>
+                        </div>
                     </div>
                 </template>
             </draggable>
@@ -28,21 +36,24 @@
             right pan
         </div>
     </div>
-    <modal :show="open_layer !== null" @close="open_layer = null">
-        <LayerForm :layer="open_layer" />
+    <modal :show="open_layer_params !== null" @close="open_layer_params = null">
+        <FormFitter
+            :scheme="layer_params"
+            v-model="open_layer_params"
+        />
     </modal>
 </template>
 
 <script>
 import draggable from 'vuedraggable';
 import icon from './icon.vue';
-import LayerForm from "../forms/LayerForm.vue";
 import modal from './modal.vue';
 
 export default {
     name: "Layers",
     props: {
-        node: null
+        node: null,
+        backend: null
     },
     emits: [
         'update'
@@ -51,12 +62,25 @@ export default {
         draggable,
         icon,
         modal,
-        LayerForm,
     },
     data() {
         return {
             local_layers: [],
-            open_layer: null
+            open_layer_params: null,
+            layer_params: [
+                {
+                    field: 'name',
+                    type: 'string',
+                    label: 'Название слоя',
+                    size: 'full'
+                },
+                {
+                    field: 'description',
+                    type: 'textEditor',
+                    label: 'Описание слоя',
+                    size: 'full'
+                },
+            ]
         };
     },
     computed: {
@@ -74,13 +98,22 @@ export default {
     },
     methods: {
         openLayer(layer) {
-            this.open_layer = layer;
+            this.open_layer_params = layer;
         },
         onDragEnd() {
             this.$emit('update', {
                 ...this.node,
                 layers: [...this.local_layers]
             }, true);
+        },
+        openParams(layer) {
+            this.open_layer_params = layer
+        },
+        openSettings(layer) {
+            window.open(
+                location.origin + `/${this.backend}/zen/threes/layercontroller/update/` + layer.lid,
+                '_blank'
+            )
         }
     }
 };
@@ -106,6 +139,7 @@ export default {
         border-radius: 4px;
         margin: 4px;
         cursor: move;
+        transition: 200ms;
 
         &:hover {
             background: #e8e8e8;
@@ -141,6 +175,32 @@ export default {
 
     &__description {
         // Можно добавить дополнительные стили если нужно
+    }
+
+    &__control {
+        display: flex;
+        align-items: center;
+
+        &__button {
+            padding: 5px 10px;
+            background: #ffffff;
+            margin: 3px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #666;
+            border: 1px solid #d8d8d8;
+            cursor: pointer;
+            transition: 200ms;
+
+            &:hover {
+                background: #ecffdc;
+                color: #617054;
+            }
+            &:active {
+                transform: scale(0.95);
+            }
+        }
     }
 }
 </style>

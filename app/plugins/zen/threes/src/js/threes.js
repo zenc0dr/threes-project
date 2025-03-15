@@ -8,32 +8,13 @@ import PrimeVue from 'primevue/config';
 import vuedraggable from 'vuedraggable';
 import Threes from '../vue/Threes.vue'
 
-$.ajaxSetup({
-    beforeSend: function() {
-        if (typeof $.oc === "undefined") {
-            console.warn("OctoberCMS not loaded yet, retrying...");
-        }
-    },
-    complete: function() {
-        if (typeof $.oc !== "undefined") {
-            $(document).trigger("render");
-        }
-    }
-});
-
 window._ = require('lodash');
 window.ths = {
     requests_register: {},
     auth_token: null,
 
-    // Объект для хранения глобальных данных
-
+    /* Объект для хранения глобальных данных */
     data: reactive({
-        // mouse: {
-        //     x: 0,
-        //     y: 0,
-        // },
-        sprite_pins: [], // Соединения в спрайте
         ui_streams: [],
     }),
 
@@ -41,21 +22,10 @@ window.ths = {
         let domain = location.origin
         let data = (opts.data) ? opts.data : null
         let axios_options = null
-        let api_url = domain
-
-        if (opts.api) {
-            api_url = '/threes.api/' + opts.api
-        } else {
-            api_url = opts.url
-        }
-
+        let api_url = opts.api ? '/threes.api/' + opts.api : opts.url
         let request_key = md5(api_url + JSON.stringify(data))
 
-        // if (opts.api) {
-        //     api_url = domain + '/threes.api/' + opts.api
-        // }
-
-        // For debug
+        /* For debug */
         console.log('Threes query [' + request_key + ']: ' + api_url, data)
 
         if (this.auth_token) {

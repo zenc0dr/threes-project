@@ -18,7 +18,11 @@
                         />
                     </div>
                     <div v-show="active_tab === 'layers'" class="node-panel__content">
-                        <Layers :node="node" @update="onNodeChange" />
+                        <Layers
+                            :node="node"
+                            :backend="backend"
+                            @update="onNodeChange"
+                        />
                     </div>
                 </div>
             </template>
@@ -38,7 +42,8 @@ export default {
     name: "NodePanel",
     props: {
         node: null,
-        fid: null
+        fid: null,
+        backend: null,
     },
     emits: ['close', 'update'],
     components: {

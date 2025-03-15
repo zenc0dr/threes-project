@@ -74,6 +74,16 @@
                     :modelValue="modelValue[element.field]"
                     @update:modelValue="modelValue[element.field] = $event"
                 />
+
+                <TextEditor
+                    v-if="element.type === 'textEditor'"
+                    :modelValue="modelValue[element.field]"
+                    @update:modelValue="modelValue[element.field] = $event"
+                    :crypto="element.crypto"
+                    :size="element.size"
+                    :label="element.label"
+                />
+
             </template>
         </template>
     </div>
@@ -84,6 +94,7 @@ import Tabs from "./Tabs";
 import String from "../inputs/String.vue";
 import Number from "../inputs/Number.vue";
 import Select from "../inputs/Select.vue";
+import TextEditor from "../inputs/TextEditor.vue";
 
 export default {
     name: "FormFitter",
@@ -92,7 +103,8 @@ export default {
         Tabs,
         String,
         Number,
-        Select
+        Select,
+        TextEditor
     },
     props: {
         scheme: {
