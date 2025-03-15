@@ -66,12 +66,10 @@ export default {
     },
     watch: {
         layers(new_layers) {
-            // Синхронизируем local_layers при изменении входного props
             this.local_layers = [...new_layers];
         }
     },
     created() {
-        // Инициализируем local_layers при создании компонента
         this.local_layers = [...this.layers];
     },
     methods: {
@@ -79,7 +77,6 @@ export default {
             this.open_layer = layer;
         },
         onDragEnd() {
-            // Эмитируем событие обновления порядка слоев наверх
             this.$emit('update', {
                 ...this.node,
                 layers: [...this.local_layers]
@@ -95,7 +92,7 @@ export default {
     flex-direction: row;
 
     &__draggable {
-        min-height: 50px; // Чтобы область перетаскивания была видна даже если слоев нет
+        min-height: 50px;
     }
 
     &__panel {
@@ -108,10 +105,10 @@ export default {
         background: #f1f1f1;
         border-radius: 4px;
         margin: 4px;
-        cursor: move; // Показываем, что элемент можно перетаскивать
+        cursor: move;
 
         &:hover {
-            background: #e8e8e8; // Небольшой эффект при наведении
+            background: #e8e8e8;
         }
     }
 
@@ -122,7 +119,7 @@ export default {
     }
 
     &__title {
-        flex: 1; // Чтобы заголовок занимал доступное пространство
+        flex: 1;
     }
 
     &__name {
