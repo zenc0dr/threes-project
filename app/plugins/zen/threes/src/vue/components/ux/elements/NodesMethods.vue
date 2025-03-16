@@ -9,15 +9,20 @@
 export default {
     name: "NodesMethods",
     props: {
-        selected_nodes: {
-            type: Array,
-            default: []
-        }
+        fid: null,
+        nids: null,
     },
+    emits: ["remove_nodes"],
     methods: {
         removeNodes()
         {
-            console.log('selected_nodes', this.selected_nodes)
+            ths.api({
+                api: 'frames.Frame:removeNodes',
+                data: {
+                    fid: null,
+                    nids: this.selected_nodes
+                }
+            })
         }
     }
 }

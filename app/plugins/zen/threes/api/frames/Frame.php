@@ -29,4 +29,14 @@ class Frame
         ths()->frames()->addLine(request('fid'));
         return [];
     }
+
+    # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
+    public function removeNodes(): array
+    {
+        ths()->frames()->removeNodes(
+            request('fid'),
+            request('nids')
+        );
+        return [];
+    }
 }

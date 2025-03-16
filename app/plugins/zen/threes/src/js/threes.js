@@ -61,6 +61,27 @@ window.ths = {
                 })
         }
     },
+
+    showNotification(text, type) {
+        if (window.oc && window.oc.flashMsg) {
+            if (!type) {
+                type = 'info'
+            }
+
+            window.oc.flashMsg({
+                text,
+                type
+            })
+
+            // Альтернативный синтаксис для разных типов уведомлений
+            // window.oc.flashMsg.success('Успешно!');
+            // window.oc.flashMsg.error('Ошибка!');
+            // window.oc.flashMsg.info('Информация');
+            // window.oc.flashMsg.warning('Предупреждение');
+        }
+    },
+
+
     afterResponse(response, then, request_key) {
         delete this.requests_register[request_key]
         this.preloader(false)

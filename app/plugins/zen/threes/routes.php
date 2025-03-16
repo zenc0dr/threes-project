@@ -1,10 +1,33 @@
 <?php
 
-function handleResponse($response)
+/**
+ * Обработка запросов
+ * @param array|string|null $response
+ * @return string|Response
+ */
+function handleResponse(array | string | null $response = null): string | Response
 {
     if (is_null($response)) {
         return '';
     }
+
+    if (is_array($response)) {
+        if (!isset($response['success'])) {
+            $response['success'] = true;
+        }
+        if (!isset($response['messages'])) {
+            $response['messages'] = [];
+        }
+    }
+
+    $has_messages = $response
+        && isset($response['messages'])
+        && is_array($response['messages']);
+
+    if ($has_messages) {
+        $response['messages'] = ths()->messages()->pushMessages($response['messages']);
+    }
+
     if (!is_string($response)) {
         return Response::make(
             json_encode($response, 128 | 256),

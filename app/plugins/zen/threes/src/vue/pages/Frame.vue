@@ -1,5 +1,5 @@
 <template>
-    <NodesMethods :selected_nodes="selected_nodes" />
+    <NodesMethods :fid="fid" :nids="selected_nodes" />
     <div class="frame" @click="clearSelection($event)">
         <draggable
             v-for="(line, line_index) in program"
@@ -147,6 +147,8 @@ export default {
                 },
             });
         },
+
+
 
         // При обновлении нода
         onNodeUpdated(node) {

@@ -20,23 +20,67 @@ class Helpers
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
 
-    public function units(): Units
+    /**
+     * Глобальные вспомогательные методы
+     * @return Helpers
+     */
+    public function helpers(): Helpers
     {
-        return Units::getInstance();
+        return Helpers::getInstance();
     }
 
-    public function nodes(): Nodes
+    /**
+     * Слои хранят аспекты, которые хранят атрибуты
+     * @return Layers
+     */
+    public function layers(): Layers
     {
-        return Nodes::getInstance();
+        return Layers::getInstance();
     }
 
+    /**
+     * Фреймы хранят схемы, доступны по $fid
+     * @return Frames
+     */
     public function frames(): Frames
     {
         return Frames::getInstance();
     }
 
-    public function layers(): Layers
+    /**
+     * Ноды, хранят информацию для схемы, доступны по $nid
+     * @return Nodes
+     */
+    public function nodes(): Nodes
     {
-        return Layers::getInstance();
+        return Nodes::getInstance();
+    }
+
+    /**
+     * Юниты - Выполняют роль хранителей слоёв и аспектов в их пассивном состоянии
+     * Ничего не делают, просто контейнера с аспектами
+     * @return Units
+     */
+    public function units(): Units
+    {
+        return Units::getInstance();
+    }
+
+    /**
+     * Система сообщений
+     * @return Messages
+     */
+    public function messages(): Messages
+    {
+        return Messages::getInstance();
+    }
+
+    /**
+     * Система событий
+     * @return Events
+     */
+    public function events(): Events
+    {
+        return Events::getInstance();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zen\Threes\Classes;
+    namespace Zen\Threes\Classes;
 
 use Zen\Threes\Models\Frame;
 use Zen\Threes\Traits\SingletonTrait;
@@ -12,7 +12,7 @@ class Frames
 {
     use SingletonTrait;
 
-    public function get(string $fid)
+    public function get(string $fid): ?Frame
     {
         return Frame::findByFid($fid);
     }
@@ -65,6 +65,14 @@ class Frames
         ]);
 
         //$this->abstractor($fid);
+    }
+
+    public function removeNodes(string $fid, array $nids): void
+    {
+        $frame = ths()->frames()->get($fid);
+
+        $program = $frame->program;
+        #todo:tut
     }
 
     /**
