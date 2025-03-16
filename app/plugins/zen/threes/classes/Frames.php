@@ -77,7 +77,6 @@ class Frames
         $program = Frame::findByFid($fid)->program;
 
         $dsl = [];
-        //$aspects = []; todo:deprecated
         foreach ($program as $line) {
             $dsl_line = [];
             foreach ($line as $nodes) {
@@ -87,7 +86,6 @@ class Frames
                     $layers = [];
                     foreach ($lids as $lid) {
                         $layer = Layer::find($lid)->dsl;
-                        //$aspects[] = $layer['aspect']; todo:deprecated
                         $layers[] = $layer;
                     }
                     $node['layers'] = $layers;
@@ -99,36 +97,7 @@ class Frames
             $dsl[] = $dsl_line;
         }
 
-        //$this->addIconsToLayers($aspects, $dsl); todo:deprecated
-
         return $dsl;
-    }
-
-    /**
-     * Мягко добавляем иконки к слоям todo:deprecated
-     * @param array $aspects
-     * @param array $dsl
-     * @return void
-     */
-    public function addIconsToLayers(array $aspects, array &$dsl): void
-    {
-        $uids = collect($aspects)->map(function ($aspect) {
-            return explode('@', $aspect)[0];
-        })->toArray();
-
-        $units = Unit::whereIn('uid', $uids)
-            ->get()->mapWithKeys(function ($unit) {
-                return [$unit->uid => $unit->icon_path];
-            })->toArray();
-
-        foreach ($dsl as &$line) {
-            foreach ($line as &$node) {
-                foreach ($node['layers'] as &$layer) {
-                    $aspect = explode('@', $layer['aspect'])[0];
-                    $layer['icon'] = $units[$aspect];
-                }
-            }
-        }
     }
 
     /**
@@ -180,6 +149,7 @@ class Frames
             if ($layer_index === $layers_count) {
                 $program_stage = 'end';
             }
+
             ths()->layers()->callAspect($fid, $uid, $method, $exe, $program_stage);
             $layer_index++;
         }

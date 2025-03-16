@@ -6,6 +6,6 @@ class Frame_24
 {
     public function flow()
     {
-        ###########%code_writer%#
+        $value = 0;#%code_writer%#
     }
 }

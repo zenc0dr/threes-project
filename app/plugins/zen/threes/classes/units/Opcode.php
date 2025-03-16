@@ -4,8 +4,18 @@ namespace Zen\Threes\Classes\Units;
 
 class Opcode
 {
-    public function write(string $exe, string $fid, ?string $program_stage = null)
+    public function write(string|array $exe, string $fid, ?string $program_stage = null)
     {
+        if (is_array($exe)) {
+
+            if (!isset($exe['code'])) {
+                return;
+            }
+
+            $exe = $exe['code'];
+        }
+
+
         $frame = ths()->frames()->get($fid);
         $this->writeCode($frame->id, $exe, $program_stage);
     }

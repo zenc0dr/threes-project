@@ -21,6 +21,8 @@ class Layer extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
+    private ?Unit $unit = null;
+
     public $rules = [
         'lid' => 'required|unique:zen_threes_layers,lid',
     ];
@@ -52,6 +54,16 @@ class Layer extends Model
     public function afterFetch(): void
     {
         $this->fillSettings($this->data);
+    }
+
+    # Получить юнит этого слоя
+    public function getUnit(): ?Unit
+    {
+        if ($this->unit) {
+            return $this->unit;
+        }
+        $uid = explode('@', $this->aspect)[0];
+        return Unit::find($uid);
     }
 
     /**
@@ -99,9 +111,23 @@ class Layer extends Model
             'name' => $this->name,
             'description' => $this->description,
             'aspect' => $this->aspect,
-            'exe' => $this->exe,
+            'exe' => $this->exeSelector(),
             'icon' => $this->icon
         ];
+    }
+
+    public function exeSelector()
+    {
+//        $exe = collect(
+//            $this->getUnit()->layers
+//        )->firstWhere(
+//            'aspect_lid',
+//            collect(explode('@', $this->aspect))->last()
+//        )['aspect_ui'] ?? null;
+
+        return $this->exe;
+
+        return $this->data ?? $this->exe;
     }
 
     /**
@@ -115,7 +141,7 @@ class Layer extends Model
         if ($icon_path = ths()->getState($state_key)) {
             return $icon_path;
         }
-        $unit = Unit::find($uid);
+        $unit = $this->getUnit();
         return ths()->setState($state_key, $unit->icon_path);
     }
 

@@ -13,15 +13,22 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+        //$layer = Layer::find('xeio4imm')->dsl;
+
+        //dd($layer);
+
         ths()->frames()->abstractor('test');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
-        Node::truncate();
-        Layer::truncate();
+        dd('Threes api works!');
+    }
 
-        //dd('Threes api works!');
+    # http://threes.dc/threes.api/debug.Tests:abstractorTest
+    public function abstractorTest()
+    {
+        ths()->frames()->abstractor('test');
     }
 }

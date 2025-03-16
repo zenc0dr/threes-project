@@ -47,7 +47,9 @@ class LayerController extends Controller
     public function formExtendFields($form): void
     {
         $aspect = explode('@', $form->model->aspect);
+
         $unit = Unit::find($aspect[0]);
+
         $ui = null;
         foreach ($unit->layers as $layer) {
             if ($layer['aspect_lid'] === $aspect[1]) {

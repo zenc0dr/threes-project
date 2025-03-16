@@ -67,7 +67,7 @@ class Layers
         string $fid, # Токен фрейма
         string $uid, # Токен юнита
         string $method, # Метод
-        string $exe, # Атрибут
+        string|array $exe, # Атрибут
         ?string $program_stage = null # Стадия программы ('start' - Начало программы, 'end' - конец программы)
     ): void {
         $unit = ths()->units()->get($uid);
