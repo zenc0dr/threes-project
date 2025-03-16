@@ -1,4 +1,5 @@
 <template>
+    <NodesMethods :selected_nodes="selected_nodes" />
     <div class="frame" @click="clearSelection($event)">
         <draggable
             v-for="(line, line_index) in program"
@@ -39,13 +40,15 @@
 import draggable from 'vuedraggable';
 import Node from '../components/Node.vue';
 import NodePanel from '../components/ux/forms/NodePanel.vue';
+import NodesMethods from "../components/ux/elements/NodesMethods.vue";
 
 export default {
     name: 'Frame',
     components: {
         draggable,
         Node,
-        NodePanel
+        NodePanel,
+        NodesMethods
     },
     props: ['backend', 'fid'],
     data() {
@@ -126,7 +129,9 @@ export default {
 
         // Нажатие правой кнопкой мыши на ноде
         handleNodeRightClick(node, event) {
-            this.openNodePanel(node)
+            if (!this.selected_nodes.length) {
+                this.openNodePanel(node)
+            }
         },
 
         // Создать нод
