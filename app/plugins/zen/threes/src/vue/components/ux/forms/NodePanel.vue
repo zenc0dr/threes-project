@@ -25,10 +25,9 @@
                         />
                     </div>
                     <div v-show="active_tab === 'node'" class="node-panel__content">
-                        Настройки нода (Пока что не синхронизируются, менять в схеме)
                         <FormFitter
                             :scheme="node_settings_scheme"
-                            v-model="node_settings"
+                            v-model="updated_node"
                         />
                     </div>
                 </div>
@@ -67,10 +66,6 @@ export default {
             edited_node: this.node ? JSON.parse(JSON.stringify(this.node)) : null,
             updated_node: null,
             active_tab: 'layers',
-            node_settings: {
-                name: 'node',
-                description: 'LALALA'
-            },
             node_settings_scheme: [
                 {
                     field: 'name',
@@ -96,6 +91,11 @@ export default {
             },
             deep: true,
             immediate: true
+        },
+        active_tab(tab) {
+            if (tab === 'node') {
+                this.updated_node = JSON.parse(JSON.stringify(this.node))
+            }
         }
     },
     computed: {
@@ -108,7 +108,6 @@ export default {
     },
     methods: {
         selectTab(tab) {
-            console.log('Выбираю', tab)
             this.active_tab = tab
         },
         // Метод эмитирует событие close родителя
@@ -136,7 +135,6 @@ export default {
                 },
                 then: response => {
                     this.$emit("update", response.node)
-                    this.updated_node = null
                 },
             })
         },
