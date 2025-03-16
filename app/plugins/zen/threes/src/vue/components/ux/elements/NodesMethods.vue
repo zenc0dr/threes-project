@@ -12,15 +12,18 @@ export default {
         fid: null,
         nids: null,
     },
-    emits: ["remove_nodes"],
+    emits: ["node_removed"],
     methods: {
         removeNodes()
         {
             ths.api({
                 api: 'frames.Frame:removeNodes',
                 data: {
-                    fid: null,
-                    nids: this.selected_nodes
+                    fid: this.fid,
+                    nids: this.nids
+                },
+                then: () => {
+                    this.$emit('node_removed')
                 }
             })
         }

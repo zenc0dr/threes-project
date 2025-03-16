@@ -1,11 +1,6 @@
 <?php
 
-/**
- * Обработка запросов
- * @param array|string|null $response
- * @return string|Response
- */
-function handleResponse(array | string | null $response = null): string | Response
+function handleResponse(array | string | null $response = null)
 {
     if (is_null($response)) {
         return '';
@@ -49,7 +44,7 @@ Route::match(
     }
 );
 
-# Проверяем файл маршрутов
+# Проверяем файл маршрутов (Для генератора кода)
 $generated_routes_path = ths()->checkDir(storage_path('temp/threes/generated_routes.php'));
 if (!file_exists($generated_routes_path)) {
     file_put_contents($generated_routes_path, '<?php');

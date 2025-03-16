@@ -62,31 +62,31 @@ window.ths = {
         }
     },
 
-    showNotification(text, type) {
-        if (window.oc && window.oc.flashMsg) {
+    // Отправить сообщение
+    pushMessage(text, type) {
+        if ($ && $.oc && typeof $.oc.flashMsg === 'function') {
             if (!type) {
                 type = 'info'
             }
-
-            window.oc.flashMsg({
-                text,
-                type
-            })
-
-            // Альтернативный синтаксис для разных типов уведомлений
-            // window.oc.flashMsg.success('Успешно!');
-            // window.oc.flashMsg.error('Ошибка!');
-            // window.oc.flashMsg.info('Информация');
-            // window.oc.flashMsg.warning('Предупреждение');
+            $.oc.flashMsg(text, type)
+        } else {
+            console.error('$.oc.flashMsg недоступен')
         }
     },
 
+    // Показать сообщения
+    pushMessages(messages) {
+        for (let i in messages) {
+            this.pushMessage(messages[i])
+        }
+    },
 
+    // Постобработка данных
     afterResponse(response, then, request_key) {
         delete this.requests_register[request_key]
         this.preloader(false)
-        if (response.alerts) {
-            this.pushAlerts(response.alerts)
+        if (response.messages) {
+            this.pushMessages(response.messages)
         }
         if (then) {
             then(response)
@@ -94,9 +94,6 @@ window.ths = {
     },
     preloader(state) {
         console.log('Preloader = ' + state)
-    },
-    pushAlerts(alerts) {
-        console.log('Alerts', alerts)
     },
     nodesUiStreamsRun() {
 

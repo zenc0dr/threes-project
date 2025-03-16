@@ -1,5 +1,9 @@
 <template>
-    <NodesMethods :fid="fid" :nids="selected_nodes" />
+    <NodesMethods
+        :fid="fid"
+        :nids="selected_nodes"
+        @node_removed="loadProgram"
+    />
     <div class="frame" @click="clearSelection($event)">
         <draggable
             v-for="(line, line_index) in program"

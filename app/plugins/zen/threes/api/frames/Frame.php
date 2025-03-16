@@ -30,9 +30,10 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
+    # http://threes.dc/threes.api/frames.Frame:removeNodes
     public function removeNodes(): array
     {
+        ths()->requestDebug(); # todo:debug
         ths()->frames()->removeNodes(
             request('fid'),
             request('nids')

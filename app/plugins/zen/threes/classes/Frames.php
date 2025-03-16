@@ -70,9 +70,24 @@ class Frames
     public function removeNodes(string $fid, array $nids): void
     {
         $frame = ths()->frames()->get($fid);
+        $program = collect($frame->program);
 
-        $program = $frame->program;
-        #todo:tut
+        $updated_program = $program->map(function ($line) use ($nids) {
+            return collect($line)->map(function ($nodes) use ($nids) {
+                return collect($nodes)->filter(function ($node_content, $node_id) use ($nids) {
+                    return !in_array($node_id, $nids);
+                });
+            })->filter(function ($level_nodes) {
+                return !$level_nodes->isEmpty();
+            });
+        })->filter(function ($program_level) {
+            return !$program_level->isEmpty();
+        })->toArray();
+
+        $frame->program = $updated_program;
+        $frame->save();
+
+        ths()->messages()->addMessage('Ноды удалены');
     }
 
     /**
