@@ -15,7 +15,6 @@ class Opcode
             $exe = $exe['code'];
         }
 
-
         $frame = ths()->frames()->get($fid);
         $this->writeCode($frame->id, $exe, $program_stage);
     }

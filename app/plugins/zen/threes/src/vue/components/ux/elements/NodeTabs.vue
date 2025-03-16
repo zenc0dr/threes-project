@@ -26,6 +26,10 @@ export default {
                 {
                     tab: 'scheme',
                     name: 'Схема'
+                },
+                {
+                    tab: 'node',
+                    name: 'Параметры'
                 }
             ],
         }

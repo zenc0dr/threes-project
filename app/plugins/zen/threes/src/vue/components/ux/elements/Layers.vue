@@ -21,9 +21,6 @@
                             <div class="threes-layers__description" v-html="layer.description"></div>
                         </div>
                         <div class="threes-layers__control">
-                            <div @click="openParams(layer)" class="threes-layers__control__button">
-                                Параметры
-                            </div>
                             <div @click="openSettings(layer)" class="threes-layers__control__button">
                                 Настройки
                             </div>
@@ -39,12 +36,6 @@
             right pan
         </div>
     </div>
-    <modal :show="open_layer_params !== null" @close="open_layer_params = null">
-        <FormFitter
-            :scheme="layer_params"
-            v-model="open_layer_params"
-        />
-    </modal>
 </template>
 
 <script>
@@ -69,21 +60,7 @@ export default {
     data() {
         return {
             local_layers: [],
-            open_layer_params: null,
-            layer_params: [
-                {
-                    field: 'name',
-                    type: 'string',
-                    label: 'Название слоя',
-                    size: 'full'
-                },
-                {
-                    field: 'description',
-                    type: 'textEditor',
-                    label: 'Описание слоя',
-                    size: 'full'
-                },
-            ]
+            open_node_settings: null,
         };
     },
     computed: {
@@ -94,23 +71,17 @@ export default {
     watch: {
         layers(new_layers) {
             this.local_layers = [...new_layers];
-        }
+        },
     },
     created() {
         this.local_layers = [...this.layers];
     },
     methods: {
-        openLayer(layer) {
-            this.open_layer_params = layer;
-        },
         onDragEnd() {
             this.$emit('update', {
                 ...this.node,
                 layers: [...this.local_layers]
             }, true);
-        },
-        openParams(layer) {
-            this.open_layer_params = layer
         },
         openSettings(layer) {
             window.open(

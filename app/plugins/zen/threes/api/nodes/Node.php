@@ -19,7 +19,7 @@ class Node
     {
         //ths()->requestDebug();todo:debug
         return [
-            'json' => ths()->nodes()->updateNode(
+            'node' => ths()->nodes()->updateNode(
                 request('fid'),
                 request('node')
             )

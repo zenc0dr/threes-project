@@ -11,7 +11,7 @@
                 <div class="node-panel__body">
                     <div v-show="active_tab === 'scheme'" class="node-panel__content">
                         <Vue3JsonEditor
-                            v-model="json"
+                            v-model="edited_node"
                             :show-btns="false"
                             :expandedOnStart="true"
                             @json-change="onNodeChange"
@@ -22,6 +22,13 @@
                             :node="node"
                             :backend="backend"
                             @update="onNodeChange"
+                        />
+                    </div>
+                    <div v-show="active_tab === 'node'" class="node-panel__content">
+                        Настройки нода (Пока что не синхронизируются, менять в схеме)
+                        <FormFitter
+                            :scheme="node_settings_scheme"
+                            v-model="node_settings"
                         />
                     </div>
                 </div>
@@ -57,17 +64,34 @@ export default {
     },
     data() {
         return {
-            json: this.node ? JSON.parse(JSON.stringify(this.node)) : null,
-            updated: null,
-            active_tab: 'layers'
+            edited_node: this.node ? JSON.parse(JSON.stringify(this.node)) : null,
+            updated_node: null,
+            active_tab: 'layers',
+            node_settings: {
+                name: 'node',
+                description: 'LALALA'
+            },
+            node_settings_scheme: [
+                {
+                    field: 'name',
+                    type: 'string',
+                    label: 'Название слоя',
+                    size: 'full'
+                },
+                {
+                    field: 'description',
+                    type: 'textEditor',
+                    label: 'Описание слоя',
+                    size: 'full'
+                },
+            ]
         }
     },
     watch: {
         node: {
             handler(node) {
                 if (node) {
-                    node = JSON.parse(JSON.stringify(node)) // todo: clone
-                    this.json = node
+                    this.edited_node = JSON.parse(JSON.stringify(node))
                 }
             },
             deep: true,
@@ -80,7 +104,7 @@ export default {
                 return `Нод: [${this.node.nid}] ${this.node.name}`;
             }
             return null
-        },
+        }
     },
     methods: {
         selectTab(tab) {
@@ -93,17 +117,17 @@ export default {
         },
         // Событие с обновлённым нодом + обновление открытого нода
         onNodeChange(node, save) {
-            this.updated = node
+            this.updated_node = node
             if (save) {
                 this.saveChanges()
             }
         },
         // Сохранить данные нода
         saveChanges() {
-            if (!this.updated) {
+            if (!this.updated_node) {
                 return;
             }
-            let node = this.updated
+            let node = this.updated_node
             ths.api({
                 api: 'nodes.Node:update',
                 data: {
@@ -111,8 +135,8 @@ export default {
                     node
                 },
                 then: response => {
-                    this.$emit("update", response.json)
-                    this.updated = null
+                    this.$emit("update", response.node)
+                    this.updated_node = null
                 },
             })
         },
