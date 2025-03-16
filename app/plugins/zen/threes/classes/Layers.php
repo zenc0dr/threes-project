@@ -2,12 +2,32 @@
 
 namespace Zen\Threes\Classes;
 
+use Illuminate\Database\Eloquent\Builder;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Layer;
 
 class Layers
 {
     use SingletonTrait;
+
+    /**
+     * Получить экземпляр Layer по $lid - токену
+     * @param string $lid
+     * @return Layer|null
+     */
+    public function get(string $lid): ?Layer
+    {
+        return Layer::find($lid);
+    }
+
+    /**
+     * Вернуть модель Layer
+     * @return Builder
+     */
+    public function model(): Builder
+    {
+        return Layer::query();
+    }
 
     public function handle(
         string $fid, # токен фрейма
@@ -83,5 +103,10 @@ class Layers
         }
 
         ths()->exe($aspect, null, $exe, $fid, $program_stage);
+    }
+
+    public function getStore()
+    {
+        $frames = ths()->frames()->get();
     }
 }

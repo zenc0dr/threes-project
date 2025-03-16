@@ -42,10 +42,10 @@
     </div>
 </template>
 <script>
-import modal from "../elements/modal.vue";
+import modal from "./modal.vue";
 import { Vue3JsonEditor } from 'vue3-json-editor'
-import NodeTabs from "../elements/NodeTabs.vue";
-import Layers from "../elements/Layers.vue";
+import NodeTabs from "./NodeTabs.vue";
+import Layers from "./Layers.vue";
 
 export default {
     name: "NodePanel",

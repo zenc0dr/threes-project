@@ -2,6 +2,7 @@
 
 namespace Zen\Threes\Classes;
 
+use Illuminate\Database\Eloquent\Builder;
 use Zen\Threes\Traits\SingletonTrait;
 
 use Zen\Threes\Models\Frame;
@@ -11,6 +12,25 @@ use Zen\Threes\Models\Layer;
 class Nodes
 {
     use SingletonTrait;
+
+    /**
+     * Получить экземпляр Node по $nid - токену
+     * @param string $nid
+     * @return Node|null
+     */
+    public function get(string $nid): ?Node
+    {
+        return Node::find($nid);
+    }
+
+    /**
+     * Вернуть модель Node
+     * @return Builder
+     */
+    public function model(): Builder
+    {
+        return Node::query();
+    }
 
     /**
      * Добавить новый нод в программу
@@ -43,11 +63,6 @@ class Nodes
         $frame->program = $program;
         $frame->save();
         return [];
-    }
-
-    public function get(string $nid)
-    {
-        return Node::find($nid);
     }
 
     /**

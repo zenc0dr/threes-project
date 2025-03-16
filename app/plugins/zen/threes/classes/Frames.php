@@ -6,15 +6,29 @@ use Zen\Threes\Models\Frame;
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Layer;
-use Zen\Threes\Models\Unit;
+use Illuminate\Database\Eloquent\Builder;
 
 class Frames
 {
     use SingletonTrait;
 
+    /**
+     * Получить экземпляр Frame по $fid - токену
+     * @param string $fid
+     * @return Frame|null
+     */
     public function get(string $fid): ?Frame
     {
         return Frame::findByFid($fid);
+    }
+
+    /**
+     * Вернуть модель Frame
+     * @return Builder
+     */
+    public function model(): Builder
+    {
+        return Frame::query();
     }
 
     /**
@@ -64,9 +78,15 @@ class Frames
             'program' => $dsl,
         ]);
 
-        //$this->abstractor($fid);
+        //$this->abstractor($fid); todo:deprecated
     }
 
+    /**
+     * Удалить связи нод с их фреймами
+     * @param string $fid
+     * @param array $nids
+     * @return void
+     */
     public function removeNodes(string $fid, array $nids): void
     {
         $frame = ths()->frames()->get($fid);
@@ -87,7 +107,7 @@ class Frames
         $frame->program = $updated_program;
         $frame->save();
 
-        ths()->messages()->addMessage('Ноды удалены');
+        ths()->messages()->addMessage('Ноды отвязаны');
     }
 
     /**

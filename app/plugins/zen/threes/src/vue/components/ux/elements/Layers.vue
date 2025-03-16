@@ -33,7 +33,7 @@
             </draggable>
         </div>
         <div class="threes-layers__panel">
-            right pan
+            <Store />
         </div>
     </div>
 </template>
@@ -42,6 +42,7 @@
 import draggable from 'vuedraggable';
 import icon from './icon.vue';
 import modal from './modal.vue';
+import Store from './Store.vue';
 
 export default {
     name: "Layers",
@@ -56,6 +57,7 @@ export default {
         draggable,
         icon,
         modal,
+        Store
     },
     data() {
         return {

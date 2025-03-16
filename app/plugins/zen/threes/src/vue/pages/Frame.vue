@@ -43,7 +43,7 @@
 <script>
 import draggable from 'vuedraggable';
 import Node from '../components/Node.vue';
-import NodePanel from '../components/ux/forms/NodePanel.vue';
+import NodePanel from '../components/ux/elements/NodePanel.vue';
 import NodesMethods from "../components/ux/elements/NodesMethods.vue";
 
 export default {
