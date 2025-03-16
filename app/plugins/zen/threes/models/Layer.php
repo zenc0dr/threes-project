@@ -53,7 +53,9 @@ class Layer extends Model
 
     public function afterFetch(): void
     {
-        $this->fillSettings($this->data);
+        if (ths()->getState('layer.extend_fields')) {
+            $this->fillSettings($this->data);
+        }
     }
 
     # Получить юнит этого слоя
@@ -74,18 +76,14 @@ class Layer extends Model
     public static function set(array $data = []): Layer
     {
         $lid = $data['lid'] ?? null;
-
         if ($lid) {
-            self::find($lid)
-                ->update([
-                    'lid' => $data['lid'],
-                    'name' => $data['name'] ?? 'Без названия',
-                    'description' => $data['description'] ?? null,
-                    'aspect' => $data['aspect'],
-                    'exe' => $data['exe'],
-                    'updated_at' => now(),
-                ]);
             $layer = Layer::find($lid);
+            $layer->lid = $data['lid'];
+            $layer->name = $data['name'] ?? 'Без названия';
+            $layer->description = $data['description'] ?? null;
+            $layer->aspect = $data['aspect'];
+            $layer->exe = is_array($data['exe']) ? ths()->toJson($data['exe']) : $data['exe'];
+            $layer->save();
         } else {
             $layer = self::create([
                 'lid' => ths()->createToken(),
@@ -96,7 +94,6 @@ class Layer extends Model
                 'updated_at' => now(),
             ]);
         }
-
         return $layer;
     }
 
@@ -116,18 +113,27 @@ class Layer extends Model
         ];
     }
 
-    public function exeSelector()
+    /**
+     * Преобразует json-строку в массив
+     * @return array
+     */
+    public function exeSelector(): ?array
     {
-//        $exe = collect(
-//            $this->getUnit()->layers
-//        )->firstWhere(
-//            'aspect_lid',
-//            collect(explode('@', $this->aspect))->last()
-//        )['aspect_ui'] ?? null;
+        $exe = $this->data ?? $this->exe;
 
-        return $this->exe;
+        if (isset($exe['exe'])) {
+            $exe = $exe['exe'];
+        }
 
-        return $this->data ?? $this->exe;
+        if (is_string($exe) && ths()->isJson($exe)) {
+            $exe = ths()->fromJson($exe);
+        }
+
+        if (!$exe) {
+            return null;
+        }
+
+        return $exe;
     }
 
     /**
@@ -169,12 +175,20 @@ class Layer extends Model
         $this->attributes['data'] = ths()->toJson($value);
     }
 
+    public function getSchemeAttribute(?string $scheme_yaml = null): array
+    {
+        if (!$scheme_yaml) {
+            return [];
+        }
+        return ths()->fromYaml($scheme_yaml);
+    }
+
     private static function updateLayerData(string $lid, array $data): void
     {
-        ths()->toJsonFile(
-            storage_path('test_layer_data2.json'),
-            $data
-        );
+//        ths()->toJsonFile(
+//            storage_path('test_layer_data2.json'),
+//            $data
+//        );
 
 
         $name = $data['name'];
@@ -182,6 +196,11 @@ class Layer extends Model
         unset($data['name']);
         unset($data['description']);
 
+        if (isset($data['exe'])) {
+            if (ths()->isJson($data['exe'])) {
+                $data['exe'] = ths()->fromJson($data['exe']);
+            }
+        }
 
         DB::table('zen_threes_layers')
             ->where('lid', $lid)
@@ -204,8 +223,32 @@ class Layer extends Model
         unset($settings['name']);
         unset($settings['description']);
 
+        # Тут нужно проверить, если нет атрибута $settings['exe'] то
+        # нужно его достать из юнита
+        if ($settings === []) {
+            $unit = $this->getUnit();
+
+            $method = explode('@', $this->aspect)[1];
+            foreach ($unit->layers as $layer) {
+                if ($layer['aspect_lid'] === $method) {
+                    $exe = $layer['aspect_exe'];
+                    break;
+                }
+            }
+
+            if (ths()->isJson($exe)) {
+                $exe = ths()->fromJson($exe);
+                $exe = ths()->toJson($exe);
+            }
+
+            $settings['exe'] = $exe;
+        }
+
         if ($settings) {
             foreach ($settings as $field => $value) {
+                if ($field === 'exe' && is_array($value)) {
+                    $value = ths()->toJson($value);
+                }
                 $this->attributes[$field] = $value;
             }
         }

@@ -82,12 +82,14 @@ export default {
                 padding: '5px 7px',
                 background: '#6eb39d',
                 borderRadius: '3px',
-                width: '50px'
+                minWidth: '50px'
             }
             for (let i in node.layers) {
                 let layer = node.layers[i]
                 if (layer.aspect === 'threes.units.ui@css') {
-                    style = JSON.parse(layer.exe)
+                    if (layer.exe) {
+                        style = layer.exe
+                    }
                     break
                 }
             }

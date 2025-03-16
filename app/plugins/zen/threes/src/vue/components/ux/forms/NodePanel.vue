@@ -66,10 +66,8 @@ export default {
         node: {
             handler(node) {
                 if (node) {
-                    node = JSON.parse(JSON.stringify(node))
-                    this.exeParser(node, node => {
-                        this.json = node
-                    })
+                    node = JSON.parse(JSON.stringify(node)) // todo: clone
+                    this.json = node
                 }
             },
             deep: true,
@@ -89,35 +87,6 @@ export default {
             console.log('Выбираю', tab)
             this.active_tab = tab
         },
-        // Преобразует атрибут exe из строки в объект в случае существования
-        exeParser(node, fn) {
-            for (let i in node.layers) {
-                if (this.isJsonString(node.layers[i].exe)) {
-                    node.layers[i].exe = JSON.parse(node.layers[i].exe)
-                }
-            }
-            fn(node)
-        },
-        // Преобразует атрибут exe из объекта в строку в случае существования
-        exeStringifier(node, fn) {
-            node.layers.forEach(layer => {
-                if (layer.hasOwnProperty('exe')) {
-                    if (typeof layer.exe !== 'string') {
-                        layer.exe = JSON.stringify(layer.exe);
-                    }
-                }
-            });
-            fn(node)
-        },
-        // Проверяет, не является ли эта строка json-строкой
-        isJsonString(str) {
-            try {
-                JSON.parse(str);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        },
         // Метод эмитирует событие close родителя
         close() {
             this.$emit("close");
@@ -134,20 +103,17 @@ export default {
             if (!this.updated) {
                 return;
             }
-
             let node = this.updated
-            this.exeStringifier(node, node => {
-                ths.api({
-                    api: 'nodes.Node:update',
-                    data: {
-                        fid: this.fid,
-                        node
-                    },
-                    then: response => {
-                        this.$emit("update", response.json)
-                        this.updated = null
-                    },
-                });
+            ths.api({
+                api: 'nodes.Node:update',
+                data: {
+                    fid: this.fid,
+                    node
+                },
+                then: response => {
+                    this.$emit("update", response.json)
+                    this.updated = null
+                },
             })
         },
         reloadNode() {

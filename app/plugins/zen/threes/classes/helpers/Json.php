@@ -5,6 +5,17 @@ namespace Zen\Threes\Classes\Helpers;
 trait Json
 {
     /**
+     * Определяет, является ли строка JSON-массивом
+     * @param $string
+     * @return bool
+     */
+    public function isJson($string): bool
+    {
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
+    /**
      * Преобразовать json-строку в массив
      * @param string $string
      * @param int|bool $assoc

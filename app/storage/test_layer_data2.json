@@ -1,5 +1,5 @@
 {
-    "name": "Создание переменной $value",
-    "description": "<p>Создаётся переменная $value<\/p>",
-    "code": "$value = 0;"
+    "name": "Стиль нода",
+    "description": "<p>Данный аспект придаёт ноду css правила<\/p>",
+    "exe": "{\"padding\":\"5px 7px\",\"background\": \"orange\",\"borderRadius\": \"3px\",\"width\": \"50px\"}"
 }

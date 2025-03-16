@@ -21,6 +21,7 @@ class LayerController extends Controller
         // Теперь подключаем правильные скрипты формы и репитера
         $this->addJs('/modules/backend/widgets/form/assets/js/october.form.js', 'core');
         $this->addJs('/modules/backend/formwidgets/repeater/assets/js/repeater-min.js', 'core');
+        ths()->setState('layer.extend_fields', true);
     }
 
     public function index()
@@ -49,16 +50,17 @@ class LayerController extends Controller
         $aspect = explode('@', $form->model->aspect);
 
         $unit = Unit::find($aspect[0]);
+        $scheme = $form->model->scheme;
 
-        $ui = null;
-        foreach ($unit->layers as $layer) {
-            if ($layer['aspect_lid'] === $aspect[1]) {
-                $ui = $layer['aspect_ui'];
-                break;
+        if (!$scheme) {
+            foreach ($unit->layers as $layer) {
+                if ($layer['aspect_lid'] === $aspect[1]) {
+                    $scheme = ths()->fromYaml($layer['aspect_ui']);
+                    break;
+                }
             }
         }
-        $ui = ths()->fromYaml($ui);
-        $form->addFields($ui, 'primary');
+        $form->addFields($scheme, 'primary');
     }
 
     public function formBeforeSave($model): void
@@ -66,7 +68,6 @@ class LayerController extends Controller
         # Останавливаем дальнейшее выполнение сохранения
         # Проверяется в plugins/zen/threes/models/Layer@boot
         ths()->setState('layer.prevent_save', request('Layer'));
-
         Flash::info('Настройки нода сохранены');
     }
 }
