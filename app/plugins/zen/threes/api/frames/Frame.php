@@ -18,7 +18,7 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=test
+    # http://threes.dc/threes.api/frames.Frame:loadProgram?debug
     protected function loadProgram(): array
     {
         return [
@@ -45,7 +45,7 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:buildFrame
+    # http://threes.dc/threes.api/frames.Frame:buildFrame?debug
     protected function buildFrame(): array
     {
         ths()->frames()->abstractor(request('fid'));

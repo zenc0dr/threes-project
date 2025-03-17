@@ -3,12 +3,12 @@
 use System\Classes\PluginBase;
 use Zen\Threes\Console\Vector;
 use Zen\Threes\Threes;
+use Log;
 
 class Plugin extends PluginBase
 {
     public function register(): void
     {
-        //Threes::getInstance()->
         # Регистрация консольных команд
         $this->registerConsoleCommand('threes:vector', Vector::class);
     }
@@ -16,7 +16,13 @@ class Plugin extends PluginBase
     public function boot()
     {
         app()->terminating(function () {
-            ths()->events()->terminating();
+            try {
+                if (function_exists('ths')) {
+                    ths()->events()->terminating();
+                }
+            } catch (\Exception $e) {
+                Log::error('Zen.Threes: terminating event error: ' . $e->getMessage());
+            }
         });
     }
 

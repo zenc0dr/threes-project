@@ -1,6 +1,6 @@
 <?php
 
-namespace Zen\Threes\Frames;
+namespace Zen\Threes\Classes\Frames;
 
 class Frame_27
 {
@@ -8,6 +8,10 @@ class Frame_27
     {
         $value = 0;
         $value++;
-#%code_writer%#
+        $value++;
+        $value++;
+        file_put_contents(storage_path('frame_result'), $value);
+        /*
+        */
     }
 }

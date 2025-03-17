@@ -96,7 +96,6 @@ export default {
             }
             for (let i in node.layers) {
                 let layer = node.layers[i]
-                console.log('layer', layer)
                 if (layer.aspect === 'threes.units.ui@css') {
                     if (layer.exe) {
                         style = layer.exe

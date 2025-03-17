@@ -183,4 +183,23 @@ class Frames
             ths()->layers()->callAspect($fid, $uid, $method, $exe);
         }
     }
+
+    /**
+     * Получить путь до фрейма
+     * @param int $frame_id
+     * @return string
+     */
+    public function getFramePath(int $frame_id): string
+    {
+        return base_path('plugins/zen/threes/classes/frames/Frame_' . $frame_id . '.php');
+    }
+
+    public function executeFrame(string $fid)
+    {
+        $frame = ths()->frames()->get($fid);
+        $frame_id = $frame->id;
+        $call = "Zen.Threes.Classes.Frames.Frame_$frame_id.flow";
+
+        return ths()->exe($call);
+    }
 }

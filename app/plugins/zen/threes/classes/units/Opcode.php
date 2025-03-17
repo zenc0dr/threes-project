@@ -21,11 +21,27 @@ class Opcode
         $frame = ths()->frames()->get($fid);
         $this->writeCode($frame->id, $exe);
 
+        # Добавляем событие для удаления плейсхолдера из Frame
+        ths()->events()->addEvent(
+            'terminating',
+            'Zen.Threes.Classes.Units.Opcode.removePlaceHolder',
+            $frame->id
+        );
+    }
+
+    # Тут надо удалить из файла
+    public function removePlaceHolder($data)
+    {
+        $frame_id = intval($data[0]);
+        $path = $this->getFramePath($frame_id);
+        $code = file_get_contents($path);
+        $code = preg_replace('/.*#%code_writer%#.*\n?/i', '', $code);
+        file_put_contents($path, $code);
     }
 
     private function getFramePath(int $frame_id): string
     {
-        return base_path('plugins/zen/threes/classes/frames/Frame_' . $frame_id . '.php');
+        return ths()->frames()->getFramePath($frame_id);
     }
 
     private function writeCode(int $frame_id, string $exe): void

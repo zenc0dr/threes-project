@@ -126,7 +126,7 @@ class Layer extends Model
      * Преобразует json-строку в массив
      * @return array|null
      */
-    public function exeSelector(): ?array
+    public function exeSelector(): array | string | null
     {
 
         $exe = $this->data ?: $this->exe;
