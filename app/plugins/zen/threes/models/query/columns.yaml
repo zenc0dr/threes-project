@@ -1,0 +1,12 @@
+columns:
+    call:
+        label: Вызов
+        type: text
+        searchable: true
+        sortable: true
+    created_at:
+        label: 'Время запроса'
+        type: datetime
+        searchable: true
+        sortable: true
+        format: 'd.m.Y H:i:s'

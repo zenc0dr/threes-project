@@ -1,0 +1,10 @@
+name: QueryController
+form: $/zen/threes/models/query/fields.yaml
+modelClass: Zen\Threes\Models\Query
+defaultRedirect: zen/threes/querycontroller
+create:
+    redirect: 'zen/threes/querycontroller/update/:id'
+    redirectClose: zen/threes/querycontroller
+update:
+    redirect: zen/threes/querycontroller
+    redirectClose: zen/threes/querycontroller

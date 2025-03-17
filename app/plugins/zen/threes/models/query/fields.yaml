@@ -1,0 +1,11 @@
+fields:
+    call:
+        label: Вызов
+        span: full
+        type: text
+    data:
+        label: 'Данные запроса'
+        span: full
+        size: huge
+        language: php
+        type: codeeditor

@@ -17,6 +17,9 @@ permissions:
     zen.threes.frames:
         tab: Threes
         label: 'Frames control'
+    zen.threes.queries:
+        tab: Threes
+        label: 'Queries control'
 navigation:
     main:
         label: Threes

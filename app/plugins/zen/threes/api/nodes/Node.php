@@ -2,10 +2,14 @@
 
 namespace Zen\Threes\Api\Nodes;
 
+use Zen\Threes\Traits\QueryLogTrait;
+
 class Node
 {
+    use QueryLogTrait;
+
     # http://threes.dc/threes.api/nodes.Node:create?fid=grok&line_index=0
-    public function create(): array
+    protected function create(): array
     {
         ths()->nodes()->addNode(
             request('fid'),
@@ -15,9 +19,8 @@ class Node
     }
 
     # http://threes.dc/threes.api/nodes.Node:update
-    public function update(): array
+    protected function update(): array
     {
-        ths()->requestDebug(); //todo:debug
         return [
             'node' => ths()->nodes()->updateNode(
                 request('fid'),
@@ -27,7 +30,7 @@ class Node
     }
 
     # http://threes.dc/threes.api/nodes.Node:getNodeDsl?fid=test&nid=mf6ddtu7
-    public function getNodeDsl(): array
+    protected function getNodeDsl(): array
     {
         return [
             'node' => ths()->nodes()->getNodeDsl(

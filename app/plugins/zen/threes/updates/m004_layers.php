@@ -1,5 +1,5 @@
 <?php namespace Zen\Threes\Updates;
-javascript:;
+
 use Schema;
 use October\Rain\Database\Updates\Migration;
 

@@ -10,3 +10,11 @@ fields:
             field: name
             type: slug
         type: text
+    threes:
+        label: ''
+        span: full
+        path: $/zen/threes/controllers/framecontroller/threes_app_partial.php
+        readOnly: 1
+        context:
+            - update
+        type: partial

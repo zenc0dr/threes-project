@@ -2,12 +2,15 @@
 
 namespace Zen\Threes\Api\Frames;
 
+use Zen\Threes\Traits\QueryLogTrait;
+
 class Frame
 {
+    use QueryLogTrait;
+
     # http://threes.dc/threes.api/frames.Frame:saveProgram
-    public function saveProgram(): array
+    protected function saveProgram(): array
     {
-        //ths()->requestDebug(); # todo:debug
         ths()->frames()->saveProgram(
             request('fid'),
             request('program')
@@ -15,8 +18,8 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=grok
-    public function loadProgram(): array
+    # http://threes.dc/threes.api/frames.Frame:loadProgram?fid=test
+    protected function loadProgram(): array
     {
         return [
             'program' => ths()->frames()->loadProgram(request('fid'))
@@ -24,7 +27,7 @@ class Frame
     }
 
     # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
-    public function addLine(): array
+    protected function addLine(): array
     {
         $line_index = ths()->frames()->addLine(request('fid'));
         ths()->messages()->addMessage("Линия добавлена #$line_index");
@@ -32,9 +35,8 @@ class Frame
     }
 
     # http://threes.dc/threes.api/frames.Frame:removeNodes
-    public function removeNodes(): array
+    protected function removeNodes(): array
     {
-        ths()->requestDebug(); # todo:debug
         ths()->frames()->removeNodes(
             request('fid'),
             request('nids')

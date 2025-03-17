@@ -2,12 +2,15 @@
 
 namespace Zen\Threes\Api\Layers;
 
+use Zen\Threes\Traits\QueryLogTrait;
+
 class Layer
 {
+    use QueryLogTrait;
+
     # http://threes.dc/threes.api/layers.Layer:getStore
-    public function getStore(): array
+    protected function getStore(): array
     {
-        ths()->requestDebug('filter_text');
         $store = ths()->layers()->getStore(
             request('filter_text')
         );

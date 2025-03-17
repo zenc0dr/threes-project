@@ -1,7 +1,12 @@
 <template>
 <div class="threes_nodes_methods">
-    <div @click="removeNodes" class="threes_nodes_methods__button">
-        <i class="icon-trash-1"></i>
+    <div
+        @click="removeNodes"
+        class="threes_nodes_methods__button"
+        :class="{inactive: (!nids || nids.length < 1)}"
+        title="Удалить выбранные ноды"
+    >
+        <i class="icon-trash-1" ></i>
     </div>
 </div>
 </template>
@@ -51,6 +56,11 @@ export default {
         &:hover {
             background: #ffe7ba;
             color: #795512;
+        }
+
+        &.inactive {
+            background: #f9f9f9;
+            color: #cdcdcd;
         }
     }
 }

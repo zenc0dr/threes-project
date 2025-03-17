@@ -36,9 +36,9 @@ class Nodes
      * Добавить новый нод в программу
      * @param string $fid
      * @param int $line_index
-     * @return array
+     * @return Node
      */
-    public function addNode(string $fid, int $line_index): array
+    public function addNode(string $fid, int $line_index): Node
     {
         $frame = Frame::findByFid($fid);
 
