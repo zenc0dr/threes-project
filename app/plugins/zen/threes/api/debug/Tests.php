@@ -13,11 +13,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        //$layer = Layer::find('xeio4imm')->dsl;
-
-        //dd($layer);
-
-        ths()->frames()->abstractor('test');
+        $layer = Layer::find('cme6abew')->dsl;
+        dd($layer);
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

@@ -4,8 +4,11 @@ namespace Zen\Threes\Classes\Units;
 
 class Opcode
 {
-    public function write(string|array $exe, string $fid, ?string $program_stage = null)
+    public function write(string|array|null $exe, string $fid)
     {
+        if (!$exe) {
+            return;
+        }
         if (is_array($exe)) {
 
             if (!isset($exe['code'])) {
@@ -16,7 +19,8 @@ class Opcode
         }
 
         $frame = ths()->frames()->get($fid);
-        $this->writeCode($frame->id, $exe, $program_stage);
+        $this->writeCode($frame->id, $exe);
+
     }
 
     private function getFramePath(int $frame_id): string
@@ -24,18 +28,21 @@ class Opcode
         return base_path('plugins/zen/threes/classes/frames/Frame_' . $frame_id . '.php');
     }
 
-    private function writeCode(int $frame_id, string $exe, ?string $program_stage = null): void
+    private function writeCode(int $frame_id, string $exe): void
     {
         $path = $this->getFramePath($frame_id);
-        if ($program_stage === 'start') {
+
+        if (!ths()->getState("frame:$frame_id:created")) {
             $code = view('zen.threes::blueprints.frames.frame', [
                 'frame_id' => $frame_id,
             ])->render();
             file_put_contents($path, $code);
+            ths()->setState("frame:$frame_id:created", true);
         }
 
+        # Читаем сгенерированный шаблон с плейсхолдером
         $code = file_get_contents($path);
-        $code = str_replace('#%code_writer%#', $exe . '#%code_writer%#', $code);
+        $code = str_replace('#%code_writer%#', '        ' . $exe . PHP_EOL . '#%code_writer%#', $code);
         file_put_contents($path, $code);
     }
 }

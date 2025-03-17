@@ -42,3 +42,7 @@ navigation:
                 permissions:
                     - zen.threes.main
                     - zen.threes.units
+            queries:
+                label: 'Журнал API'
+                url: zen/threes/querycontroller
+                icon: icon-book

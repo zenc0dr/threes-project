@@ -38,6 +38,7 @@
             @update="onNodeUpdated"
         />
     </div>
+    <FrameVersion :fid="fid" />
 </template>
 
 <script>
@@ -45,6 +46,7 @@ import draggable from 'vuedraggable';
 import Node from '../components/Node.vue';
 import NodePanel from '../components/ux/elements/NodePanel.vue';
 import NodesMethods from "../components/ux/elements/NodesMethods.vue";
+import FrameVersion from "../components/ux/elements/FrameVersion.vue";
 
 export default {
     name: 'Frame',
@@ -52,7 +54,8 @@ export default {
         draggable,
         Node,
         NodePanel,
-        NodesMethods
+        NodesMethods,
+        FrameVersion
     },
     props: ['backend', 'fid'],
     data() {
@@ -93,6 +96,7 @@ export default {
             }
             for (let i in node.layers) {
                 let layer = node.layers[i]
+                console.log('layer', layer)
                 if (layer.aspect === 'threes.units.ui@css') {
                     if (layer.exe) {
                         style = layer.exe
@@ -210,6 +214,7 @@ export default {
 <style lang="scss">
 .frame {
     border: 1px solid #ddd;
+    margin-bottom: 15px;
 
     .node-test {
         background: #4795b1;

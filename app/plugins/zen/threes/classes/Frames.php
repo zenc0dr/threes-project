@@ -175,23 +175,12 @@ class Frames
             }
         }
 
-        $layers_count = count($layers);
-        $layer_index = 0;
         foreach ($layers as $layer) {
-            $program_stage = null;
-            if ($layer_index === 0) {
-                $program_stage = 'start';
-            }
             $aspect = explode('@', $layer['aspect']);
             $uid = $aspect[0];
             $method = $aspect[1];
             $exe = $layer['exe'];
-            if ($layer_index === $layers_count) {
-                $program_stage = 'end';
-            }
-
-            ths()->layers()->callAspect($fid, $uid, $method, $exe, $program_stage);
-            $layer_index++;
+            ths()->layers()->callAspect($fid, $uid, $method, $exe);
         }
     }
 }

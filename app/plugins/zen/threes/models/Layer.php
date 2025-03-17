@@ -128,7 +128,9 @@ class Layer extends Model
      */
     public function exeSelector(): ?array
     {
-        $exe = $this->data ?? $this->exe;
+
+        $exe = $this->data ?: $this->exe;
+
 
         if (isset($exe['exe'])) {
             $exe = $exe['exe'];

@@ -22,7 +22,7 @@ class QueryController extends Controller
     public function __construct()
     {
         parent::__construct();
-        BackendMenu::setContext('Zen.Threes', 'main');
+        BackendMenu::setContext('Zen.Threes', 'main', 'queries');
     }
 
 }

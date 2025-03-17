@@ -44,4 +44,12 @@ class Frame
         ths()->messages()->addMessage('Ноды отвязаны');
         return [];
     }
+
+    # http://threes.dc/threes.api/frames.Frame:buildFrame
+    protected function buildFrame(): array
+    {
+        ths()->frames()->abstractor(request('fid'));
+        ths()->messages()->addMessage('Программа собрана');
+        return [];
+    }
 }

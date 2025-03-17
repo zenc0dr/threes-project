@@ -70,13 +70,13 @@ export default {
                 {
                     field: 'name',
                     type: 'string',
-                    label: 'Название слоя',
+                    label: 'Название нода',
                     size: 'full'
                 },
                 {
                     field: 'description',
                     type: 'textEditor',
-                    label: 'Описание слоя',
+                    label: 'Описание нода',
                     size: 'full'
                 },
             ]

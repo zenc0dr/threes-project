@@ -6,6 +6,7 @@ use October\Rain\Database\Traits\Sortable;
 use October\Rain\Database\Traits\NestedTree;
 
 /**
+ * @property  string $id - Идентификатор
  * @property string $fid - Токен фрейма
  * @property string $name - Название фрейма
  * @property string $description - Описание фрейма

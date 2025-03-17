@@ -2,10 +2,12 @@
 
 namespace Zen\Threes\Frames;
 
-class Frame_24
+class Frame_27
 {
     public function flow()
     {
-        $value = 0;#%code_writer%#
+        $value = 0;
+        $value++;
+#%code_writer%#
     }
 }
