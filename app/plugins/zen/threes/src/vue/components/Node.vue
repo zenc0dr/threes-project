@@ -1,11 +1,11 @@
 <template>
 <div v-if="node.nid" class="threes-node">
     <template v-for="layer in node.layers">
-        <template v-if="layer.aspect === 'threes.units.oc@write'">
-            <NodeCode :node="node" :layer="layer" />
-        </template>
         <template v-if="layer.aspect === 'threes.units.ui@css'">
             <UiNode :node="node" :layer="layer" />
+        </template>
+        <template v-if="layer.aspect === 'threes.units.oc@write' && !hasCssLayer">
+            <NodeCode :node="node" :layer="layer" />
         </template>
     </template>
 </div>
@@ -20,6 +20,11 @@ export default {
     components: {
         NodeCode,
         UiNode
+    },
+    computed: {
+        hasCssLayer() {
+            return this.node.layers.some(layer => layer.aspect === 'threes.units.ui@css');
+        }
     },
     props: {
         node: null

@@ -26,7 +26,8 @@ class Frame
     # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
     public function addLine(): array
     {
-        ths()->frames()->addLine(request('fid'));
+        $line_index = ths()->frames()->addLine(request('fid'));
+        ths()->messages()->addMessage("Линия добавлена #$line_index");
         return [];
     }
 
@@ -38,6 +39,7 @@ class Frame
             request('fid'),
             request('nids')
         );
+        ths()->messages()->addMessage('Ноды отвязаны');
         return [];
     }
 }

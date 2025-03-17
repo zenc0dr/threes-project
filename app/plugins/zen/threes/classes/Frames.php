@@ -24,9 +24,9 @@ class Frames
 
     /**
      * Вернуть модель Frame
-     * @return Builder
+     * @return Builder | Frame
      */
-    public function model(): Builder
+    public function model(): Builder | Frame
     {
         return Frame::query();
     }
@@ -77,8 +77,6 @@ class Frames
         Frame::findByFid($fid)->update([
             'program' => $dsl,
         ]);
-
-        //$this->abstractor($fid); todo:deprecated
     }
 
     /**
@@ -106,8 +104,6 @@ class Frames
 
         $frame->program = $updated_program;
         $frame->save();
-
-        ths()->messages()->addMessage('Ноды отвязаны');
     }
 
     /**
@@ -146,15 +142,16 @@ class Frames
     /**
      * Добавить линию
      * @param string $fid
-     * @return void
+     * @return int - Номер добавленой линии
      */
-    public function addLine(string $fid): void
+    public function addLine(string $fid): int
     {
         $frame = Frame::findByFid($fid);
         $program = $frame->program;
         $program[] = [];
         $frame->program = $program;
         $frame->save();
+        return count($program) - 1;
     }
 
     /**

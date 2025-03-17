@@ -22,9 +22,9 @@ class Units
 
     /**
      * Вернуть модель Unit
-     * @return Builder
+     * @return Builder | Unit
      */
-    public function model(): Builder
+    public function model(): Builder | Unit
     {
         return Unit::query();
     }

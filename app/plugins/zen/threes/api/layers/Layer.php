@@ -7,8 +7,14 @@ class Layer
     # http://threes.dc/threes.api/layers.Layer:getStore
     public function getStore(): array
     {
+        ths()->requestDebug('filter_text');
+        $store = ths()->layers()->getStore(
+            request('filter_text')
+        );
+
         return [
-            'store' => ths()->layers()->getStore()
+            'layers' => $store['layers'],
+            'nodes' => $store['nodes']
         ];
     }
 }

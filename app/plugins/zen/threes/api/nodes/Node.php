@@ -17,7 +17,7 @@ class Node
     # http://threes.dc/threes.api/nodes.Node:update
     public function update(): array
     {
-        //ths()->requestDebug();todo:debug
+        ths()->requestDebug(); //todo:debug
         return [
             'node' => ths()->nodes()->updateNode(
                 request('fid'),

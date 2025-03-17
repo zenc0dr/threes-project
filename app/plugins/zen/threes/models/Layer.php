@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Модель фрейма
+ * @property string $lid - Токен слоя
+ * @property string $aspect - Аспект слоя
  * @property string $icon
- * @property string $exe
+ * @property string $exe - Атрибут слоя
  * @property array $layers
  * @method static find($lid)
  */
@@ -51,6 +53,10 @@ class Layer extends Model
         });
     }
 
+    /**
+     * Событие после извлечения данных из БД
+     * @return void
+     */
     public function afterFetch(): void
     {
         if (ths()->getState('layer.extend_fields')) {
@@ -58,7 +64,10 @@ class Layer extends Model
         }
     }
 
-    # Получить юнит этого слоя
+    /**
+     * Получить юнит этого слоя
+     * @return Unit|null
+     */
     public function getUnit(): ?Unit
     {
         if ($this->unit) {
@@ -115,7 +124,7 @@ class Layer extends Model
 
     /**
      * Преобразует json-строку в массив
-     * @return array
+     * @return array|null
      */
     public function exeSelector(): ?array
     {
@@ -175,6 +184,11 @@ class Layer extends Model
         $this->attributes['data'] = ths()->toJson($value);
     }
 
+    /**
+     * Геттер для схемы ui слоя
+     * @param string|null $scheme_yaml
+     * @return array
+     */
     public function getSchemeAttribute(?string $scheme_yaml = null): array
     {
         if (!$scheme_yaml) {
@@ -183,14 +197,14 @@ class Layer extends Model
         return ths()->fromYaml($scheme_yaml);
     }
 
+    /**
+     * Обновление данных слоя
+     * @param string $lid
+     * @param array $data
+     * @return void
+     */
     private static function updateLayerData(string $lid, array $data): void
     {
-//        ths()->toJsonFile(
-//            storage_path('test_layer_data2.json'),
-//            $data
-//        );
-
-
         $name = $data['name'];
         $description = $data['description'] ?? null;
         unset($data['name']);

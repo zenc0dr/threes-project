@@ -25,9 +25,9 @@ class Nodes
 
     /**
      * Вернуть модель Node
-     * @return Builder
+     * @return Builder | Node
      */
-    public function model(): Builder
+    public function model(): Builder | Node
     {
         return Node::query();
     }
@@ -38,7 +38,7 @@ class Nodes
      * @param int $line_index
      * @return array
      */
-    public function addNode(string $fid, int $line_index)
+    public function addNode(string $fid, int $line_index): array
     {
         $frame = Frame::findByFid($fid);
 
@@ -46,7 +46,7 @@ class Nodes
         $layer = Layer::set();
         $program = $frame->program;
 
-        $node = [
+        $node_short_dsl = [
             $node->nid => [
                 $layer->lid
             ]
@@ -59,10 +59,10 @@ class Nodes
             }
         }
 
-        $program[$line_index][] = $node;
+        $program[$line_index][] = $node_short_dsl;
         $frame->program = $program;
         $frame->save();
-        return [];
+        return $node;
     }
 
     /**
@@ -95,7 +95,7 @@ class Nodes
 
         $updated_layers_lids = [];
         foreach ($layers as $layer) {
-            $updated_layers_lids[] = ths()->layers()->handle($fid, $node['nid'], $layer);
+            $updated_layers_lids[] = ths()->layers()->handle($layer);
         }
 
         $frame = Frame::findByFid($fid);

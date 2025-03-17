@@ -22,16 +22,14 @@ class Layers
 
     /**
      * Вернуть модель Layer
-     * @return Builder
+     * @return Builder | Layer
      */
-    public function model(): Builder
+    public function model(): Builder | Layer
     {
         return Layer::query();
     }
 
     public function handle(
-        string $fid, # токен фрейма
-        string $nid, # Токен нода
         array | string $layer # DSL-слой
     ): string {
         $lid = $layer['lid'] ?? null;
@@ -52,6 +50,9 @@ class Layers
      */
     public function handleAspect(string $aspect): string
     {
+        $aspect = explode('::', $aspect);
+        $lid = $aspect[1] ?? null;
+        $aspect = $aspect[0] ?? null;
         $aspect = explode('@', $aspect);
         $uid = $aspect[0];
         $method = $aspect[1];
@@ -61,12 +62,16 @@ class Layers
         foreach ($unit->layers as $unit_layer) {
             $layer_method = $unit_layer['aspect_lid'];
             if ($method === $layer_method) {
-                $layer = Layer::set([
-                    'name' => $unit_layer['aspect_name'],
-                    'description' => $unit_layer['aspect_desc'],
-                    'aspect' => "$uid@$method",
-                    'exe' => $unit_layer['aspect_exe'],
-                ]);
+                if ($lid) {
+                    $layer = Layer::find($lid);
+                } else {
+                    $layer = Layer::set([
+                        'name' => $unit_layer['aspect_name'],
+                        'description' => $unit_layer['aspect_desc'],
+                        'aspect' => "$uid@$method",
+                        'exe' => $unit_layer['aspect_exe'],
+                    ]);
+                }
                 break;
             }
         }
@@ -105,8 +110,68 @@ class Layers
         ths()->exe($aspect, null, $exe, $fid, $program_stage);
     }
 
-    public function getStore()
+    /**
+     * Получить хранилище слоёв и нодов
+     * @param string|null $filter_text
+     * @return array[]
+     */
+    public function getStore(?string $filter_text = null): array
     {
-        $frames = ths()->frames()->get();
+        $frames = ths()->frames()->model()->active()->get();
+        $project_layers = [];
+        $project_nodes = [];
+        foreach ($frames as $frame) {
+            $dsl_program = ths()->frames()->loadProgram($frame->fid);
+            foreach ($dsl_program as $line) {
+                foreach ($line as $node) {
+                    if (!isset($project_nodes[$node['nid']])) {
+                        $node['fid'] = $frame->fid;
+                        $project_nodes[$node['nid']] = $node;
+                    }
+                    foreach ($node['layers'] as $layer) {
+                        if (!$this->isFilterAllow([
+                            $layer['lid'],
+                            $layer['name'],
+                            $layer['description'],
+                            $layer['aspect'],
+                        ], $filter_text)) {
+                            continue;
+                        }
+
+                        $layer['nid'] = $node['nid'];
+                        if (!isset($project_layers[$layer['lid']])) {
+                            $project_layers[$layer['lid']] = $layer;
+                        }
+                    }
+                    unset($project_nodes[$node['nid']]['layers']);
+                }
+            }
+        }
+
+        return [
+            'layers' => $project_layers,
+            'nodes' => $project_nodes,
+        ];
+    }
+
+    /**
+     * Проверяет массив строк на вхождение
+     * @param array $fields - Массив строк
+     * @param string|null $filter - Поисковое вхождение
+     * @return bool - Фильтр позволяет
+     */
+    private function isFilterAllow(array $fields, ?string $filter = null): bool
+    {
+        if (!$filter) {
+            return true;
+        }
+        $is_allowed = false;
+        foreach ($fields as $field) {
+            if (str_contains($field, $filter)) {
+                $is_allowed = true;
+                break;
+            }
+        }
+        return $is_allowed;
     }
 }

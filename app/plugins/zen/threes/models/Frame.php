@@ -9,7 +9,6 @@ use October\Rain\Database\Traits\NestedTree;
  * @property string $fid - Токен фрейма
  * @property string $name - Название фрейма
  * @property string $description - Описание фрейма
- * @property bool $active - Активность фрейма
  * @property array $program - Программа фрейма
  * @method static active() - Фильтр активности в запросе
  * @method static find($fid) - Найти фрейм по токену

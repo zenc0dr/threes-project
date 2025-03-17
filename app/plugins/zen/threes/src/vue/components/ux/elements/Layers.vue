@@ -33,7 +33,7 @@
             </draggable>
         </div>
         <div class="threes-layers__panel">
-            <Store />
+            <Store @add:layer="addLayer" />
         </div>
     </div>
 </template>
@@ -92,12 +92,19 @@ export default {
             )
         },
         removeLayer(layer) {
-            this.local_layers = this.local_layers.filter(l => l.lid !== layer.lid);
+            this.local_layers = this.local_layers.filter(l => l.lid !== layer.lid)
             this.$emit('update', {
                 ...this.node,
                 layers: [...this.local_layers]
             }, true);
         },
+        addLayer(layer) {
+            this.local_layers.push(layer.aspect + '::' + layer.lid)
+            this.$emit('update', {
+                ...this.node,
+                layers: [...this.local_layers]
+            }, true);
+        }
     }
 };
 </script>

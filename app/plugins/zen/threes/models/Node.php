@@ -5,6 +5,7 @@ use October\Rain\Database\Traits\Validation;
 
 
 /**
+ * @property string $nid - Токен нода
  * @property array $dsl
  * @method static find($nid)
  */
