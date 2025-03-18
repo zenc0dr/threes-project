@@ -5,6 +5,7 @@
         :info="info"
         @update="loadProgram"
         @selectAllNodes="selectAllNodes"
+        @addNewNode="createNode"
     />
     <div class="frame" @click="clearSelection($event)">
         <draggable
@@ -13,12 +14,13 @@
             v-model="program[line_index]"
             tag="div"
             class="frame__line"
+            :class="{selected: lineSelected(line_index)}"
             group="nodes"
             item-key="nid"
             :multi-drag="true"
             :selected-items="selected_nodes"
             @end="saveProgram"
-            @dblclick="createNode(line_index)"
+            @click="selectLine(line_index)"
         >
             <template #item="{element:node}">
                 <Node
@@ -31,7 +33,7 @@
                 />
             </template>
         </draggable>
-        <div @click="addProgramLine" class="frame__add-line">+</div>
+        <div @click="addProgramLine" class="frame__add-line" title="Добавить новую линию">+</div>
         <NodePanel
             :node="node_in_panel"
             :fid="fid"
@@ -63,6 +65,7 @@ export default {
     data() {
         return {
             program: [], // DSL программа
+            selected_line_index: 0,
             selected_nodes: [], // Массив nid выбранных нодов
             node_in_panel: null // Сюда вставить нод чтобы открыть панель
         };
@@ -79,6 +82,11 @@ export default {
         // Открыть панель нода
         openNodePanel(node) {
             this.node_in_panel = node
+        },
+
+        // Выделение линии
+        lineSelected(line_index) {
+            return this.selected_line_index === line_index
         },
 
         // Закрыть панель нода
@@ -159,13 +167,13 @@ export default {
             }
         },
 
-        // Создать нод
-        createNode(line_index) {
+        // Создать новый нод
+        createNode() {
             ths.api({
                 api: 'nodes.Node:create',
                 data: {
                     fid: this.fid,
-                    line_index: line_index
+                    line_index: this.selected_line_index
                 },
                 then: () => {
                     this.loadProgram()
@@ -179,6 +187,10 @@ export default {
                 this.node_in_panel = node
             }
             this.loadProgram()
+        },
+
+        selectLine(line_index) {
+            this.selected_line_index = line_index
         },
 
         // Добавить программную линию
@@ -241,6 +253,11 @@ export default {
         gap: 5px;
         min-height: 40px;
         margin-bottom: 4px;
+        transition: 200ms;
+
+        &.selected {
+            box-shadow: -3px 0 0 0 #8500ff;
+        }
     }
 
     &__node {

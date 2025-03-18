@@ -1,6 +1,13 @@
 <template>
 <div class="threes_nodes_methods">
     <div
+        @click="addNewNode"
+        class="threes_nodes_methods__button"
+        title="Добавить нод на линию"
+    >
+        <i class="icon-cube"></i>
+    </div>
+    <div
         @click="selectAllNodes"
         class="threes_nodes_methods__button"
         title="Выбрать все ноды на схеме"
@@ -30,15 +37,15 @@
 </div>
 </template>
 <script>
-import FramePreloader from "./FramePreloader.vue";
+import FramePreloader from './FramePreloader.vue';
 export default {
-    name: "NodesMethods",
+    name: 'NodesMethods',
     props: {
         fid: null,
         nids: null,
         info: null,
     },
-    emits: ["update", "selectAllNodes"],
+    emits: ['update', 'selectAllNodes', 'addNewNode'],
     components: {
         FramePreloader
     },
@@ -49,7 +56,7 @@ export default {
     },
     methods: {
         selectAllNodes() {
-            this.$emit("selectAllNodes");
+            this.$emit('selectAllNodes');
         },
         removeNodes()
         {
@@ -82,6 +89,10 @@ export default {
                     this.$emit('update')
                 }
             })
+        },
+        addNewNode()
+        {
+            this.$emit('addNewNode')
         }
     }
 }
