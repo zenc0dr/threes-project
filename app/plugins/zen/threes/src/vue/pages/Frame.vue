@@ -2,7 +2,9 @@
     <NodesMethods
         :fid="fid"
         :nids="selected_nodes"
-        @node_removed="loadProgram"
+        :info="info"
+        @update="loadProgram"
+        @selectAllNodes="selectAllNodes"
     />
     <div class="frame" @click="clearSelection($event)">
         <draggable
@@ -68,6 +70,11 @@ export default {
     mounted() {
         this.loadProgram();
     },
+    computed: {
+        info() {
+            return 'Выделено: ' + this.selected_nodes.length
+        }
+    },
     methods: {
         // Открыть панель нода
         openNodePanel(node) {
@@ -84,6 +91,17 @@ export default {
             if (event.target.matches('.frame, .frame__line')) {
                 this.selected_nodes = [];
             }
+        },
+
+        // Выбрать все ноды
+        selectAllNodes() {
+            let all_nodes = []
+            this.program.forEach(line => {
+                line.forEach(node => {
+                    all_nodes.push(node.nid)
+                })
+            })
+            this.selected_nodes = all_nodes
         },
 
         // Оформить стиль нода в зависимости от его слоя css
@@ -154,8 +172,6 @@ export default {
                 },
             });
         },
-
-
 
         // При обновлении нода
         onNodeUpdated(node) {

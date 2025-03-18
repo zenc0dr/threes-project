@@ -22,7 +22,7 @@ class Opcode
         $this->writeCode($frame->id, $exe);
 
         # Добавляем событие для удаления плейсхолдера из Frame
-        ths()->events()->addEvent(
+        ths()->events()->addEventOnce(
             'terminating',
             'Zen.Threes.Classes.Units.Opcode.removePlaceHolder',
             $frame->id

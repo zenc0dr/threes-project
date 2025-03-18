@@ -32,6 +32,25 @@ class Events
     }
 
     /**
+     * Добавляет одно неповторяемое событие
+     * @param string $hook_name
+     * @param string $call
+     * @param ...$arguments
+     * @return void
+     */
+    public function addEventOnce(string $hook_name, string $call, ...$arguments): void
+    {
+        if (isset($this->events[$hook_name])) {
+            return;
+        }
+        $this->events[$hook_name] = [
+            'hook_name' => $hook_name,
+            'call' => $call,
+            'arguments' => $arguments
+        ];
+    }
+
+    /**
      * Выполняется при завершении работы приложения
      *
      * @return void

@@ -3,6 +3,7 @@
 namespace Zen\Threes\Api\Frames;
 
 use Zen\Threes\Traits\QueryLogTrait;
+use function MongoDB\BSON\toJSON;
 
 class Frame
 {
@@ -26,7 +27,7 @@ class Frame
         ];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:addLine?fid=grok
+    # http://threes.dc/threes.api/frames.Frame:addLine?debug
     protected function addLine(): array
     {
         $line_index = ths()->frames()->addLine(request('fid'));
@@ -42,6 +43,17 @@ class Frame
             request('nids')
         );
         ths()->messages()->addMessage('Ноды отвязаны');
+        return [];
+    }
+
+    # http://threes.dc/threes.api/frames.Frame:copyNodes
+    protected function copyNodes(): array
+    {
+        ths()->frames()->copyNodes(
+            request('fid'),
+            request('nids')
+        );
+        ths()->messages()->addMessage('Ноды скопированы');
         return [];
     }
 

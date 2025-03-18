@@ -16,6 +16,7 @@ window.ths = {
     /* Объект для хранения глобальных данных */
     data: reactive({
         ui_streams: [],
+        process: false,
     }),
 
     api(opts) {
@@ -25,8 +26,20 @@ window.ths = {
         let api_url = opts.api ? '/threes.api/' + opts.api : opts.url
         let request_key = md5(api_url + JSON.stringify(data))
 
+        /* Прерываем незавершенный запрос */
+        if (this.requests_register[request_key]) {
+            return
+        }
+
         /* For debug */
         console.log('Threes query [' + request_key + ']: ' + api_url, data)
+
+        /* Enable preloader after 2 seconds */
+        this.requests_register[request_key] = setTimeout(() => {
+            if (this.requests_register[request_key]) {
+                this.preloader(true)
+            }
+        }, 2000)
 
         if (this.auth_token) {
             axios_options = {
@@ -93,7 +106,9 @@ window.ths = {
         }
     },
     preloader(state) {
-        console.log('Preloader = ' + state)
+        console.log('Состояние прелоадера', state)
+
+        this.data.process = state
     },
     nodesUiStreamsRun() {
 

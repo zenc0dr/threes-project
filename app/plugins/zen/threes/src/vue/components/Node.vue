@@ -7,19 +7,24 @@
         <template v-if="layer.aspect === 'threes.units.oc@write' && !hasCssLayer">
             <NodeCode :node="node" :layer="layer" />
         </template>
+        <template v-if="layer.aspect === 'threes.units.frame@frame' && !hasCssLayer">
+            <FrameNode/>
+        </template>
     </template>
 </div>
 </template>
 <script>
 import NodeCode from "./nodes/NodeCode.vue";
 import UiNode from "./nodes/UiNode.vue";
+import FrameNode from "./nodes/FrameNode.vue";
 
 export default {
     name: "Node",
     emits: ['update'],
     components: {
         NodeCode,
-        UiNode
+        UiNode,
+        FrameNode
     },
     computed: {
         hasCssLayer() {

@@ -8,10 +8,14 @@ class Frame_27
     {
         $value = 0;
         $value++;
-        $value++;
-        $value++;
         file_put_contents(storage_path('frame_result'), $value);
         /*
+        $value++;
+        $value++;
         */
+        echo "hello world";
+        #
+        #
+        #
     }
 }
