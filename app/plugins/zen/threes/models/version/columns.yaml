@@ -1,0 +1,26 @@
+columns:
+    id:
+        label: 'Версия (id)'
+        type: number
+        searchable: true
+        sortable: true
+    fid:
+        label: FID
+        type: text
+        searchable: true
+        sortable: true
+    nid:
+        label: NID
+        type: text
+        searchable: true
+        sortable: true
+    lid:
+        label: LID
+        type: text
+        searchable: true
+        sortable: true
+    created_at:
+        label: Время
+        type: datetime
+        sortable: true
+        format: 'd.m.Y H:i:s'

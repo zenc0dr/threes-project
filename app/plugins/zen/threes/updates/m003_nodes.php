@@ -12,6 +12,8 @@ class M003Nodes extends Migration
             $table->string('nid')->primary()->comment('Токен нода');
             $table->string('name')->nullable()->comment('Имя нода');
             $table->string('description')->nullable()->comment('Описание нода');
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
 
             $table->unique('nid', 'nid_unique');
         });

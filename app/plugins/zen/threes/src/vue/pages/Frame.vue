@@ -3,6 +3,7 @@
         :fid="fid"
         :nids="selected_nodes"
         :info="info"
+        :lines="program_lines_count"
         @update="loadProgram"
         @selectAllNodes="selectAllNodes"
         @addNewNode="createNode"
@@ -73,9 +74,17 @@ export default {
     mounted() {
         this.loadProgram();
     },
+    watch: {
+        selected_nodes() {
+            ths.data.nids = this.selected_nodes
+        }
+    },
     computed: {
         info() {
             return 'Выделено: ' + this.selected_nodes.length
+        },
+        program_lines_count() {
+            return this.program?.length ?? 0
         }
     },
     methods: {

@@ -13,7 +13,6 @@ class Node extends Model
 {
     use Validation;
 
-    public $timestamps = false;
     public $table = 'zen_threes_nodes';
     protected $primaryKey = 'nid';
     protected $keyType = 'string';

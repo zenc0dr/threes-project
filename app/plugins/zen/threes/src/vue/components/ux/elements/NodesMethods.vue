@@ -3,6 +3,7 @@
     <div
         @click="addNewNode"
         class="threes_nodes_methods__button"
+        :class="{inactive:!lines}"
         title="Добавить нод на линию"
     >
         <i class="icon-cube"></i>
@@ -10,6 +11,7 @@
     <div
         @click="selectAllNodes"
         class="threes_nodes_methods__button"
+        :class="{inactive:!lines}"
         title="Выбрать все ноды на схеме"
     >
         <i class="icon-bullseye"></i>
@@ -44,6 +46,7 @@ export default {
         fid: null,
         nids: null,
         info: null,
+        lines: null
     },
     emits: ['update', 'selectAllNodes', 'addNewNode'],
     components: {

@@ -1,0 +1,7 @@
+fields:
+    data:
+        label: 'Данные версии'
+        span: full
+        size: giant
+        language: php
+        type: codeeditor

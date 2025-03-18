@@ -46,3 +46,7 @@ navigation:
                 label: 'Журнал API'
                 url: zen/threes/querycontroller
                 icon: icon-book
+            versions:
+                label: Версионирование
+                url: /
+                icon: icon-inbox

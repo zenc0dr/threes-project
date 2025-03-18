@@ -15,3 +15,6 @@ v1.0.5:
 v1.0.6:
     - 'Create Queries'
     - m005_queries.php
+v1.0.7:
+    - 'Create Versions'
+    - builder_table_create_zen_threes_versions.php
