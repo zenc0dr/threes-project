@@ -24,7 +24,7 @@ export default {
         vSelect
     },
     mounted() {
-        //this.getVersion()
+        this.getVersions()
     },
     data() {
         return {
@@ -33,9 +33,9 @@ export default {
         }
     },
     methods: {
-        getVersion() {
+        getVersions() {
             ths.api({
-                api: 'frames.Frame:getVersion',
+                api: 'frames.Frame:getVersions',
                 data: {
                     fid: this.fid
                 },
@@ -52,6 +52,7 @@ export default {
                     fid: this.fid
                 },
                 then: response => {
+                    this.getVersions()
                     this.$emit('update:version')
                 }
             })
@@ -67,6 +68,7 @@ export default {
 .threes-frame-version {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 
     .v-select {
         flex: 1 1 0;

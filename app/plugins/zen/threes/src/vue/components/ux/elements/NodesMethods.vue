@@ -67,7 +67,7 @@ export default {
                 return
             }
             ths.api({
-                api: 'frames.Frame:removeNodes',
+                api: 'nodes.Node:removeNodes',
                 data: {
                     fid: this.fid,
                     nids: this.nids
@@ -83,7 +83,7 @@ export default {
                 return
             }
             ths.api({
-                api: 'frames.Frame:copyNodes',
+                api: 'nodes.Node:copyNodes',
                 data: {
                     fid: this.fid,
                     nids: this.nids

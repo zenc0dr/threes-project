@@ -3,7 +3,7 @@
 namespace Zen\Threes\Api\Frames;
 
 use Zen\Threes\Traits\QueryLogTrait;
-use function MongoDB\BSON\toJSON;
+use Zen\Threes\Models\Version;
 
 class Frame
 {
@@ -20,7 +20,7 @@ class Frame
     }
 
     # http://threes.dc/threes.api/frames.Frame:loadProgram?debug
-    protected function loadProgram(): array
+    public function loadProgram(): array
     {
         return [
             'program' => ths()->frames()->loadProgram(request('fid'))
@@ -35,33 +35,23 @@ class Frame
         return [];
     }
 
-    # http://threes.dc/threes.api/frames.Frame:removeNodes
-    protected function removeNodes(): array
-    {
-        ths()->frames()->removeNodes(
-            request('fid'),
-            request('nids')
-        );
-        ths()->messages()->addMessage('Ноды отвязаны');
-        return [];
-    }
-
-    # http://threes.dc/threes.api/frames.Frame:copyNodes
-    protected function copyNodes(): array
-    {
-        ths()->frames()->copyNodes(
-            request('fid'),
-            request('nids')
-        );
-        ths()->messages()->addMessage('Ноды скопированы');
-        return [];
-    }
-
     # http://threes.dc/threes.api/frames.Frame:buildFrame?debug
     protected function buildFrame(): array
     {
         ths()->frames()->abstractor(request('fid'));
         ths()->messages()->addMessage('Программа собрана');
         return [];
+    }
+
+    # http://threes.dc/threes.api/frames.Frame:getVersions?fid=test
+    public function getVersions(): array
+    {
+        $fid = request('fid');
+        return [
+            'version' => Version::where('fid', $fid)->orderBy('id', 'desc')->first()?->id ?? 0,
+            'versions' => ths()->versions()->getFrameVersions(
+                $fid
+            )
+        ];
     }
 }

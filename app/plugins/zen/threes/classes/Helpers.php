@@ -83,4 +83,9 @@ class Helpers
     {
         return Events::getInstance();
     }
+
+    public function versions(): Versions
+    {
+        return Versions::getInstance();
+    }
 }

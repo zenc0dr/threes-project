@@ -29,6 +29,28 @@ class Node
         ];
     }
 
+    # http://threes.dc/threes.api/frames.Frame:removeNodes
+    protected function removeNodes(): array
+    {
+        ths()->nodes()->removeNodes(
+            request('fid'),
+            request('nids')
+        );
+        ths()->messages()->addMessage('Ноды отвязаны');
+        return [];
+    }
+
+    # http://threes.dc/threes.api/frames.Frame:copyNodes
+    protected function copyNodes(): array
+    {
+        ths()->nodes()->copyNodes(
+            request('fid'),
+            request('nids')
+        );
+        ths()->messages()->addMessage('Ноды скопированы');
+        return [];
+    }
+
     # http://threes.dc/threes.api/nodes.Node:getNodeDsl?fid=test&nid=mf6ddtu7
     protected function getNodeDsl(): array
     {

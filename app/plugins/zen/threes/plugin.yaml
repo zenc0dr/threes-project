@@ -48,5 +48,5 @@ navigation:
                 icon: icon-book
             versions:
                 label: Версионирование
-                url: /
+                url: zen/threes/versioncontroller
                 icon: icon-inbox

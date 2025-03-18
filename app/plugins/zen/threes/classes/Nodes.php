@@ -78,6 +78,73 @@ class Nodes
         return $this->getNodeDsl($fid, $node['nid']);
     }
 
+    /**
+     * Удалить связи нод с их фреймами
+     * @param string $fid
+     * @param array $nids
+     * @return void
+     */
+    public function removeNodes(string $fid, array $nids): void
+    {
+        $frame = ths()->frames()->get($fid);
+        $program = collect($frame->program);
+
+        $updated_program = $program->map(function ($line) use ($nids) {
+            return collect($line)->map(function ($nodes) use ($nids) {
+                return collect($nodes)->filter(function ($node_content, $node_id) use ($nids) {
+                    return !in_array($node_id, $nids);
+                });
+            })->filter(function ($level_nodes) {
+                return !$level_nodes->isEmpty();
+            });
+        })->filter(function ($program_level) {
+            return !$program_level->isEmpty();
+        })->toArray();
+
+        $frame->program = $updated_program;
+        $frame->save();
+    }
+
+    /**
+     * Скопировать ноды
+     * @param string $fid
+     * @param array $nids
+     * @return void
+     */
+    public function copyNodes(string $fid, array $nids): void
+    {
+        $frame = ths()->frames()->get($fid);
+        $program = collect($frame->program);
+
+        $updated_program = $program->map(function ($line) use ($nids) {
+            $line_collection = collect($line);
+            $nodes_to_copy = [];
+
+            $line_collection->each(function ($nodes) use ($nids, &$nodes_to_copy) {
+                foreach ($nodes as $node_id => $layers) {
+                    if (in_array($node_id, $nids)) {
+                        $original_node = Node::find($node_id);
+                        $new_node = Node::set([
+                            'name' => $original_node->name,
+                            'description' => $original_node->description,
+                        ]);
+
+                        $nodes_to_copy[] = [$new_node->nid => $layers];
+                    }
+                }
+            });
+
+            if (!empty($nodes_to_copy)) {
+                $line = array_merge($line, $nodes_to_copy);
+            }
+
+            return $line;
+        })->toArray();
+
+        $frame->program = $updated_program;
+        $frame->save();
+    }
+
 
     /**
      * Прикрепить слои

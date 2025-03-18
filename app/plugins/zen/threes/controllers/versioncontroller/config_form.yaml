@@ -1,0 +1,10 @@
+name: VersionController
+form: $/zen/threes/models/version/fields.yaml
+modelClass: Zen\Threes\Models\Version
+defaultRedirect: zen/threes/versioncontroller
+create:
+    redirect: 'zen/threes/versioncontroller/update/:id'
+    redirectClose: zen/threes/versioncontroller
+update:
+    redirect: zen/threes/versioncontroller
+    redirectClose: zen/threes/versioncontroller
