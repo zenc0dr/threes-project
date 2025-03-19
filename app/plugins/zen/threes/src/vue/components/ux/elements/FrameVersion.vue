@@ -5,11 +5,10 @@
             :reduce="record => record.id"
             :create-option="record => ({id:record, name:record})"
             :options="versions"
-            :modelValue="version"
-            @update:modelValue="onInput"
+            v-model="version"
         />
         <div @click="build" class="btn btn-primary threes-build-btn">Собрать</div>
-        <div class="btn btn-primary">Загрузить</div>
+        <div @click="restoreVersion" class="btn btn-primary">Загрузить</div>
     </div>
 </template>
 <script>
@@ -45,6 +44,9 @@ export default {
                 }
             })
         },
+        restoreVersion() {
+            console.log('Восстанавливаем версию')
+        },
         build() {
             ths.api({
                 api: 'frames.Frame:buildFrame',
@@ -56,9 +58,6 @@ export default {
                     this.$emit('update:version')
                 }
             })
-        },
-        onInput() {
-            console.log('Чёт сделать')
         }
     }
 
