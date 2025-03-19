@@ -47,4 +47,15 @@ class Versions
             })
             ->toArray();
     }
+
+    /**
+     * Восстановить версию фрейма
+     * @param int $version_id
+     * @return void
+     */
+    public function restoreFrameVersion(int $version_id): void
+    {
+        $version = Version::find($version_id);
+        ths()->frames()->saveProgram($version->fid, $version->data);
+    }
 }

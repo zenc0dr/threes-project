@@ -45,7 +45,16 @@ export default {
             })
         },
         restoreVersion() {
-            console.log('Восстанавливаем версию')
+            ths.api({
+                api: 'frames.Frame:restoreVersion',
+                data: {
+                    version_id: this.version
+                },
+                then: response => {
+                    this.getVersions()
+                    this.$emit('update:version')
+                }
+            })
         },
         build() {
             ths.api({

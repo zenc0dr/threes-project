@@ -178,4 +178,14 @@ class Frames
 
         return ths()->exe($call);
     }
+
+    /**
+     * Прокси метод - Восстановление версии фрейма
+     * @param int $version_id
+     * @return void
+     */
+    public function restoreVersion(int $version_id): void
+    {
+        ths()->versions()->restoreFrameVersion($version_id);
+    }
 }

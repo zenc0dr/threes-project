@@ -54,4 +54,13 @@ class Frame
             )
         ];
     }
+
+    # http://threes.dc/threes.api/frames.Frame:restoreVersion?fid=test
+    public function restoreVersion(): array
+    {
+        ths()->frames()->restoreVersion(
+            request('version_id')
+        );
+        return [];
+    }
 }

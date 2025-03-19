@@ -43,7 +43,7 @@
             @update="onNodeUpdated"
         />
     </div>
-    <FrameVersion :fid="fid" />
+    <FrameVersion :fid="fid" @update:version="loadProgram" />
 </template>
 
 <script>

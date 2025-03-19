@@ -31,6 +31,15 @@ class Version extends Model
     }
 
     /**
+     * Возвращает оригинальное значение поля дата в виде json-строки
+     * @return string
+     */
+    public function getDataJsonAttribute(): string
+    {
+        return $this->attributes['data'] ?? '';
+    }
+
+    /**
      * Извлекает данные слоя из json-массива
      * @param array|null $value
      * @return void

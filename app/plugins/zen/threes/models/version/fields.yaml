@@ -1,5 +1,5 @@
 fields:
-    data:
+    data_json:
         label: 'Данные версии'
         span: full
         size: giant
