@@ -116,6 +116,26 @@ class Layers
      */
     public function getStore(?string $filter_text = null): array
     {
+        $units = ths()->units()->model()->get();
+        $unit_layers = [];
+        foreach ($units as $unit) {
+            $uid = $unit->uid;
+            $icon_path = $unit->icon_path;
+
+            foreach ($unit->layers as $unit_layer) {
+                $method = $unit_layer['aspect_lid'];
+                $name = $unit_layer['aspect_name'];
+                $aspect = "$uid@$method";
+                $description = $unit_layer['aspect_desc'];
+                $unit_layers[] = [
+                    'aspect' => $aspect,
+                    'name' => $name,
+                    'description' => $description,
+                    'icon' => $icon_path,
+                ];
+            }
+        }
+
         $frames = ths()->frames()->model()->active()->get();
         $project_layers = [];
         $project_nodes = [];
@@ -148,6 +168,7 @@ class Layers
         }
 
         return [
+            'unit_layers' => $unit_layers,
             'layers' => $project_layers,
             'nodes' => $project_nodes,
         ];

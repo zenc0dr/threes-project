@@ -99,7 +99,11 @@ export default {
             }, true);
         },
         addLayer(layer) {
-            this.local_layers.push(layer.aspect + '::' + layer.lid)
+            if (layer.lid) {
+                this.local_layers.push(layer.aspect + '::' + layer.lid)
+            } else {
+                this.local_layers.push(layer.aspect)
+            }
             this.$emit('update', {
                 ...this.node,
                 layers: [...this.local_layers]

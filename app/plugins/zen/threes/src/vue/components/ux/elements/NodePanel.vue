@@ -1,6 +1,6 @@
 <template>
     <div class="node-panel">
-        <modal :show="node !== null" @close="close">
+        <modal max-width="100%" :show="node !== null" @close="close">
             <template #heading>
                 {{ title }}
             </template>

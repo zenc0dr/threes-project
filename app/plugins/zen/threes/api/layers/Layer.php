@@ -16,6 +16,7 @@ class Layer
         );
 
         return [
+            'unit_layers' => $store['unit_layers'],
             'layers' => $store['layers'],
             'nodes' => $store['nodes']
         ];
