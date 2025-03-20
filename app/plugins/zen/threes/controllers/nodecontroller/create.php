@@ -1,20 +1,10 @@
 <?php Block::put('breadcrumb') ?>
     <ul>
-        <li><a href="<?= Backend::url('zen/threes/unitcontroller') ?>">UnitController</a></li>
+        <li><a href="<?= Backend::url('zen/threes/nodecontroller') ?>">NodeController</a></li>
         <li><?= e($this->pageTitle) ?></li>
     </ul>
 <?php Block::endPut() ?>
-<?php
 
-if (request('sid') && request('node')) {
-    echo ths()->sprites()->getNodeTitle(
-        $this->params[0],
-        request('sid'),
-        request('node')
-    );
-}
-
-?>
 <?php if (!$this->fatalError): ?>
 
     <?= Form::open(['class' => 'layout']) ?>
@@ -28,11 +18,10 @@ if (request('sid') && request('node')) {
                 <button
                     type="submit"
                     data-request="onSave"
-                    data-request-data="redirect:0"
                     data-hotkey="ctrl+s, cmd+s"
                     data-load-indicator="<?= e(trans('backend::lang.form.saving')) ?>"
                     class="btn btn-primary">
-                    <?= e(trans('backend::lang.form.save')) ?>
+                    <?= e(trans('backend::lang.form.create')) ?>
                 </button>
                 <button
                     type="button"
@@ -41,24 +30,17 @@ if (request('sid') && request('node')) {
                     data-hotkey="ctrl+enter, cmd+enter"
                     data-load-indicator="<?= e(trans('backend::lang.form.saving')) ?>"
                     class="btn btn-default">
-                    <?= e(trans('backend::lang.form.save_and_close')) ?>
+                    <?= e(trans('backend::lang.form.create_and_close')) ?>
                 </button>
-                <button
-                    type="button"
-                    class="oc-icon-trash-o btn-icon danger pull-right"
-                    data-request="onDelete"
-                    data-load-indicator="<?= e(trans('backend::lang.form.deleting')) ?>"
-                    data-request-confirm="<?= e(trans('backend::lang.form.confirm_delete')) ?>">
-                </button>
-
                 <span class="btn-text">
-                    <?= e(trans('backend::lang.form.or')) ?> <a href="<?= Backend::url('zen/threes/unitcontroller') ?>"><?= e(trans('backend::lang.form.cancel')) ?></a>
+                    <?= e(trans('backend::lang.form.or')) ?> <a href="<?= Backend::url('zen/threes/nodecontroller') ?>"><?= e(trans('backend::lang.form.cancel')) ?></a>
                 </span>
             </div>
         </div>
+
     <?= Form::close() ?>
 
 <?php else: ?>
     <p class="flash-message static error"><?= e(trans($this->fatalError)) ?></p>
-    <p><a href="<?= Backend::url('zen/threes/unitcontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
+    <p><a href="<?= Backend::url('zen/threes/nodecontroller') ?>" class="btn btn-default"><?= e(trans('backend::lang.form.return_to_list')) ?></a></p>
 <?php endif ?>

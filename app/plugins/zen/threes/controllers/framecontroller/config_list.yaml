@@ -12,4 +12,4 @@ toolbar:
 structure:
     maxDepth: 0
     treeExpanded: false
-recordUrl: 'zen/threes/framecontroller/update/:fid'
+recordUrl: 'zen/threes/framecontroller/update/:nid'

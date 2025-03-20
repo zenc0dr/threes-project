@@ -1,6 +1,6 @@
 <div data-control="toolbar">
     <a
-        href="<?= Backend::url('zen/threes/unitcontroller/create') ?>"
+        href="<?= Backend::url('zen/threes/nodecontroller/create') ?>"
         class="btn btn-primary oc-icon-plus">
         <?= e(trans('backend::lang.form.create')) ?>
     </a>

@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class M006Version extends Migration
+class M004Versions extends Migration
 {
     public function up()
     {
@@ -11,9 +11,7 @@ class M006Version extends Migration
         {
             $table->increments('id')->unsigned();
             $table->integer('version')->unsigned()->nullable();
-            $table->text('fid')->nullable();
             $table->text('nid')->nullable();
-            $table->text('lid')->nullable();
             $table->text('data')->nullable();
             $table->timestamp('created_at')->nullable();
             $table->timestamp('updated_at')->nullable();

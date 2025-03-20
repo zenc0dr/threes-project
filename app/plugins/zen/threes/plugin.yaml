@@ -11,15 +11,15 @@ permissions:
     zen.threes.options:
         tab: Threes
         label: 'Threes Options'
-    zen.threes.units:
-        tab: Threes
-        label: 'Units control'
     zen.threes.frames:
         tab: Threes
         label: 'Frames control'
     zen.threes.queries:
         tab: Threes
         label: 'Queries control'
+    zen.threes.nodes:
+        tab: Threes
+        label: 'Nodes control'
 navigation:
     main:
         label: Threes
@@ -35,13 +35,13 @@ navigation:
                 permissions:
                     - zen.threes.main
                     - zen.threes.frames
-            units:
-                label: Юниты
-                url: zen/threes/unitcontroller
+            nodes:
+                label: Ноды
+                url: zen/threes/nodecontroller
                 icon: icon-square
                 permissions:
                     - zen.threes.main
-                    - zen.threes.units
+                    - zen.threes.nodes
             queries:
                 label: 'Журнал API'
                 url: zen/threes/querycontroller

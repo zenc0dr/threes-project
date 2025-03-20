@@ -3,10 +3,8 @@
 use Model;
 use October\Rain\Database\Traits\Validation;
 
-
 /**
  * @property string $nid - Токен нода
- * @property array $dsl
  * @method static find($nid)
  */
 class Node extends Model
@@ -28,36 +26,27 @@ class Node extends Model
         'description',
     ];
 
-    public static function set(array $data = []): self
+    public function getNidAttribute($value): string
     {
-        $nid = $data['nid'] ?? null;
-
-        if ($nid) {
-            $node = self::find($nid);
-
-            if ($node) {
-                $node->update([
-                    'name' => $data['name'] ?? 'Без названия',
-                    'description' => $data['description'] ?? null,
-                ]);
-            }
-        } else {
-            $node = self::create([
-                'nid' => ths()->createToken(),
-                'name' => '#',
-                'description' => '',
-            ]);
+        if ($value) {
+            return $value;
         }
 
-        return $node;
+        return ths()->nodes()->createNidToken();
     }
 
-    public function getDslAttribute(): array
+    public $hasMany = [
+        'nodes' => [
+            Node::class,
+            'key' => 'nid',
+            'otherKey' => 'nid',
+            'scope' => 'applyEmptyScope'
+        ]
+    ];
+
+    public function scopeApplyEmptyScope($query)
     {
-        return [
-            'nid' => $this->nid,
-            'name' => $this->name,
-            'description' => $this->description
-        ];
+        return $query->whereRaw('1 = 0');
     }
+
 }

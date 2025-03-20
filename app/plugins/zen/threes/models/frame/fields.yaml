@@ -3,8 +3,8 @@ fields:
         label: 'Название фрейма'
         span: auto
         type: text
-    fid:
-        label: 'Токен фрейма (fid)'
+    nid:
+        label: 'Токен нода (author.scope.aspect)'
         span: auto
         preset:
             field: name

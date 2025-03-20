@@ -6,14 +6,13 @@ use October\Rain\Database\Traits\Sortable;
 use October\Rain\Database\Traits\NestedTree;
 
 /**
- * @property  string $id - Идентификатор
- * @property string $fid - Токен фрейма
- * @property string $name - Название фрейма
- * @property string $description - Описание фрейма
- * @property array $program - Программа фрейма
+ * @property  string $id - Идентификатор фрейма
+ * @property string $nid - Токен нода
+ * @property string $name - Название нода
+ * @property string $description - Описание нода
  * @method static active() - Фильтр активности в запросе
- * @method static find($fid) - Найти фрейм по токену
- * @method static where(string $fid, int|string $value) - Условие where для фрейма
+ * @method static find($nid) - Найти фрейм по токену нода
+ * @method static where(string $nid, int|string $value) - Условие where для фрейма
  */
 class Frame extends Model
 {
@@ -26,75 +25,25 @@ class Frame extends Model
     protected $primaryKey = 'id';
 
     public $rules = [
-        'fid' => 'required|unique:zen_threes_frames,fid',
+        'nid' => 'required|unique:zen_threes_frames,nid',
         'name' => 'required',
     ];
 
     protected $fillable = [
-        'id',
-        'fid',
-        'name',
-        'description',
-        'active',
-        'program',
+        'nid',
     ];
 
-    protected array $data_dump = [];
-
-    public static function findByFid($fid)
+    public static function findByNid(string $nid): ?Frame
     {
-        return self::where('fid', $fid)->firstOrFail();
+        return self::where('nid', $nid)->firstOrFail();
     }
 
-    //region Фильтры
-    public function scopeActive($query)
+    public function getNidAttribute($value): string
     {
-        return $query->where('active', 1);
-    }
-    //endregion
-
-    //region Геттеры
-    public function getDataAttribute(?string $record): array
-    {
-        if ($record) {
-            return ths()->fromJson($record) ?? [];
+        if ($value) {
+            return $value;
         }
-        return [];
-    }
 
-    public function getProgramAttribute()
-    {
-        return $this->data_dump['program'] ?? [];
-    }
-    //endregion
-    //region Сеттеры
-    public function setDataAttribute(?array $record): void
-    {
-        $this->attributes['data'] = $record ? ths()->toJson($record, true) : null;
-    }
-
-    public function setProgramAttribute(?array $fields = null): void
-    {
-        $this->data_dump['program'] = $fields ?? [];
-    }
-    //endregion
-    //region Методы
-    public function saveData(): void
-    {
-        if (empty($this->attributes['fid'])) {
-            $this->attributes['fid'] = $this->fid ?? ths()->createToken();
-        }
-        $this->attributes['data'] = ths()->toJson($this->data_dump);
-    }
-    //endregion
-    //region События
-    public function afterFetch(): void
-    {
-        $this->data_dump = $this->data;
-    }
-
-    public function beforeSave(): void
-    {
-        $this->saveData();
+        return ths()->nodes()->createNidToken();
     }
 }

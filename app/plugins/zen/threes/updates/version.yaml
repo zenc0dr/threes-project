@@ -1,20 +1,14 @@
 v1.0.1:
     - 'Initialize plugin'
 v1.0.2:
-    - 'Create Units'
-    - m001_units.php
-v1.0.3:
     - 'Create Frames'
-    - m002_frames.php
-v1.0.4:
+    - m001_frames.php
+v1.0.3:
     - 'Create Nodes'
-    - m003_nodes.php
-v1.0.5:
-    - 'Create Layers'
-    - m004_layers.php
-v1.0.6:
+    - m002_nodes.php
+v1.0.4:
     - 'Create Queries'
-    - m005_queries.php
-v1.0.7:
+    - m003_queries.php
+v1.0.5:
     - 'Create Versions'
-    - m006_version.php
+    - m004_versions.php

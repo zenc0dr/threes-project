@@ -43,11 +43,3 @@ Route::match(
         return handleResponse($response);
     }
 );
-
-# Проверяем файл маршрутов (Для генератора кода)
-$generated_routes_path = ths()->checkDir(storage_path('temp/threes/generated_routes.php'));
-if (!file_exists($generated_routes_path)) {
-    file_put_contents($generated_routes_path, '<?php');
-}
-
-require_once $generated_routes_path;

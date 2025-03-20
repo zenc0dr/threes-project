@@ -1,7 +1,0 @@
-fields:
-    code:
-        label: 'Выполняемый код'
-        span: full
-        size: giant
-        language: php
-        type: codeeditor

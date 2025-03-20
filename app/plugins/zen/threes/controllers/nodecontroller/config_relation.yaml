@@ -1,0 +1,10 @@
+nodes:
+    label: 'Состав нод'
+    view:
+        list: $/zen/threes/models/node/columns.yaml
+        toolbarButtons: add|remove
+    manage:
+        form: $/zen/threes/models/node/fields.yaml
+    custom:
+        display: getRelationNodes
+        relation: true

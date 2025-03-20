@@ -30,40 +30,12 @@ class Helpers
     }
 
     /**
-     * Слои хранят аспекты, которые хранят атрибуты
-     * @return Layers
-     */
-    public function layers(): Layers
-    {
-        return Layers::getInstance();
-    }
-
-    /**
-     * Фреймы хранят схемы, доступны по $fid
-     * @return Frames
-     */
-    public function frames(): Frames
-    {
-        return Frames::getInstance();
-    }
-
-    /**
      * Ноды, хранят информацию для схемы, доступны по $nid
      * @return Nodes
      */
     public function nodes(): Nodes
     {
         return Nodes::getInstance();
-    }
-
-    /**
-     * Юниты - Выполняют роль хранителей слоёв и аспектов в их пассивном состоянии
-     * Ничего не делают, просто контейнера с аспектами
-     * @return Units
-     */
-    public function units(): Units
-    {
-        return Units::getInstance();
     }
 
     /**

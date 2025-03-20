@@ -1,0 +1,10 @@
+name: NodeController
+form: $/zen/threes/models/node/fields.yaml
+modelClass: Zen\Threes\Models\Node
+defaultRedirect: zen/threes/nodecontroller
+create:
+    redirect: 'zen/threes/nodecontroller/update/:nid'
+    redirectClose: zen/threes/nodecontroller
+update:
+    redirect: zen/threes/nodecontroller
+    redirectClose: zen/threes/nodecontroller

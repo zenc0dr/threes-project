@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class M005Queries extends Migration
+class M003Queries extends Migration
 {
     public function up()
     {
