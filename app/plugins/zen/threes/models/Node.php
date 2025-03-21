@@ -128,36 +128,43 @@ class Node extends Model
         return [];
     }
 
-    public function getFieldsAttribute(): array
+    public function getSchemeAttribute(?string $value): ?string
     {
-        return $this->data_dump['fields'] ?? [];
-    }
+        if ($value) {
+            return $value;
+        }
 
-    public function setFieldsAttribute(?array $fields = null): void
-    {
-        $this->data_dump['fields'] = $fields ?? [];
+        $default_scheme = ths()->fromYamlFile(
+            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
+        );
+
+        $exe = $default_scheme['fields']['exe'];
+        $exe['tab'] = 'Настройки';
+
+        return ths()->toYaml(['exe' => $exe]);
     }
 
     public function getAdditionalFieldsAttribute(): array
     {
-        if ($this->fields) {
+        if ($this->scheme) {
+            $fields = ths()->fromYaml($this->scheme);
+
+            if (!$fields) {
+                return [];
+            }
+
             $add_fields = [];
-            foreach ($this->fields as $field) {
-                $add_fields[$field['field']] = [
-                    'label' => $field['label'],
-                    'type' => $field['type'],
-                    'tab' => $field['tab'],
-                    'span' => $field['span'],
+            foreach ($fields as $field => $value) {
+                $add_fields[$field] = [
+                    'label' => $value['label'],
+                    'type' => $value['type'],
+                    'tab' => $value['tab'] ?? 'Настройки',
+                    'span' => $value['span'],
                 ];
-
-                if ($size = $field['size'] ?? null) {
-                    $add_fields[$field['field']]['size'] = $size;
-                }
-
-                if ($additional = $field['additional'] ?? null) {
+                if ($additional = $value['additional'] ?? null) {
                     foreach ($additional as $batch) {
                         $batch = ths()->fromYaml($batch['rule']);
-                        $add_fields[$field['field']] = array_merge($add_fields[$field['field']], $batch);
+                        $add_fields[$value['field']] = array_merge($add_fields[$value['field']], $batch);
                     }
                 }
             }

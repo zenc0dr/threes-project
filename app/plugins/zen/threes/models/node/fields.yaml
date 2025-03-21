@@ -13,3 +13,12 @@ fields:
         span: full
         size: giant
         type: richeditor
+tabs:
+    fields:
+        scheme:
+            label: 'Схема интерфейса'
+            span: full
+            size: giant
+            language: plain_text
+            type: codeeditor
+            tab: Схема

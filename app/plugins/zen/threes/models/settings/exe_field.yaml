@@ -1,0 +1,7 @@
+fields:
+    exe:
+        label: 'Базовая инструкция'
+        span: full
+        size: giant
+        language: plain_text
+        type: codeeditor
