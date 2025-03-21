@@ -1,4 +1,9 @@
 columns:
+    svg_path:
+        label: Иконка
+        type: partial
+        width: 40px
+        path: $/zen/threes/controllers/nodecontroller/partials/icon.php
     nid:
         label: nid
         type: text

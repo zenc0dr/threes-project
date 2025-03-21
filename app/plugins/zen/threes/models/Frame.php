@@ -46,4 +46,16 @@ class Frame extends Model
 
         return ths()->nodes()->createNidToken();
     }
+
+    private function createNode()
+    {
+        $node = new Node();
+        $node->nid = $this->nid;
+        $node->name = $this->name;
+        $node->save();
+    }
+
+    public function beforeSave() {
+
+    }
 }

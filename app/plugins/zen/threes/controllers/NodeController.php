@@ -25,6 +25,7 @@ class NodeController extends Controller
     {
         parent::__construct();
         BackendMenu::setContext('Zen.Threes', 'main', 'nodes');
+        $this->addCss('/plugins/zen/threes/controllers/nodecontroller/assets/css/nodecontroller.css');
     }
 
     public function formFindModelObject(string $nid)
