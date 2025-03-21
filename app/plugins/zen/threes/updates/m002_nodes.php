@@ -11,6 +11,7 @@ class M002Nodes extends Migration
         {
             $table->string('nid')->primary()->comment('Токен нода');
             $table->text('svg')->nullable()->comment('Код SVG иконки');
+            $table->string('svg_name')->nullable()->comment('Имя файла svg');
             $table->string('name')->nullable()->comment('Имя нода');
             $table->string('description')->nullable()->comment('Описание нода');
             $table->text('data')->nullable()->comment('Данные схемы');

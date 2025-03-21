@@ -13,10 +13,6 @@
             <?= $this->formRender() ?>
         </div>
 
-        <div class="layout-row">
-            <?= $this->relationRender('nodes') ?>
-        </div>
-
         <div class="form-buttons">
             <div class="loading-indicator-container">
                 <button
