@@ -21,17 +21,33 @@ class Frame extends Model
     use NestedTree;
 
     public $table = 'zen_threes_frames';
-
     protected $primaryKey = 'id';
-
     public $rules = [
         'nid' => 'required|unique:zen_threes_frames,nid',
-        'name' => 'required',
+        'name' => 'required', // Оставляем валидацию
     ];
 
     protected $fillable = [
         'nid',
+        'name', // Убеждаемся, что name в fillable
     ];
+
+    protected $node;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        if (!$this->exists) {
+            $this->node = new Node();
+            $this->nid = $this->node->nid;
+        }
+    }
+
+    public function afterFetch()
+    {
+        $this->node = Node::find($this->nid) ?? new Node(['nid' => $this->nid]);
+    }
 
     public static function findByNid(string $nid): ?Frame
     {
@@ -47,15 +63,33 @@ class Frame extends Model
         return ths()->nodes()->createNidToken();
     }
 
-    private function createNode()
+    public function getNameAttribute($value)
     {
-        $node = new Node();
-        $node->nid = $this->nid;
-        $node->name = $this->name;
-        $node->save();
+        return $this->node->name ?? $value ?? '';
     }
 
-    public function beforeSave() {
+    public function setNameAttribute($value): void
+    {
+        $this->attributes['name'] = $value;
+        if ($this->node) {
+            $this->node->name = $value;
+        }
+    }
 
+    public function beforeSave()
+    {
+        if (!$this->nid) {
+            $this->nid = $this->node->nid;
+        }
+
+        unset($this->attributes['name']);
+    }
+
+    public function afterSave()
+    {
+        if ($this->node) {
+            $this->node->nid = $this->nid; // Убеждаемся, что nid совпадает
+            $this->node->save(); // Сохраняем связанный Node
+        }
     }
 }
