@@ -35,32 +35,20 @@
             </template>
         </draggable>
         <div @click="addProgramLine" class="frame__add-line" title="Добавить новую линию">+</div>
-        <NodePanel
-            :node="node_in_panel"
-            :fid="fid"
-            :backend="backend"
-            @close="closeNodePanel"
-            @update="onNodeUpdated"
-        />
     </div>
-    <FrameVersion :fid="fid" @update:version="loadProgram" />
 </template>
 
 <script>
 import draggable from 'vuedraggable';
-import Node from '../components/Node.vue';
-import NodePanel from '../components/ux/elements/NodePanel.vue';
+
 import NodesMethods from "../components/ux/elements/NodesMethods.vue";
-import FrameVersion from "../components/ux/elements/FrameVersion.vue";
 
 export default {
     name: 'Frame',
     components: {
         draggable,
         Node,
-        NodePanel,
-        NodesMethods,
-        FrameVersion
+        NodesMethods
     },
     props: ['backend', 'fid'],
     data() {
