@@ -21,6 +21,11 @@ class Threes extends Helpers
     {
         $path = str_replace('.', '\\', $path);
         $path = $this->capitalizeLastSegmentFast($path);
+
+        if (str_contains($method, '-')) {
+            $method = ths()->kebabToCamel($method);
+        }
+
         return app("Zen\Threes\Api\\$path")->{$method}(...$data);
     }
 

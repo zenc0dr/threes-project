@@ -24,4 +24,14 @@ trait Strings
     {
         return strtolower(Str::random($length));
     }
+
+    /**
+     * Преобразует kebab-case в camelCase
+     * @param string $value
+     * @return string
+     */
+    public function kebabToCamel(string $value): string
+    {
+        return Str::camel($value);
+    }
 }
