@@ -20,7 +20,22 @@ class Threes extends Helpers
     public function api(string $path, string $method, ...$data): mixed
     {
         $path = str_replace('.', '\\', $path);
+        $path = $this->capitalizeLastSegmentFast($path);
         return app("Zen\Threes\Api\\$path")->{$method}(...$data);
+    }
+
+    /**
+     * Данный метод преобразует nodes.program в nodes.Program
+     * позволяя делать красивые URL
+     * @param string $path
+     * @return string
+     */
+    function capitalizeLastSegmentFast(string $path): string {
+        $lastSlashPos = strrpos($path, '\\');
+        if ($lastSlashPos === false) {
+            return ucfirst($path);
+        }
+        return substr($path, 0, $lastSlashPos + 1) . ucfirst(substr($path, $lastSlashPos + 1));
     }
 
     /**

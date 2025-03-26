@@ -4,7 +4,7 @@ namespace Zen\Threes\Api\nodes;
 
 class Program
 {
-    # http://threes.dc/threes.api/nodes.Program:getNodeProgram?nid=node1
+    # http://threes.dc/threes.api/nodes.program:getNodeProgram?nid=node1
     public function getNodeProgram(): array
     {
         return [
