@@ -10,33 +10,33 @@ export default {
         return {
             square_position: 0,
             animation_frame_id: null,
-            ths: window.ths, // Добавляем ссылку на window.ths
+            ths: window.ths,
         };
     },
     mounted() {
         if (this.ths.data.process) {
-            this.animate();
+            this.animate()
         }
     },
     unmounted() {
-        this.cancel_animation();
+        this.cancel_animation()
     },
     watch: {
         'ths.data.process'(new_value) {
             if (new_value) {
-                this.animate();
+                this.animate()
             } else {
-                this.cancel_animation();
+                this.cancel_animation()
             }
         },
     },
     methods: {
         animate() {
-            this.square_position = (this.square_position + 2) % 150; // Изменено на 150
-            this.animation_frame_id = requestAnimationFrame(this.animate);
+            this.square_position = (this.square_position + 2) % 150
+            this.animation_frame_id = requestAnimationFrame(this.animate)
         },
         cancel_animation() {
-            cancelAnimationFrame(this.animation_frame_id);
+            cancelAnimationFrame(this.animation_frame_id)
         },
     },
 };

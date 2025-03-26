@@ -45,4 +45,9 @@ class Nodes
             ->max();
         return $max_number ? $max_number + 1 : 1;
     }
+
+    public function getNodeProgram(string $nid)
+    {
+        dd($nid);
+    }
 }
