@@ -23,13 +23,16 @@ class Nodes
     {
         $author = ths()->settings('author_token') ?? 'project';
         $scope = 'default';
-
-        //$token = ths()->createToken(); // Вот эту строку надо заменить
         $token = 'node' . $this->getMaxNodeNumber($author, $scope);
-
         return "$author.$scope.$token";
     }
 
+    /**
+     * Возвращает последний номер стандартного токена нода (с привязкой к автору)
+     * @param string $author
+     * @param string $scope
+     * @return string
+     */
     public function getMaxNodeNumber(string $author, string $scope = 'default'): string
     {
         $prefix = "$author.$scope.node";

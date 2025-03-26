@@ -2,10 +2,12 @@ fields:
     name:
         label: 'Название фрейма'
         span: auto
+        required: 1
         type: text
     nid:
-        label: 'Токен нода (author.scope.aspect)'
+        label: 'Токен нода (author.scope.name)'
         span: auto
+        required: 1
         preset:
             field: name
             type: slug

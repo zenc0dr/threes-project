@@ -66,9 +66,9 @@ class Events
 
     /**
      * Выполняет событие
-     *
-     * @param array $event Массив данных события
+     * @param array $event
      * @return void
+     * @throws \ReflectionException
      */
     public function runEvent(array $event): void
     {

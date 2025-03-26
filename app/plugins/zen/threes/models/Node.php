@@ -6,6 +6,7 @@ use October\Rain\Database\Traits\Validation;
 /**
  * @property string $nid - Токен нода
  * @method static find($nid)
+ * @method static where($field, $operator, $value)
  */
 class Node extends Model
 {

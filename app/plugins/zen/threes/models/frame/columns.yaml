@@ -1,6 +1,6 @@
 columns:
-    fid:
-        label: fid
+    nid:
+        label: token
         type: text
         searchable: true
         sortable: true

@@ -40,15 +40,15 @@
 
 <script>
 import draggable from 'vuedraggable';
-
-import NodesMethods from "../components/ux/elements/NodesMethods.vue";
+import NodesMethods from "../components/NodesMethods.vue";
+import Node from "../components/Node.vue";
 
 export default {
     name: 'Frame',
     components: {
         draggable,
+        NodesMethods,
         Node,
-        NodesMethods
     },
     props: ['backend', 'fid'],
     data() {
@@ -60,7 +60,7 @@ export default {
         };
     },
     mounted() {
-        this.loadProgram();
+        //this.loadProgram();
     },
     watch: {
         selected_nodes() {
@@ -111,6 +111,7 @@ export default {
 
         // Оформить стиль нода в зависимости от его слоя css
         getNodeStyle(node) {
+            /*
             let style = {
                 padding: '5px 7px',
                 background: '#6eb39d',
@@ -127,6 +128,7 @@ export default {
                 }
             }
             return style
+            */
         },
 
         // Если нод выделен

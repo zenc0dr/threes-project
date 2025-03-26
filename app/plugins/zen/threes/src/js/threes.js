@@ -116,8 +116,8 @@ window.ths = {
     }
 }
 
-import FormFitter from "../vue/components/ux/forms/FormFitter.vue";
-import FormSection from "../vue/components/ux/forms/FormSection.vue";
+import FormFitter from "../vue/components/FormFitter.vue";
+import FormSection from "../vue/components/FormSection.vue";
 import vueClickOutsideElement from 'vue-click-outside-element';
 
 const app = createApp(Threes);

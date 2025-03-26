@@ -91,10 +91,10 @@
 
 <script>
 import Tabs from "./Tabs";
-import String from "../inputs/String.vue";
-import Number from "../inputs/Number.vue";
-import Select from "../inputs/Select.vue";
-import TextEditor from "../inputs/TextEditor.vue";
+import String from "./String.vue";
+import Number from "./Number.vue";
+import Select from "./Select.vue";
+import TextEditor from "./TextEditor.vue";
 
 export default {
     name: "FormFitter",
