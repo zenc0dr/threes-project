@@ -39,7 +39,11 @@
 </div>
 <modal :show="nodes_store" @close="nodes_store = false">
     <template #default>
-        <NodesStore />
+        <NodesStore
+            :nid="nid"
+            :line_index="selected_line_index"
+            @update="$emit('update')"
+        />
     </template>
 </modal>
 </template>
@@ -54,7 +58,8 @@ export default {
         nid: null,
         nids: null,
         info: null,
-        lines: null
+        lines: null,
+        selected_line_index: 0,
     },
     emits: ['update', 'selectAllNodes'],
     components: {

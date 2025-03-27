@@ -2,7 +2,7 @@
 <div class="nodes-store">
     <Search :text="search_text" @update:text="getStoreNodes"/>
     <div class="nodes-store__items">
-        <div @click="addNode" v-for="node in store_nodes" class="nodes-store__item">
+        <div @click="addNode(node.nid)" v-for="node in store_nodes" class="nodes-store__item">
             <div class="nodes-store__title">
                 <icon width="20px" height="20px" :src="node.icon" class="nodes-store__icon" />
                 <div class="nodes-store__name">
@@ -20,6 +20,13 @@ import icon from "./icon.vue"
 import Search from "./Search.vue"
 export default {
     name: "NodesStore",
+    props: {
+        nid: null,
+        line_index: 0
+    },
+    emits: [
+        'update'
+    ],
     components: {
         icon,
         Search
@@ -48,9 +55,17 @@ export default {
                 }
             })
         },
-        addNode() {
+        addNode(nid) {
             ths.api({
-                //api: 'nodes.'
+                api: 'nodes.node:add-node',
+                data: {
+                    nid,
+                    parent_nid: this.nid,
+                    line_index: this.line_index
+                },
+                then: response => {
+                    this.$emit('update')
+                }
             })
         }
     }

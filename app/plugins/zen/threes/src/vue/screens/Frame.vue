@@ -4,6 +4,7 @@
         :nids="selected_nodes"
         :info="info"
         :lines="nodes_lines_count"
+        :selected_line_index="selected_line_index"
         @update="getNodes"
         @selectAllNodes="selectAllNodes"
     />

@@ -59,4 +59,44 @@ class Nodes
         $node->nodes = $nodes;
         $node->save();
     }
+
+    public function addNode(string $nid, string $parent_nid, int $line_index): void
+    {
+        dd(
+            $nid,
+            $parent_nid,
+            $line_index
+        );
+        //ths()->messages()->addMessage("Нод $nid добавлен в нод $parent_nid на линию $line_index");
+    }
+
+
+    /*
+    public function addNodeOld(string $fid, int $line_index): Node
+    {
+        $frame = Frame::findByFid($fid);
+
+        $node = Node::set();
+        $layer = Layer::set();
+        $program = $frame->program;
+
+        $node_short_dsl = [
+            $node->nid => [
+                $layer->lid
+            ]
+        ];
+
+        # Заполнить программу отсутствующими пустыми линиями
+        for ($i = 0; $i <= $line_index; $i++) {
+            if (!isset($program[$i])) {
+                $program[$i] = [];
+            }
+        }
+
+        $program[$line_index][] = $node_short_dsl;
+        $frame->program = $program;
+        $frame->save();
+        return $node;
+    }
+    */
 }
