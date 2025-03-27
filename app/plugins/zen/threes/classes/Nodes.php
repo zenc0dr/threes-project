@@ -51,6 +51,23 @@ class Nodes
         return Node::find($nid)?->nodes ?? [];
     }
 
+    public function nodesToString(array $nodes): string
+    {
+        $parts = array_map(function ($sub_array) {
+            return implode(',', $sub_array);
+        }, $nodes);
+
+        return implode(';', $parts);
+    }
+
+    public function nodesFromString(string $nodes): array
+    {
+        $parts = explode(';', $nodes);
+        return array_map(function ($part) {
+            return $part === '' ? [] : explode(',', $part);
+        }, $parts);
+    }
+
     public function addLine(string $nid): void
     {
         $node = Node::find($nid);
@@ -62,12 +79,20 @@ class Nodes
 
     public function addNode(string $nid, string $parent_nid, int $line_index): void
     {
-        dd(
-            $nid,
-            $parent_nid,
-            $line_index
-        );
-        //ths()->messages()->addMessage("Нод $nid добавлен в нод $parent_nid на линию $line_index");
+        $node = Node::find($parent_nid);
+        $node->name = 'Новое имя';
+//        $nodes = $node->nodes;
+//
+//        // Расширяем массив при необходимости
+//        if ($line_index >= count($nodes)) {
+//            $nodes = array_pad($nodes, $line_index + 1, []);
+//        }
+//
+//        // Добавляем элемент в нужную линию
+//        $nodes[$line_index][] = $nid;
+//
+//        $node->nodes = $nodes;
+        $node->save();
     }
 
 

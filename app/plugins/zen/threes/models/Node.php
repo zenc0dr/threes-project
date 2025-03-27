@@ -8,6 +8,7 @@ use October\Rain\Database\Traits\Validation;
  * @property string $name - Имя
  * @property string $svg_path - Путь до SVG
  * @property string $description - Описание
+ * @property null|string $svg
  * @method static find($nid)
  * @method static get()
  */
@@ -105,26 +106,12 @@ class Node extends Model
     public function getNodesAttribute(): array
     {
         $nodes_string = $this->data_dump['nodes'] ?? '';
-        $lines = explode(';', $nodes_string);
-        $output = [];
-        foreach ($lines as $line) {
-            $line = trim($line);
-            $nodes = explode(',', $line);
-            $output[] = $nodes;
-        }
-
-        return $output;
+        return ths()->nodes()->nodesFromString($nodes_string);
     }
 
     public function setNodesAttribute(array $nodes): void
     {
-        $lines = array_map(function($node) {
-            if (is_array($node)) {
-                return implode(',', $node);
-            }
-            return trim((string) $node);
-        }, $nodes);
-        $this->data_dump['nodes'] = join(';', $lines);
+        $this->data_dump['nodes'] = ths()->nodes()->nodesToString($nodes);
     }
 
     public function getSvgPathAttribute(): string
@@ -132,7 +119,6 @@ class Node extends Model
         if (!$this->svg) {
             return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
         }
-
         return '/storage/app/uploads/public/threes/icons/' . $this->svg_name;
     }
 

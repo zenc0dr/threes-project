@@ -11,6 +11,18 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+
+        $array = [
+            ['node1', 'node2', 'node3'],
+            [],
+            [],
+            ['node5'],
+            []
+        ];
+
+        $string = 'node1,node2,node3;;;node5;';
+        //$result = ths()->nodes()->nodesToString($array);
+        //$result = ths()->nodes()->nodesFromString($string);
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
