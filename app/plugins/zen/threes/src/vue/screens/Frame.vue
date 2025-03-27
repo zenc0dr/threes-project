@@ -1,18 +1,18 @@
 <template>
     <NodesMethods
-        :fid="fid"
+        :nid="nid"
         :nids="selected_nodes"
         :info="info"
-        :lines="program_lines_count"
-        @update="loadProgram"
+        :lines="nodes_lines_count"
+        @update="getNodes"
         @selectAllNodes="selectAllNodes"
         @addNewNode="createNode"
     />
     <div class="frame" @click="clearSelection($event)">
         <draggable
-            v-for="(line, line_index) in program"
+            v-for="(line, line_index) in nodes"
             :key="line_index"
-            v-model="program[line_index]"
+            v-model="nodes[line_index]"
             tag="div"
             class="frame__line"
             :class="{selected: lineSelected(line_index)}"
@@ -34,7 +34,7 @@
                 />
             </template>
         </draggable>
-        <div @click="addProgramLine" class="frame__add-line" title="Добавить новую линию">+</div>
+        <div @click="addLine" class="frame__add-line" title="Добавить новую линию">+</div>
     </div>
 </template>
 
@@ -50,17 +50,17 @@ export default {
         NodesMethods,
         Node,
     },
-    props: ['backend', 'fid'],
+    props: ['backend', 'nid'],
     data() {
         return {
-            program: [], // DSL программа
+            nodes: [], // DSL программа
             selected_line_index: 0,
             selected_nodes: [], // Массив nid выбранных нодов
             node_in_panel: null // Сюда вставить нод чтобы открыть панель
         };
     },
     mounted() {
-        //this.loadProgram();
+        this.getNodes();
     },
     watch: {
         selected_nodes() {
@@ -71,8 +71,8 @@ export default {
         info() {
             return 'Выделено: ' + this.selected_nodes.length
         },
-        program_lines_count() {
-            return this.program?.length ?? 0
+        nodes_lines_count() {
+            return this.nodes?.length ?? 0
         }
     },
     methods: {
@@ -101,7 +101,7 @@ export default {
         // Выбрать все ноды
         selectAllNodes() {
             let all_nodes = []
-            this.program.forEach(line => {
+            this.nodes.forEach(line => {
                 line.forEach(node => {
                     all_nodes.push(node.nid)
                 })
@@ -171,11 +171,11 @@ export default {
             ths.api({
                 api: 'nodes.Node:create',
                 data: {
-                    fid: this.fid,
+                    nid: this.nid,
                     line_index: this.selected_line_index
                 },
                 then: () => {
-                    this.loadProgram()
+                    this.getNodes()
                 },
             });
         },
@@ -185,7 +185,7 @@ export default {
             if (node) {
                 this.node_in_panel = node
             }
-            this.loadProgram()
+            this.getNodes()
         },
 
         selectLine(line_index) {
@@ -193,28 +193,27 @@ export default {
         },
 
         // Добавить программную линию
-        addProgramLine() {
+        addLine() {
             ths.api({
-                api: 'frames.Frame:addLine',
+                api: 'nodes.node:add-line',
                 data: {
-                    fid:
-                    this.fid
+                    nid: this.nid
                 },
                 then: response => {
-                    this.loadProgram()
+                    this.getNodes()
                 },
             });
         },
 
-        // Загрузить программу
-        loadProgram() {
+        // Получить ноды
+        getNodes() {
             ths.api({
-                api: 'frames.Frame:loadProgram',
+                api: 'nodes.node:nodes',
                 data: {
-                    fid: this.fid
+                    nid: this.nid
                 },
                 then: response => {
-                    this.program = response.program;
+                    this.nodes = response.nodes;
                 },
             });
         },
@@ -225,11 +224,11 @@ export default {
             ths.api({
                 api: 'frames.Frame:saveProgram',
                 data: {
-                    fid: this.fid,
-                    program: this.program
+                    nid: this.nid,
+                    nodes: this.nodes
                 },
                 then: () => {
-                    this.loadProgram();
+                    this.getNodes();
                 },
             });
         },

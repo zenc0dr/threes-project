@@ -43,7 +43,7 @@ import FramePreloader from './FramePreloader.vue';
 export default {
     name: 'NodesMethods',
     props: {
-        fid: null,
+        nid: null,
         nids: null,
         info: null,
         lines: null
@@ -69,7 +69,7 @@ export default {
             ths.api({
                 api: 'nodes.Node:removeNodes',
                 data: {
-                    fid: this.fid,
+                    nid: this.nid,
                     nids: this.nids
                 },
                 then: () => {
@@ -85,7 +85,7 @@ export default {
             ths.api({
                 api: 'nodes.Node:copyNodes',
                 data: {
-                    fid: this.fid,
+                    nid: this.nid,
                     nids: this.nids
                 },
                 then: () => {

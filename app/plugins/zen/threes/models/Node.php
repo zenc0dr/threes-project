@@ -25,6 +25,7 @@ class Node extends Model
         'nid',
         'svg',
         'svg_name',
+        'nodes',
         'name',
         'data',
         'scheme',
@@ -95,6 +96,31 @@ class Node extends Model
         $token = $this->makeNidToken();
         $token = explode('.', $token);
         return end($token);
+    }
+
+    public function getNodesAttribute(): array
+    {
+        $nodes_string = $this->data_dump['nodes'] ?? '';
+        $lines = explode(';', $nodes_string);
+        $output = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            $nodes = explode(',', $line);
+            $output[] = $nodes;
+        }
+
+        return $output;
+    }
+
+    public function setNodesAttribute(array $nodes): void
+    {
+        $lines = array_map(function($node) {
+            if (is_array($node)) {
+                return implode(',', $node);
+            }
+            return trim((string) $node);
+        }, $nodes);
+        $this->data_dump['nodes'] = join(';', $lines);
     }
 
     public function getSvgPathAttribute(): string

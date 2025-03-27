@@ -46,8 +46,17 @@ class Nodes
         return $max_number ? $max_number + 1 : 1;
     }
 
-    public function getNodeProgram(string $nid)
+    public function getNodes(string $nid): array
     {
-        dd($nid);
+        return Node::find($nid)?->nodes ?? [];
+    }
+
+    public function addLine(string $nid): void
+    {
+        $node = Node::find($nid);
+        $nodes = $node->nodes ?? [];
+        $nodes[] = [];
+        $node->nodes = $nodes;
+        $node->save();
     }
 }
