@@ -10,7 +10,6 @@ use October\Rain\Database\Traits\Validation;
  * @property string $description - Описание
  * @method static find($nid)
  * @method static get()
- * @method static where($field, $operator, $value)
  */
 
 class Node extends Model
@@ -210,7 +209,8 @@ class Node extends Model
         return [
             'nid' => $this->nid,
             'name' => $this->name,
-            'icon' => $this->svg_path
+            'icon' => $this->svg_path,
+            'description' => $this->description,
         ];
     }
 

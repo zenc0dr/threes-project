@@ -8,7 +8,7 @@ class Store
     public function getStoreNodes(): array
     {
         return [
-            'store_nodes' => ths()->store()->getStoreNodes()
+            'store_nodes' => ths()->store()->getStoreNodes(request('filter_text'))
         ];
     }
 }

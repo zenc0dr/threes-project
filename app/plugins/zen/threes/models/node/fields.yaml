@@ -27,5 +27,5 @@ fields:
     description:
         label: Описание
         span: full
-        size: giant
-        type: richeditor
+        size: small
+        type: textarea
