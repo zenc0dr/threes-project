@@ -5,9 +5,14 @@ use October\Rain\Database\Traits\Validation;
 
 /**
  * @property string $nid - Токен нода
+ * @property string $name - Имя
+ * @property string $svg_path - Путь до SVG
+ * @property string $description - Описание
  * @method static find($nid)
+ * @method static get()
  * @method static where($field, $operator, $value)
  */
+
 class Node extends Model
 {
     use Validation;
@@ -198,6 +203,15 @@ class Node extends Model
             return $add_fields;
         }
         return [];
+    }
+
+    public function getStoreItemAttribute(): array
+    {
+        return [
+            'nid' => $this->nid,
+            'name' => $this->name,
+            'icon' => $this->svg_path
+        ];
     }
 
     public function afterFetch(): void
