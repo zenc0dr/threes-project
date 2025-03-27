@@ -13,7 +13,7 @@ class Node
     }
 
     # http://threes.dc/threes.api/nodes.node:add-line?nid=threes.default.node1
-    public function addLine()
+    public function addLine(): array
     {
         ths()->nodes()->addLine(request('nid'));
         return [];

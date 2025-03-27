@@ -39,6 +39,15 @@ class Helpers
     }
 
     /**
+     * Хранилище нод
+     * @return Store
+     */
+    public function store(): Store
+    {
+        return Store::getInstance();
+    }
+
+    /**
      * Система сообщений
      * @return Messages
      */

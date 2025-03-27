@@ -169,7 +169,7 @@ export default {
         // Создать новый нод
         createNode() {
             ths.api({
-                api: 'nodes.Node:create',
+                api: 'nodes.node:create',
                 data: {
                     nid: this.nid,
                     line_index: this.selected_line_index
