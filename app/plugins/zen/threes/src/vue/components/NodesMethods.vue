@@ -37,9 +37,17 @@
     </div>
     <FramePreloader class="threes_nodes_methods__preloader" />
 </div>
+<modal :show="nodes_store" @close="nodes_store = false">
+    <template #default>
+        <NodesStore />
+    </template>
+</modal>
 </template>
 <script>
-import FramePreloader from './FramePreloader.vue';
+import FramePreloader from './FramePreloader.vue'
+import NodesStore from "./NodesStore.vue"
+import modal from "./modal.vue"
+
 export default {
     name: 'NodesMethods',
     props: {
@@ -48,9 +56,16 @@ export default {
         info: null,
         lines: null
     },
-    emits: ['update', 'selectAllNodes', 'addNewNode'],
+    emits: ['update', 'selectAllNodes'],
     components: {
-        FramePreloader
+        FramePreloader,
+        NodesStore,
+        modal
+    },
+    data() {
+        return {
+            nodes_store: false
+        }
     },
     computed: {
         selected_none() {
@@ -95,7 +110,11 @@ export default {
         },
         addNewNode()
         {
-            this.$emit('addNewNode')
+            this.nodes_store = true
+
+
+
+            //this.$emit('update')
         }
     }
 }

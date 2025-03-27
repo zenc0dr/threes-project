@@ -6,7 +6,6 @@
         :lines="nodes_lines_count"
         @update="getNodes"
         @selectAllNodes="selectAllNodes"
-        @addNewNode="createNode"
     />
     <div class="frame" @click="clearSelection($event)">
         <draggable
@@ -20,7 +19,7 @@
             item-key="nid"
             :multi-drag="true"
             :selected-items="selected_nodes"
-            @end="saveProgram"
+            @end="setNodes"
             @click="selectLine(line_index)"
         >
             <template #item="{element:node}">
@@ -167,18 +166,18 @@ export default {
         },
 
         // Создать новый нод
-        createNode() {
-            ths.api({
-                api: 'nodes.node:create',
-                data: {
-                    nid: this.nid,
-                    line_index: this.selected_line_index
-                },
-                then: () => {
-                    this.getNodes()
-                },
-            });
-        },
+        // createNode() {
+        //     ths.api({
+        //         api: 'nodes.node:create',
+        //         data: {
+        //             nid: this.nid,
+        //             line_index: this.selected_line_index
+        //         },
+        //         then: () => {
+        //             this.getNodes()
+        //         },
+        //     });
+        // },
 
         // При обновлении нода
         onNodeUpdated(node) {
@@ -219,10 +218,10 @@ export default {
         },
 
         // Сохранить программу
-        saveProgram() {
+        setNodes() {
             this.selected_nodes = []
             ths.api({
-                api: 'frames.Frame:saveProgram',
+                api: 'frames.Frame:setNodes',
                 data: {
                     nid: this.nid,
                     nodes: this.nodes

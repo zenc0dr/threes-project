@@ -1,7 +1,7 @@
 <template>
 <div class="nodes-store">
     <div class="nodes-store__items">
-        <div v-for="node in nodes" class="nodes-store__item">
+        <div v-for="node in store_nodes" class="nodes-store__item">
             <icon :src="node.icon" class="nodes-store__icon" />
             <div class="nodes-store__name">
                 {{ node.name }}
@@ -19,7 +19,7 @@ export default {
     },
     data() {
         return {
-            nodes: []
+            store_nodes: []
         }
     },
     mounted() {
@@ -30,7 +30,7 @@ export default {
             ths.api({
                 api: 'nodes.store:get-store-nodes',
                 then: response => {
-                    this.nodes = response.nodes
+                    this.store_nodes = response.store_nodes
                 }
             })
         }
@@ -39,19 +39,24 @@ export default {
 </script>
 <style lang="scss">
 .nodes-store {
-
+    padding: 15px;
 
     &__items {
-
+        display: flex;
     }
     &__item {
-
+        display: flex;
+        border: 1px solid #666;
+        border-radius: 4px;
+        padding: 9px 10px;
+        margin: 5px;
+        font-size: 16px;
     }
     &__icon {
 
     }
     &__name {
-
+        padding: 10px;
     }
 }
 </style>
