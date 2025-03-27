@@ -2,11 +2,6 @@
 
 use Illuminate\Console\Command;
 
-/**
- * Vector Command
- *
- * @link https://docs.octobercms.com/3.x/extend/console-commands.html
- */
 class Vector extends Command
 {
     protected $signature = 'threes:vector';
@@ -17,7 +12,15 @@ class Vector extends Command
         $exclude = [
             '/app/plugins/zen/threes/node_modules',
             '/app/plugins/zen/threes/package-lock.json',
-            '/app/plugins/zen/threes/assets'
+            '/app/plugins/zen/threes/assets',
+            '/app/plugins/zen/threes/controllers',
+            'app/plugins/zen/threes/src/vue/old_components',
+        ];
+
+        // Файлы, которые нужно включить в любом случае
+        $force_include = [
+            '/app/plugins/zen/threes/README.md',
+            '/app/plugins/zen/threes/plugin.yaml',
         ];
 
         $allow_extensions = [
@@ -35,28 +38,43 @@ class Vector extends Command
             $path = $file['path'];
             $ext = $file['extension'];
 
+            // Принудительное включение файлов из белого списка
+            if (in_array($path, $force_include)) {
+                $this->processFile($path, $output);
+                continue;
+            }
+
+            // Проверка расширения файла
             if (!in_array($ext, $allow_extensions)) {
                 continue;
             }
 
+            // Проверка на исключенные пути
+            $excluded = false;
             foreach ($exclude as $item) {
                 if (str_starts_with($path, $item)) {
-                    continue 2;
+                    $excluded = true;
+                    break;
                 }
             }
+            if ($excluded) {
+                continue;
+            }
 
-            $this->output->writeln("Render file: $path");
-            $code = file_get_contents($path);
-            $path = preg_replace('/^\/app\//', '', $path);
-            $output[] = "`$path`" . PHP_EOL . '```' . $code . PHP_EOL . '```';
+            $this->processFile($path, $output);
         }
 
         $markdown = join(PHP_EOL, $output);
         $output_path = storage_path('threes_vector.md');
-        file_put_contents(
-            $output_path,
-            $markdown
-        );
-        $this->output->writeln("Joutput: $output_path");
+        file_put_contents($output_path, $markdown);
+        $this->output->writeln("Output: $output_path");
+    }
+
+    protected function processFile(string $path, array &$output)
+    {
+        $this->output->writeln("Render file: $path");
+        $code = file_get_contents($path);
+        $cleanPath = preg_replace('/^\/app\//', '', $path);
+        $output[] = "`$cleanPath`" . PHP_EOL . '```' . $code . PHP_EOL . '```';
     }
 }
