@@ -81,17 +81,15 @@ class Nodes
     {
         $node = Node::find($parent_nid);
         $node->name = 'Новое имя';
-//        $nodes = $node->nodes;
-//
-//        // Расширяем массив при необходимости
-//        if ($line_index >= count($nodes)) {
-//            $nodes = array_pad($nodes, $line_index + 1, []);
-//        }
-//
-//        // Добавляем элемент в нужную линию
-//        $nodes[$line_index][] = $nid;
-//
-//        $node->nodes = $nodes;
+        $nodes = $node->nodes;
+
+        # Расширяем массив при необходимости
+        if ($line_index >= count($nodes)) {
+            $nodes = array_pad($nodes, $line_index + 1, []);
+        }
+
+        $nodes[$line_index][] = $nid;
+        $node->nodes = $nodes;
         $node->save();
     }
 

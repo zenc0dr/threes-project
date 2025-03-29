@@ -145,21 +145,21 @@ class Node extends Model
         return [];
     }
 
-    public function getSchemeAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $default_scheme = ths()->fromYamlFile(
-            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
-        );
-
-        $exe = $default_scheme['fields']['exe'];
-        $exe['tab'] = 'Настройки';
-
-        return ths()->toYaml(['exe' => $exe]);
-    }
+//    public function getSchemeAttribute(?string $value): ?string
+//    {
+//        if ($value) {
+//            return $value;
+//        }
+//
+//        $default_scheme = ths()->fromYamlFile(
+//            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
+//        );
+//
+//        $exe = $default_scheme['fields']['exe'];
+//        $exe['tab'] = 'Настройки';
+//
+//        return ths()->toYaml(['exe' => $exe]);
+//    }
 
     public function getAdditionalFieldsAttribute(): array
     {
@@ -241,8 +241,22 @@ class Node extends Model
         if (empty($this->attributes['nid'])) {
             $this->attributes['nid'] = $this->nid ?? ths()->nodes()->createNidToken();
         }
-        $settings = $this->dynamic_attributes;
+
+        // Собираем неразрешенные атрибуты из атрибутов модели
+        $non_fillable = array_diff_key($this->attributes, array_flip($this->fillable));
+
+        // Объединяем с динамическими атрибутами
+        $settings = array_merge($this->dynamic_attributes, $non_fillable);
+
+        // Удаляем неразрешенные атрибуты из атрибутов модели
+        foreach (array_keys($non_fillable) as $key) {
+            unset($this->attributes[$key]);
+        }
+
+        // Обновляем data_dump с настройками
         $this->data_dump['settings'] = $settings;
+
+        // Устанавливаем 'data' как JSON
         $this->attributes['data'] = ths()->toJson($this->data_dump);
     }
 }
