@@ -2,13 +2,13 @@
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Classes\Helpers\Carbon;
 use Zen\Threes\Classes\Helpers\Debug;
 use Zen\Threes\Classes\Helpers\Files;
 use Zen\Threes\Classes\Helpers\Json;
+use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
-use Zen\Threes\Classes\Helpers\State;
-use Zen\Threes\Classes\Helpers\Carbon;
 
 class Helpers
 {
@@ -54,6 +54,11 @@ class Helpers
     public function messages(): Messages
     {
         return Messages::getInstance();
+    }
+
+    public function notice(): Notice
+    {
+        return Notice::getInstance();
     }
 
     /**

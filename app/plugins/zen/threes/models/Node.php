@@ -103,16 +103,24 @@ class Node extends Model
         return end($token);
     }
 
+    /**
     public function getNodesAttribute(): array
     {
         $nodes_string = $this->data_dump['nodes'] ?? '';
         return ths()->nodes()->nodesFromString($nodes_string);
     }
 
+    public function getNodesNidsAttribute(): array
+    {
+        $nodes_string = $this->data_dump['nodes'] ?? '';
+        return ths()->nodes()->nodesFromString($nodes_string, false);
+    }
+
     public function setNodesAttribute(array $nodes): void
     {
         $this->data_dump['nodes'] = ths()->nodes()->nodesToString($nodes);
     }
+     */
 
     public function getSvgPathAttribute(): string
     {

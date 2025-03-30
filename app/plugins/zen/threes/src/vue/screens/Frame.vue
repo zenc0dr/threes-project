@@ -208,7 +208,7 @@ export default {
         // Получить ноды
         getNodes() {
             ths.api({
-                api: 'nodes.node:nodes',
+                api: 'nodes.node:get-nodes',
                 data: {
                     nid: this.nid
                 },
@@ -222,7 +222,7 @@ export default {
         setNodes() {
             this.selected_nodes = []
             ths.api({
-                api: 'frames.Frame:setNodes',
+                api: 'nodes.node:set-nodes',
                 data: {
                     nid: this.nid,
                     nodes: this.nodes

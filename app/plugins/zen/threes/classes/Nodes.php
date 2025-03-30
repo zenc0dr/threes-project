@@ -51,8 +51,23 @@ class Nodes
         return Node::find($nid)?->nodes ?? [];
     }
 
+    public function setNodes(string $nid, array $nodes): void
+    {
+        $node = Node::find($nid);
+        $node->nodes = $nodes;
+        $node->save();
+    }
+
     public function nodesToString(array $nodes): string
     {
+
+        foreach ($nodes as &$line) {
+            foreach ($line as &$node) {
+                # Вот тут надо сохранить информацию о нодах
+                $node = $node['nid'];
+            }
+        }
+
         $parts = array_map(function ($sub_array) {
             return implode(',', $sub_array);
         }, $nodes);
@@ -60,12 +75,59 @@ class Nodes
         return implode(';', $parts);
     }
 
-    public function nodesFromString(string $nodes): array
+    public function nodesFromString(string $nodes, bool $decorate = true): array
     {
-        $parts = explode(';', $nodes);
+
+        //$decorate = true;
+
+        if ($decorate) {
+            $nids = str_replace(';', ',', $nodes);
+            $nids = str_replace(',', ' ', $nids);
+            $nids = trim($nids);
+            $nids = explode(' ', $nids);
+
+            $nodes_records = Node::whereIn('nid', $nids)->get();
+            $nodes_data = [];
+            foreach ($nodes_records as $node_record) {
+                $nodes_data[$node_record->nid] = [
+                    'nid' => $node_record->nid,
+                    'name' => $node_record->name,
+                ];
+            }
+        } else {
+            $nodes_data = null;
+        }
+
+
+        $lines = explode(';', $nodes);
+        $nodes = array_map(function ($part) use ($nodes_data) {
+            if ($part === '') {
+                return [];
+            }
+
+            $nodes_nids = explode(',', $part);
+
+            if ($nodes_data !== null) {
+                return array_map(function ($nid) use ($nodes_data) {
+                    return $nodes_data[$nid];
+                }, $nodes_nids);
+            } else {
+                return array_map(function ($part) {
+                    return $part === '' ? [] : explode(',', $part);
+                }, $nodes_nids);
+            }
+
+        }, $lines);
+
+        return $nodes;
+    }
+
+    public function nodesFromStringOLD(string $nodes): array
+    {
+        $lines = explode(';', $nodes);
         return array_map(function ($part) {
             return $part === '' ? [] : explode(',', $part);
-        }, $parts);
+        }, $lines);
     }
 
     public function addLine(string $nid): void
@@ -79,9 +141,12 @@ class Nodes
 
     public function addNode(string $nid, string $parent_nid, int $line_index): void
     {
+
         $node = Node::find($parent_nid);
         $node->name = 'Новое имя';
-        $nodes = $node->nodes;
+        $nodes = $node->nodes_nids;
+
+        dd($nodes);
 
         # Расширяем массив при необходимости
         if ($line_index >= count($nodes)) {
@@ -92,34 +157,4 @@ class Nodes
         $node->nodes = $nodes;
         $node->save();
     }
-
-
-    /*
-    public function addNodeOld(string $fid, int $line_index): Node
-    {
-        $frame = Frame::findByFid($fid);
-
-        $node = Node::set();
-        $layer = Layer::set();
-        $program = $frame->program;
-
-        $node_short_dsl = [
-            $node->nid => [
-                $layer->lid
-            ]
-        ];
-
-        # Заполнить программу отсутствующими пустыми линиями
-        for ($i = 0; $i <= $line_index; $i++) {
-            if (!isset($program[$i])) {
-                $program[$i] = [];
-            }
-        }
-
-        $program[$line_index][] = $node_short_dsl;
-        $frame->program = $program;
-        $frame->save();
-        return $node;
-    }
-    */
 }

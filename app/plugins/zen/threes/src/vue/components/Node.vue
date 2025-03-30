@@ -26,6 +26,7 @@ export default {
 </script>
 <style lang="scss">
 .threes-node {
-
+    padding: 10px;
+    background: #0d89ec;
 }
 </style>

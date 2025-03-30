@@ -2,6 +2,8 @@
 
 namespace Zen\Threes\Api\debug;
 
+use Http;
+
 /**
  * Данный класс существует для отладки и экспериментов
  * в нем всегда должны быть два метода: debug (по возможности оставлять пустым) и test (для теста api)
@@ -12,9 +14,7 @@ class Tests
     public function debug()
     {
 
-        $node = ths()->nodes()->model()->find('threes.default.node6');
-        $node->name = 'Новое имя';
-        $node->save();
+        ths()->notice()->telegramSendMessage('Какдила?');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
