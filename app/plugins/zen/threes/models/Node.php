@@ -1,283 +1,53 @@
-<?php namespace Zen\Threes\Models;
+<?php
 
-use Illuminate\Database\Eloquent\Builder;
-use Model;
-use October\Rain\Database\Traits\Validation;
+namespace App\Models\Mongo;
 
-/**
- * @mixin Builder
- * @property string $nid - Токен нода
- * @property string $name - Имя
- * @property string $svg_path - Путь до SVG
- * @property string $description - Описание
- * @property null|string $svg
- * @method static find($nid)
- * @method static get()
- * @method static Builder|static whereIn(string $column, array $values)
- * @method Builder|static whereIn(string $column, array $values)
- */
+use Jenssegers\Mongodb\Eloquent\Model;
 
 class Node extends Model
 {
-    use Validation;
-
-    public $table = 'zen_threes_nodes';
-    protected $primaryKey = 'nid';
-    protected $keyType = 'string';
+    protected $connection = 'mongodb';
+    protected $collection = 'nodes';
+    protected $primaryKey = '_id'; // MongoDB по умолчанию
     public $incrementing = false;
 
-    public $rules = [
-        'nid' => 'required|unique:zen_threes_nodes,nid',
-    ];
-
     protected $fillable = [
-        'nid',
-        'svg',
-        'svg_name',
-        'nodes',
-        'name',
-        'data',
-        'scheme',
-        'description',
+        'nid',            // уникальный идентификатор
+        'name',           // имя нода
+        'type',           // например: 'ai_agent', 'form_component', 'data_adapter'
+        'props',          // произвольные свойства (endpoint, interval, binding и т.д.)
+        'children',       // вложенные ноды или ссылки
+        'meta',           // что-то вроде system-поля (например timestamps, версия)
     ];
 
-    private ?string $nid_token_dump = null;
+    protected $casts = [
+        'props' => 'array',
+        'children' => 'array',
+        'meta' => 'array',
+    ];
 
-    protected array $dynamic_attributes = [];
-    protected array $data_dump = [];
+    ### Примеры удобных методов для будущего:
 
-    /** Разделение статических и динамических полей
-     * @param $name
-     * @param $value
-     * @return void
-     */
-    public function __set($name, $value)
+    public function addChild($node_or_ref): void
     {
-        if (!$this->hasAttribute($name)) {
-            $this->dynamic_attributes[$name] = $value;
-            unset($this->attributes[$name]);
-        } else {
-            parent::__set($name, $value);
-        }
+        $children = $this->children ?? [];
+        $children[] = $node_or_ref;
+        $this->children = $children;
+        $this->save();
     }
 
-    /**
-     * Проверка на динамический атрибут
-     * @param string $key
-     * @return bool
-     */
-    private function hasAttribute(string $key): bool
+    public function resolveChildren(): array
     {
-        return in_array($key, $this->fillable);
-    }
+        $resolved = [];
 
-    /**
-     * Получить токен нода
-     * @return string
-     */
-    private function makeNidToken(): string
-    {
-        if ($this->nid_token_dump) {
-            return $this->nid_token_dump;
-        }
-        return $this->nid_token_dump = ths()->nodes()->createNidToken();
-    }
-
-    /**
-     * Получить DSL-объект нода
-     * @return array
-     */
-    public function getDslObjectAttribute(): array
-    {
-        return [
-            'nid' => $this->nid,
-            'name' => $this->name,
-        ];
-    }
-
-    /**
-     * @param string|null $value
-     * @return string|null
-     */
-    public function getNidAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        return $this->makeNidToken();
-    }
-
-    public function getNameAttribute(?string $value): string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $token = $this->makeNidToken();
-        $token = explode('.', $token);
-        return end($token);
-    }
-
-    public function getNodesAttribute(): string
-    {
-        return $this->data_dump['nodes'] ?? '';
-    }
-
-    public function setNodesAttribute(string $nodes): void
-    {
-        $this->data_dump['nodes'] = $nodes;
-    }
-
-//    public function getNodesTreeAttribute(): array
-//    {
-//        $nodes_string = $this->data_dump['nodes'] ?? '';
-//        dd($nodes_string);
-//    }
-
-    public function getSvgPathAttribute(): string
-    {
-        if (!$this->svg) {
-            return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
-        }
-        return '/storage/app/uploads/public/threes/icons/' . $this->svg_name;
-    }
-
-    public function getSvgAttribute(?string $svg = null): string
-    {
-        if (!$svg) {
-            return file_get_contents(
-                base_path('plugins/zen/threes/assets/images/icons/default-icon.svg')
-            );
-        }
-        return $svg;
-    }
-
-    public function getSettingsAttribute(): array
-    {
-        return $this->data_dump['settings'] ?? [];
-    }
-
-    public function getDataAttribute(?string $data): array
-    {
-        if ($data) {
-            return ths()->fromJson($data) ?? [];
-        }
-        return [];
-    }
-
-    public function getSchemeAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $default_scheme = ths()->fromYamlFile(
-            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
-        );
-
-        $exe = $default_scheme['fields']['exe'];
-        $exe['tab'] = 'Настройки';
-
-        return ths()->toYaml(['exe' => $exe]);
-    }
-
-    public function getAdditionalFieldsAttribute(): array
-    {
-        if ($this->scheme) {
-            $fields = ths()->fromYaml($this->scheme);
-
-            if (!$fields) {
-                return [];
-            }
-
-            $add_fields = [];
-            foreach ($fields as $field => $value) {
-                $add_fields[$field] = [
-                    'label' => $value['label'],
-                    'type' => $value['type'],
-                    'tab' => $value['tab'] ?? 'Настройки',
-                    'span' => $value['span'],
-                ];
-                if ($additional = $value['additional'] ?? null) {
-                    foreach ($additional as $batch) {
-                        $batch = ths()->fromYaml($batch['rule']);
-                        $add_fields[$value['field']] = array_merge($add_fields[$value['field']], $batch);
-                    }
-                }
-            }
-            return $add_fields;
-        }
-        return [];
-    }
-
-    public function getStoreItemAttribute(): array
-    {
-        return [
-            'nid' => $this->nid,
-            'name' => $this->name,
-            'icon' => $this->svg_path,
-            'description' => $this->description,
-        ];
-    }
-
-    public function afterFetch(): void
-    {
-        $this->data_dump = $this->data;
-        $this->fillSettings();
-    }
-
-    public function beforeSave(): void
-    {
-        $this->saveData();
-        $this->saveSvgIcon();
-    }
-
-    private function fillSettings(): void
-    {
-        $settings = $this->data_dump['settings'] ?? null;
-        if ($settings) {
-            foreach ($settings as $field => $value) {
-                $this->attributes[$field] = $value;
+        foreach ($this->children ?? [] as $item) {
+            if (isset($item['$ref']) && isset($item['$id'])) {
+                $resolved[] = self::find($item['$id']);
+            } elseif (isset($item['nid'])) {
+                $resolved[] = new self($item); // вложенный без сохранения
             }
         }
-    }
 
-    private function saveSvgIcon(): void
-    {
-        if (!$this->svg) {
-            return;
-        }
-        $svg_name = md5($this->svg) . '.svg';
-        $path = ths()->checkDir(storage_path('app/uploads/public/threes/icons/' . $svg_name));
-        file_put_contents(
-            $path,
-            $this->svg
-        );
-        $this->attributes['svg_name'] = $svg_name;
-    }
-
-    public function saveData(): void
-    {
-        if (empty($this->attributes['nid'])) {
-            $this->attributes['nid'] = $this->nid ?? ths()->nodes()->createNidToken();
-        }
-
-        // Собираем неразрешенные атрибуты из атрибутов модели
-        $non_fillable = array_diff_key($this->attributes, array_flip($this->fillable));
-
-        // Объединяем с динамическими атрибутами
-        $settings = array_merge($this->dynamic_attributes, $non_fillable);
-
-        // Удаляем неразрешенные атрибуты из атрибутов модели
-        foreach (array_keys($non_fillable) as $key) {
-            unset($this->attributes[$key]);
-        }
-
-        // Обновляем data_dump с настройками
-        $this->data_dump['settings'] = $settings;
-
-        // Устанавливаем 'data' как JSON
-        $this->attributes['data'] = ths()->toJson($this->data_dump);
+        return $resolved;
     }
 }
