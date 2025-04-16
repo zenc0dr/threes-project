@@ -1,9 +1,11 @@
 <?php namespace Zen\Threes\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Model;
 use October\Rain\Database\Traits\Validation;
 
 /**
+ * @mixin Builder
  * @property string $nid - Токен нода
  * @property string $name - Имя
  * @property string $svg_path - Путь до SVG
@@ -11,6 +13,8 @@ use October\Rain\Database\Traits\Validation;
  * @property null|string $svg
  * @method static find($nid)
  * @method static get()
+ * @method static Builder|static whereIn(string $column, array $values)
+ * @method Builder|static whereIn(string $column, array $values)
  */
 
 class Node extends Model
@@ -80,6 +84,18 @@ class Node extends Model
     }
 
     /**
+     * Получить DSL-объект нода
+     * @return array
+     */
+    public function getDslObjectAttribute(): array
+    {
+        return [
+            'nid' => $this->nid,
+            'name' => $this->name,
+        ];
+    }
+
+    /**
      * @param string|null $value
      * @return string|null
      */
@@ -103,24 +119,21 @@ class Node extends Model
         return end($token);
     }
 
-    /**
-    public function getNodesAttribute(): array
+    public function getNodesAttribute(): string
     {
-        $nodes_string = $this->data_dump['nodes'] ?? '';
-        return ths()->nodes()->nodesFromString($nodes_string);
+        return $this->data_dump['nodes'] ?? '';
     }
 
-    public function getNodesNidsAttribute(): array
+    public function setNodesAttribute(string $nodes): void
     {
-        $nodes_string = $this->data_dump['nodes'] ?? '';
-        return ths()->nodes()->nodesFromString($nodes_string, false);
+        $this->data_dump['nodes'] = $nodes;
     }
 
-    public function setNodesAttribute(array $nodes): void
-    {
-        $this->data_dump['nodes'] = ths()->nodes()->nodesToString($nodes);
-    }
-     */
+//    public function getNodesTreeAttribute(): array
+//    {
+//        $nodes_string = $this->data_dump['nodes'] ?? '';
+//        dd($nodes_string);
+//    }
 
     public function getSvgPathAttribute(): string
     {
@@ -153,21 +166,21 @@ class Node extends Model
         return [];
     }
 
-//    public function getSchemeAttribute(?string $value): ?string
-//    {
-//        if ($value) {
-//            return $value;
-//        }
-//
-//        $default_scheme = ths()->fromYamlFile(
-//            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
-//        );
-//
-//        $exe = $default_scheme['fields']['exe'];
-//        $exe['tab'] = 'Настройки';
-//
-//        return ths()->toYaml(['exe' => $exe]);
-//    }
+    public function getSchemeAttribute(?string $value): ?string
+    {
+        if ($value) {
+            return $value;
+        }
+
+        $default_scheme = ths()->fromYamlFile(
+            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
+        );
+
+        $exe = $default_scheme['fields']['exe'];
+        $exe['tab'] = 'Настройки';
+
+        return ths()->toYaml(['exe' => $exe]);
+    }
 
     public function getAdditionalFieldsAttribute(): array
     {

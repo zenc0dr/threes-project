@@ -11,7 +11,8 @@
         "october/all": "^3.7",
         "rainlab/builder-plugin": "^2.0",
         "rainlab/user-plugin": "^3.2",
-        "romanov/clearcachewidget-plugin": "^1.3"
+        "romanov/clearcachewidget-plugin": "^1.3",
+        "jenssegers/mongodb": "^3.9"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5|^9.0"

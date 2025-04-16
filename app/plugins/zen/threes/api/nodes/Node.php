@@ -11,14 +11,14 @@ class Node
     public function getNodes(): array
     {
         return [
-            'nodes' => ths()->nodes()->getNodes(request('nid'))
+            'nodes' => ths()->nodes()->getDslScheme(request('nid'))
         ];
     }
 
     # http://threes.dc/threes.api/nodes.node:set-nodes?debug
     protected function setNodes()
     {
-        ths()->nodes()->setNodes(
+        ths()->nodes()->setDslScheme(
             request('nid'),
             request('nodes'),
         );

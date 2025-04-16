@@ -6,6 +6,7 @@ use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Node;
 use Illuminate\Database\Eloquent\Builder;
 
+
 class Nodes
 {
     use SingletonTrait;
@@ -46,90 +47,85 @@ class Nodes
         return $max_number ? $max_number + 1 : 1;
     }
 
-    public function getNodes(string $nid): array
+    /**
+     * Сохранить DSL-схему фрейма
+     * @param string $nid
+     * @param array $scheme
+     * @return void
+     */
+    public function setDslScheme(string $nid, array $scheme, bool $decorated = true): void
     {
-        return Node::find($nid)?->nodes ?? [];
-    }
+        if ($decorated) {
+            $db_array = [];
+            foreach ($scheme as $line_nodes) {
+                if (!$line_nodes) {
+                    $db_array[] = [];
+                } else {
+                    $line = [];
+                    foreach ($line_nodes as $line_node) {
+                        $line[] = $line_node['nid'];
+                        $node = Node::find($line_node['nid']);
+                        $node->name = $line_node['name'];
+                        $node->save();
+                    }
+                    $db_array[] = $line;
+                }
+            }
 
-    public function setNodes(string $nid, array $nodes): void
-    {
+            $dump = [];
+            foreach ($db_array as $line_nodes) {
+                $dump[] = join(',', $line_nodes);
+            }
+            $dsl_string = join(';', $dump);
+        }
+
         $node = Node::find($nid);
-        $node->nodes = $nodes;
+        $node->nodes = $dsl_string;
         $node->save();
     }
 
-    public function nodesToString(array $nodes): string
+    /**
+     * Получить DSL-схему для фрейма
+     * @param string $nid
+     * @param bool $decorated - Декорировано, значит ноды обогащены dsl-узлами
+     * @return array
+     */
+    public function getDslScheme(string $nid, bool $decorated = true): array
     {
-
-        foreach ($nodes as &$line) {
-            foreach ($line as &$node) {
-                # Вот тут надо сохранить информацию о нодах
-                $node = $node['nid'];
-            }
-        }
-
-        $parts = array_map(function ($sub_array) {
-            return implode(',', $sub_array);
-        }, $nodes);
-
-        return implode(';', $parts);
-    }
-
-    public function nodesFromString(string $nodes, bool $decorate = true): array
-    {
-
-        //$decorate = true;
-
-        if ($decorate) {
-            $nids = str_replace(';', ',', $nodes);
-            $nids = str_replace(',', ' ', $nids);
-            $nids = trim($nids);
-            $nids = explode(' ', $nids);
-
-            $nodes_records = Node::whereIn('nid', $nids)->get();
-            $nodes_data = [];
-            foreach ($nodes_records as $node_record) {
-                $nodes_data[$node_record->nid] = [
-                    'nid' => $node_record->nid,
-                    'name' => $node_record->name,
-                ];
-            }
-        } else {
-            $nodes_data = null;
-        }
-
-
-        $lines = explode(';', $nodes);
-        $nodes = array_map(function ($part) use ($nodes_data) {
-            if ($part === '') {
-                return [];
-            }
-
-            $nodes_nids = explode(',', $part);
-
-            if ($nodes_data !== null) {
-                return array_map(function ($nid) use ($nodes_data) {
-                    return $nodes_data[$nid];
-                }, $nodes_nids);
+        $dsl_string = Node::find($nid)->nodes;
+        $dsl_scheme = [];
+        $nids = [];
+        $lines = explode(';', $dsl_string);
+        foreach ($lines as $line_nodes) {
+            if (!$line_nodes) {
+                $dsl_scheme[] = [];
             } else {
-                return array_map(function ($part) {
-                    return $part === '' ? [] : explode(',', $part);
-                }, $nodes_nids);
+                $nodes_nids = explode(',', $line_nodes);
+                $nids = array_merge($nids, $nodes_nids);
+                $dsl_scheme[] = $nodes_nids;
             }
+        }
 
-        }, $lines);
+        if ($decorated) {
+            $nids = array_unique($nids);
+            $nodes = Node::whereIn('nid', $nids)
+                ->get()
+                ->keyBy('nid');
 
-        return $nodes;
+            foreach ($dsl_scheme as &$line_nodes) {
+                foreach ($line_nodes as &$line_node) {
+                    $line_node = $nodes[$line_node]->dsl_object;
+                }
+            }
+        }
+
+        return $dsl_scheme;
     }
 
-    public function nodesFromStringOLD(string $nodes): array
-    {
-        $lines = explode(';', $nodes);
-        return array_map(function ($part) {
-            return $part === '' ? [] : explode(',', $part);
-        }, $lines);
-    }
-
+    /**
+     * @param string $nid
+     * @return void
+     */
     public function addLine(string $nid): void
     {
         $node = Node::find($nid);
@@ -141,15 +137,13 @@ class Nodes
 
     public function addNode(string $nid, string $parent_nid, int $line_index): void
     {
-
-        $node = Node::find($parent_nid);
-        $node->name = 'Новое имя';
-        $nodes = $node->nodes_nids;
-
-        dd($nodes);
+//        $node = Node::find($parent_nid);
+//        $node->name = 'Новое имя';
+//        $nodes = $node->getDslScheme($nid);
+        $scheme = $this->getDslScheme($parent_nid);
 
         # Расширяем массив при необходимости
-        if ($line_index >= count($nodes)) {
+        if ($line_index >= count($scheme)) {
             $nodes = array_pad($nodes, $line_index + 1, []);
         }
 

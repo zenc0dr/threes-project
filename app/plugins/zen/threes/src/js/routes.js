@@ -4,13 +4,13 @@ const routes = [
     {
         path: "/:backend/zen/threes/framecontroller/create",
         name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
+        component: () => import("../vue/screens/Node.vue"),
         props: true,
     },
     {
         path: "/:backend/zen/threes/framecontroller/update/:nid",
         name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
+        component: () => import("../vue/screens/Node.vue"),
         props: true,
     },
 ];

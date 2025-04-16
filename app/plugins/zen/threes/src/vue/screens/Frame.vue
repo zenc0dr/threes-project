@@ -23,13 +23,14 @@
             @end="setNodes"
             @click="selectLine(line_index)"
         >
-            <template #item="{element:node}">
+            <template #item="{ element: node, index: node_index }">
                 <Node
                     class="frame__node"
-                    :class="{'selected':isNodeSelected(node)}"
+                    :class="{'selected': isNodeSelected(node)}"
                     :style="getNodeStyle(node)"
                     :node="node"
-                    @click="handleNodeClick(node, $event)"
+                    @mousedown="onNodeMouseDown(node, $event, line_index, node_index)"
+                    @click="handleNodeClick(node, $event, line_index, node_index)"
                     @contextmenu.prevent="handleNodeRightClick(node, $event)"
                 />
             </template>
@@ -53,10 +54,10 @@ export default {
     props: ['backend', 'nid'],
     data() {
         return {
-            nodes: [], // DSL программа
+            nodes: [],             // DSL программа (массив строк, каждая строка – массив нодов)
             selected_line_index: 0,
-            selected_nodes: [], // Массив nid выбранных нодов
-            node_in_panel: null // Сюда вставить нод чтобы открыть панель
+            selected_nodes: [],    // Массив nid выбранных нодов
+            node_in_panel: null    // Для открытия панели выбранного нода
         };
     },
     mounted() {
@@ -64,135 +65,107 @@ export default {
     },
     watch: {
         selected_nodes() {
-            ths.data.nids = this.selected_nodes
+            // Обновляем глобальные данные для других компонентов
+            ths.data.nids = this.selected_nodes;
         }
     },
     computed: {
         info() {
-            return 'Выделено: ' + this.selected_nodes.length
+            return 'Выделено: ' + this.selected_nodes.length;
         },
         nodes_lines_count() {
-            return this.nodes?.length ?? 0
+            return this.nodes?.length ?? 0;
         }
     },
     methods: {
-        // Открыть панель нода
+        // Открыть панель редактирования нода
         openNodePanel(node) {
-            this.node_in_panel = node
+            this.node_in_panel = node;
         },
 
-        // Выделение линии
+        // Проверка выделенной строки
         lineSelected(line_index) {
-            return this.selected_line_index === line_index
+            return this.selected_line_index === line_index;
         },
 
         // Закрыть панель нода
         closeNodePanel() {
-            this.node_in_panel = null
+            this.node_in_panel = null;
         },
 
-        // Очистить множественное выделение
+        // Очистить выделение нодов, если клик произошёл по фону или строке
         clearSelection(event) {
             if (event.target.matches('.frame, .frame__line')) {
                 this.selected_nodes = [];
             }
         },
 
-        // Выбрать все ноды
+        // Выбрать все ноды во всех строках
         selectAllNodes() {
-            let all_nodes = []
+            let all_nodes = [];
             this.nodes.forEach(line => {
                 line.forEach(node => {
-                    all_nodes.push(node.nid)
-                })
-            })
-            this.selected_nodes = all_nodes
+                    all_nodes.push(node.nid);
+                });
+            });
+            this.selected_nodes = all_nodes;
         },
 
-        // Оформить стиль нода в зависимости от его слоя css
+        // Применить стили для нода (пример реализации)
         getNodeStyle(node) {
-            /*
-            let style = {
-                padding: '5px 7px',
-                background: '#6eb39d',
-                borderRadius: '3px',
-                minWidth: '50px'
-            }
-            for (let i in node.layers) {
-                let layer = node.layers[i]
-                if (layer.aspect === 'threes.units.ui@css') {
-                    if (layer.exe) {
-                        style = layer.exe
-                    }
-                    break
-                }
-            }
-            return style
-            */
+            // Здесь можно анализировать слои (node.layers) и возвращать соответствующий стиль
+            return {};
         },
 
-        // Если нод выделен
+        // Проверка, выделен ли нод
         isNodeSelected(node) {
             return this.selected_nodes.includes(node.nid);
         },
 
-        // Нажатие левой кнопкой мыши на ноде
-        handleNodeClick(node, event) {
-            if (event.detail === 2) return; // Пропускаем двойной клик
+        // Обработка события mousedown:
+        // Если нажата левая кнопка без Ctrl, выделяем группу нодов от нажатого до конца строки
+        onNodeMouseDown(node, event, lineIndex, nodeIndex) {
+            if (event.button !== 0) return; // Только левая кнопка
+            if (!event.ctrlKey) {
+                this.selectNodesFrom(lineIndex, nodeIndex);
+            }
+        },
 
-            const nid = node.nid;
+        // Обработка события клика:
+        // Если зажат Ctrl, то переключаем выделение отдельного нода
+        handleNodeClick(node, event, lineIndex, nodeIndex) {
+            if (event.detail === 2) return; // Пропускаем двойной клик
             if (event.ctrlKey) {
-                // Множественный выбор с Ctrl
+                const nid = node.nid;
                 const index = this.selected_nodes.indexOf(nid);
                 if (index === -1) {
-                    this.selected_nodes.push(nid) // Добавляем, если не выбран
+                    this.selected_nodes.push(nid);
                 } else {
-                    this.selected_nodes.splice(index, 1); // Убираем, если уже выбран
-                }
-            } else {
-                // Одиночный выбор без Ctrl
-                if (this.selected_nodes.length === 1 && this.selected_nodes[0] === nid) {
-                    this.selected_nodes = [] // Снимаем выбор, если кликнули на уже выбранный
-                } else {
-                    this.selected_nodes = [nid] // Выбираем только этот нод
+                    this.selected_nodes.splice(index, 1);
                 }
             }
         },
 
-        // Нажатие правой кнопкой мыши на ноде
+        // Обработка правого клика: открывает панель нода, если ещё не выделен ни один нод
         handleNodeRightClick(node, event) {
             if (!this.selected_nodes.length) {
-                this.openNodePanel(node)
+                this.openNodePanel(node);
             }
         },
 
-        // Создать новый нод
-        // createNode() {
-        //     ths.api({
-        //         api: 'nodes.node:create',
-        //         data: {
-        //             nid: this.nid,
-        //             line_index: this.selected_line_index
-        //         },
-        //         then: () => {
-        //             this.getNodes()
-        //         },
-        //     });
-        // },
-
-        // При обновлении нода
-        onNodeUpdated(node) {
-            if (node) {
-                this.node_in_panel = node
-            }
-            this.getNodes()
+        // Выделяет ноды в строке, начиная с указанного индекса (все ноды справа от выбранного)
+        selectNodesFrom(lineIndex, nodeIndex) {
+            const line = this.nodes[lineIndex] || [];
+            const nodesToSelect = line.slice(nodeIndex).map(node => node.nid);
+            this.selected_nodes = nodesToSelect;
         },
 
+        // Выбор строки для акцентирования (например, подсветка всего ряда)
         selectLine(line_index) {
-            this.selected_line_index = line_index
+            this.selected_line_index = line_index;
         },
 
-        // Добавить программную линию
+        // Добавить новую линию нодов
         addLine() {
             ths.api({
                 api: 'nodes.node:add-line',
@@ -200,12 +173,12 @@ export default {
                     nid: this.nid
                 },
                 then: response => {
-                    this.getNodes()
+                    this.getNodes();
                 },
             });
         },
 
-        // Получить ноды
+        // Запрос нодов с сервера
         getNodes() {
             ths.api({
                 api: 'nodes.node:get-nodes',
@@ -218,9 +191,9 @@ export default {
             });
         },
 
-        // Сохранить программу
+        // Сохранить текущее расположение нодов
         setNodes() {
-            this.selected_nodes = []
+            this.selected_nodes = [];
             ths.api({
                 api: 'nodes.node:set-nodes',
                 data: {
