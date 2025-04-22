@@ -5,6 +5,7 @@ namespace Zen\Threes\Api\debug;
 use Http;
 
 use MongoDB\Client;
+use Zen\Threes\Models\Node;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -15,14 +16,34 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $client = new Client("mongodb://root:secret@threes-mongo:27017/admin");
+        $node = new Node([
+            'nid' => 'test.node.001',
+            'name' => 'Test Node',
+            'type' => 'test_type',
+            'props' => ['foo' => 'bar'],
+            'children' => [],
+            'meta' => ['created_by' => 'phpstorm'],
+        ]);
+        $node->save();
 
-        $dbs = $client->listDatabases();
-        return response()->json($dbs);
+        $loaded = Node::find((string) $node->_id);
 
-        dd(
-            ths()->nodes()->getDslScheme('threes.default.node7')
-        );
+        dd($node->_id, $loaded);
+
+        $byNid = Node::findByNid('test.node.001');
+
+
+
+//        $client = new Client("mongodb://root:secret@threes-mongo:27017/admin");
+//
+//        $dbs = $client->listDatabases();
+//        $result = response()->json($dbs);
+//
+//        dd($result);
+
+//        dd(
+//            ths()->nodes()->getDslScheme('threes.default.node7')
+//        );
 
 
         $nodes = [

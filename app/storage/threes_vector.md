@@ -149,6 +149,10 @@ class Threes extends Helpers
 
 namespace Zen\Threes\Api\debug;
 
+use Http;
+
+use MongoDB\Client;
+
 /**
  * Данный класс существует для отладки и экспериментов
  * в нем всегда должны быть два метода: debug (по возможности оставлять пустым) и test (для теста api)
@@ -158,18 +162,41 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+        $client = new Client("mongodb://root:secret@threes-mongo:27017/admin");
 
-        $array = [
-            ['node1', 'node2', 'node3'],
+        $dbs = $client->listDatabases();
+        $result = response()->json($dbs);
+
+        dd($result);
+
+//        dd(
+//            ths()->nodes()->getDslScheme('threes.default.node7')
+//        );
+
+
+        $nodes = [
             [],
+            [
+                [
+                    'nid' => 'node1',
+                    'name' => 'Node 1',
+                ],
+                [
+                    'nid' => 'node2',
+                    'name' => 'Node 2',
+                ],
+            ],
             [],
-            ['node5'],
-            []
+            [
+                [
+                    'nid' => 'node3',
+                    'name' => 'Node 3',
+                ],
+            ]
         ];
 
-        $string = 'node1,node2,node3;;;node5;';
-        //$result = ths()->nodes()->nodesToString($array);
-        //$result = ths()->nodes()->nodesFromString($string);
+
+        //ths()->nodes()->setDslScheme('');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -190,12 +217,22 @@ use Zen\Threes\Traits\QueryLogTrait;
 class Node
 {
     use QueryLogTrait;
-    # http://threes.dc/threes.api/nodes.node:nodes?nid=threes.default.node1
-    public function nodes(): array
+    # http://threes.dc/threes.api/nodes.node:get-nodes?nid=threes.default.node1
+    public function getNodes(): array
     {
         return [
-            'nodes' => ths()->nodes()->getNodes(request('nid'))
+            'nodes' => ths()->nodes()->getDslScheme(request('nid'))
         ];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:set-nodes?debug
+    protected function setNodes()
+    {
+        ths()->nodes()->setDslScheme(
+            request('nid'),
+            request('nodes'),
+        );
+        return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:add-line?nid=threes.default.node1
@@ -205,7 +242,7 @@ class Node
         return [];
     }
 
-    # http://threes.dc/threes.api/nodes.node:add-node
+    # http://threes.dc/threes.api/nodes.node:add-node?debug
     protected function addNode(): array
     {
         ths()->nodes()->addNode(
@@ -322,13 +359,13 @@ class Events
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Classes\Helpers\Carbon;
 use Zen\Threes\Classes\Helpers\Debug;
 use Zen\Threes\Classes\Helpers\Files;
 use Zen\Threes\Classes\Helpers\Json;
+use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
-use Zen\Threes\Classes\Helpers\State;
-use Zen\Threes\Classes\Helpers\Carbon;
 
 class Helpers
 {
@@ -374,6 +411,11 @@ class Helpers
     public function messages(): Messages
     {
         return Messages::getInstance();
+    }
+
+    public function notice(): Notice
+    {
+        return Notice::getInstance();
     }
 
     /**
@@ -435,6 +477,7 @@ use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Node;
 use Illuminate\Database\Eloquent\Builder;
 
+
 class Nodes
 {
     use SingletonTrait;
@@ -475,28 +518,85 @@ class Nodes
         return $max_number ? $max_number + 1 : 1;
     }
 
-    public function getNodes(string $nid): array
+    /**
+     * Сохранить DSL-схему фрейма
+     * @param string $nid
+     * @param array $scheme
+     * @return void
+     */
+    public function setDslScheme(string $nid, array $scheme, bool $decorated = true): void
     {
-        return Node::find($nid)?->nodes ?? [];
+        if ($decorated) {
+            $db_array = [];
+            foreach ($scheme as $line_nodes) {
+                if (!$line_nodes) {
+                    $db_array[] = [];
+                } else {
+                    $line = [];
+                    foreach ($line_nodes as $line_node) {
+                        $line[] = $line_node['nid'];
+                        $node = Node::find($line_node['nid']);
+                        $node->name = $line_node['name'];
+                        $node->save();
+                    }
+                    $db_array[] = $line;
+                }
+            }
+
+            $dump = [];
+            foreach ($db_array as $line_nodes) {
+                $dump[] = join(',', $line_nodes);
+            }
+            $dsl_string = join(';', $dump);
+        }
+
+        $node = Node::find($nid);
+        $node->nodes = $dsl_string;
+        $node->save();
     }
 
-    public function nodesToString(array $nodes): string
+    /**
+     * Получить DSL-схему для фрейма
+     * @param string $nid
+     * @param bool $decorated - Декорировано, значит ноды обогащены dsl-узлами
+     * @return array
+     */
+    public function getDslScheme(string $nid, bool $decorated = true): array
     {
-        $parts = array_map(function ($sub_array) {
-            return implode(',', $sub_array);
-        }, $nodes);
+        $dsl_string = Node::find($nid)->nodes;
+        $dsl_scheme = [];
+        $nids = [];
+        $lines = explode(';', $dsl_string);
+        foreach ($lines as $line_nodes) {
+            if (!$line_nodes) {
+                $dsl_scheme[] = [];
+            } else {
+                $nodes_nids = explode(',', $line_nodes);
+                $nids = array_merge($nids, $nodes_nids);
+                $dsl_scheme[] = $nodes_nids;
+            }
+        }
 
-        return implode(';', $parts);
+        if ($decorated) {
+            $nids = array_unique($nids);
+            $nodes = Node::whereIn('nid', $nids)
+                ->get()
+                ->keyBy('nid');
+
+            foreach ($dsl_scheme as &$line_nodes) {
+                foreach ($line_nodes as &$line_node) {
+                    $line_node = $nodes[$line_node]->dsl_object;
+                }
+            }
+        }
+
+        return $dsl_scheme;
     }
 
-    public function nodesFromString(string $nodes): array
-    {
-        $parts = explode(';', $nodes);
-        return array_map(function ($part) {
-            return $part === '' ? [] : explode(',', $part);
-        }, $parts);
-    }
-
+    /**
+     * @param string $nid
+     * @return void
+     */
     public function addLine(string $nid): void
     {
         $node = Node::find($nid);
@@ -508,51 +608,47 @@ class Nodes
 
     public function addNode(string $nid, string $parent_nid, int $line_index): void
     {
-        $node = Node::find($parent_nid);
-        $node->name = 'Новое имя';
-//        $nodes = $node->nodes;
-//
-//        // Расширяем массив при необходимости
-//        if ($line_index >= count($nodes)) {
-//            $nodes = array_pad($nodes, $line_index + 1, []);
-//        }
-//
-//        // Добавляем элемент в нужную линию
-//        $nodes[$line_index][] = $nid;
-//
-//        $node->nodes = $nodes;
-        $node->save();
-    }
+//        $node = Node::find($parent_nid);
+//        $node->name = 'Новое имя';
+//        $nodes = $node->getDslScheme($nid);
+        $scheme = $this->getDslScheme($parent_nid);
 
-
-    /*
-    public function addNodeOld(string $fid, int $line_index): Node
-    {
-        $frame = Frame::findByFid($fid);
-
-        $node = Node::set();
-        $layer = Layer::set();
-        $program = $frame->program;
-
-        $node_short_dsl = [
-            $node->nid => [
-                $layer->lid
-            ]
-        ];
-
-        # Заполнить программу отсутствующими пустыми линиями
-        for ($i = 0; $i <= $line_index; $i++) {
-            if (!isset($program[$i])) {
-                $program[$i] = [];
-            }
+        # Расширяем массив при необходимости
+        if ($line_index >= count($scheme)) {
+            $nodes = array_pad($nodes, $line_index + 1, []);
         }
 
-        $program[$line_index][] = $node_short_dsl;
-        $frame->program = $program;
-        $frame->save();
-        return $node;
+        $nodes[$line_index][] = $nid;
+        $node->nodes = $nodes;
+        $node->save();
     }
-    */
+}
+
+```
+`plugins/zen/threes/classes/Notice.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Http;
+use Zen\Threes\Traits\SingletonTrait;
+
+class Notice
+{
+    use SingletonTrait;
+
+    public function telegramSendMessage(string $text, ?string $chat_id = null): void
+    {
+        $bot_token = env('TELEGRAM_BOT_TOKEN');
+        $chat_id = env('TELEGRAM_CHAT_ID', $chat_id);
+        if (!$bot_token || !$chat_id) {
+            return;
+        }
+        $api_url = 'https://api.telegram.org';
+        $encodedText = urlencode($text);
+        $query = "$api_url/bot$bot_token/sendMessage?chat_id=$chat_id&text=$encodedText&parse_mode=HTML";
+        Http::get($query);
+    }
 }
 
 ```
@@ -1162,252 +1258,57 @@ class Frame extends Model
 
 ```
 `plugins/zen/threes/models/Node.php`
-```<?php namespace Zen\Threes\Models;
+```<?php
 
-use Model;
-use October\Rain\Database\Traits\Validation;
+namespace App\Models\Threes;
 
-/**
- * @property string $nid - Токен нода
- * @property string $name - Имя
- * @property string $svg_path - Путь до SVG
- * @property string $description - Описание
- * @property null|string $svg
- * @method static find($nid)
- * @method static get()
- */
+use Jenssegers\Mongodb\Eloquent\Model;
 
 class Node extends Model
 {
-    use Validation;
-
-    public $table = 'zen_threes_nodes';
-    protected $primaryKey = 'nid';
-    protected $keyType = 'string';
+    protected $connection = 'mongodb';
+    protected $collection = 'nodes';
+    protected $primaryKey = '_id'; // MongoDB по умолчанию
     public $incrementing = false;
 
-    public $rules = [
-        'nid' => 'required|unique:zen_threes_nodes,nid',
-    ];
-
     protected $fillable = [
-        'nid',
-        'svg',
-        'svg_name',
-        'nodes',
-        'name',
-        'data',
-        'scheme',
-        'description',
+        'nid',            // уникальный идентификатор
+        'name',           // имя нода
+        'type',           // например: 'ai_agent', 'form_component', 'data_adapter'
+        'props',          // произвольные свойства (endpoint, interval, binding и т.д.)
+        'children',       // вложенные ноды или ссылки
+        'meta',           // что-то вроде system-поля (например timestamps, версия)
     ];
 
-    private ?string $nid_token_dump = null;
+    protected $casts = [
+        'props' => 'array',
+        'children' => 'array',
+        'meta' => 'array',
+    ];
 
-    protected array $dynamic_attributes = [];
-    protected array $data_dump = [];
+    ### Примеры удобных методов для будущего:
 
-    /** Разделение статических и динамических полей
-     * @param $name
-     * @param $value
-     * @return void
-     */
-    public function __set($name, $value)
+    public function addChild($node_or_ref): void
     {
-        if (!$this->hasAttribute($name)) {
-            $this->dynamic_attributes[$name] = $value;
-            unset($this->attributes[$name]);
-        } else {
-            parent::__set($name, $value);
-        }
+        $children = $this->children ?? [];
+        $children[] = $node_or_ref;
+        $this->children = $children;
+        $this->save();
     }
 
-    /**
-     * Проверка на динамический атрибут
-     * @param string $key
-     * @return bool
-     */
-    private function hasAttribute(string $key): bool
+    public function resolveChildren(): array
     {
-        return in_array($key, $this->fillable);
-    }
+        $resolved = [];
 
-    /**
-     * Получить токен нода
-     * @return string
-     */
-    private function makeNidToken(): string
-    {
-        if ($this->nid_token_dump) {
-            return $this->nid_token_dump;
-        }
-        return $this->nid_token_dump = ths()->nodes()->createNidToken();
-    }
-
-    /**
-     * @param string|null $value
-     * @return string|null
-     */
-    public function getNidAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        return $this->makeNidToken();
-    }
-
-    public function getNameAttribute(?string $value): string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $token = $this->makeNidToken();
-        $token = explode('.', $token);
-        return end($token);
-    }
-
-    public function getNodesAttribute(): array
-    {
-        $nodes_string = $this->data_dump['nodes'] ?? '';
-        return ths()->nodes()->nodesFromString($nodes_string);
-    }
-
-    public function setNodesAttribute(array $nodes): void
-    {
-        $this->data_dump['nodes'] = ths()->nodes()->nodesToString($nodes);
-    }
-
-    public function getSvgPathAttribute(): string
-    {
-        if (!$this->svg) {
-            return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
-        }
-        return '/storage/app/uploads/public/threes/icons/' . $this->svg_name;
-    }
-
-    public function getSvgAttribute(?string $svg = null): string
-    {
-        if (!$svg) {
-            return file_get_contents(
-                base_path('plugins/zen/threes/assets/images/icons/default-icon.svg')
-            );
-        }
-        return $svg;
-    }
-
-    public function getSettingsAttribute(): array
-    {
-        return $this->data_dump['settings'] ?? [];
-    }
-
-    public function getDataAttribute(?string $data): array
-    {
-        if ($data) {
-            return ths()->fromJson($data) ?? [];
-        }
-        return [];
-    }
-
-    public function getSchemeAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $default_scheme = ths()->fromYamlFile(
-            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
-        );
-
-        $exe = $default_scheme['fields']['exe'];
-        $exe['tab'] = 'Настройки';
-
-        return ths()->toYaml(['exe' => $exe]);
-    }
-
-    public function getAdditionalFieldsAttribute(): array
-    {
-        if ($this->scheme) {
-            $fields = ths()->fromYaml($this->scheme);
-
-            if (!$fields) {
-                return [];
-            }
-
-            $add_fields = [];
-            foreach ($fields as $field => $value) {
-                $add_fields[$field] = [
-                    'label' => $value['label'],
-                    'type' => $value['type'],
-                    'tab' => $value['tab'] ?? 'Настройки',
-                    'span' => $value['span'],
-                ];
-                if ($additional = $value['additional'] ?? null) {
-                    foreach ($additional as $batch) {
-                        $batch = ths()->fromYaml($batch['rule']);
-                        $add_fields[$value['field']] = array_merge($add_fields[$value['field']], $batch);
-                    }
-                }
-            }
-            return $add_fields;
-        }
-        return [];
-    }
-
-    public function getStoreItemAttribute(): array
-    {
-        return [
-            'nid' => $this->nid,
-            'name' => $this->name,
-            'icon' => $this->svg_path,
-            'description' => $this->description,
-        ];
-    }
-
-    public function afterFetch(): void
-    {
-        $this->data_dump = $this->data;
-        $this->fillSettings();
-    }
-
-    public function beforeSave(): void
-    {
-        $this->saveData();
-        $this->saveSvgIcon();
-    }
-
-    private function fillSettings(): void
-    {
-        $settings = $this->data_dump['settings'] ?? null;
-        if ($settings) {
-            foreach ($settings as $field => $value) {
-                $this->attributes[$field] = $value;
+        foreach ($this->children ?? [] as $item) {
+            if (isset($item['$ref']) && isset($item['$id'])) {
+                $resolved[] = self::find($item['$id']);
+            } elseif (isset($item['nid'])) {
+                $resolved[] = new self($item); // вложенный без сохранения
             }
         }
-    }
 
-    private function saveSvgIcon(): void
-    {
-        if (!$this->svg) {
-            return;
-        }
-        $svg_name = md5($this->svg) . '.svg';
-        $path = ths()->checkDir(storage_path('app/uploads/public/threes/icons/' . $svg_name));
-        file_put_contents(
-            $path,
-            $this->svg
-        );
-        $this->attributes['svg_name'] = $svg_name;
-    }
-
-    public function saveData(): void
-    {
-        if (empty($this->attributes['nid'])) {
-            $this->attributes['nid'] = $this->nid ?? ths()->nodes()->createNidToken();
-        }
-        $settings = $this->dynamic_attributes;
-        $this->data_dump['settings'] = $settings;
-        $this->attributes['data'] = ths()->toJson($this->data_dump);
+        return $resolved;
     }
 }
 
@@ -1812,6 +1713,7 @@ fields:
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
+        "grapesjs": "^0.22.6",
         "lodash": "^4.17.21",
         "md5": "^2.3.0",
         "primeicons": "^5.0.0",
@@ -1936,15 +1838,9 @@ Route::match(
 
 const routes = [
     {
-        path: "/:backend/zen/threes/framecontroller/create",
+        path: "/:backend/zen/threes/framecontroller",
         name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
-        props: true,
-    },
-    {
-        path: "/:backend/zen/threes/framecontroller/update/:nid",
-        name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
+        component: () => import("../vue/screens/Ui.vue"),
         props: true,
     },
 ];
@@ -1958,14 +1854,12 @@ export default router;
 
 ```
 `plugins/zen/threes/src/js/threes.js`
-```
-const axios = require('axios');
+```const axios = require('axios');
 const md5 = require('md5');
 import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
-import vuedraggable from 'vuedraggable';
 import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
@@ -2067,384 +1961,17 @@ window.ths = {
         }
     },
     preloader(state) {
-        console.log('Состояние прелоадера', state)
-
         this.data.process = state
     },
-    nodesUiStreamsRun() {
-
-    }
 }
 
-import FormFitter from "../vue/components/FormFitter.vue";
-import FormSection from "../vue/components/FormSection.vue";
 import vueClickOutsideElement from 'vue-click-outside-element';
 
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
 app.use(vueClickOutsideElement)
-app.component('FormFitter', FormFitter);
-app.component('FormSection', FormSection);
-app.component('draggable', vuedraggable);
 app.mount("#threes");
-
-```
-`plugins/zen/threes/src/vue/components/Select.css`
-```:root {
-    --vs-colors--lightest: rgba(60, 60, 60, .26);
-    --vs-colors--light: rgba(60, 60, 60, .5);
-    --vs-colors--dark: #333;
-    --vs-colors--darkest: rgba(0, 0, 0, .15);
-    --vs-search-input-color: inherit;
-    --vs-search-input-placeholder-color: inherit;
-    --vs-font-size: 1rem;
-    --vs-line-height: 1.4;
-    --vs-state-disabled-bg: rgb(248, 248, 248);
-    --vs-state-disabled-color: var(--vs-colors--light);
-    --vs-state-disabled-controls-color: var(--vs-colors--light);
-    --vs-state-disabled-cursor: not-allowed;
-    --vs-border-color: var(--vs-colors--lightest);
-    --vs-border-width: 1px;
-    --vs-border-style: solid;
-    --vs-border-radius: 4px;
-    --vs-actions-padding: 4px 6px 0 3px;
-    --vs-controls-color: var(--vs-colors--light);
-    --vs-controls-size: 1;
-    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
-    --vs-selected-bg: #f0f0f0;
-    --vs-selected-color: var(--vs-colors--dark);
-    --vs-selected-border-color: var(--vs-border-color);
-    --vs-selected-border-style: var(--vs-border-style);
-    --vs-selected-border-width: var(--vs-border-width);
-    --vs-dropdown-bg: #fff;
-    --vs-dropdown-color: inherit;
-    --vs-dropdown-z-index: 1000;
-    --vs-dropdown-min-width: 160px;
-    --vs-dropdown-max-height: 350px;
-    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
-    --vs-dropdown-option-bg: #000;
-    --vs-dropdown-option-color: var(--vs-dropdown-color);
-    --vs-dropdown-option-padding: 3px 20px;
-    --vs-dropdown-option--active-bg: #5897fb;
-    --vs-dropdown-option--active-color: #fff;
-    --vs-dropdown-option--deselect-bg: #fb5858;
-    --vs-dropdown-option--deselect-color: #fff;
-    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
-    --vs-transition-duration: .15s
-}
-
-.v-select {
-    position: relative;
-    font-family: inherit;
-    background: #fff;
-}
-
-.v-select, .v-select * {
-    box-sizing: border-box
-}
-
-:root {
-    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
-    --vs-transition-duration: .15s
-}
-
-@-webkit-keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-@keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-.vs__fade-enter-active, .vs__fade-leave-active {
-    pointer-events: none;
-    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
-}
-
-.vs__fade-enter, .vs__fade-leave-to {
-    opacity: 0
-}
-
-:root {
-    --vs-disabled-bg: var(--vs-state-disabled-bg);
-    --vs-disabled-color: var(--vs-state-disabled-color);
-    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
-    cursor: var(--vs-disabled-cursor);
-    background-color: var(--vs-disabled-bg)
-}
-
-.v-select[dir=rtl] .vs__actions {
-    padding: 0 3px 0 6px
-}
-
-.v-select[dir=rtl] .vs__clear {
-    margin-left: 6px;
-    margin-right: 0
-}
-
-.v-select[dir=rtl] .vs__deselect {
-    margin-left: 0;
-    margin-right: 2px
-}
-
-.v-select[dir=rtl] .vs__dropdown-menu {
-    text-align: right
-}
-
-.vs__dropdown-toggle {
-    height: 42px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    display: flex;
-    padding: 0 0 4px;
-    background: none;
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-radius: var(--vs-border-radius);
-    white-space: normal
-}
-
-.vs__selected-options {
-    display: flex;
-    flex-basis: 100%;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    padding: 0 2px;
-    position: relative
-}
-
-.vs__actions {
-    display: flex;
-    align-items: center;
-    padding: var(--vs-actions-padding)
-}
-
-.vs--searchable .vs__dropdown-toggle {
-    height: auto;
-    min-height: 36px;
-    cursor: text
-}
-
-.vs--unsearchable .vs__dropdown-toggle {
-    cursor: pointer
-}
-
-.vs--open .vs__dropdown-toggle {
-    border-bottom-color: transparent;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0
-}
-
-.vs__open-indicator {
-    fill: var(--vs-controls-color);
-    transform: scale(var(--vs-controls-size));
-    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
-    transition-timing-function: var(--vs-transition-timing-function)
-}
-
-.vs--open .vs__open-indicator {
-    transform: rotate(180deg) scale(var(--vs-controls-size))
-}
-
-.vs--loading .vs__open-indicator {
-    opacity: 0
-}
-
-.vs__clear {
-    fill: var(--vs-controls-color);
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    cursor: pointer;
-    margin-right: 8px
-}
-
-.vs__dropdown-menu {
-    display: block;
-    box-sizing: border-box;
-    position: absolute;
-    top: calc(100% - var(--vs-border-width));
-    left: 0;
-    z-index: var(--vs-dropdown-z-index);
-    padding: 5px 0;
-    margin: 0;
-    width: 100%;
-    max-height: var(--vs-dropdown-max-height);
-    min-width: var(--vs-dropdown-min-width);
-    overflow-y: auto;
-    box-shadow: var(--vs-dropdown-box-shadow);
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-top-style: none;
-    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
-    text-align: left;
-    list-style: none;
-    background: var(--vs-dropdown-bg);
-    color: var(--vs-dropdown-color)
-}
-
-.vs__no-options {
-    text-align: center
-}
-
-.vs__dropdown-option {
-    line-height: 1.42857143;
-    display: block;
-    padding: var(--vs-dropdown-option-padding);
-    clear: both;
-    color: var(--vs-dropdown-option-color);
-    white-space: nowrap;
-    cursor: pointer
-}
-
-.vs__dropdown-option--highlight {
-    background: var(--vs-dropdown-option--active-bg);
-    color: var(--vs-dropdown-option--active-color)
-}
-
-.vs__dropdown-option--deselect {
-    background: var(--vs-dropdown-option--deselect-bg);
-    color: var(--vs-dropdown-option--deselect-color)
-}
-
-.vs__dropdown-option--disabled {
-    background: var(--vs-state-disabled-bg);
-    color: var(--vs-state-disabled-color);
-    cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs__selected {
-    display: flex;
-    align-items: center;
-    background-color: var(--vs-selected-bg);
-    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
-    border-radius: var(--vs-border-radius);
-    color: var(--vs-selected-color);
-    line-height: var(--vs-line-height);
-    margin: 4px 2px 0;
-    padding: 0 .25em;
-    z-index: 0
-}
-
-.vs__deselect {
-    display: inline-flex;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    margin-left: 4px;
-    padding: 0;
-    border: 0;
-    cursor: pointer;
-    background: none;
-    fill: var(--vs-controls-color);
-    text-shadow: var(--vs-controls--deselect-text-shadow)
-}
-
-.vs__selected {
-    /*height: 33px;*/
-}
-
-.vs--single .vs__selected {
-    background-color: transparent;
-    border-color: transparent
-}
-
-.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
-    position: absolute;
-    opacity: .4
-}
-
-.vs--single.vs--searching .vs__selected {
-    display: none
-}
-
-.vs__search::-webkit-search-cancel-button {
-    display: none
-}
-
-.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
-    display: none
-}
-
-.vs__search, .vs__search:focus {
-    color: var(--vs-search-input-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    line-height: var(--vs-line-height);
-    font-size: var(--vs-font-size);
-    border: 1px solid transparent;
-    border-left: none;
-    outline: none;
-    margin: 4px 0 0;
-    padding: 0 7px;
-    background: none;
-    box-shadow: none;
-    width: 0;
-    max-width: 100%;
-    flex-grow: 1;
-    z-index: 1
-}
-
-.vs__search::-moz-placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs__search::placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs--unsearchable .vs__search {
-    opacity: 1
-}
-
-.vs--unsearchable:not(.vs--disabled) .vs__search {
-    cursor: pointer
-}
-
-.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
-    opacity: .2
-}
-
-.vs__spinner {
-    align-self: center;
-    opacity: 0;
-    font-size: 5px;
-    text-indent: -9999em;
-    overflow: hidden;
-    border-top: .9em solid rgba(100, 100, 100, .1);
-    border-right: .9em solid rgba(100, 100, 100, .1);
-    border-bottom: .9em solid rgba(100, 100, 100, .1);
-    border-left: .9em solid rgba(60, 60, 60, .45);
-    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
-    -webkit-animation: vSelectSpinner 1.1s infinite linear;
-    animation: vSelectSpinner 1.1s infinite linear;
-    transition: opacity .1s
-}
-
-.vs__spinner, .vs__spinner:after {
-    border-radius: 50%;
-    width: 5em;
-    height: 5em;
-    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
-}
-
-.vs--loading .vs__spinner {
-    opacity: 1
-}
 
 ```
 `plugins/zen/threes/src/vue/old_components/Dwarf/inputs/DwarfSelect.css`
@@ -2804,6 +2331,363 @@ app.mount("#threes");
 }
 
 ```
+`plugins/zen/threes/src/vue/old_components/v2/Select.css`
+```:root {
+    --vs-colors--lightest: rgba(60, 60, 60, .26);
+    --vs-colors--light: rgba(60, 60, 60, .5);
+    --vs-colors--dark: #333;
+    --vs-colors--darkest: rgba(0, 0, 0, .15);
+    --vs-search-input-color: inherit;
+    --vs-search-input-placeholder-color: inherit;
+    --vs-font-size: 1rem;
+    --vs-line-height: 1.4;
+    --vs-state-disabled-bg: rgb(248, 248, 248);
+    --vs-state-disabled-color: var(--vs-colors--light);
+    --vs-state-disabled-controls-color: var(--vs-colors--light);
+    --vs-state-disabled-cursor: not-allowed;
+    --vs-border-color: var(--vs-colors--lightest);
+    --vs-border-width: 1px;
+    --vs-border-style: solid;
+    --vs-border-radius: 4px;
+    --vs-actions-padding: 4px 6px 0 3px;
+    --vs-controls-color: var(--vs-colors--light);
+    --vs-controls-size: 1;
+    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
+    --vs-selected-bg: #f0f0f0;
+    --vs-selected-color: var(--vs-colors--dark);
+    --vs-selected-border-color: var(--vs-border-color);
+    --vs-selected-border-style: var(--vs-border-style);
+    --vs-selected-border-width: var(--vs-border-width);
+    --vs-dropdown-bg: #fff;
+    --vs-dropdown-color: inherit;
+    --vs-dropdown-z-index: 1000;
+    --vs-dropdown-min-width: 160px;
+    --vs-dropdown-max-height: 350px;
+    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
+    --vs-dropdown-option-bg: #000;
+    --vs-dropdown-option-color: var(--vs-dropdown-color);
+    --vs-dropdown-option-padding: 3px 20px;
+    --vs-dropdown-option--active-bg: #5897fb;
+    --vs-dropdown-option--active-color: #fff;
+    --vs-dropdown-option--deselect-bg: #fb5858;
+    --vs-dropdown-option--deselect-color: #fff;
+    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
+    --vs-transition-duration: .15s
+}
+
+.v-select {
+    position: relative;
+    font-family: inherit;
+    background: #fff;
+}
+
+.v-select, .v-select * {
+    box-sizing: border-box
+}
+
+:root {
+    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
+    --vs-transition-duration: .15s
+}
+
+@-webkit-keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+.vs__fade-enter-active, .vs__fade-leave-active {
+    pointer-events: none;
+    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
+}
+
+.vs__fade-enter, .vs__fade-leave-to {
+    opacity: 0
+}
+
+:root {
+    --vs-disabled-bg: var(--vs-state-disabled-bg);
+    --vs-disabled-color: var(--vs-state-disabled-color);
+    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
+    cursor: var(--vs-disabled-cursor);
+    background-color: var(--vs-disabled-bg)
+}
+
+.v-select[dir=rtl] .vs__actions {
+    padding: 0 3px 0 6px
+}
+
+.v-select[dir=rtl] .vs__clear {
+    margin-left: 6px;
+    margin-right: 0
+}
+
+.v-select[dir=rtl] .vs__deselect {
+    margin-left: 0;
+    margin-right: 2px
+}
+
+.v-select[dir=rtl] .vs__dropdown-menu {
+    text-align: right
+}
+
+.vs__dropdown-toggle {
+    height: 42px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: flex;
+    padding: 0 0 4px;
+    background: none;
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-radius: var(--vs-border-radius);
+    white-space: normal
+}
+
+.vs__selected-options {
+    display: flex;
+    flex-basis: 100%;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    padding: 0 2px;
+    position: relative
+}
+
+.vs__actions {
+    display: flex;
+    align-items: center;
+    padding: var(--vs-actions-padding)
+}
+
+.vs--searchable .vs__dropdown-toggle {
+    height: auto;
+    min-height: 36px;
+    cursor: text
+}
+
+.vs--unsearchable .vs__dropdown-toggle {
+    cursor: pointer
+}
+
+.vs--open .vs__dropdown-toggle {
+    border-bottom-color: transparent;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0
+}
+
+.vs__open-indicator {
+    fill: var(--vs-controls-color);
+    transform: scale(var(--vs-controls-size));
+    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
+    transition-timing-function: var(--vs-transition-timing-function)
+}
+
+.vs--open .vs__open-indicator {
+    transform: rotate(180deg) scale(var(--vs-controls-size))
+}
+
+.vs--loading .vs__open-indicator {
+    opacity: 0
+}
+
+.vs__clear {
+    fill: var(--vs-controls-color);
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    margin-right: 8px
+}
+
+.vs__dropdown-menu {
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    top: calc(100% - var(--vs-border-width));
+    left: 0;
+    z-index: var(--vs-dropdown-z-index);
+    padding: 5px 0;
+    margin: 0;
+    width: 100%;
+    max-height: var(--vs-dropdown-max-height);
+    min-width: var(--vs-dropdown-min-width);
+    overflow-y: auto;
+    box-shadow: var(--vs-dropdown-box-shadow);
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-top-style: none;
+    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
+    text-align: left;
+    list-style: none;
+    background: var(--vs-dropdown-bg);
+    color: var(--vs-dropdown-color)
+}
+
+.vs__no-options {
+    text-align: center
+}
+
+.vs__dropdown-option {
+    line-height: 1.42857143;
+    display: block;
+    padding: var(--vs-dropdown-option-padding);
+    clear: both;
+    color: var(--vs-dropdown-option-color);
+    white-space: nowrap;
+    cursor: pointer
+}
+
+.vs__dropdown-option--highlight {
+    background: var(--vs-dropdown-option--active-bg);
+    color: var(--vs-dropdown-option--active-color)
+}
+
+.vs__dropdown-option--deselect {
+    background: var(--vs-dropdown-option--deselect-bg);
+    color: var(--vs-dropdown-option--deselect-color)
+}
+
+.vs__dropdown-option--disabled {
+    background: var(--vs-state-disabled-bg);
+    color: var(--vs-state-disabled-color);
+    cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs__selected {
+    display: flex;
+    align-items: center;
+    background-color: var(--vs-selected-bg);
+    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
+    border-radius: var(--vs-border-radius);
+    color: var(--vs-selected-color);
+    line-height: var(--vs-line-height);
+    margin: 4px 2px 0;
+    padding: 0 .25em;
+    z-index: 0
+}
+
+.vs__deselect {
+    display: inline-flex;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: none;
+    fill: var(--vs-controls-color);
+    text-shadow: var(--vs-controls--deselect-text-shadow)
+}
+
+.vs__selected {
+    /*height: 33px;*/
+}
+
+.vs--single .vs__selected {
+    background-color: transparent;
+    border-color: transparent
+}
+
+.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
+    position: absolute;
+    opacity: .4
+}
+
+.vs--single.vs--searching .vs__selected {
+    display: none
+}
+
+.vs__search::-webkit-search-cancel-button {
+    display: none
+}
+
+.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
+    display: none
+}
+
+.vs__search, .vs__search:focus {
+    color: var(--vs-search-input-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    line-height: var(--vs-line-height);
+    font-size: var(--vs-font-size);
+    border: 1px solid transparent;
+    border-left: none;
+    outline: none;
+    margin: 4px 0 0;
+    padding: 0 7px;
+    background: none;
+    box-shadow: none;
+    width: 0;
+    max-width: 100%;
+    flex-grow: 1;
+    z-index: 1
+}
+
+.vs__search::-moz-placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs__search::placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs--unsearchable .vs__search {
+    opacity: 1
+}
+
+.vs--unsearchable:not(.vs--disabled) .vs__search {
+    cursor: pointer
+}
+
+.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
+    opacity: .2
+}
+
+.vs__spinner {
+    align-self: center;
+    opacity: 0;
+    font-size: 5px;
+    text-indent: -9999em;
+    overflow: hidden;
+    border-top: .9em solid rgba(100, 100, 100, .1);
+    border-right: .9em solid rgba(100, 100, 100, .1);
+    border-bottom: .9em solid rgba(100, 100, 100, .1);
+    border-left: .9em solid rgba(60, 60, 60, .45);
+    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
+    -webkit-animation: vSelectSpinner 1.1s infinite linear;
+    animation: vSelectSpinner 1.1s infinite linear;
+    transition: opacity .1s
+}
+
+.vs__spinner, .vs__spinner:after {
+    border-radius: 50%;
+    width: 5em;
+    height: 5em;
+    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
+}
+
+.vs--loading .vs__spinner {
+    opacity: 1
+}
+
+```
 `plugins/zen/threes/traits/QueryLogTrait.php`
 ```<?php
 
@@ -2904,7 +2788,6 @@ class M001Frames extends Migration
         Schema::dropIfExists('zen_threes_frames');
     }
 }
-
 ```
 `plugins/zen/threes/updates/m002_nodes.php`
 ```<?php namespace Zen\Threes\Updates;

@@ -1,38 +1,64 @@
 <?php
 
-namespace App\Models\Mongo;
+namespace Zen\Threes\Models;
 
-use Jenssegers\Mongodb\Eloquent\Model;
+use MongoDB\Client;
+use MongoDB\BSON\ObjectId;
 
-class Node extends Model
+class Node
 {
-    protected $connection = 'mongodb';
-    protected $collection = 'nodes';
-    protected $primaryKey = '_id'; // MongoDB по умолчанию
-    public $incrementing = false;
+    public static string $database = 'threes';
+    public static string $collection = 'nodes';
 
-    protected $fillable = [
-        'nid',            // уникальный идентификатор
-        'name',           // имя нода
-        'type',           // например: 'ai_agent', 'form_component', 'data_adapter'
-        'props',          // произвольные свойства (endpoint, interval, binding и т.д.)
-        'children',       // вложенные ноды или ссылки
-        'meta',           // что-то вроде system-поля (например timestamps, версия)
-    ];
+    protected array $attributes = [];
 
-    protected $casts = [
-        'props' => 'array',
-        'children' => 'array',
-        'meta' => 'array',
-    ];
+    public function __construct(array $data = [])
+    {
+        $this->attributes = $data;
+    }
 
-    ### Примеры удобных методов для будущего:
+    public static function client(): Client
+    {
+        return new Client(env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin'));
+    }
+
+    public static function collection()
+    {
+        return self::client()->selectDatabase(self::$database)->selectCollection(self::$collection);
+    }
+
+    public static function find(string $id): ?self
+    {
+        $doc = self::collection()->findOne(['_id' => new ObjectId($id)]);
+        return $doc ? new self($doc->getArrayCopy()) : null;
+    }
+
+    public static function findByNid(string $nid): ?self
+    {
+        $doc = self::collection()->findOne(['nid' => $nid]);
+        return $doc ? new self($doc->getArrayCopy()) : null;
+    }
+
+    public function save(): void
+    {
+        if (isset($this->attributes['_id'])) {
+            // Обновление
+            self::collection()->replaceOne(
+                ['_id' => new ObjectId($this->attributes['_id'])],
+                $this->attributes
+            );
+        } else {
+            // Вставка
+            $result = self::collection()->insertOne($this->attributes);
+            $this->attributes['_id'] = $result->getInsertedId();
+        }
+    }
 
     public function addChild($node_or_ref): void
     {
-        $children = $this->children ?? [];
+        $children = $this->attributes['children'] ?? [];
         $children[] = $node_or_ref;
-        $this->children = $children;
+        $this->attributes['children'] = $children;
         $this->save();
     }
 
@@ -40,7 +66,7 @@ class Node extends Model
     {
         $resolved = [];
 
-        foreach ($this->children ?? [] as $item) {
+        foreach ($this->attributes['children'] ?? [] as $item) {
             if (isset($item['$ref']) && isset($item['$id'])) {
                 $resolved[] = self::find($item['$id']);
             } elseif (isset($item['nid'])) {
@@ -49,5 +75,20 @@ class Node extends Model
         }
 
         return $resolved;
+    }
+
+    public function __get($key)
+    {
+        return $this->attributes[$key] ?? null;
+    }
+
+    public function __set($key, $value): void
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    public function toArray(): array
+    {
+        return $this->attributes;
     }
 }

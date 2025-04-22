@@ -1,11 +1,9 @@
-
 const axios = require('axios');
 const md5 = require('md5');
 import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
-import vuedraggable from 'vuedraggable';
 import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
@@ -107,24 +105,14 @@ window.ths = {
         }
     },
     preloader(state) {
-        console.log('Состояние прелоадера', state)
-
         this.data.process = state
     },
-    nodesUiStreamsRun() {
-
-    }
 }
 
-import FormFitter from "../vue/components/FormFitter.vue";
-import FormSection from "../vue/components/FormSection.vue";
 import vueClickOutsideElement from 'vue-click-outside-element';
 
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
 app.use(vueClickOutsideElement)
-app.component('FormFitter', FormFitter);
-app.component('FormSection', FormSection);
-app.component('draggable', vuedraggable);
 app.mount("#threes");
