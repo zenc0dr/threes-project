@@ -1,7 +1,13 @@
 <?php
 
-function handleResponse(array | string | null $response = null)
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+function handleResponse(array | string | \Symfony\Component\HttpFoundation\Response | null $response = null)
 {
+    if ($response instanceof BinaryFileResponse) {
+        return $response;
+    }
+
     if (is_null($response)) {
         return '';
     }

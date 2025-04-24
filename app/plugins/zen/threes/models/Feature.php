@@ -41,7 +41,11 @@ class Feature extends Model
 
     public function getStatusOptions(): array
     {
-        return $this->getUniqueOptions('status');
+        return [
+            'accepted' => 'accepted',
+            'planned' => 'planned',
+        ];
+        //return $this->getUniqueOptions('status');
     }
     public function getCategoryOptions(): array
     {

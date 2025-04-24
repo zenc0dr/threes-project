@@ -30,11 +30,24 @@ tabs:
                         span: full
                         type: textarea
         vector_prompt:
-            label: 'Промт обработки вектора'
-            size: large
+            label: 'Промт обработки данных'
+            prompt: 'Добавить блок'
+            displayMode: accordion
             span: full
-            type: textarea
+            type: repeater
             tab: Vector
+            form:
+                fields:
+                    active:
+                        label: Включен
+                        span: full
+                        default: 1
+                        type: switch
+                    text:
+                        label: Промт
+                        size: small
+                        span: full
+                        type: textarea
         vector:
             label: 'Сырой вектор'
             size: giant
@@ -44,8 +57,8 @@ tabs:
             tab: Vector
         default_prompt:
             label: 'Промт по усолчанию'
-            span: full
             size: giant
+            span: full
             type: textarea
             tab: Ai
 fields:

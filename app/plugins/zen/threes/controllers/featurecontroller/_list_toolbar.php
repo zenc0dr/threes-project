@@ -13,4 +13,18 @@
         data-stripe-load-indicator>
         <?= e(trans('backend::lang.list.delete_selected')) ?>
     </button>
+    <button
+        class="btn btn-default oc-icon-refresh"
+        data-request="onRegenerate"
+        data-request-confirm="Вы уверены, что хотите выполнить регенерацию бэклога?"
+        data-stripe-load-indicator>
+        Регенерировать
+    </button>
+    <a
+        href="<?= Backend::url('zen/threes/featurecontroller/downloadxlsx') ?>"
+        class="btn btn-default oc-icon-download"
+        target="_blank"
+    >
+        Скачать XLSX
+    </a>
 </div>

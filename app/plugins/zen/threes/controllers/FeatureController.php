@@ -24,4 +24,17 @@ class FeatureController extends Controller
         BackendMenu::setContext('Zen.Threes', 'main', 'threes-features');
     }
 
+    public function onRegenerate()
+    {
+        \Flash::success('Регенерация успешно выполнена!');
+
+        ths()->backlog()->generateBacklog(
+            ths()->getSetting('vector_yaml')
+        );
+        // или для ошибки:
+        // \Flash::error('Произошла ошибка при регенерации.');
+
+        // Вернём обновление списка, если нужно
+        return \Redirect::back();
+    }
 }

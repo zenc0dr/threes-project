@@ -14,13 +14,21 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->ai(
-                'Привет моделька',
-                'Ты добрая и ласковая девушка',
-                'ollama'
-            )
+
+        ths()->backlog()->generateBacklog(
+            ths()->getSetting('vector_yaml')
         );
+
+        //ths()->setSetting('vector_yaml', 'LALALA');
+
+
+//        dd(
+//            ths()->ai(
+//                'Привет моделька',
+//                'Ты добрая и ласковая девушка',
+//                'ollama'
+//            )
+//        );
 
 
         #ths()->getSetting();
