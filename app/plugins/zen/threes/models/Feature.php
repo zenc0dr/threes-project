@@ -31,43 +31,23 @@ class Feature extends Model
 
     public function getModuleOptions(): array
     {
-        return Feature::query()
-            ->withoutGlobalScopes() // отключаем все глобальные scope'ы, включая сортировку
-            ->selectRaw('DISTINCT module')
-            ->orderBy('module') // сортируем только по тому, что явно есть в SELECT
-            ->pluck('module', 'module')
-            ->toArray();
+        return $this->getUniqueOptions('module');
     }
 
     public function getPriorityOptions(): array
     {
-        return Feature::query()
-            ->withoutGlobalScopes()
-            ->selectRaw('DISTINCT priority')
-            ->orderBy('priority')
-            ->pluck('priority', 'priority')
-            ->toArray();
+        return $this->getUniqueOptions('priority');
     }
 
     public function getStatusOptions(): array
     {
-        return Feature::query()
-            ->withoutGlobalScopes()
-            ->selectRaw('DISTINCT status')
-            ->orderBy('status')
-            ->pluck('status', 'status')
-            ->toArray();
+        return $this->getUniqueOptions('status');
     }
-
     public function getCategoryOptions(): array
     {
-        return Feature::query()
-            ->withoutGlobalScopes()
-            ->selectRaw('DISTINCT category')
-            ->orderBy('category')
-            ->pluck('category', 'category')
-            ->toArray();
+        return $this->getUniqueOptions('category');
     }
+
 
     public function getCriteriaCountAttribute()
     {
@@ -101,5 +81,17 @@ class Feature extends Model
             ->values()
             ->all();
         $this->acceptance_criteria = $transformed;
+    }
+
+    private function getUniqueOptions(string $field)
+    {
+        return Feature::query()
+            ->withoutGlobalScopes()
+            ->whereNotNull($field)
+            ->selectRaw("DISTINCT $field")
+            ->orderBy($field)
+            ->pluck($field, $field)
+            ->mapWithKeys(fn($v, $k) => [(string)$k => (string)$v])
+            ->toArray();
     }
 }

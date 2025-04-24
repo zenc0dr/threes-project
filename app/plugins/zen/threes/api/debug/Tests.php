@@ -14,7 +14,13 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->backlog()->handleVector();
+        dd(
+            ths()->ai(
+                'Привет моделька',
+                'Ты добрая и ласковая девушка',
+                'ollama'
+            )
+        );
 
 
         #ths()->getSetting();

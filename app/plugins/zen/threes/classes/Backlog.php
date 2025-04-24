@@ -16,7 +16,8 @@ class Backlog
 
         $yaml = ths()->ai(
             $vector,
-            $system_prompt
+            $system_prompt,
+            'ollama'
         );
 
         //$yaml = file_get_contents(storage_path('ai_answer.txt'));

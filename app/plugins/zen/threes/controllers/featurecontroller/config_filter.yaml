@@ -1,7 +1,17 @@
 scopes:
     category:
         label: Категория
-        type: group
-        modelClass: Zen\Threes\Models\Feature
-        nameFrom: category
+        type: dropdown
         options: getCategoryOptions
+    module:
+        label: Модуль
+        type: dropdown
+        options: getModuleOptions
+    priority:
+        label: Приоритет
+        type: dropdown
+        options: getPriorityOptions
+    status:
+        label: Статус
+        type: dropdown
+        options: getStatusOptions

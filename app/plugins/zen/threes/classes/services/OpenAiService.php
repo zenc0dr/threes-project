@@ -21,14 +21,14 @@ class OpenAiService
      * @return string
      * @throws Exception
      */
-    public static function query(string $system_prompt, string $user_prompt): string
+    public static function query(string $user_prompt, string $system_prompt, string $model = 'gpt-4.1'): string
     {
         $service = new self();
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $service->api_key,
             ])->timeout(600)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4.1',
+                'model' => $model,
                 'messages' => [
                     [
                         'role' => 'system',

@@ -80,11 +80,29 @@ class Helpers
         return Backlog::getInstance();
     }
 
-    public function ai(string $prompt, string $system_prompt =  null)
-    {
-        if (!$system_prompt) {
-            $system_prompt = ths()->getSetting('default_prompt');
+    public function ai(
+        string $prompt,
+        string $system_prompt = null,
+        string $service = 'openai',
+        string $model = null
+    ): ?string {
+        if ($service === 'openai') {
+            if (!$system_prompt) {
+                $system_prompt = ths()->getSetting('default_prompt');
+            }
+            if (!$model) {
+                $model = 'gpt-4.1';
+            }
+            return \Zen\Threes\Classes\Services\OpenAiService::query($prompt, $system_prompt, $model);
         }
-        return \Zen\Threes\Classes\Services\OpenAiService::query($system_prompt,$prompt);
+
+        if ($service === 'ollama') {
+            if (!$model) {
+                $model = 'llama3.3:latest';
+            }
+            return \Zen\Threes\Classes\Services\OllamaService::query($prompt, $system_prompt, $model);
+        }
+
+        return null;
     }
 }
