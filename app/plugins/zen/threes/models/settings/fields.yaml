@@ -1,3 +1,53 @@
+tabs:
+    fields:
+        vector_yaml:
+            label: 'Векторное представление'
+            size: giant
+            language: plain_text
+            span: full
+            type: codeeditor
+            tab: 'Vector YAML'
+        vector_handlers:
+            label: 'Обработка вектора'
+            prompt: 'Добавить обработчик'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: 'Vector YAML'
+            form:
+                fields:
+                    active:
+                        label: 'Обработчик включен'
+                        span: full
+                        type: switch
+                    name:
+                        label: 'Название обработчика'
+                        span: full
+                        type: text
+                    system_prompt:
+                        label: 'Системный промт'
+                        size: large
+                        span: full
+                        type: textarea
+        vector_prompt:
+            label: 'Промт обработки вектора'
+            size: large
+            span: full
+            type: textarea
+            tab: Vector
+        vector:
+            label: 'Сырой вектор'
+            size: giant
+            language: plain_text
+            span: full
+            type: codeeditor
+            tab: Vector
+        default_prompt:
+            label: 'Промт по усолчанию'
+            span: full
+            size: giant
+            type: textarea
+            tab: Ai
 fields:
     author_token:
         label: 'Токен автора'

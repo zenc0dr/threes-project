@@ -20,6 +20,9 @@ permissions:
     zen.threes.nodes:
         tab: Threes
         label: 'Nodes control'
+    zen.threes.features:
+        tab: Threes
+        label: 'Features control'
 navigation:
     main:
         label: Threes
@@ -28,6 +31,10 @@ navigation:
         permissions:
             - zen.threes.main
         sideMenu:
+            threes-features:
+                label: Бэклог
+                url: zen/threes/featurecontroller
+                icon: icon-star-o
             frames:
                 label: Фреймы
                 url: zen/threes/framecontroller

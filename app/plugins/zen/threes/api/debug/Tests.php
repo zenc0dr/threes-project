@@ -3,6 +3,7 @@
 namespace Zen\Threes\Api\debug;
 
 use Http;
+use Zen\Threes\Classes\Services\OpenAiService;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -13,8 +14,20 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+        ths()->backlog()->handleVector();
 
-        ths()->notice()->telegramSendMessage('Какдила?');
+
+        #ths()->getSetting();
+        #ths()->backlog()->generateBacklog();
+
+//        $answer = OpenAiService::query(
+//            'Ты дружелюбная помощница',
+//            'Привет милая, как твои делишки?'
+//        );
+//
+//        dd($answer);
+
+        //ths()->notice()->telegramSendMessage('Какдила?');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

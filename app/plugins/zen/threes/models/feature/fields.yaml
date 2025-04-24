@@ -1,0 +1,43 @@
+fields:
+    name:
+        label: 'Название фичи'
+        span: full
+        type: text
+    category:
+        label: Категория
+        showSearch: true
+        span: auto
+        type: dropdown
+    module:
+        label: Модуль
+        span: auto
+        showSearch: true
+        type: dropdown
+    priority:
+        label: Приоритет
+        showSearch: true
+        span: auto
+        type: dropdown
+    status:
+        label: Статус
+        showSearch: true
+        span: auto
+        type: dropdown
+    description:
+        label: Описание
+        span: full
+        size: giant
+        type: markdown
+    acceptance_criteria_repeater:
+        label: 'Критерии приёмки'
+        prompt: 'Добавить критерий'
+        displayMode: accordion
+        span: full
+        type: repeater
+        form:
+            fields:
+                item:
+                    label: Критерий
+                    span: full
+                    size: small
+                    type: textarea

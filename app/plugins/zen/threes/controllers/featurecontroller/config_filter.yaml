@@ -1,0 +1,7 @@
+scopes:
+    category:
+        label: Категория
+        type: group
+        modelClass: Zen\Threes\Models\Feature
+        nameFrom: category
+        options: getCategoryOptions

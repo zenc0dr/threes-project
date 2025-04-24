@@ -1,0 +1,16 @@
+list: $/zen/threes/models/feature/columns.yaml
+modelClass: Zen\Threes\Models\Feature
+title: FeatureController
+noRecordsMessage: 'backend::lang.list.no_records'
+showSetup: true
+showCheckboxes: true
+recordsPerPage: 20
+toolbar:
+    buttons: list_toolbar
+    search:
+        prompt: 'backend::lang.list.search_prompt'
+recordUrl: 'zen/threes/featurecontroller/update/:id'
+structure:
+    maxDepth: 0
+    treeExpanded: false
+filter: config_filter.yaml

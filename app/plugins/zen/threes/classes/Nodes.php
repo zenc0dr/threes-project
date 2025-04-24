@@ -21,7 +21,7 @@ class Nodes
      */
     public function createNidToken(): string
     {
-        $author = ths()->settings('author_token') ?? 'project';
+        $author = ths()->getSetting('author_token') ?? 'project';
         $scope = 'default';
         $token = 'node' . $this->getMaxNodeNumber($author, $scope);
         return "$author.$scope.$token";

@@ -1,0 +1,10 @@
+name: FeatureController
+form: $/zen/threes/models/feature/fields.yaml
+modelClass: Zen\Threes\Models\Feature
+defaultRedirect: zen/threes/featurecontroller
+create:
+    redirect: 'zen/threes/featurecontroller/update/:id'
+    redirectClose: zen/threes/featurecontroller
+update:
+    redirect: zen/threes/featurecontroller
+    redirectClose: zen/threes/featurecontroller

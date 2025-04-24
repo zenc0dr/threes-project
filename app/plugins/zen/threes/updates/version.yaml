@@ -12,3 +12,6 @@ v1.0.4:
 v1.0.5:
     - 'Create Versions'
     - m004_versions.php
+v1.0.6:
+    - 'Created Features'
+    - m005_features.php

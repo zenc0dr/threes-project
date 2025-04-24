@@ -88,8 +88,15 @@ class Threes extends Helpers
      * @param string $key
      * @return mixed
      */
-    public function settings(string $key)
+    public function getSetting(string $key): mixed
     {
         return Settings::get($key);
+    }
+
+    public function setSetting(string $key, mixed $value): void
+    {
+        $settings = Settings::instance();
+        $settings->setAttribute($key, $value);
+        $settings->save();
     }
 }

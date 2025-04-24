@@ -1,0 +1,58 @@
+columns:
+    id:
+        label: id
+        type: number
+        sortable: true
+        width: 50px
+    name:
+        label: name
+        type: text
+        searchable: true
+        sortable: true
+        width: auto
+    sort_order:
+        label: Порядок
+        type: number
+        sortable: true
+        width: 100px
+    created_at:
+        label: Создано
+        type: datetime
+        searchable: true
+        sortable: true
+        width: 150px
+        format: 'd.m.Y H:i'
+    updated_at:
+        label: Обновлено
+        type: datetime
+        searchable: true
+        sortable: true
+        width: 150px
+        format: 'd.m.Y H:i'
+    module:
+        label: Модуль
+        type: text
+        searchable: true
+        sortable: true
+        width: 250px
+    category:
+        label: Категория
+        type: text
+        searchable: true
+        sortable: true
+        width: 250px
+    status:
+        label: Статус
+        type: text
+        searchable: true
+        sortable: true
+        width: 100px
+    priority:
+        label: Приоритет
+        type: text
+        searchable: true
+        sortable: true
+        width: 100px
+    criteria_count:
+        label: Критериев
+        type: number

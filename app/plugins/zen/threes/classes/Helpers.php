@@ -74,4 +74,17 @@ class Helpers
     {
         return Versions::getInstance();
     }
+
+    public function backlog(): Backlog
+    {
+        return Backlog::getInstance();
+    }
+
+    public function ai(string $prompt, string $system_prompt =  null)
+    {
+        if (!$system_prompt) {
+            $system_prompt = ths()->getSetting('default_prompt');
+        }
+        return \Zen\Threes\Classes\Services\OpenAiService::query($system_prompt,$prompt);
+    }
 }
