@@ -34,7 +34,7 @@ class FeatureController extends Controller
         // или для ошибки:
         // \Flash::error('Произошла ошибка при регенерации.');
 
-        // Вернём обновление списка, если нужно
+        // Вернём обновление списка
         return \Redirect::back();
     }
 }

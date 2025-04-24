@@ -21,9 +21,8 @@
         Регенерировать
     </button>
     <a
-        href="<?= Backend::url('zen/threes/featurecontroller/downloadxlsx') ?>"
+        href="<?= url('/threes.api/backlog.export:xlsx') ?>"
         class="btn btn-default oc-icon-download"
-        target="_blank"
     >
         Скачать XLSX
     </a>
