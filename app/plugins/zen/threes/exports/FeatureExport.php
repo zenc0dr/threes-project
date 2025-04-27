@@ -11,7 +11,9 @@ class FeatureExport implements FromCollection, WithHeadings
         $rows = [];
 
         $features = Feature::get();
+
         foreach ($features as $feature) {
+            // Основная строка фичи
             $rows[] = [
                 $feature->id,
                 $feature->name,
@@ -22,6 +24,13 @@ class FeatureExport implements FromCollection, WithHeadings
                 $feature->priority,
                 $feature->created_at->format('d.m.Y H:i'),
             ];
+
+            // Каждая acceptance criteria — отдельной строкой
+            foreach ($feature->acceptance_criteria as $criteria) {
+                $rows[] = [
+                    '', '', '- ' . $criteria, '', '', '', '', '',
+                ];
+            }
         }
 
         return collect($rows);

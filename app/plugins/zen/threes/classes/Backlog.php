@@ -11,11 +11,7 @@ class Backlog
 
     public function handleVector(): void
     {
-        $yaml = ths()->getSetting('vector_yaml');
-
-        /*
         $vector = ths()->getSetting('vector');
-
         $system_prompt = collect(ths()->getSetting('vector_prompt'))
             ->where('active', 1)
             ->map(function ($prompt) {
@@ -29,15 +25,6 @@ class Backlog
         );
 
         ths()->setSetting('vector_yaml', $yaml);
-        */
-
-        //$yaml = file_get_contents(storage_path('ai_answer.txt'));
-
-//        file_put_contents(
-//            storage_path('ai_answer.txt'),
-//            $yaml
-//        );
-
         $this->generateBacklog($yaml);
     }
 
@@ -91,6 +78,7 @@ class Backlog
                 'priority' => $priority,
                 'status' => $status,
                 'module' => $module,
+                'release' => 1,
                 'acceptance_criteria' => $acceptance_criteria,
             ]);
         }

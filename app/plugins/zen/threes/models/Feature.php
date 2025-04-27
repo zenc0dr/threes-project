@@ -24,6 +24,7 @@ class Feature extends Model
         'priority',
         'status',
         'module',
+        'release',
         'acceptance_criteria'
     ];
 

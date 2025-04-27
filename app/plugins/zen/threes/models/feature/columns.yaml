@@ -1,13 +1,16 @@
 columns:
     id:
-        label: id
-        type: number
+        label: Фича
+        type: text
+        searchable: true
         sortable: true
-        width: 50px
+        width: auto
+        valueFrom: name
     name:
         label: name
         type: text
         searchable: true
+        invisible: true
         sortable: true
         width: auto
     sort_order:
@@ -34,13 +37,13 @@ columns:
         type: text
         searchable: true
         sortable: true
-        width: 250px
+        width: 100px
     category:
         label: Категория
         type: text
         searchable: true
         sortable: true
-        width: 250px
+        width: 100px
     status:
         label: Статус
         type: text
@@ -56,3 +59,4 @@ columns:
     criteria_count:
         label: Критериев
         type: number
+        width: 100px

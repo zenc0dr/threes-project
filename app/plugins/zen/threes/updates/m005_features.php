@@ -16,6 +16,7 @@ class M005Features extends Migration
             $table->text('priority')->nullable();
             $table->text('status')->nullable();
             $table->text('module')->nullable();
+            $table->integer('release')->nullable();
             $table->text('acceptance_criteria')->nullable();
             $table->integer('parent_id')->unsigned()->nullable();
             $table->integer('sort_order')->unsigned()->default(0);

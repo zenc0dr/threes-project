@@ -9,8 +9,8 @@ toolbar:
     buttons: list_toolbar
     search:
         prompt: 'backend::lang.list.search_prompt'
-recordUrl: 'zen/threes/featurecontroller/update/:id'
 structure:
     maxDepth: 0
     treeExpanded: false
 filter: config_filter.yaml
+recordUrl: 'zen/threes/featurecontroller/update/:id'

@@ -1,3 +1,11 @@
+tabs:
+    fields:
+        comment:
+            label: 'Промт для модификации фичи'
+            size: small
+            span: full
+            type: textarea
+            tab: Управление
 fields:
     name:
         label: 'Название фичи'
