@@ -60,3 +60,7 @@ columns:
         label: Критериев
         type: number
         width: 100px
+    description:
+        label: Описание
+        type: text
+        invisible: true

@@ -30,6 +30,24 @@ class Feature extends Model
 
     public $rules = [];
 
+
+    public function getDataAttribute(?string $data = null): array
+    {
+        if (!$data) {
+            return [];
+        }
+        return ths()->fromJson($data);
+    }
+
+    public function setDataAttribute(?array $data = []): void
+    {
+        if ($data === null) {
+            $this->attributes['data'] = null;
+        } else {
+            $this->attributes['data'] = ths()->toJson($data);
+        }
+    }
+
     public function getModuleOptions(): array
     {
         return $this->getUniqueOptions('module');
@@ -64,7 +82,7 @@ class Feature extends Model
         $this->attributes['acceptance_criteria'] = ths()->toJson($value);
     }
 
-    public function getAcceptanceCriteriaAttribute(string $value = ''): array
+    public function getAcceptanceCriteriaAttribute(?string $value = ''): ?array
     {
         if (!$value) {
             return [];

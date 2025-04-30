@@ -1,11 +1,59 @@
 tabs:
     fields:
+        description:
+            label: Описание
+            size: large
+            span: full
+            type: markdown
+            tab: Настройки
+        acceptance_criteria_repeater:
+            label: 'Критерии приёмки'
+            prompt: 'Добавить критерий'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Настройки
+            form:
+                fields:
+                    item:
+                        label: 'Критерии приёмки'
+                        span: full
+                        size: ''
+                        type: textarea
         comment:
-            label: 'Промт для модификации фичи'
+            label: Комментарии
             size: small
             span: full
             type: textarea
             tab: Управление
+        data:
+            label: ''
+            prompt: Добавить
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Промт
+            form:
+                fields:
+                    system:
+                        label: 'Системный промт'
+                        span: auto
+                        default: 0
+                        type: switch
+                    active:
+                        label: Включен
+                        span: auto
+                        default: 1
+                        type: switch
+                    title:
+                        label: Заголовок
+                        span: full
+                        type: text
+                    text:
+                        label: Промт
+                        size: large
+                        span: full
+                        type: textarea
 fields:
     name:
         label: 'Название фичи'
@@ -31,21 +79,3 @@ fields:
         showSearch: true
         span: auto
         type: dropdown
-    description:
-        label: Описание
-        span: full
-        size: giant
-        type: markdown
-    acceptance_criteria_repeater:
-        label: 'Критерии приёмки'
-        prompt: 'Добавить критерий'
-        displayMode: accordion
-        span: full
-        type: repeater
-        form:
-            fields:
-                item:
-                    label: Критерий
-                    span: full
-                    size: small
-                    type: textarea

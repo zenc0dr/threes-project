@@ -6,6 +6,7 @@ use Http;
 use Zen\Threes\Classes\Services\OpenAiService;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Dumper;
+use Zen\Threes\Classes\Gen;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -16,12 +17,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd('ok?');
-
-
-        ths()->backlog()->generateBacklog(
-            ths()->getSetting('vector_yaml')
-        );
+        Gen::run(1);
 
         //ths()->setSetting('vector_yaml', 'LALALA');
 
