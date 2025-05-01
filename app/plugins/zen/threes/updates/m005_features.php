@@ -10,14 +10,18 @@ class M005Features extends Migration
         Schema::create('zen_threes_features', function($table)
         {
             $table->increments('id');
-            $table->text('name')->nullable();
-            $table->text('description')->nullable();
-            $table->text('category')->nullable();
-            $table->text('priority')->nullable();
-            $table->text('status')->nullable();
-            $table->text('module')->nullable();
-            $table->integer('release')->nullable();
-            $table->text('acceptance_criteria')->nullable();
+            $table->text('name')->nullable()->comment('Название феномена');
+            $table->text('description')->nullable()->comment('Описание феномена');
+
+            $table->text('category')->nullable()->comment('Категория феномена');
+            $table->text('priority')->nullable()->comment('Приоритет феномена');
+            $table->text('status')->nullable()->comment('Статус феномена');
+            $table->text('module')->nullable()->comment('Модуль?');
+            
+
+            $table->text('data')->nullable();
+            $table->integer('release')->nullable()->comment('Релиз');
+            $table->text('acceptance_criteria')->nullable()->comment('Критерии приёмки');
             $table->integer('parent_id')->unsigned()->nullable();
             $table->integer('sort_order')->unsigned()->default(0);
             $table->integer('nest_left')->unsigned();
