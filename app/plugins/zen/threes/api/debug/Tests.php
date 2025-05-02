@@ -54,10 +54,20 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:testMongo
     public function testMongo()
     {
+
+//        dd(
+//            ths()->getSetting('author_token')
+//        );
+
         $node = new Node();
         $node->name = 'Я нод';
         $node->save();
-        dd($node->getNid());
+        $nid = $node->getNid();
+        $node = Node::find($nid);
+        dd(
+            $node->nid,
+            $node->name
+        );
     }
 
     # http://threes.dc/threes.api/debug.Tests:handleYamlFile

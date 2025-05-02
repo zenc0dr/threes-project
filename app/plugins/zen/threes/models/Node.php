@@ -3,64 +3,123 @@
 namespace Zen\Threes\Models;
 
 use MongoDB\Client;
-use MongoDB\BSON\ObjectId;
+use MongoDB\Collection as MongoCollection;
 
 class Node
 {
-    public static string $database = 'threes';
+    // 📦 Настройки подключения к базе
+    public static string $database   = 'threes';
     public static string $collection = 'nodes';
 
+    // 🧬 Внутреннее хранилище данных
     protected array $attributes = [];
 
+    // 🛠 Конструктор инициализирует ноду из массива
     public function __construct(array $data = [])
     {
         $this->attributes = $data;
     }
 
+    protected function getNidAttribute(): ?string
+    {
+        // читаем внутренний _id
+        return $this->attributes['_id'] ?? null;
+    }
+
+
+
+    // 🔌 Подключение к MongoDB
     public static function client(): Client
     {
-        return new Client(env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin'));
+        return new Client(
+            env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin')
+        );
     }
 
-    public static function collection()
+    // 🔗 Получение коллекции
+    public static function collection(): MongoCollection
     {
-        return self::client()->selectDatabase(self::$database)->selectCollection(self::$collection);
+        return self::client()
+            ->selectDatabase(self::$database)
+            ->selectCollection(self::$collection);
     }
 
-    public function getOid(): ?string
+    // 🪄 Генерация читаемого nid вида zen.threes.ab3d8d2k
+    public static function generateNidFromSettings(): string
     {
-        return isset($this->attributes['_id'])
-            ? (string) $this->attributes['_id']
-            : null;
+        $author_scope = ths()->getSetting('author_token'); // ожидается "zen.threes"
+        return $author_scope . '.' . self::shortId();
     }
 
-    public static function find(string $oid): ?self
+    // 🔐 Генерация короткого ID — только латиница и цифры
+    public static function shortId(int $length = 8): string
     {
-        $doc = self::collection()->findOne(['_id' => new ObjectId($oid)]);
+        $chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
+    }
+
+    // 🔎 Поиск по nid (который = _id)
+    public static function find(string $nid): ?self
+    {
+        $doc = self::collection()->findOne(['_id' => $nid]);
         return $doc ? new self($doc->getArrayCopy()) : null;
     }
 
-    public static function findByNid(string $nid): ?self
-    {
-        $doc = self::collection()->findOne(['nid' => $nid]);
-        return $doc ? new self($doc->getArrayCopy()) : null;
-    }
-
+    // 💾 Сохранение (вставка или обновление)
     public function save(): void
     {
         $this->beforeSave();
-        if (isset($this->attributes['_id'])) {
+
+        // Если ещё нет _id — создаём его
+        if (empty($this->attributes['_id'])) {
+            $this->attributes['_id'] = self::generateNidFromSettings();
+        }
+
+        // Удалим поле 'nid', если случайно попало — теперь используем только _id
+        unset($this->attributes['nid']);
+
+        // Проверяем реально ли есть документ в базе
+        if ($this->exists()) {
+            // обновление
             self::collection()->replaceOne(
-                ['_id' => new ObjectId($this->attributes['_id'])],
+                ['_id' => $this->attributes['_id']],
                 $this->attributes
             );
         } else {
+            // вставка
             $result = self::collection()->insertOne($this->attributes);
-            $this->attributes['_id'] = $result->getInsertedId();
+            // на случай, если драйвер вернул ObjectId
+            $this->attributes['_id'] = (string) $result->getInsertedId();
         }
+
         $this->afterSave();
     }
 
+    // 🗑 Удаление
+    public function delete(): void
+    {
+        if ($this->exists()) {
+            self::collection()->deleteOne([
+                '_id' => $this->attributes['_id']
+            ]);
+        }
+    }
+
+    // ✅ Проверка существования документа в БД
+    public function exists(): bool
+    {
+        if (empty($this->attributes['_id'])) {
+            return false;
+        }
+
+        return self::collection()
+                ->countDocuments(
+                    ['_id' => $this->attributes['_id']],
+                    ['limit' => 1]
+                ) > 0;
+    }
+
+    // 🔗 Добавление дочернего узла (в виде embedded или ref)
     public function addChild($node_or_ref): void
     {
         $children = $this->attributes['children'] ?? [];
@@ -69,43 +128,71 @@ class Node
         $this->save();
     }
 
+    // 🔍 Загрузка всех потомков по ссылкам ($ref / nid)
     public function resolveChildren(): array
     {
         $resolved = [];
 
         foreach ($this->attributes['children'] ?? [] as $item) {
-            if (isset($item['$ref']) && isset($item['$id'])) {
+            if (isset($item['$ref'], $item['$id'])) {
                 $resolved[] = self::find($item['$id']);
-            } elseif (isset($item['nid'])) {
-                $resolved[] = new self($item); // вложенный без сохранения
+            } elseif (isset($item['_id'])) {
+                $resolved[] = new self($item);
             }
         }
 
-        return $resolved;
+        return array_filter($resolved);
     }
 
-    public function __get($key)
+    // 🪪 Получить текущий идентификатор как строку
+    public function getNid(): ?string
     {
-        return $this->attributes[$key] ?? null;
+        return $this->attributes['_id'] ?? null;
     }
 
-    public function __set($key, $value): void
-    {
-        $this->attributes[$key] = $value;
-    }
-
+    // 🧾 Преобразование в массив (например, для API/экспорта)
     public function toArray(): array
     {
         return $this->attributes;
     }
 
-    public function beforeSave()
+    // 🧠 Умные геттеры и сеттеры
+    public function __get($key)
     {
+        # Реализация волшебного геттера
+        $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
 
+        return $this->attributes[$key] ?? null;
     }
 
-    public function afterSave()
+    public function __set($key, $value): void
     {
+        $method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
 
+        if (method_exists($this, $method)) {
+            $this->$method($value);
+            return;
+        }
+
+        $this->attributes[$key] = $value;
     }
+
+    private function setTimestamps(): void
+    {
+        $now = date('c');
+        if (!$this->exists()) {
+            $this->attributes['created_at'] = $now;
+        }
+        $this->attributes['updated_at'] = $now;
+    }
+
+    // ✨ События (можно переопределить при наследовании)
+    protected function beforeSave(): void
+    {
+        $this->setTimestamps();
+    }
+    protected function afterSave(): void {}
 }
