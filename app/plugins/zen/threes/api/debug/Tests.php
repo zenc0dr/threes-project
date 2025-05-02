@@ -18,7 +18,13 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        Gen::run(1);
+
+        ths()->
+
+        #Gen::run(1);
+        dd(
+            'ok'
+        );
 
         //ths()->setSetting('vector_yaml', 'LALALA');
 
@@ -58,6 +64,8 @@ class Tests
 //        dd(
 //            ths()->getSetting('author_token')
 //        );
+
+        //Node::truncate();
 
         $node = new Node();
         $node->name = 'Я нод';

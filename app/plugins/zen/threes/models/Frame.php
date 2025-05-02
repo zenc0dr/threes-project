@@ -54,15 +54,6 @@ class Frame extends Model
         return self::where('nid', $nid)->firstOrFail();
     }
 
-    public function getNidAttribute($value): string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        return ths()->nodes()->createNidToken();
-    }
-
     public function getNameAttribute($value)
     {
         return $this->node->name ?? $value ?? '';

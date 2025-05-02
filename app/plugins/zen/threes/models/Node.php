@@ -5,6 +5,12 @@ namespace Zen\Threes\Models;
 use MongoDB\Client;
 use MongoDB\Collection as MongoCollection;
 
+/**
+ * @property string $nid
+ * @property string $name
+ * @property string $description
+ */
+
 class Node
 {
     // 📦 Настройки подключения к базе
@@ -26,14 +32,18 @@ class Node
         return $this->attributes['_id'] ?? null;
     }
 
-
-
     // 🔌 Подключение к MongoDB
     public static function client(): Client
     {
         return new Client(
             env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin')
         );
+    }
+
+    // Сбросить данные таблицы
+    public static function truncate(): void
+    {
+        self::collection()->drop();
     }
 
     // 🔗 Получение коллекции
@@ -48,14 +58,7 @@ class Node
     public static function generateNidFromSettings(): string
     {
         $author_scope = ths()->getSetting('author_token'); // ожидается "zen.threes"
-        return $author_scope . '.' . self::shortId();
-    }
-
-    // 🔐 Генерация короткого ID — только латиница и цифры
-    public static function shortId(int $length = 8): string
-    {
-        $chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
+        return $author_scope . '.' . ths()->createShortId();
     }
 
     // 🔎 Поиск по nid (который = _id)

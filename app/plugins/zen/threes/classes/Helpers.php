@@ -21,15 +21,6 @@ class Helpers
     use Carbon;   # Создание объекта Carbon
 
     /**
-     * Глобальные вспомогательные методы
-     * @return Helpers
-     */
-    public function helpers(): Helpers
-    {
-        return Helpers::getInstance();
-    }
-
-    /**
      * Ноды, хранят информацию для схемы, доступны по $nid
      * @return Nodes
      */

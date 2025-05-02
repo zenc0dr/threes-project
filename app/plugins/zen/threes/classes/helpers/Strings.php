@@ -16,13 +16,24 @@ trait Strings
     }
 
     /**
-     * Сгенерировать случайную строку с заданной длинной
+     * Сгенерировать токен с заданной длинной
      * @param int $length
      * @return string
      */
     public function createToken(int $length = 8): string
     {
         return strtolower(Str::random($length));
+    }
+
+    /**
+     * Сгенерировать строку из безопасных символов
+     * @param int $length
+     * @return string
+     */
+    public function createShortId(int $length = 8): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
     }
 
     /**
