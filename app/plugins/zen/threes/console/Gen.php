@@ -10,16 +10,6 @@ class Gen extends Command
     public function handle()
     {
         $feature_id = $this->argument('feature_id');
-
-
-
-
-
-
-
-
-
-
         $this->output->writeln("Hello {$feature_id}!");
     }
 }

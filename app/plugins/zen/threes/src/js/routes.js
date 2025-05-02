@@ -2,15 +2,9 @@ import { createWebHistory, createRouter } from "vue-router";
 
 const routes = [
     {
-        path: "/:backend/zen/threes/framecontroller/create",
+        path: "/:backend/zen/threes/framecontroller",
         name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
-        props: true,
-    },
-    {
-        path: "/:backend/zen/threes/framecontroller/update/:nid",
-        name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
+        component: () => import("../vue/screens/Ui.vue"),
         props: true,
     },
 ];

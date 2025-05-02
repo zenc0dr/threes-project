@@ -3,6 +3,8 @@
 
 use System\Classes\PluginBase;
 use Zen\Threes\Console\Vector;
+use Zen\Threes\Console\BacklogFill;
+use Zen\Threes\Console\Gen;
 use Log;
 
 class Plugin extends PluginBase
@@ -11,6 +13,8 @@ class Plugin extends PluginBase
     {
         # Регистрация консольных команд
         $this->registerConsoleCommand('threes:vector', Vector::class);
+        $this->registerConsoleCommand('threes:backlog_fill', BacklogFill::class);
+        $this->registerConsoleCommand('threes:gen', Gen::class);
     }
 
     public function boot()
@@ -137,9 +141,35 @@ class Threes extends Helpers
      * @param string $key
      * @return mixed
      */
-    public function settings(string $key)
+    public function getSetting(string $key): mixed
     {
         return Settings::get($key);
+    }
+
+    public function setSetting(string $key, mixed $value): void
+    {
+        $settings = Settings::instance();
+        $settings->setAttribute($key, $value);
+        $settings->save();
+    }
+}
+
+```
+`plugins/zen/threes/api/backlog/Export.php`
+```<?php
+
+namespace Zen\Threes\Api\Backlog;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Zen\Threes\Exports\FeatureExport;
+
+class Export
+{
+    # http://threes.dc/threes.api/backlog.export:xlsx
+    public function xlsx(): BinaryFileResponse
+    {
+        $fileName = 'features_export_' . date('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new FeatureExport, $fileName);
     }
 }
 
@@ -148,6 +178,13 @@ class Threes extends Helpers
 ```<?php
 
 namespace Zen\Threes\Api\debug;
+
+use Http;
+use Zen\Threes\Classes\Services\OpenAiService;
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Dumper;
+use Zen\Threes\Classes\Gen;
+use Zen\Threes\Models\Node;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -159,17 +196,36 @@ class Tests
     public function debug()
     {
 
-        $array = [
-            ['node1', 'node2', 'node3'],
-            [],
-            [],
-            ['node5'],
-            []
-        ];
+        ths()->
 
-        $string = 'node1,node2,node3;;;node5;';
-        //$result = ths()->nodes()->nodesToString($array);
-        //$result = ths()->nodes()->nodesFromString($string);
+        #Gen::run(1);
+        dd(
+            'ok'
+        );
+
+        //ths()->setSetting('vector_yaml', 'LALALA');
+
+
+//        dd(
+//            ths()->ai(
+//                'Привет моделька',
+//                'Ты добрая и ласковая девушка',
+//                'ollama'
+//            )
+//        );
+
+
+        #ths()->getSetting();
+        #ths()->backlog()->generateBacklog();
+
+//        $answer = OpenAiService::query(
+//            'Ты дружелюбная помощница',
+//            'Привет милая, как твои делишки?'
+//        );
+//
+//        dd($answer);
+
+        //ths()->notice()->telegramSendMessage('Какдила?');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -177,6 +233,70 @@ class Tests
     {
         dd('Threes api works!');
     }
+
+    # http://threes.dc/threes.api/debug.Tests:testMongo
+    public function testMongo()
+    {
+
+//        dd(
+//            ths()->getSetting('author_token')
+//        );
+
+        //Node::truncate();
+
+        $node = new Node();
+        $node->name = 'Я нод';
+        $node->save();
+        $nid = $node->getNid();
+        $node = Node::find($nid);
+        dd(
+            $node->nid,
+            $node->name
+        );
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:handleYamlFile
+    public function handleYamlFile()
+    {
+        $yaml_path = storage_path('backlog/VB_v1.yaml');
+        $yaml_content = file_get_contents($yaml_path);
+
+        // Подготовка: оборачиваем опасные строки
+        $prepared_yaml = $this->prepareYamlForParsing($yaml_content);
+
+        // Теперь безопасно парсим YAML
+        $data = Yaml::parse($prepared_yaml);
+
+        // Дальше делаешь что хочешь: цитируешь строки, сериализуешь обратно и т.д.
+        $output = Yaml::dump($data, 10, 2);
+
+        dd($output);
+    }
+
+
+
+    public function prepareYamlForParsing(string $yaml_content): string
+    {
+        // Регулярка для ключей вида: Ключ: значение с двоеточием внутри
+        return preg_replace_callback('/^(\s*\w[\w\-]*\s*:\s*)(.*)$/mu', function($matches) {
+            $key = $matches[1];
+            $value = trim($matches[2]);
+
+            // Если значение уже в кавычках — оставляем
+            if (str_starts_with($value, '"') || str_starts_with($value, "'")) {
+                return $matches[0];
+            }
+
+            // Если значение содержит двоеточие и не начинается на [ или { (то есть не массив или объект)
+            if (strpos($value, ':') !== false && !in_array($value[0], ['[', '{'])) {
+                $value = '"' . str_replace('"', '\"', $value) . '"';
+            }
+
+            return $key . $value;
+        }, $yaml_content);
+    }
+
+
 }
 
 ```
@@ -190,12 +310,22 @@ use Zen\Threes\Traits\QueryLogTrait;
 class Node
 {
     use QueryLogTrait;
-    # http://threes.dc/threes.api/nodes.node:nodes?nid=threes.default.node1
-    public function nodes(): array
+    # http://threes.dc/threes.api/nodes.node:get-nodes?nid=threes.default.node1
+    public function getNodes(): array
     {
         return [
             'nodes' => ths()->nodes()->getNodes(request('nid'))
         ];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:set-nodes?debug
+    protected function setNodes()
+    {
+        ths()->nodes()->setNodes(
+            request('nid'),
+            request('nodes'),
+        );
+        return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:add-line?nid=threes.default.node1
@@ -205,7 +335,7 @@ class Node
         return [];
     }
 
-    # http://threes.dc/threes.api/nodes.node:add-node
+    # http://threes.dc/threes.api/nodes.node:add-node?debug
     protected function addNode(): array
     {
         ths()->nodes()->addNode(
@@ -231,6 +361,95 @@ class Store
         return [
             'store_nodes' => ths()->store()->getStoreNodes(request('filter_text'))
         ];
+    }
+}
+
+```
+`plugins/zen/threes/classes/Backlog.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Models\Feature;
+
+class Backlog
+{
+    use SingletonTrait;
+
+    public function handleVector(): void
+    {
+        $vector = ths()->getSetting('vector');
+        $system_prompt = collect(ths()->getSetting('vector_prompt'))
+            ->where('active', 1)
+            ->map(function ($prompt) {
+                return $prompt['text'];
+            })
+            ->join(PHP_EOL);
+
+        $yaml = ths()->ai(
+            $vector,
+            $system_prompt
+        );
+
+        ths()->setSetting('vector_yaml', $yaml);
+        $this->generateBacklog($yaml);
+    }
+
+    public function generateBacklog(string $yaml = null): void
+    {
+        Feature::truncate();
+
+        if (!$yaml) {
+            $yaml = ths()->fromYamlFile(
+                storage_path('vector/backlog_vector.yaml')
+            );
+        } else {
+            $yaml = ths()->fromYaml($yaml);
+        }
+
+        $id_cnt = 0;
+
+        $ids = [];
+        foreach ($yaml as $feature) {
+            $id = $feature['id'];
+            if (!isset($ids[$id])) {
+                $id_cnt++;
+                $ids[$id] = $id_cnt;
+            }
+            $id = $ids[$id];
+            $name = $feature['title'];
+            $description = $feature['description'];
+            $category = $feature['category'];
+            $priority = $feature['priority'] ?? 'normal';
+            $status = $feature['status'] ?? 'planned';
+            $tags = $feature['tags'];
+            $dependencies = $feature['dependencies'];
+            $acceptance_criteria = $feature['acceptance_criteria'];
+            $parent_id = $feature['parent_id'] ? $ids[$feature['parent_id']] : null;
+            $module = $feature['module'];
+
+            foreach ($acceptance_criteria as &$acceptance_criterion) {
+                foreach ($ids as $uid => $id) {
+                    $acceptance_criterion = str_replace($uid, 'id:' . $id, $acceptance_criterion);
+                }
+            }
+
+            #dd($tags, $acceptance_criteria, $dependencies);
+
+            Feature::create([
+                'id' => $id,
+                'parent_id' => $parent_id,
+                'name' => $name,
+                'description' => $description,
+                'category' => $category,
+                'priority' => $priority,
+                'status' => $status,
+                'module' => $module,
+                'release' => 1,
+                'acceptance_criteria' => $acceptance_criteria,
+            ]);
+        }
     }
 }
 
@@ -317,18 +536,56 @@ class Events
 }
 
 ```
+`plugins/zen/threes/classes/Gen.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Zen\Threes\Models\Feature;
+
+class Gen
+{
+    public static function run(int $feature_id)
+    {
+        $feature = Feature::find($feature_id);
+        $self = new self();
+        $self->generate($feature);
+    }
+
+    public function generate(Feature $feature)
+    {
+
+        dd($feature->data);
+
+
+//        $vector = ths()->getSetting('vector');
+//        $system_prompt = collect()
+//            ->where('active', 1)
+//            ->map(function ($prompt) {
+//                return $prompt['text'];
+//            })
+//            ->join(PHP_EOL);
+//
+//        $yaml = ths()->ai(
+//            $vector,
+//            $system_prompt
+//        );
+    }
+}
+
+```
 `plugins/zen/threes/classes/Helpers.php`
 ```<?php
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Classes\Helpers\Carbon;
 use Zen\Threes\Classes\Helpers\Debug;
 use Zen\Threes\Classes\Helpers\Files;
 use Zen\Threes\Classes\Helpers\Json;
+use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
-use Zen\Threes\Classes\Helpers\State;
-use Zen\Threes\Classes\Helpers\Carbon;
 
 class Helpers
 {
@@ -339,15 +596,6 @@ class Helpers
     use Strings;  # Слой настроек
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
-
-    /**
-     * Глобальные вспомогательные методы
-     * @return Helpers
-     */
-    public function helpers(): Helpers
-    {
-        return Helpers::getInstance();
-    }
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
@@ -376,6 +624,11 @@ class Helpers
         return Messages::getInstance();
     }
 
+    public function notice(): Notice
+    {
+        return Notice::getInstance();
+    }
+
     /**
      * Система событий
      * @return Events
@@ -388,6 +641,37 @@ class Helpers
     public function versions(): Versions
     {
         return Versions::getInstance();
+    }
+
+    public function backlog(): Backlog
+    {
+        return Backlog::getInstance();
+    }
+
+    public function ai(
+        string $prompt,
+        string $system_prompt = null,
+        string $service = 'openai',
+        string $model = null
+    ): ?string {
+        if ($service === 'openai') {
+            if (!$system_prompt) {
+                $system_prompt = ths()->getSetting('default_prompt');
+            }
+            if (!$model) {
+                $model = 'gpt-4.1';
+            }
+            return \Zen\Threes\Classes\Services\OpenAiService::query($prompt, $system_prompt, $model);
+        }
+
+        if ($service === 'ollama') {
+            if (!$model) {
+                $model = 'llama3.3:latest';
+            }
+            return \Zen\Threes\Classes\Services\OllamaService::query($prompt, $system_prompt, $model);
+        }
+
+        return null;
     }
 }
 
@@ -433,126 +717,50 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Models\Node;
-use Illuminate\Database\Eloquent\Builder;
 
 class Nodes
 {
     use SingletonTrait;
 
-    public function model(): Builder | Node
-    {
-        return Node::query();
-    }
-
     /**
-     * Генерирует NID (токен нода)
-     * @return string
+     * Доступ к модели
+     * @param string|null $nid
+     * @return Node|null
      */
-    public function createNidToken(): string
+    public function model(string $nid = null): ?Node
     {
-        $author = ths()->settings('author_token') ?? 'project';
-        $scope = 'default';
-        $token = 'node' . $this->getMaxNodeNumber($author, $scope);
-        return "$author.$scope.$token";
-    }
-
-    /**
-     * Возвращает последний номер стандартного токена нода (с привязкой к автору)
-     * @param string $author
-     * @param string $scope
-     * @return string
-     */
-    public function getMaxNodeNumber(string $author, string $scope = 'default'): string
-    {
-        $prefix = "$author.$scope.node";
-        $max_number = Node::where('nid', 'like', "$prefix%")
-            ->get()
-            ->map(function ($node) use ($prefix) {
-                $number = str_replace($prefix, '', $node->nid);
-                return is_numeric($number) ? (int) $number : 0;
-            })
-            ->max();
-        return $max_number ? $max_number + 1 : 1;
-    }
-
-    public function getNodes(string $nid): array
-    {
-        return Node::find($nid)?->nodes ?? [];
-    }
-
-    public function nodesToString(array $nodes): string
-    {
-        $parts = array_map(function ($sub_array) {
-            return implode(',', $sub_array);
-        }, $nodes);
-
-        return implode(';', $parts);
-    }
-
-    public function nodesFromString(string $nodes): array
-    {
-        $parts = explode(';', $nodes);
-        return array_map(function ($part) {
-            return $part === '' ? [] : explode(',', $part);
-        }, $parts);
-    }
-
-    public function addLine(string $nid): void
-    {
-        $node = Node::find($nid);
-        $nodes = $node->nodes ?? [];
-        $nodes[] = [];
-        $node->nodes = $nodes;
-        $node->save();
-    }
-
-    public function addNode(string $nid, string $parent_nid, int $line_index): void
-    {
-        $node = Node::find($parent_nid);
-        $node->name = 'Новое имя';
-//        $nodes = $node->nodes;
-//
-//        // Расширяем массив при необходимости
-//        if ($line_index >= count($nodes)) {
-//            $nodes = array_pad($nodes, $line_index + 1, []);
-//        }
-//
-//        // Добавляем элемент в нужную линию
-//        $nodes[$line_index][] = $nid;
-//
-//        $node->nodes = $nodes;
-        $node->save();
-    }
-
-
-    /*
-    public function addNodeOld(string $fid, int $line_index): Node
-    {
-        $frame = Frame::findByFid($fid);
-
-        $node = Node::set();
-        $layer = Layer::set();
-        $program = $frame->program;
-
-        $node_short_dsl = [
-            $node->nid => [
-                $layer->lid
-            ]
-        ];
-
-        # Заполнить программу отсутствующими пустыми линиями
-        for ($i = 0; $i <= $line_index; $i++) {
-            if (!isset($program[$i])) {
-                $program[$i] = [];
-            }
+        if ($nid) {
+            return Node::find($nid);
         }
-
-        $program[$line_index][] = $node_short_dsl;
-        $frame->program = $program;
-        $frame->save();
-        return $node;
+        return new Node();
     }
-    */
+}
+
+```
+`plugins/zen/threes/classes/Notice.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Http;
+use Zen\Threes\Traits\SingletonTrait;
+
+class Notice
+{
+    use SingletonTrait;
+
+    public function telegramSendMessage(string $text, ?string $chat_id = null): void
+    {
+        $bot_token = env('TELEGRAM_BOT_TOKEN');
+        $chat_id = env('TELEGRAM_CHAT_ID', $chat_id);
+        if (!$bot_token || !$chat_id) {
+            return;
+        }
+        $api_url = 'https://api.telegram.org';
+        $encodedText = urlencode($text);
+        $query = "$api_url/bot$bot_token/sendMessage?chat_id=$chat_id&text=$encodedText&parse_mode=HTML";
+        Http::get($query);
+    }
 }
 
 ```
@@ -878,13 +1086,24 @@ trait Strings
     }
 
     /**
-     * Сгенерировать случайную строку с заданной длинной
+     * Сгенерировать токен с заданной длинной
      * @param int $length
      * @return string
      */
     public function createToken(int $length = 8): string
     {
         return strtolower(Str::random($length));
+    }
+
+    /**
+     * Сгенерировать строку из безопасных символов
+     * @param int $length
+     * @return string
+     */
+    public function createShortId(int $length = 8): string
+    {
+        $chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
     }
 
     /**
@@ -968,6 +1187,161 @@ trait Yaml
 }
 
 ```
+`plugins/zen/threes/classes/services/OllamaService.php`
+```<?php
+
+namespace Zen\Threes\Classes\Services;
+
+use Exception;
+use Throwable;
+use Http;
+
+class OllamaService
+{
+    private string $host;
+
+    public function __construct()
+    {
+        $this->host = env('OLLAMA_HOST', 'http://192.168.201.105:11434');
+    }
+
+    /**
+     * Выполнить запрос к Ollama с поддержкой system prompt
+     * @param string $model
+     * @param string $user_prompt
+     * @param string|null $system_prompt
+     * @return string
+     * @throws Exception
+     */
+    public static function query(string $user_prompt, ?string $system_prompt = null, string $model = 'llama3.3:latest'): string
+    {
+        set_time_limit(0);
+
+        $service = new self();
+        try {
+            $payload = [
+                'model'  => $model,
+                'prompt' => $user_prompt,
+                'stream' => false,
+            ];
+
+            if ($system_prompt) {
+                $payload['system'] = $system_prompt;
+            }
+
+            $response = Http::timeout(3600)->post($service->host . '/api/generate', $payload);
+
+            if (!$response || !$response->successful()) {
+                throw new Exception('Ollama connection error: ' . $response->body());
+            }
+
+            return $response->json()['response'] ?? '';
+        } catch (Exception | Throwable $exception) {
+            throw new Exception('Ollama connection error', 0, $exception);
+        }
+    }
+}
+
+```
+`plugins/zen/threes/classes/services/OpenAiService.php`
+```<?php
+
+namespace Zen\Threes\Classes\Services;
+
+use Exception;
+use Throwable;
+use Http;
+
+class OpenAiService
+{
+    private string $api_key;
+    public function __construct()
+    {
+        $this->api_key = env('OPEN_AI_API_KEY');
+    }
+
+    /**
+     * Выполнить запрос к Open Ai
+     * @param string $system_prompt
+     * @param string $user_prompt
+     * @return string
+     * @throws Exception
+     */
+    public static function query(string $user_prompt, string $system_prompt, string $model = 'gpt-4.1'): string
+    {
+        $service = new self();
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $service->api_key,
+            ])->timeout(600)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => $system_prompt
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $user_prompt
+                    ],
+                ],
+            ]);
+
+            if (!$response || !$response->successful()) {
+                throw new Exception('API connection error');
+            }
+
+            return $response->json()['choices'][0]['message']['content'];
+        } catch (Exception | Throwable $exception) {
+            throw new Exception('API connection error', 0, $exception);
+        }
+    }
+}
+
+```
+`plugins/zen/threes/console/BacklogFill.php`
+```<?php namespace Zen\Threes\Console;
+
+use Illuminate\Console\Command;
+
+/**
+ * BacklogFill Command
+ *
+ * @link https://docs.octobercms.com/3.x/extend/console-commands.html
+ */
+class BacklogFill extends Command
+{
+
+    protected $signature = 'threes:backlog_fill';
+    protected $description = 'Заполнить бэклог';
+
+    public function handle()
+    {
+        $this->output->writeln("Обрабатываю данные...");
+        ths()->backlog()->handleVector();
+        $this->output->writeln("Обработка завершена.");
+    }
+}
+
+```
+`plugins/zen/threes/console/Gen.php`
+```<?php namespace Zen\Threes\Console;
+
+use Illuminate\Console\Command;
+
+class Gen extends Command
+{
+    protected $signature = 'threes:gen {feature_id}';
+    protected $description = 'Генерирует запрос';
+
+    public function handle()
+    {
+        $feature_id = $this->argument('feature_id');
+        $this->output->writeln("Hello {$feature_id}!");
+    }
+}
+
+```
 `plugins/zen/threes/console/Vector.php`
 ```<?php namespace Zen\Threes\Console;
 
@@ -985,7 +1359,7 @@ class Vector extends Command
             '/app/plugins/zen/threes/package-lock.json',
             '/app/plugins/zen/threes/assets',
             '/app/plugins/zen/threes/controllers',
-            'app/plugins/zen/threes/src/vue/old_components',
+            'app/plugins/zen/threes/src/vue/trash',
         ];
 
         // Файлы, которые нужно включить в любом случае
@@ -1051,6 +1425,52 @@ class Vector extends Command
 }
 
 ```
+`plugins/zen/threes/exports/FeatureExport.php`
+```<?php namespace Zen\Threes\Exports;
+
+use Zen\Threes\Models\Feature;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+
+class FeatureExport implements FromCollection, WithHeadings
+{
+    public function collection()
+    {
+        $rows = [];
+
+        $features = Feature::get();
+
+        foreach ($features as $feature) {
+            // Основная строка фичи
+            $rows[] = [
+                $feature->id,
+                $feature->name,
+                $feature->description,
+                $feature->module,
+                $feature->category,
+                $feature->status,
+                $feature->priority,
+                $feature->created_at->format('d.m.Y H:i'),
+            ];
+
+            // Каждая acceptance criteria — отдельной строкой
+            foreach ($feature->acceptance_criteria as $criteria) {
+                $rows[] = [
+                    '', '', '- ' . $criteria, '', '', '', '', '',
+                ];
+            }
+        }
+
+        return collect($rows);
+    }
+
+    public function headings(): array
+    {
+        return ['ID', 'Название', 'Описание', 'Область', 'Категория', 'Статус', 'Приоритет', 'Создано'];
+    }
+}
+
+```
 `plugins/zen/threes/init.php`
 ```<?php
 
@@ -1059,6 +1479,129 @@ if (!function_exists('ths')) {
     function ths(): \Zen\Threes\Threes
     {
         return \Zen\Threes\Threes::getInstance();
+    }
+}
+
+```
+`plugins/zen/threes/models/Feature.php`
+```<?php namespace Zen\Threes\Models;
+
+use Model;
+use October\Rain\Database\Traits\Validation;
+use October\Rain\Database\Traits\Sortable;
+use October\Rain\Database\Traits\NestedTree;
+
+/**
+ * @property array $acceptance_criteria
+ */
+class Feature extends Model
+{
+    use Validation;
+    use Sortable;
+    use NestedTree;
+
+    public $table = 'zen_threes_features';
+
+    protected $fillable = [
+        'parent_id',
+        'name',
+        'description',
+        'category',
+        'priority',
+        'status',
+        'module',
+        'release',
+        'acceptance_criteria'
+    ];
+
+    public $rules = [];
+
+
+    public function getDataAttribute(?string $data = null): array
+    {
+        if (!$data) {
+            return [];
+        }
+        return ths()->fromJson($data);
+    }
+
+    public function setDataAttribute(?array $data = []): void
+    {
+        if ($data === null) {
+            $this->attributes['data'] = null;
+        } else {
+            $this->attributes['data'] = ths()->toJson($data);
+        }
+    }
+
+    public function getModuleOptions(): array
+    {
+        return $this->getUniqueOptions('module');
+    }
+
+    public function getPriorityOptions(): array
+    {
+        return $this->getUniqueOptions('priority');
+    }
+
+    public function getStatusOptions(): array
+    {
+        return [
+            'accepted' => 'accepted',
+            'planned' => 'planned',
+        ];
+        //return $this->getUniqueOptions('status');
+    }
+    public function getCategoryOptions(): array
+    {
+        return $this->getUniqueOptions('category');
+    }
+
+
+    public function getCriteriaCountAttribute()
+    {
+        return count($this->acceptance_criteria);
+    }
+
+    public function setAcceptanceCriteriaAttribute(array $value = []): void
+    {
+        $this->attributes['acceptance_criteria'] = ths()->toJson($value);
+    }
+
+    public function getAcceptanceCriteriaAttribute(?string $value = ''): ?array
+    {
+        if (!$value) {
+            return [];
+        }
+        return ths()->fromJson($value);
+    }
+
+    public function getAcceptanceCriteriaRepeaterAttribute(): array
+    {
+        $raw = $this->acceptance_criteria;
+        return array_map(fn($item) => ['item' => $item], $raw);
+    }
+
+    public function setAcceptanceCriteriaRepeaterAttribute($value): void
+    {
+        $transformed = collect($value)
+            ->pluck('item')
+            ->filter()
+            ->values()
+            ->all();
+        $this->acceptance_criteria = $transformed;
+    }
+
+    private function getUniqueOptions(string $field)
+    {
+        return Feature::query()
+            ->withoutGlobalScopes()
+            ->whereNotNull($field)
+            ->selectRaw("DISTINCT $field")
+            ->orderBy($field)
+            ->pluck($field, $field)
+            ->mapWithKeys(fn($v, $k) => [(string)$k => (string)$v])
+            ->toArray();
     }
 }
 
@@ -1120,15 +1663,6 @@ class Frame extends Model
         return self::where('nid', $nid)->firstOrFail();
     }
 
-    public function getNidAttribute($value): string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        return ths()->nodes()->createNidToken();
-    }
-
     public function getNameAttribute($value)
     {
         return $this->node->name ?? $value ?? '';
@@ -1162,253 +1696,206 @@ class Frame extends Model
 
 ```
 `plugins/zen/threes/models/Node.php`
-```<?php namespace Zen\Threes\Models;
+```<?php
 
-use Model;
-use October\Rain\Database\Traits\Validation;
+namespace Zen\Threes\Models;
+
+use MongoDB\Client;
+use MongoDB\Collection as MongoCollection;
 
 /**
- * @property string $nid - Токен нода
- * @property string $name - Имя
- * @property string $svg_path - Путь до SVG
- * @property string $description - Описание
- * @property null|string $svg
- * @method static find($nid)
- * @method static get()
+ * @property string $nid
+ * @property string $name
+ * @property string $description
  */
 
-class Node extends Model
+class Node
 {
-    use Validation;
+    // 📦 Настройки подключения к базе
+    public static string $database   = 'threes';
+    public static string $collection = 'nodes';
 
-    public $table = 'zen_threes_nodes';
-    protected $primaryKey = 'nid';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    // 🧬 Внутреннее хранилище данных
+    protected array $attributes = [];
 
-    public $rules = [
-        'nid' => 'required|unique:zen_threes_nodes,nid',
-    ];
-
-    protected $fillable = [
-        'nid',
-        'svg',
-        'svg_name',
-        'nodes',
-        'name',
-        'data',
-        'scheme',
-        'description',
-    ];
-
-    private ?string $nid_token_dump = null;
-
-    protected array $dynamic_attributes = [];
-    protected array $data_dump = [];
-
-    /** Разделение статических и динамических полей
-     * @param $name
-     * @param $value
-     * @return void
-     */
-    public function __set($name, $value)
+    // 🛠 Конструктор инициализирует ноду из массива
+    public function __construct(array $data = [])
     {
-        if (!$this->hasAttribute($name)) {
-            $this->dynamic_attributes[$name] = $value;
-            unset($this->attributes[$name]);
-        } else {
-            parent::__set($name, $value);
-        }
+        $this->attributes = $data;
     }
 
-    /**
-     * Проверка на динамический атрибут
-     * @param string $key
-     * @return bool
-     */
-    private function hasAttribute(string $key): bool
+    protected function getNidAttribute(): ?string
     {
-        return in_array($key, $this->fillable);
+        // читаем внутренний _id
+        return $this->attributes['_id'] ?? null;
     }
 
-    /**
-     * Получить токен нода
-     * @return string
-     */
-    private function makeNidToken(): string
+    // 🔌 Подключение к MongoDB
+    public static function client(): Client
     {
-        if ($this->nid_token_dump) {
-            return $this->nid_token_dump;
-        }
-        return $this->nid_token_dump = ths()->nodes()->createNidToken();
-    }
-
-    /**
-     * @param string|null $value
-     * @return string|null
-     */
-    public function getNidAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        return $this->makeNidToken();
-    }
-
-    public function getNameAttribute(?string $value): string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $token = $this->makeNidToken();
-        $token = explode('.', $token);
-        return end($token);
-    }
-
-    public function getNodesAttribute(): array
-    {
-        $nodes_string = $this->data_dump['nodes'] ?? '';
-        return ths()->nodes()->nodesFromString($nodes_string);
-    }
-
-    public function setNodesAttribute(array $nodes): void
-    {
-        $this->data_dump['nodes'] = ths()->nodes()->nodesToString($nodes);
-    }
-
-    public function getSvgPathAttribute(): string
-    {
-        if (!$this->svg) {
-            return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
-        }
-        return '/storage/app/uploads/public/threes/icons/' . $this->svg_name;
-    }
-
-    public function getSvgAttribute(?string $svg = null): string
-    {
-        if (!$svg) {
-            return file_get_contents(
-                base_path('plugins/zen/threes/assets/images/icons/default-icon.svg')
-            );
-        }
-        return $svg;
-    }
-
-    public function getSettingsAttribute(): array
-    {
-        return $this->data_dump['settings'] ?? [];
-    }
-
-    public function getDataAttribute(?string $data): array
-    {
-        if ($data) {
-            return ths()->fromJson($data) ?? [];
-        }
-        return [];
-    }
-
-    public function getSchemeAttribute(?string $value): ?string
-    {
-        if ($value) {
-            return $value;
-        }
-
-        $default_scheme = ths()->fromYamlFile(
-            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
+        return new Client(
+            env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin')
         );
-
-        $exe = $default_scheme['fields']['exe'];
-        $exe['tab'] = 'Настройки';
-
-        return ths()->toYaml(['exe' => $exe]);
     }
 
-    public function getAdditionalFieldsAttribute(): array
+    // Сбросить данные таблицы
+    public static function truncate(): void
     {
-        if ($this->scheme) {
-            $fields = ths()->fromYaml($this->scheme);
+        self::collection()->drop();
+    }
 
-            if (!$fields) {
-                return [];
-            }
+    // 🔗 Получение коллекции
+    public static function collection(): MongoCollection
+    {
+        return self::client()
+            ->selectDatabase(self::$database)
+            ->selectCollection(self::$collection);
+    }
 
-            $add_fields = [];
-            foreach ($fields as $field => $value) {
-                $add_fields[$field] = [
-                    'label' => $value['label'],
-                    'type' => $value['type'],
-                    'tab' => $value['tab'] ?? 'Настройки',
-                    'span' => $value['span'],
-                ];
-                if ($additional = $value['additional'] ?? null) {
-                    foreach ($additional as $batch) {
-                        $batch = ths()->fromYaml($batch['rule']);
-                        $add_fields[$value['field']] = array_merge($add_fields[$value['field']], $batch);
-                    }
-                }
-            }
-            return $add_fields;
+    // 🪄 Генерация читаемого nid вида zen.threes.ab3d8d2k
+    public static function generateNidFromSettings(): string
+    {
+        $author_scope = ths()->getSetting('author_token'); // ожидается "zen.threes"
+        return $author_scope . '.' . ths()->createShortId();
+    }
+
+    // 🔎 Поиск по nid (который = _id)
+    public static function find(string $nid): ?self
+    {
+        $doc = self::collection()->findOne(['_id' => $nid]);
+        return $doc ? new self($doc->getArrayCopy()) : null;
+    }
+
+    // 💾 Сохранение (вставка или обновление)
+    public function save(): void
+    {
+        $this->beforeSave();
+
+        // Если ещё нет _id — создаём его
+        if (empty($this->attributes['_id'])) {
+            $this->attributes['_id'] = self::generateNidFromSettings();
         }
-        return [];
+
+        // Удалим поле 'nid', если случайно попало — теперь используем только _id
+        unset($this->attributes['nid']);
+
+        // Проверяем реально ли есть документ в базе
+        if ($this->exists()) {
+            // обновление
+            self::collection()->replaceOne(
+                ['_id' => $this->attributes['_id']],
+                $this->attributes
+            );
+        } else {
+            // вставка
+            $result = self::collection()->insertOne($this->attributes);
+            // на случай, если драйвер вернул ObjectId
+            $this->attributes['_id'] = (string) $result->getInsertedId();
+        }
+
+        $this->afterSave();
     }
 
-    public function getStoreItemAttribute(): array
+    // 🗑 Удаление
+    public function delete(): void
     {
-        return [
-            'nid' => $this->nid,
-            'name' => $this->name,
-            'icon' => $this->svg_path,
-            'description' => $this->description,
-        ];
-    }
-
-    public function afterFetch(): void
-    {
-        $this->data_dump = $this->data;
-        $this->fillSettings();
-    }
-
-    public function beforeSave(): void
-    {
-        $this->saveData();
-        $this->saveSvgIcon();
-    }
-
-    private function fillSettings(): void
-    {
-        $settings = $this->data_dump['settings'] ?? null;
-        if ($settings) {
-            foreach ($settings as $field => $value) {
-                $this->attributes[$field] = $value;
-            }
+        if ($this->exists()) {
+            self::collection()->deleteOne([
+                '_id' => $this->attributes['_id']
+            ]);
         }
     }
 
-    private function saveSvgIcon(): void
+    // ✅ Проверка существования документа в БД
+    public function exists(): bool
     {
-        if (!$this->svg) {
+        if (empty($this->attributes['_id'])) {
+            return false;
+        }
+
+        return self::collection()
+                ->countDocuments(
+                    ['_id' => $this->attributes['_id']],
+                    ['limit' => 1]
+                ) > 0;
+    }
+
+    // 🔗 Добавление дочернего узла (в виде embedded или ref)
+    public function addChild($node_or_ref): void
+    {
+        $children = $this->attributes['children'] ?? [];
+        $children[] = $node_or_ref;
+        $this->attributes['children'] = $children;
+        $this->save();
+    }
+
+    // 🔍 Загрузка всех потомков по ссылкам ($ref / nid)
+    public function resolveChildren(): array
+    {
+        $resolved = [];
+
+        foreach ($this->attributes['children'] ?? [] as $item) {
+            if (isset($item['$ref'], $item['$id'])) {
+                $resolved[] = self::find($item['$id']);
+            } elseif (isset($item['_id'])) {
+                $resolved[] = new self($item);
+            }
+        }
+
+        return array_filter($resolved);
+    }
+
+    // 🪪 Получить текущий идентификатор как строку
+    public function getNid(): ?string
+    {
+        return $this->attributes['_id'] ?? null;
+    }
+
+    // 🧾 Преобразование в массив (например, для API/экспорта)
+    public function toArray(): array
+    {
+        return $this->attributes;
+    }
+
+    // 🧠 Умные геттеры и сеттеры
+    public function __get($key)
+    {
+        # Реализация волшебного геттера
+        $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+
+        return $this->attributes[$key] ?? null;
+    }
+
+    public function __set($key, $value): void
+    {
+        $method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+
+        if (method_exists($this, $method)) {
+            $this->$method($value);
             return;
         }
-        $svg_name = md5($this->svg) . '.svg';
-        $path = ths()->checkDir(storage_path('app/uploads/public/threes/icons/' . $svg_name));
-        file_put_contents(
-            $path,
-            $this->svg
-        );
-        $this->attributes['svg_name'] = $svg_name;
+
+        $this->attributes[$key] = $value;
     }
 
-    public function saveData(): void
+    private function setTimestamps(): void
     {
-        if (empty($this->attributes['nid'])) {
-            $this->attributes['nid'] = $this->nid ?? ths()->nodes()->createNidToken();
+        $now = date('c');
+        if (!$this->exists()) {
+            $this->attributes['created_at'] = $now;
         }
-        $settings = $this->dynamic_attributes;
-        $this->data_dump['settings'] = $settings;
-        $this->attributes['data'] = ths()->toJson($this->data_dump);
+        $this->attributes['updated_at'] = $now;
     }
+
+    // ✨ События (можно переопределить при наследовании)
+    protected function beforeSave(): void
+    {
+        $this->setTimestamps();
+    }
+    protected function afterSave(): void {}
 }
 
 ```
@@ -1593,6 +2080,159 @@ class Version extends Model
 }
 
 ```
+`plugins/zen/threes/models/feature/columns.yaml`
+```columns:
+    id:
+        label: Фича
+        type: text
+        searchable: true
+        sortable: true
+        width: auto
+        valueFrom: name
+    name:
+        label: name
+        type: text
+        searchable: true
+        invisible: true
+        sortable: true
+        width: auto
+    sort_order:
+        label: Порядок
+        type: number
+        sortable: true
+        width: 100px
+    created_at:
+        label: Создано
+        type: datetime
+        searchable: true
+        sortable: true
+        width: 150px
+        format: 'd.m.Y H:i'
+    updated_at:
+        label: Обновлено
+        type: datetime
+        searchable: true
+        sortable: true
+        width: 150px
+        format: 'd.m.Y H:i'
+    module:
+        label: Модуль
+        type: text
+        searchable: true
+        sortable: true
+        width: 100px
+    category:
+        label: Категория
+        type: text
+        searchable: true
+        sortable: true
+        width: 100px
+    status:
+        label: Статус
+        type: text
+        searchable: true
+        sortable: true
+        width: 100px
+    priority:
+        label: Приоритет
+        type: text
+        searchable: true
+        sortable: true
+        width: 100px
+    criteria_count:
+        label: Критериев
+        type: number
+        width: 100px
+    description:
+        label: Описание
+        type: text
+        invisible: true
+
+```
+`plugins/zen/threes/models/feature/fields.yaml`
+```tabs:
+    fields:
+        description:
+            label: Описание
+            size: large
+            span: full
+            type: markdown
+            tab: Настройки
+        acceptance_criteria_repeater:
+            label: 'Критерии приёмки'
+            prompt: 'Добавить критерий'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Настройки
+            form:
+                fields:
+                    item:
+                        label: 'Критерии приёмки'
+                        span: full
+                        size: ''
+                        type: textarea
+        comment:
+            label: Комментарии
+            size: small
+            span: full
+            type: textarea
+            tab: Управление
+        data:
+            label: ''
+            prompt: Добавить
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Промт
+            form:
+                fields:
+                    system:
+                        label: 'Системный промт'
+                        span: auto
+                        default: 0
+                        type: switch
+                    active:
+                        label: Включен
+                        span: auto
+                        default: 1
+                        type: switch
+                    title:
+                        label: Заголовок
+                        span: full
+                        type: text
+                    text:
+                        label: Промт
+                        size: large
+                        span: full
+                        type: textarea
+fields:
+    name:
+        label: 'Название фичи'
+        span: full
+        type: text
+    category:
+        label: Категория
+        showSearch: true
+        span: auto
+        type: dropdown
+    module:
+        label: Модуль
+        span: auto
+        showSearch: true
+        type: dropdown
+    priority:
+        label: Приоритет
+        showSearch: true
+        span: auto
+        type: dropdown
+    status:
+        label: Статус
+        showSearch: true
+        span: auto
+        type: dropdown
+
+```
 `plugins/zen/threes/models/frame/columns.yaml`
 ```columns:
     nid:
@@ -1742,7 +2382,75 @@ fields:
 
 ```
 `plugins/zen/threes/models/settings/fields.yaml`
-```fields:
+```tabs:
+    fields:
+        vector_yaml:
+            label: 'Векторное представление'
+            size: giant
+            language: plain_text
+            span: full
+            type: codeeditor
+            tab: 'Vector YAML'
+        vector_handlers:
+            label: 'Обработка вектора'
+            prompt: 'Добавить обработчик'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: 'Vector YAML'
+            form:
+                fields:
+                    active:
+                        label: 'Обработчик включен'
+                        span: full
+                        type: switch
+                    name:
+                        label: 'Название обработчика'
+                        span: full
+                        type: text
+                    system_prompt:
+                        label: 'Системный промт'
+                        size: large
+                        span: full
+                        type: textarea
+        vector_prompt:
+            label: 'Промт обработки исходных данных'
+            prompt: 'Добавить блок промта'
+            displayMode: accordion
+            span: full
+            type: repeater
+            tab: Беклог
+            form:
+                fields:
+                    active:
+                        label: Включен
+                        span: full
+                        default: 1
+                        type: switch
+                    name:
+                        label: 'Название промта'
+                        span: full
+                        type: text
+                        comment: 'Не учитывается ai'
+                    text:
+                        label: Промт
+                        size: small
+                        span: full
+                        type: textarea
+        vector:
+            label: 'Сырой вектор'
+            size: giant
+            language: plain_text
+            span: full
+            type: codeeditor
+            tab: Беклог
+        default_prompt:
+            label: 'Промт по умолчанию'
+            size: giant
+            span: full
+            type: textarea
+            tab: 'Настройки Ai'
+fields:
     author_token:
         label: 'Токен автора'
         span: auto
@@ -1812,6 +2520,7 @@ fields:
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
+        "grapesjs": "^0.22.6",
         "lodash": "^4.17.21",
         "md5": "^2.3.0",
         "primeicons": "^5.0.0",
@@ -1851,6 +2560,9 @@ permissions:
     zen.threes.nodes:
         tab: Threes
         label: 'Nodes control'
+    zen.threes.features:
+        tab: Threes
+        label: 'Features control'
 navigation:
     main:
         label: Threes
@@ -1859,6 +2571,10 @@ navigation:
         permissions:
             - zen.threes.main
         sideMenu:
+            threes-features:
+                label: Бэклог
+                url: zen/threes/featurecontroller
+                icon: icon-star-o
             frames:
                 label: Фреймы
                 url: zen/threes/framecontroller
@@ -1886,8 +2602,14 @@ navigation:
 `plugins/zen/threes/routes.php`
 ```<?php
 
-function handleResponse(array | string | null $response = null)
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+function handleResponse(array | string | \Symfony\Component\HttpFoundation\Response | null $response = null)
 {
+    if ($response instanceof BinaryFileResponse) {
+        return $response;
+    }
+
     if (is_null($response)) {
         return '';
     }
@@ -1936,15 +2658,9 @@ Route::match(
 
 const routes = [
     {
-        path: "/:backend/zen/threes/framecontroller/create",
+        path: "/:backend/zen/threes/framecontroller",
         name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
-        props: true,
-    },
-    {
-        path: "/:backend/zen/threes/framecontroller/update/:nid",
-        name: "Frame",
-        component: () => import("../vue/screens/Frame.vue"),
+        component: () => import("../vue/screens/Ui.vue"),
         props: true,
     },
 ];
@@ -1958,14 +2674,12 @@ export default router;
 
 ```
 `plugins/zen/threes/src/js/threes.js`
-```
-const axios = require('axios');
+```const axios = require('axios');
 const md5 = require('md5');
 import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
 import PrimeVue from 'primevue/config';
-import vuedraggable from 'vuedraggable';
 import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
@@ -2067,387 +2781,20 @@ window.ths = {
         }
     },
     preloader(state) {
-        console.log('Состояние прелоадера', state)
-
         this.data.process = state
     },
-    nodesUiStreamsRun() {
-
-    }
 }
 
-import FormFitter from "../vue/components/FormFitter.vue";
-import FormSection from "../vue/components/FormSection.vue";
 import vueClickOutsideElement from 'vue-click-outside-element';
 
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
 app.use(vueClickOutsideElement)
-app.component('FormFitter', FormFitter);
-app.component('FormSection', FormSection);
-app.component('draggable', vuedraggable);
 app.mount("#threes");
 
 ```
-`plugins/zen/threes/src/vue/components/Select.css`
-```:root {
-    --vs-colors--lightest: rgba(60, 60, 60, .26);
-    --vs-colors--light: rgba(60, 60, 60, .5);
-    --vs-colors--dark: #333;
-    --vs-colors--darkest: rgba(0, 0, 0, .15);
-    --vs-search-input-color: inherit;
-    --vs-search-input-placeholder-color: inherit;
-    --vs-font-size: 1rem;
-    --vs-line-height: 1.4;
-    --vs-state-disabled-bg: rgb(248, 248, 248);
-    --vs-state-disabled-color: var(--vs-colors--light);
-    --vs-state-disabled-controls-color: var(--vs-colors--light);
-    --vs-state-disabled-cursor: not-allowed;
-    --vs-border-color: var(--vs-colors--lightest);
-    --vs-border-width: 1px;
-    --vs-border-style: solid;
-    --vs-border-radius: 4px;
-    --vs-actions-padding: 4px 6px 0 3px;
-    --vs-controls-color: var(--vs-colors--light);
-    --vs-controls-size: 1;
-    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
-    --vs-selected-bg: #f0f0f0;
-    --vs-selected-color: var(--vs-colors--dark);
-    --vs-selected-border-color: var(--vs-border-color);
-    --vs-selected-border-style: var(--vs-border-style);
-    --vs-selected-border-width: var(--vs-border-width);
-    --vs-dropdown-bg: #fff;
-    --vs-dropdown-color: inherit;
-    --vs-dropdown-z-index: 1000;
-    --vs-dropdown-min-width: 160px;
-    --vs-dropdown-max-height: 350px;
-    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
-    --vs-dropdown-option-bg: #000;
-    --vs-dropdown-option-color: var(--vs-dropdown-color);
-    --vs-dropdown-option-padding: 3px 20px;
-    --vs-dropdown-option--active-bg: #5897fb;
-    --vs-dropdown-option--active-color: #fff;
-    --vs-dropdown-option--deselect-bg: #fb5858;
-    --vs-dropdown-option--deselect-color: #fff;
-    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
-    --vs-transition-duration: .15s
-}
-
-.v-select {
-    position: relative;
-    font-family: inherit;
-    background: #fff;
-}
-
-.v-select, .v-select * {
-    box-sizing: border-box
-}
-
-:root {
-    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
-    --vs-transition-duration: .15s
-}
-
-@-webkit-keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-@keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-.vs__fade-enter-active, .vs__fade-leave-active {
-    pointer-events: none;
-    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
-}
-
-.vs__fade-enter, .vs__fade-leave-to {
-    opacity: 0
-}
-
-:root {
-    --vs-disabled-bg: var(--vs-state-disabled-bg);
-    --vs-disabled-color: var(--vs-state-disabled-color);
-    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
-    cursor: var(--vs-disabled-cursor);
-    background-color: var(--vs-disabled-bg)
-}
-
-.v-select[dir=rtl] .vs__actions {
-    padding: 0 3px 0 6px
-}
-
-.v-select[dir=rtl] .vs__clear {
-    margin-left: 6px;
-    margin-right: 0
-}
-
-.v-select[dir=rtl] .vs__deselect {
-    margin-left: 0;
-    margin-right: 2px
-}
-
-.v-select[dir=rtl] .vs__dropdown-menu {
-    text-align: right
-}
-
-.vs__dropdown-toggle {
-    height: 42px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    display: flex;
-    padding: 0 0 4px;
-    background: none;
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-radius: var(--vs-border-radius);
-    white-space: normal
-}
-
-.vs__selected-options {
-    display: flex;
-    flex-basis: 100%;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    padding: 0 2px;
-    position: relative
-}
-
-.vs__actions {
-    display: flex;
-    align-items: center;
-    padding: var(--vs-actions-padding)
-}
-
-.vs--searchable .vs__dropdown-toggle {
-    height: auto;
-    min-height: 36px;
-    cursor: text
-}
-
-.vs--unsearchable .vs__dropdown-toggle {
-    cursor: pointer
-}
-
-.vs--open .vs__dropdown-toggle {
-    border-bottom-color: transparent;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0
-}
-
-.vs__open-indicator {
-    fill: var(--vs-controls-color);
-    transform: scale(var(--vs-controls-size));
-    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
-    transition-timing-function: var(--vs-transition-timing-function)
-}
-
-.vs--open .vs__open-indicator {
-    transform: rotate(180deg) scale(var(--vs-controls-size))
-}
-
-.vs--loading .vs__open-indicator {
-    opacity: 0
-}
-
-.vs__clear {
-    fill: var(--vs-controls-color);
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    cursor: pointer;
-    margin-right: 8px
-}
-
-.vs__dropdown-menu {
-    display: block;
-    box-sizing: border-box;
-    position: absolute;
-    top: calc(100% - var(--vs-border-width));
-    left: 0;
-    z-index: var(--vs-dropdown-z-index);
-    padding: 5px 0;
-    margin: 0;
-    width: 100%;
-    max-height: var(--vs-dropdown-max-height);
-    min-width: var(--vs-dropdown-min-width);
-    overflow-y: auto;
-    box-shadow: var(--vs-dropdown-box-shadow);
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-top-style: none;
-    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
-    text-align: left;
-    list-style: none;
-    background: var(--vs-dropdown-bg);
-    color: var(--vs-dropdown-color)
-}
-
-.vs__no-options {
-    text-align: center
-}
-
-.vs__dropdown-option {
-    line-height: 1.42857143;
-    display: block;
-    padding: var(--vs-dropdown-option-padding);
-    clear: both;
-    color: var(--vs-dropdown-option-color);
-    white-space: nowrap;
-    cursor: pointer
-}
-
-.vs__dropdown-option--highlight {
-    background: var(--vs-dropdown-option--active-bg);
-    color: var(--vs-dropdown-option--active-color)
-}
-
-.vs__dropdown-option--deselect {
-    background: var(--vs-dropdown-option--deselect-bg);
-    color: var(--vs-dropdown-option--deselect-color)
-}
-
-.vs__dropdown-option--disabled {
-    background: var(--vs-state-disabled-bg);
-    color: var(--vs-state-disabled-color);
-    cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs__selected {
-    display: flex;
-    align-items: center;
-    background-color: var(--vs-selected-bg);
-    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
-    border-radius: var(--vs-border-radius);
-    color: var(--vs-selected-color);
-    line-height: var(--vs-line-height);
-    margin: 4px 2px 0;
-    padding: 0 .25em;
-    z-index: 0
-}
-
-.vs__deselect {
-    display: inline-flex;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    margin-left: 4px;
-    padding: 0;
-    border: 0;
-    cursor: pointer;
-    background: none;
-    fill: var(--vs-controls-color);
-    text-shadow: var(--vs-controls--deselect-text-shadow)
-}
-
-.vs__selected {
-    /*height: 33px;*/
-}
-
-.vs--single .vs__selected {
-    background-color: transparent;
-    border-color: transparent
-}
-
-.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
-    position: absolute;
-    opacity: .4
-}
-
-.vs--single.vs--searching .vs__selected {
-    display: none
-}
-
-.vs__search::-webkit-search-cancel-button {
-    display: none
-}
-
-.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
-    display: none
-}
-
-.vs__search, .vs__search:focus {
-    color: var(--vs-search-input-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    line-height: var(--vs-line-height);
-    font-size: var(--vs-font-size);
-    border: 1px solid transparent;
-    border-left: none;
-    outline: none;
-    margin: 4px 0 0;
-    padding: 0 7px;
-    background: none;
-    box-shadow: none;
-    width: 0;
-    max-width: 100%;
-    flex-grow: 1;
-    z-index: 1
-}
-
-.vs__search::-moz-placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs__search::placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs--unsearchable .vs__search {
-    opacity: 1
-}
-
-.vs--unsearchable:not(.vs--disabled) .vs__search {
-    cursor: pointer
-}
-
-.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
-    opacity: .2
-}
-
-.vs__spinner {
-    align-self: center;
-    opacity: 0;
-    font-size: 5px;
-    text-indent: -9999em;
-    overflow: hidden;
-    border-top: .9em solid rgba(100, 100, 100, .1);
-    border-right: .9em solid rgba(100, 100, 100, .1);
-    border-bottom: .9em solid rgba(100, 100, 100, .1);
-    border-left: .9em solid rgba(60, 60, 60, .45);
-    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
-    -webkit-animation: vSelectSpinner 1.1s infinite linear;
-    animation: vSelectSpinner 1.1s infinite linear;
-    transition: opacity .1s
-}
-
-.vs__spinner, .vs__spinner:after {
-    border-radius: 50%;
-    width: 5em;
-    height: 5em;
-    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
-}
-
-.vs--loading .vs__spinner {
-    opacity: 1
-}
-
-```
-`plugins/zen/threes/src/vue/old_components/Dwarf/inputs/DwarfSelect.css`
+`plugins/zen/threes/src/vue/trash/Dwarf/inputs/DwarfSelect.css`
 ```:root {
     --vs-colors--lightest: rgba(60, 60, 60, .26);
     --vs-colors--light: rgba(60, 60, 60, .5);
@@ -2804,6 +3151,363 @@ app.mount("#threes");
 }
 
 ```
+`plugins/zen/threes/src/vue/trash/v2/Select.css`
+```:root {
+    --vs-colors--lightest: rgba(60, 60, 60, .26);
+    --vs-colors--light: rgba(60, 60, 60, .5);
+    --vs-colors--dark: #333;
+    --vs-colors--darkest: rgba(0, 0, 0, .15);
+    --vs-search-input-color: inherit;
+    --vs-search-input-placeholder-color: inherit;
+    --vs-font-size: 1rem;
+    --vs-line-height: 1.4;
+    --vs-state-disabled-bg: rgb(248, 248, 248);
+    --vs-state-disabled-color: var(--vs-colors--light);
+    --vs-state-disabled-controls-color: var(--vs-colors--light);
+    --vs-state-disabled-cursor: not-allowed;
+    --vs-border-color: var(--vs-colors--lightest);
+    --vs-border-width: 1px;
+    --vs-border-style: solid;
+    --vs-border-radius: 4px;
+    --vs-actions-padding: 4px 6px 0 3px;
+    --vs-controls-color: var(--vs-colors--light);
+    --vs-controls-size: 1;
+    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
+    --vs-selected-bg: #f0f0f0;
+    --vs-selected-color: var(--vs-colors--dark);
+    --vs-selected-border-color: var(--vs-border-color);
+    --vs-selected-border-style: var(--vs-border-style);
+    --vs-selected-border-width: var(--vs-border-width);
+    --vs-dropdown-bg: #fff;
+    --vs-dropdown-color: inherit;
+    --vs-dropdown-z-index: 1000;
+    --vs-dropdown-min-width: 160px;
+    --vs-dropdown-max-height: 350px;
+    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
+    --vs-dropdown-option-bg: #000;
+    --vs-dropdown-option-color: var(--vs-dropdown-color);
+    --vs-dropdown-option-padding: 3px 20px;
+    --vs-dropdown-option--active-bg: #5897fb;
+    --vs-dropdown-option--active-color: #fff;
+    --vs-dropdown-option--deselect-bg: #fb5858;
+    --vs-dropdown-option--deselect-color: #fff;
+    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
+    --vs-transition-duration: .15s
+}
+
+.v-select {
+    position: relative;
+    font-family: inherit;
+    background: #fff;
+}
+
+.v-select, .v-select * {
+    box-sizing: border-box
+}
+
+:root {
+    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
+    --vs-transition-duration: .15s
+}
+
+@-webkit-keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes vSelectSpinner {
+    0% {
+        transform: rotate(0)
+    }
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+.vs__fade-enter-active, .vs__fade-leave-active {
+    pointer-events: none;
+    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
+}
+
+.vs__fade-enter, .vs__fade-leave-to {
+    opacity: 0
+}
+
+:root {
+    --vs-disabled-bg: var(--vs-state-disabled-bg);
+    --vs-disabled-color: var(--vs-state-disabled-color);
+    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
+    cursor: var(--vs-disabled-cursor);
+    background-color: var(--vs-disabled-bg)
+}
+
+.v-select[dir=rtl] .vs__actions {
+    padding: 0 3px 0 6px
+}
+
+.v-select[dir=rtl] .vs__clear {
+    margin-left: 6px;
+    margin-right: 0
+}
+
+.v-select[dir=rtl] .vs__deselect {
+    margin-left: 0;
+    margin-right: 2px
+}
+
+.v-select[dir=rtl] .vs__dropdown-menu {
+    text-align: right
+}
+
+.vs__dropdown-toggle {
+    height: 42px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: flex;
+    padding: 0 0 4px;
+    background: none;
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-radius: var(--vs-border-radius);
+    white-space: normal
+}
+
+.vs__selected-options {
+    display: flex;
+    flex-basis: 100%;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    padding: 0 2px;
+    position: relative
+}
+
+.vs__actions {
+    display: flex;
+    align-items: center;
+    padding: var(--vs-actions-padding)
+}
+
+.vs--searchable .vs__dropdown-toggle {
+    height: auto;
+    min-height: 36px;
+    cursor: text
+}
+
+.vs--unsearchable .vs__dropdown-toggle {
+    cursor: pointer
+}
+
+.vs--open .vs__dropdown-toggle {
+    border-bottom-color: transparent;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0
+}
+
+.vs__open-indicator {
+    fill: var(--vs-controls-color);
+    transform: scale(var(--vs-controls-size));
+    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
+    transition-timing-function: var(--vs-transition-timing-function)
+}
+
+.vs--open .vs__open-indicator {
+    transform: rotate(180deg) scale(var(--vs-controls-size))
+}
+
+.vs--loading .vs__open-indicator {
+    opacity: 0
+}
+
+.vs__clear {
+    fill: var(--vs-controls-color);
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    margin-right: 8px
+}
+
+.vs__dropdown-menu {
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    top: calc(100% - var(--vs-border-width));
+    left: 0;
+    z-index: var(--vs-dropdown-z-index);
+    padding: 5px 0;
+    margin: 0;
+    width: 100%;
+    max-height: var(--vs-dropdown-max-height);
+    min-width: var(--vs-dropdown-min-width);
+    overflow-y: auto;
+    box-shadow: var(--vs-dropdown-box-shadow);
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-top-style: none;
+    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
+    text-align: left;
+    list-style: none;
+    background: var(--vs-dropdown-bg);
+    color: var(--vs-dropdown-color)
+}
+
+.vs__no-options {
+    text-align: center
+}
+
+.vs__dropdown-option {
+    line-height: 1.42857143;
+    display: block;
+    padding: var(--vs-dropdown-option-padding);
+    clear: both;
+    color: var(--vs-dropdown-option-color);
+    white-space: nowrap;
+    cursor: pointer
+}
+
+.vs__dropdown-option--highlight {
+    background: var(--vs-dropdown-option--active-bg);
+    color: var(--vs-dropdown-option--active-color)
+}
+
+.vs__dropdown-option--deselect {
+    background: var(--vs-dropdown-option--deselect-bg);
+    color: var(--vs-dropdown-option--deselect-color)
+}
+
+.vs__dropdown-option--disabled {
+    background: var(--vs-state-disabled-bg);
+    color: var(--vs-state-disabled-color);
+    cursor: var(--vs-state-disabled-cursor)
+}
+
+.vs__selected {
+    display: flex;
+    align-items: center;
+    background-color: var(--vs-selected-bg);
+    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
+    border-radius: var(--vs-border-radius);
+    color: var(--vs-selected-color);
+    line-height: var(--vs-line-height);
+    margin: 4px 2px 0;
+    padding: 0 .25em;
+    z-index: 0
+}
+
+.vs__deselect {
+    display: inline-flex;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background: none;
+    fill: var(--vs-controls-color);
+    text-shadow: var(--vs-controls--deselect-text-shadow)
+}
+
+.vs__selected {
+    /*height: 33px;*/
+}
+
+.vs--single .vs__selected {
+    background-color: transparent;
+    border-color: transparent
+}
+
+.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
+    position: absolute;
+    opacity: .4
+}
+
+.vs--single.vs--searching .vs__selected {
+    display: none
+}
+
+.vs__search::-webkit-search-cancel-button {
+    display: none
+}
+
+.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
+    display: none
+}
+
+.vs__search, .vs__search:focus {
+    color: var(--vs-search-input-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    line-height: var(--vs-line-height);
+    font-size: var(--vs-font-size);
+    border: 1px solid transparent;
+    border-left: none;
+    outline: none;
+    margin: 4px 0 0;
+    padding: 0 7px;
+    background: none;
+    box-shadow: none;
+    width: 0;
+    max-width: 100%;
+    flex-grow: 1;
+    z-index: 1
+}
+
+.vs__search::-moz-placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs__search::placeholder {
+    color: var(--vs-search-input-placeholder-color)
+}
+
+.vs--unsearchable .vs__search {
+    opacity: 1
+}
+
+.vs--unsearchable:not(.vs--disabled) .vs__search {
+    cursor: pointer
+}
+
+.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
+    opacity: .2
+}
+
+.vs__spinner {
+    align-self: center;
+    opacity: 0;
+    font-size: 5px;
+    text-indent: -9999em;
+    overflow: hidden;
+    border-top: .9em solid rgba(100, 100, 100, .1);
+    border-right: .9em solid rgba(100, 100, 100, .1);
+    border-bottom: .9em solid rgba(100, 100, 100, .1);
+    border-left: .9em solid rgba(60, 60, 60, .45);
+    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
+    -webkit-animation: vSelectSpinner 1.1s infinite linear;
+    animation: vSelectSpinner 1.1s infinite linear;
+    transition: opacity .1s
+}
+
+.vs__spinner, .vs__spinner:after {
+    border-radius: 50%;
+    width: 5em;
+    height: 5em;
+    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
+}
+
+.vs--loading .vs__spinner {
+    opacity: 1
+}
+
+```
 `plugins/zen/threes/traits/QueryLogTrait.php`
 ```<?php
 
@@ -2990,6 +3694,47 @@ class M004Versions extends Migration
     }
 }
 ```
+`plugins/zen/threes/updates/m005_features.php`
+```<?php namespace Zen\Threes\Updates;
+
+use Schema;
+use October\Rain\Database\Updates\Migration;
+
+class M005Features extends Migration
+{
+    public function up()
+    {
+        Schema::create('zen_threes_features', function($table)
+        {
+            $table->increments('id');
+            $table->text('name')->nullable()->comment('Название феномена');
+            $table->text('description')->nullable()->comment('Описание феномена');
+
+            $table->text('category')->nullable()->comment('Категория феномена');
+            $table->text('priority')->nullable()->comment('Приоритет феномена');
+            $table->text('status')->nullable()->comment('Статус феномена');
+            $table->text('module')->nullable()->comment('Модуль?');
+            
+
+            $table->text('data')->nullable();
+            $table->integer('release')->nullable()->comment('Релиз');
+            $table->text('acceptance_criteria')->nullable()->comment('Критерии приёмки');
+            $table->integer('parent_id')->unsigned()->nullable();
+            $table->integer('sort_order')->unsigned()->default(0);
+            $table->integer('nest_left')->unsigned();
+            $table->integer('nest_right')->unsigned();
+            $table->integer('nest_depth')->unsigned();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('zen_threes_features');
+    }
+}
+
+```
 `plugins/zen/threes/updates/version.yaml`
 ```v1.0.1:
     - 'Initialize plugin'
@@ -3005,6 +3750,9 @@ v1.0.4:
 v1.0.5:
     - 'Create Versions'
     - m004_versions.php
+v1.0.6:
+    - 'Created Features'
+    - m005_features.php
 
 ```
 `plugins/zen/threes/views/blueprints/frames/frame.htm`
