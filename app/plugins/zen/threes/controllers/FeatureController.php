@@ -21,7 +21,7 @@ class FeatureController extends Controller
     public function __construct()
     {
         parent::__construct();
-        BackendMenu::setContext('Zen.Threes', 'main', 'threes-features');
+        BackendMenu::setContext('Zen.Threes', 'main', 'features');
     }
 
     public function onRegenerate()
