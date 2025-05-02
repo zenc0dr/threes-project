@@ -7,6 +7,7 @@ use Zen\Threes\Classes\Services\OpenAiService;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Dumper;
 use Zen\Threes\Classes\Gen;
+use Zen\Threes\Models\Node;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -50,10 +51,13 @@ class Tests
         dd('Threes api works!');
     }
 
-    # http://threes.dc/threes.api/debug.Tests:test
+    # http://threes.dc/threes.api/debug.Tests:testMongo
     public function testMongo()
     {
-
+        $node = new Node();
+        $node->name = 'Я нод';
+        $node->save();
+        dd($node->getNid());
     }
 
     # http://threes.dc/threes.api/debug.Tests:handleYamlFile

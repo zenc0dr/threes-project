@@ -27,9 +27,16 @@ class Node
         return self::client()->selectDatabase(self::$database)->selectCollection(self::$collection);
     }
 
-    public static function find(string $id): ?self
+    public function getOid(): ?string
     {
-        $doc = self::collection()->findOne(['_id' => new ObjectId($id)]);
+        return isset($this->attributes['_id'])
+            ? (string) $this->attributes['_id']
+            : null;
+    }
+
+    public static function find(string $oid): ?self
+    {
+        $doc = self::collection()->findOne(['_id' => new ObjectId($oid)]);
         return $doc ? new self($doc->getArrayCopy()) : null;
     }
 
@@ -41,17 +48,17 @@ class Node
 
     public function save(): void
     {
+        $this->beforeSave();
         if (isset($this->attributes['_id'])) {
-            // Обновление
             self::collection()->replaceOne(
                 ['_id' => new ObjectId($this->attributes['_id'])],
                 $this->attributes
             );
         } else {
-            // Вставка
             $result = self::collection()->insertOne($this->attributes);
             $this->attributes['_id'] = $result->getInsertedId();
         }
+        $this->afterSave();
     }
 
     public function addChild($node_or_ref): void
@@ -90,5 +97,15 @@ class Node
     public function toArray(): array
     {
         return $this->attributes;
+    }
+
+    public function beforeSave()
+    {
+
+    }
+
+    public function afterSave()
+    {
+
     }
 }
