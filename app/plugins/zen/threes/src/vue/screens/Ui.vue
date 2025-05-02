@@ -1,16 +1,16 @@
 <template>
     <div class="threes-ui">
-        <NodeTree />
+        <Tree />
     </div>
 </template>
 
 <script>
-import NodeTree from '../components/NodeTree.vue'
+import Tree from '../components/Tree.vue'
 export default {
-    name: 'Ui',
+    name: 'Stand',
     props: ['backend'],
     components: {
-        NodeTree
+        Tree
     }
 };
 </script>

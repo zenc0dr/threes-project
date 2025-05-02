@@ -2551,9 +2551,6 @@ permissions:
     zen.threes.options:
         tab: Threes
         label: 'Threes Options'
-    zen.threes.frames:
-        tab: Threes
-        label: 'Frames control'
     zen.threes.queries:
         tab: Threes
         label: 'Queries control'
@@ -2571,17 +2568,10 @@ navigation:
         permissions:
             - zen.threes.main
         sideMenu:
-            threes-features:
+            features:
                 label: Бэклог
                 url: zen/threes/featurecontroller
                 icon: icon-star-o
-            frames:
-                label: Фреймы
-                url: zen/threes/framecontroller
-                icon: icon-play
-                permissions:
-                    - zen.threes.main
-                    - zen.threes.frames
             nodes:
                 label: Ноды
                 url: zen/threes/nodecontroller
@@ -2658,7 +2648,7 @@ Route::match(
 
 const routes = [
     {
-        path: "/:backend/zen/threes/framecontroller",
+        path: "/:backend/zen/threes/nodecontroller",
         name: "Frame",
         component: () => import("../vue/screens/Ui.vue"),
         props: true,

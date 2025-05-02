@@ -17,7 +17,7 @@
 import TreeItem from './TreeItem.vue'
 
 export default {
-    name: 'NodeTree',
+    name: 'Tree',
     components: { TreeItem },
     data() {
         return {
