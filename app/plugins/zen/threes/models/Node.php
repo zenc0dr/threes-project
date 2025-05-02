@@ -1,270 +1,94 @@
-<?php namespace Zen\Threes\Models;
+<?php
 
-use Model;
-use October\Rain\Database\Traits\Validation;
+namespace Zen\Threes\Models;
 
-/**
- * @property string $nid - Токен нода
- * @property string $name - Имя
- * @property string $svg_path - Путь до SVG
- * @property string $description - Описание
- * @property null|string $svg
- * @method static find($nid)
- * @method static get()
- */
+use MongoDB\Client;
+use MongoDB\BSON\ObjectId;
 
-class Node extends Model
+class Node
 {
-    use Validation;
+    public static string $database = 'threes';
+    public static string $collection = 'nodes';
 
-    public $table = 'zen_threes_nodes';
-    protected $primaryKey = 'nid';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    protected array $attributes = [];
 
-    public $rules = [
-        'nid' => 'required|unique:zen_threes_nodes,nid',
-    ];
-
-    protected $fillable = [
-        'nid',
-        'svg',
-        'svg_name',
-        'nodes',
-        'name',
-        'data',
-        'scheme',
-        'description',
-    ];
-
-    private ?string $nid_token_dump = null;
-
-    protected array $dynamic_attributes = [];
-    protected array $data_dump = [];
-
-    /** Разделение статических и динамических полей
-     * @param $name
-     * @param $value
-     * @return void
-     */
-    public function __set($name, $value)
+    public function __construct(array $data = [])
     {
-        if (!$this->hasAttribute($name)) {
-            $this->dynamic_attributes[$name] = $value;
-            unset($this->attributes[$name]);
-        } else {
-            parent::__set($name, $value);
-        }
+        $this->attributes = $data;
     }
 
-    /**
-     * Проверка на динамический атрибут
-     * @param string $key
-     * @return bool
-     */
-    private function hasAttribute(string $key): bool
+    public static function client(): Client
     {
-        return in_array($key, $this->fillable);
+        return new Client(env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin'));
     }
 
-    /**
-     * Получить токен нода
-     * @return string
-     */
-    private function makeNidToken(): string
+    public static function collection()
     {
-        if ($this->nid_token_dump) {
-            return $this->nid_token_dump;
-        }
-        return $this->nid_token_dump = ths()->nodes()->createNidToken();
+        return self::client()->selectDatabase(self::$database)->selectCollection(self::$collection);
     }
 
-    /**
-     * @param string|null $value
-     * @return string|null
-     */
-    public function getNidAttribute(?string $value): ?string
+    public static function find(string $id): ?self
     {
-        if ($value) {
-            return $value;
-        }
-
-        return $this->makeNidToken();
+        $doc = self::collection()->findOne(['_id' => new ObjectId($id)]);
+        return $doc ? new self($doc->getArrayCopy()) : null;
     }
 
-    public function getNameAttribute(?string $value): string
+    public static function findByNid(string $nid): ?self
     {
-        if ($value) {
-            return $value;
-        }
-
-        $token = $this->makeNidToken();
-        $token = explode('.', $token);
-        return end($token);
+        $doc = self::collection()->findOne(['nid' => $nid]);
+        return $doc ? new self($doc->getArrayCopy()) : null;
     }
 
-    /**
-    public function getNodesAttribute(): array
+    public function save(): void
     {
-        $nodes_string = $this->data_dump['nodes'] ?? '';
-        return ths()->nodes()->nodesFromString($nodes_string);
-    }
-
-    public function getNodesNidsAttribute(): array
-    {
-        $nodes_string = $this->data_dump['nodes'] ?? '';
-        return ths()->nodes()->nodesFromString($nodes_string, false);
-    }
-
-    public function setNodesAttribute(array $nodes): void
-    {
-        $this->data_dump['nodes'] = ths()->nodes()->nodesToString($nodes);
-    }
-     */
-
-    public function getSvgPathAttribute(): string
-    {
-        if (!$this->svg) {
-            return '/plugins/zen/threes/assets/images/icons/default-icon.svg';
-        }
-        return '/storage/app/uploads/public/threes/icons/' . $this->svg_name;
-    }
-
-    public function getSvgAttribute(?string $svg = null): string
-    {
-        if (!$svg) {
-            return file_get_contents(
-                base_path('plugins/zen/threes/assets/images/icons/default-icon.svg')
+        if (isset($this->attributes['_id'])) {
+            // Обновление
+            self::collection()->replaceOne(
+                ['_id' => new ObjectId($this->attributes['_id'])],
+                $this->attributes
             );
+        } else {
+            // Вставка
+            $result = self::collection()->insertOne($this->attributes);
+            $this->attributes['_id'] = $result->getInsertedId();
         }
-        return $svg;
     }
 
-    public function getSettingsAttribute(): array
+    public function addChild($node_or_ref): void
     {
-        return $this->data_dump['settings'] ?? [];
+        $children = $this->attributes['children'] ?? [];
+        $children[] = $node_or_ref;
+        $this->attributes['children'] = $children;
+        $this->save();
     }
 
-    public function getDataAttribute(?string $data): array
+    public function resolveChildren(): array
     {
-        if ($data) {
-            return ths()->fromJson($data) ?? [];
-        }
-        return [];
-    }
+        $resolved = [];
 
-//    public function getSchemeAttribute(?string $value): ?string
-//    {
-//        if ($value) {
-//            return $value;
-//        }
-//
-//        $default_scheme = ths()->fromYamlFile(
-//            base_path('plugins/zen/threes/models/settings/exe_field.yaml')
-//        );
-//
-//        $exe = $default_scheme['fields']['exe'];
-//        $exe['tab'] = 'Настройки';
-//
-//        return ths()->toYaml(['exe' => $exe]);
-//    }
-
-    public function getAdditionalFieldsAttribute(): array
-    {
-        if ($this->scheme) {
-            $fields = ths()->fromYaml($this->scheme);
-
-            if (!$fields) {
-                return [];
-            }
-
-            $add_fields = [];
-            foreach ($fields as $field => $value) {
-                $add_fields[$field] = [
-                    'label' => $value['label'],
-                    'type' => $value['type'],
-                    'tab' => $value['tab'] ?? 'Настройки',
-                    'span' => $value['span'],
-                ];
-                if ($additional = $value['additional'] ?? null) {
-                    foreach ($additional as $batch) {
-                        $batch = ths()->fromYaml($batch['rule']);
-                        $add_fields[$value['field']] = array_merge($add_fields[$value['field']], $batch);
-                    }
-                }
-            }
-            return $add_fields;
-        }
-        return [];
-    }
-
-    public function getStoreItemAttribute(): array
-    {
-        return [
-            'nid' => $this->nid,
-            'name' => $this->name,
-            'icon' => $this->svg_path,
-            'description' => $this->description,
-        ];
-    }
-
-    public function afterFetch(): void
-    {
-        $this->data_dump = $this->data;
-        $this->fillSettings();
-    }
-
-    public function beforeSave(): void
-    {
-        $this->saveData();
-        $this->saveSvgIcon();
-    }
-
-    private function fillSettings(): void
-    {
-        $settings = $this->data_dump['settings'] ?? null;
-        if ($settings) {
-            foreach ($settings as $field => $value) {
-                $this->attributes[$field] = $value;
+        foreach ($this->attributes['children'] ?? [] as $item) {
+            if (isset($item['$ref']) && isset($item['$id'])) {
+                $resolved[] = self::find($item['$id']);
+            } elseif (isset($item['nid'])) {
+                $resolved[] = new self($item); // вложенный без сохранения
             }
         }
+
+        return $resolved;
     }
 
-    private function saveSvgIcon(): void
+    public function __get($key)
     {
-        if (!$this->svg) {
-            return;
-        }
-        $svg_name = md5($this->svg) . '.svg';
-        $path = ths()->checkDir(storage_path('app/uploads/public/threes/icons/' . $svg_name));
-        file_put_contents(
-            $path,
-            $this->svg
-        );
-        $this->attributes['svg_name'] = $svg_name;
+        return $this->attributes[$key] ?? null;
     }
 
-    public function saveData(): void
+    public function __set($key, $value): void
     {
-        if (empty($this->attributes['nid'])) {
-            $this->attributes['nid'] = $this->nid ?? ths()->nodes()->createNidToken();
-        }
+        $this->attributes[$key] = $value;
+    }
 
-        // Собираем неразрешенные атрибуты из атрибутов модели
-        $non_fillable = array_diff_key($this->attributes, array_flip($this->fillable));
-
-        // Объединяем с динамическими атрибутами
-        $settings = array_merge($this->dynamic_attributes, $non_fillable);
-
-        // Удаляем неразрешенные атрибуты из атрибутов модели
-        foreach (array_keys($non_fillable) as $key) {
-            unset($this->attributes[$key]);
-        }
-
-        // Обновляем data_dump с настройками
-        $this->data_dump['settings'] = $settings;
-
-        // Устанавливаем 'data' как JSON
-        $this->attributes['data'] = ths()->toJson($this->data_dump);
+    public function toArray(): array
+    {
+        return $this->attributes;
     }
 }

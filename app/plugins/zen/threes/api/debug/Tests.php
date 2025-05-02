@@ -50,6 +50,12 @@ class Tests
         dd('Threes api works!');
     }
 
+    # http://threes.dc/threes.api/debug.Tests:test
+    public function testMongo()
+    {
+
+    }
+
     # http://threes.dc/threes.api/debug.Tests:handleYamlFile
     public function handleYamlFile()
     {
