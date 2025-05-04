@@ -9,6 +9,9 @@ use MongoDB\Collection as MongoCollection;
  * @property string $nid
  * @property string $name
  * @property string $description
+ * @property string $handler
+ * @property string | array $data
+ * @property array $props
  */
 
 class Node

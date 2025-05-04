@@ -43,9 +43,6 @@ export default {
     flex-direction: row;
     justify-content: space-between;
 }
-.threes-bottom {
-
-}
 .schema-container {
     display: flex;
     flex: 1 1 0;
