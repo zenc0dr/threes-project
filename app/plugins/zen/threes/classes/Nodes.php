@@ -24,19 +24,26 @@ class Nodes
 
     /**
      * Создание простого текстового нода
-     * @return string
+     * @return Node
      */
-    public function fabric(): string
+    public function fabric(): Node
     {
         $node = $this->model();
+        $node->icon = base_path('plugins/zen/threes/src/images/icons/cog.svg');
         $node->name = "Новый документ";
-        $node->handler = 'Zen.Threes.Classes.Document.txt';
+        $node->handler = 'Zen.Threes.Classes.Nodes.Document.Text';
         $node->data = "Привет мир!";
         $node->props = [
             'tree' => true,
-            'schema' => true
+            'schema' => true,
+            'store' => [
+                'group' => 'Документы',
+                'author' => ths()->getSetting('author_token') ?? 'Nobody',
+                'tags' => ["text", "documents"],
+                'created_at' => now()->toDateTimeString(),
+            ],
         ];
         $node->save();
-        return $node->nid;
+        return $node;
     }
 }

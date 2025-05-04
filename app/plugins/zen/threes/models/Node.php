@@ -57,11 +57,21 @@ class Node
             ->selectCollection(self::$collection);
     }
 
+    # Геттеры и сеттеры
+    public function setIconAttribute(string $svg): void
+    {
+        $this->attributes['icon'] = ths()->setIcon($svg);
+    }
+
+    public function getIconAttribute(): string
+    {
+        return ths()->getIcon($this->attributes['icon']);
+    }
+
     // 🪄 Генерация читаемого nid вида zen.threes.ab3d8d2k
     public static function generateNidFromSettings(): string
     {
-        $author_scope = ths()->getSetting('author_token'); // ожидается "zen.threes"
-        return $author_scope . '.' . ths()->createShortId();
+        return ths()->createShortId();
     }
 
     // 🔎 Поиск по nid (который = _id)
@@ -156,22 +166,37 @@ class Node
         return $this->attributes['_id'] ?? null;
     }
 
-    // 🧾 Преобразование в массив (например, для API/экспорта)
+    // Преобразование в массив (например, для API/экспорта)
     public function toArray(): array
     {
         return $this->attributes;
     }
 
-    // 🧠 Умные геттеры и сеттеры
+    protected function normalizeValue($value)
+    {
+        if ($value instanceof \MongoDB\Model\BSONDocument || $value instanceof \MongoDB\Model\BSONArray) {
+            $value = $value->getArrayCopy();
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $k => $v) {
+                $value[$k] = $this->normalizeValue($v);
+            }
+        }
+
+        return $value;
+    }
+
+
+    // Умные геттеры и сеттеры
     public function __get($key)
     {
-        # Реализация волшебного геттера
         $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
         if (method_exists($this, $method)) {
             return $this->$method();
         }
 
-        return $this->attributes[$key] ?? null;
+        return $this->normalizeValue($this->attributes[$key] ?? null);
     }
 
     public function __set($key, $value): void

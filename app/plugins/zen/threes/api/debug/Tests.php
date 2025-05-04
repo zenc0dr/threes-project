@@ -18,37 +18,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
-        ths()->
-
-        #Gen::run(1);
-        dd(
-            'ok'
-        );
-
-        //ths()->setSetting('vector_yaml', 'LALALA');
-
-
-//        dd(
-//            ths()->ai(
-//                'Привет моделька',
-//                'Ты добрая и ласковая девушка',
-//                'ollama'
-//            )
-//        );
-
-
-        #ths()->getSetting();
-        #ths()->backlog()->generateBacklog();
-
-//        $answer = OpenAiService::query(
-//            'Ты дружелюбная помощница',
-//            'Привет милая, как твои делишки?'
-//        );
-//
-//        dd($answer);
-
-        //ths()->notice()->telegramSendMessage('Какдила?');
+        #Node::truncate();
+        #$node = ths()->nodes()->fabric();
+        $node = ths()->nodes()->model('8zmyqyfu9pc3');
+        dd($node->props);
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

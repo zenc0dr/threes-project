@@ -9,6 +9,7 @@ use Zen\Threes\Classes\Helpers\Json;
 use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
+use Zen\Threes\Classes\Helpers\Icon;
 
 class Helpers
 {
@@ -19,6 +20,7 @@ class Helpers
     use Strings;  # Слой настроек
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
+    use Icon;     # Сервис иконок
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid

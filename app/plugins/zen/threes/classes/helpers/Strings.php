@@ -30,10 +30,15 @@ trait Strings
      * @param int $length
      * @return string
      */
-    public function createShortId(int $length = 8): string
+    public function createShortId(int $length = 12): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
+        $alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+        $max = strlen($alphabet) - 1;
+        $token = '';
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $alphabet[random_int(0, $max)];
+        }
+        return $token;
     }
 
     /**
