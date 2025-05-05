@@ -1,7 +1,7 @@
 <template>
     <div class="threes-ui">
         <div class="threes-top">
-            <div class="three-container">
+            <div class="tree-container">
                 <Tree />
             </div>
             <div class="schema-container">
@@ -50,5 +50,6 @@ export default {
     display: flex;
     flex: 1 1 0;
     background: #ededed;
+    padding-left: 15px;
 }
 </style>

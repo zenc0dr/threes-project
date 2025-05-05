@@ -1,22 +1,22 @@
 <template>
     <div class="tree-item">
         <div
-            class="tree-label flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-200 transition"
-            :class="{ 'bg-blue-100 text-blue-700 font-bold': node.nid === active_nid }"
+            class="tree-label"
+            :class="{ 'active': node.nid === active_nid }"
             @click="toggle"
         >
-            <div class="tree-content flex items-center gap-1" :style="{ marginLeft: `${depth * 16}px` }">
+            <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
-                <span v-if="has_children" class="chevron w-4 flex justify-center items-center" @click.stop="toggleOpen">
+                <span v-if="has_children" class="chevron" @click.stop="toggleOpen">
                     {{ open ? '▾' : '▸' }}
                 </span>
-                <span v-else class="chevron w-4"></span>
+                <span v-else class="chevron"></span>
 
                 <!-- Иконка -->
-                <icon :src="node.icon" width="16px" height="16px" class="mr-1" />
+                <icon :src="node.icon" width="16px" height="16px" />
 
                 <!-- Название -->
-                <span class="tree-name truncate" @click="select">{{ node.name }}</span>
+                <span class="tree-name" @click="select">{{ node.name }}</span>
             </div>
         </div>
 
@@ -79,6 +79,15 @@ export default {
         align-items: center;
         gap: 0.25rem;
         user-select: none;
+        &.active {
+            background: #e0f2ff;
+            color: #0369a1;
+            font-weight: 600;
+            border-left: 4px solid #0ea5e9;
+            border-radius: 4px;
+            padding-left: 0.5rem;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
     }
 
     .tree-content {
@@ -88,7 +97,7 @@ export default {
     }
 
     .chevron {
-        width: 1rem; // 16px
+        width: 1rem;
         text-align: center;
         flex-shrink: 0;
     }
