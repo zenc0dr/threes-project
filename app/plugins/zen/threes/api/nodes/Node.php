@@ -15,9 +15,13 @@ class Node
         ];
     }
 
-    # http://threes.dc/threes.api/nodes.node:set-nodes?debug
-    protected function setNodes()
+    # http://threes.dc/threes.api/nodes.node:set-node-name?debug
+    protected function setNodeName()
     {
+        ths()->nodes()->setNodeName(
+            request('nid'),
+            request('name')
+        );
         return [];
     }
 

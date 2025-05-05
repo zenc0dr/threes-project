@@ -1,5 +1,6 @@
 const axios = require('axios');
 const md5 = require('md5');
+import mitt from 'mitt';
 import { createApp } from 'vue';
 import { reactive } from 'vue'
 import router from './routes';
@@ -10,6 +11,7 @@ window._ = require('lodash');
 window.ths = {
     requests_register: {},
     auth_token: null,
+    bus: mitt(), // Шина событий
 
     /* Объект для хранения глобальных данных */
     data: reactive({

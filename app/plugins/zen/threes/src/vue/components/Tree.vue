@@ -19,14 +19,19 @@ import TreeItem from './TreeItem.vue'
 export default {
     name: 'Tree',
     components: { TreeItem },
-    mounted() {
-        this.getTree()
-    },
     data() {
         return {
+            ths: window.ths,
             active_nid: null,
             tree: []
         }
+    },
+    mounted() {
+        this.getTree()
+        this.ths.bus.on('tree:refresh', this.getTree)
+    },
+    unmounted() {
+        this.ths.bus.off('tree:refresh', this.getTree)
     },
     methods: {
         handleSelect(nid) {

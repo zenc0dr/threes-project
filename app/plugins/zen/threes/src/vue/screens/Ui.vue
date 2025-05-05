@@ -46,5 +46,6 @@ export default {
 .schema-container {
     display: flex;
     flex: 1 1 0;
+    background: #d3ecec;
 }
 </style>

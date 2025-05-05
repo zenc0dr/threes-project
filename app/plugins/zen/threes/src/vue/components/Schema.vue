@@ -3,21 +3,24 @@
         <div class="threes-schema__header">
             <div class="threes-schema__title">
                 <icon class="threes-schema__icon" :src="node.icon"/>
-                <div class="threes-schema__name">{{ node.name }}</div>
+                <editable-text
+                    class="threes-schema__name"
+                    v-model="node.name"
+                    @save="saveName"
+                />
             </div>
-            <div class="threes-schema__description">
-
-            </div>
+            <div class="threes-schema__description" v-html="node.description"/>
         </div>
     </div>
 </template>
+
 <script>
 import icon from './icon.vue'
+import EditableText from './EditableText.vue'
+
 export default {
     name: "Schema",
-    components: {
-        icon
-    },
+    components: { icon, EditableText },
     data() {
         return {
             node: null,
@@ -28,46 +31,34 @@ export default {
     watch: {
         'ths.data.selected_nid': {
             handler(nid) {
-                if (nid) {
-                    this.getSchema(nid)
-                }
+                if (nid) this.getSchema(nid)
             },
             immediate: true
         }
     },
     methods: {
         getSchema(nid) {
-            ths.api({
+            this.ths.api({
                 api: 'ui:get-schema-nodes',
-                data: {
-                    nid
-                },
+                data: { nid },
                 then: response => {
                     this.node = response.node
-                    this.tree = response.tree
+                    this.schema = response.tree
+                }
+            })
+        },
+        saveName(name) {
+            if (!this.node?.nid || !name) return
+            this.ths.api({
+                api: 'nodes.node:set-node-name',
+                data: {
+                    nid: this.node.nid, name
+                },
+                then: response => {
+                    this.ths.bus.emit('tree:refresh')
                 }
             })
         }
     }
 }
 </script>
-<style lang="scss">
-.threes-schema {
-    background: #83ff56;
-    padding: 15px;
-    flex: 1 1 0;
-    min-height: 100%;
-
-    &__header {
-        padding: 5px;
-        background: #3accf8;
-    }
-    &__title {
-        display: flex;
-        flex-direction: row;
-    }
-    &__name {
-        font-size: 24px;
-    }
-}
-</style>
