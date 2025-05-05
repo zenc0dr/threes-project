@@ -19,9 +19,9 @@ class Tests
     public function debug()
     {
         #Node::truncate();
-        #$node = ths()->nodes()->fabric();
-        $node = ths()->nodes()->model('8zmyqyfu9pc3');
-        dd($node->props);
+        #$node = ths()->nodes()->createNode();
+        $node = ths()->nodes()->model('n7abeanmj9yh');
+        dd($node->getSchemaNode());
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
