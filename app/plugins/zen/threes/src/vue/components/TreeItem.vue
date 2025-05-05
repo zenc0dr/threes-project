@@ -1,38 +1,48 @@
 <template>
     <div class="tree-item" :style="{ paddingLeft: `${depth * 16}px` }">
         <div
-            class="tree-label flex items-center px-2 py-1 rounded hover:bg-gray-200 transition"
-            :class="{ 'bg-blue-100 text-blue-700 font-bold': node.id === active_id }"
+            class="tree-label flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-200 transition"
+            :class="{ 'bg-blue-100 text-blue-700 font-bold': node.nid === active_nid }"
             @click="toggle"
         >
-            <span v-if="has_children" class="chevron w-4 text-center mr-1" @click.stop="toggleOpen">
+            <!-- Шеврон -->
+            <span v-if="has_children" class="chevron w-4 flex justify-center items-center" @click.stop="toggleOpen">
                 {{ open ? '▾' : '▸' }}
             </span>
-            <span v-else class="w-4 mr-1"></span>
+            <span v-else class="chevron w-4"></span>
 
-            <span @click="select">{{ node.name }}</span>
+            <!-- Иконка -->
+            <icon :src="node.icon" width="16px" height="16px" class="mr-1" />
+
+            <!-- Название -->
+            <span class="tree-name truncate" @click="select">{{ node.name }}</span>
         </div>
 
         <div v-show="open" v-if="has_children" class="tree-children">
             <tree-item
                 v-for="child in node.children"
-                :key="child.id"
+                :key="child.nid"
                 :node="child"
                 :depth="depth + 1"
-                :active_id="active_id"
+                :active_nid="active_nid"
                 @select="$emit('select', $event)"
             />
         </div>
     </div>
 </template>
 
+
 <script>
+import icon from './icon.vue'
 export default {
     name: 'TreeItem',
+    components: {
+        icon
+    },
     props: {
         node: Object,
         depth: Number,
-        active_id: String
+        active_nid: String
     },
     data() {
         return {
@@ -52,7 +62,7 @@ export default {
             this.open = !this.open
         },
         select() {
-            this.$emit('select', this.node.id)
+            this.$emit('select', this.node.nid)
         }
     }
 }
@@ -63,18 +73,29 @@ export default {
     display: flex;
     flex-direction: column;
 
-    .chevron {
-        margin-right: 5px;
+    .tree-label {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        user-select: none;
     }
-    cursor: pointer;
-}
 
-.tree-children {
-    display: flex;
-    flex-direction: column;
-}
+    .chevron {
+        width: 1rem; // 16px
+        text-align: center;
+        flex-shrink: 0;
+    }
 
-.tree-label {
-    user-select: none;
+    .tree-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+    }
+
+    .tree-children {
+        display: flex;
+        flex-direction: column;
+    }
 }
 </style>

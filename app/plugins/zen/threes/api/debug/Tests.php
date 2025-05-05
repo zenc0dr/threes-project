@@ -57,6 +57,13 @@ class Tests
         );
     }
 
+    # http://threes.dc/threes.api/debug.Tests:addNodeToChildrenTest?nid=xxxxx&children_nid=yyyyyy
+    public function addNodeToChildrenTest()
+    {
+        ths()->nodes()->model(request('nid'))
+            ->addChild(request('children_nid'));
+    }
+
     # http://threes.dc/threes.api/debug.Tests:handleYamlFile
     public function handleYamlFile()
     {
