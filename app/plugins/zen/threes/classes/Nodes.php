@@ -88,4 +88,9 @@ class Nodes
 
         return $data;
     }
+
+    public function getShemaNodes(string $nid): array
+    {
+
+    }
 }

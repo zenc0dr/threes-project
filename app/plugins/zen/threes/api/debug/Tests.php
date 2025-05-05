@@ -19,7 +19,7 @@ class Tests
     public function debug()
     {
         dd(
-            ths()->nodes()->getNodesTree()
+            ths()->nodes()->model('n7abeanmj9yh')->toArray()
         );
 
 

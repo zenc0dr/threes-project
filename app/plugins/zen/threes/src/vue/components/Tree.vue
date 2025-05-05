@@ -31,7 +31,7 @@ export default {
     methods: {
         handleSelect(nid) {
             this.active_nid = nid
-            this.$emit('select', nid)
+            ths.data.selected_nid = nid
         },
         getTree() {
             ths.api({

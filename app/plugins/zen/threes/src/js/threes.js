@@ -15,7 +15,8 @@ window.ths = {
     data: reactive({
         ui_streams: [],
         process: false,
-        nids: []
+        nids: [],
+        selected_nid: null
     }),
 
     api(opts) {

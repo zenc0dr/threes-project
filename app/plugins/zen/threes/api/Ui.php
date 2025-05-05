@@ -13,4 +13,12 @@ class Ui
             'tree' => ths()->nodes()->getNodesTree()
         ];
     }
+
+    # http://threes.dc/threes.api/ui:get-schema-nodes
+    public function getSchemaNodes(): array
+    {
+        return [
+            'tree' => ths()->nodes()->getNodesTree()
+        ];
+    }
 }
