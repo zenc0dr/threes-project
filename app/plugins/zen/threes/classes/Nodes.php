@@ -160,8 +160,12 @@ class Nodes
 
     public function setNodeSettings(string $nid, array $settings): void
     {
+
         $node = Node::find($nid);
         $props = $node->props;
+
+        //dd($props, $settings);
+
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
         }

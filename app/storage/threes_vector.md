@@ -161,17 +161,8 @@ class Ui
     # http://threes.dc/threes.api/ui:get-schema-nodes?nid=dmbfxt7vm4xd
     public function getSchemaNodes(): array
     {
-        $nid = request('nid');
-        $node = ths()->nodes()->model($nid);
-
         return [
-            'node' => [
-                'nid' => $nid,
-                'icon' => $node->icon,
-                'name' => $node->name,
-                'description' => $node->description,
-            ],
-            'tree' => ths()->nodes()->getNodesSchema($nid)
+            'schema' => ths()->nodes()->getNodesSchema(request('nid'))
         ];
     }
 }
@@ -369,20 +360,12 @@ class Node
 {
     use QueryLogTrait;
 
-    # http://threes.dc/threes.api/nodes.node:get-node-settings?nid=xxxxxxx
-    public function getNodeSettings(): array
-    {
-        $nid = request('nid');
-        return [
-            'settings' => ths()->nodes()->getNodeSettings($nid),
-        ];
-    }
-
     # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
     protected function setNodeSettings(): array
     {
         $nid = request('nid');
         $settings = request('settings');
+
         ths()->nodes()->setNodeSettings($nid, $settings);
         return [];
     }
@@ -922,8 +905,12 @@ class Nodes
 
     public function setNodeSettings(string $nid, array $settings): void
     {
+
         $node = Node::find($nid);
         $props = $node->props;
+
+        //dd($props, $settings);
+
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
         }

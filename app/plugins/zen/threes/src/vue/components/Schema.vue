@@ -37,11 +37,11 @@
                 </div>
                 <div class="modal-settings">
                     <label class="checkbox">
-                        <input type="checkbox" v-model="schema.self_content" />
+                        <input type="checkbox" v-model="schema.props.self_content" />
                         <span>Показывать собственный контент</span>
                     </label>
                     <label class="checkbox">
-                        <input type="checkbox" v-model="schema.show_children" />
+                        <input type="checkbox" v-model="schema.props.show_children" />
                         <span>Показывать потомков</span>
                     </label>
                 </div>
@@ -110,15 +110,6 @@ export default {
         getNodeSettings()
         {
             this.settings = true
-            // ths.api({
-            //     api: 'nodes.node:get-node-settings',
-            //     data: {
-            //         nid: this.node.nid,
-            //     },
-            //     then: response => {
-            //         this.settings = response.settings
-            //     }
-            // })
         },
         setNodeSettings()
         {
@@ -130,6 +121,7 @@ export default {
                 },
                 then: response => {
                     this.settings = null
+                    this.getSchema()
                 }
             })
         }
