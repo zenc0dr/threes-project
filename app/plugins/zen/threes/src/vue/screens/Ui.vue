@@ -64,7 +64,6 @@ export default {
     display: flex;
     flex: 1 1 0;
     background: #ededed;
-    padding-left: 15px;
 }
 .threes-settings {
     padding: 3px 4px;

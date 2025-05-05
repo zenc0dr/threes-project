@@ -8,6 +8,14 @@
                     v-model="node.name"
                     @save="saveName"
                 />
+                <div class="threes-schema__settings">
+                    <icon
+                        class="threes-schema__settings__icon"
+                        src="/plugins/zen/threes/assets/images/icons/cog.svg"
+                        height="15px"
+                        width="15px"
+                    />
+                </div>
             </div>
             <div class="threes-schema__description" v-html="node.description"/>
         </div>
@@ -75,9 +83,25 @@ export default {
         display: flex;
         flex-direction: row;
         align-items: center;
+        justify-content: space-between;
+    }
+    &__header {
+        padding: 10px;
+        background: #ffffff;
+    }
+    &__description {
+        padding-left: 10px;
+        color: #7d7d7d;
     }
     &__name {
         font-size: 24px;
+    }
+    &__settings {
+        margin-left: auto;
+        &__icon {
+            cursor: pointer;
+            color: #000
+        }
     }
 }
 </style>
