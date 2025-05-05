@@ -7,12 +7,23 @@ use Zen\Threes\Traits\QueryLogTrait;
 class Node
 {
     use QueryLogTrait;
-    # http://threes.dc/threes.api/nodes.node:get-nodes?nid=threes.default.node1
-    public function getNodes(): array
-    {
-        return [
 
+    # http://threes.dc/threes.api/nodes.node:get-node-settings?nid=xxxxxxx
+    public function getNodeSettings(): array
+    {
+        $nid = request('nid');
+        return [
+            'settings' => ths()->nodes()->getNodeSettings($nid),
         ];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
+    protected function setNodeSettings(): array
+    {
+        $nid = request('nid');
+        $settings = request('settings');
+        ths()->nodes()->setNodeSettings($nid, $settings);
+        return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:set-node-name?debug

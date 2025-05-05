@@ -132,4 +132,25 @@ class Nodes
         $node->name = $name;
         $node->save();
     }
+
+    public function getNodeSettings(string $nid): array
+    {
+        $node = Node::find($nid);
+        $props = $node->props;
+
+        return [
+            'self_content' => $props['self_content'] ?? false,
+        ];
+    }
+
+    public function setNodeSettings(string $nid, array $settings): void
+    {
+        $node = Node::find($nid);
+        $props = $node->props;
+        if (isset($settings['self_content'])) {
+            $props['self_content'] = $settings['self_content'];
+        }
+        $node->props = $props;
+        $node->save();
+    }
 }

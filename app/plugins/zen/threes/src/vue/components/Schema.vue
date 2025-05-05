@@ -11,6 +11,7 @@
                 <div class="threes-schema__settings">
                     <icon
                         class="threes-schema__settings__icon"
+                        @click="getNodeSettings"
                         src="/plugins/zen/threes/assets/images/icons/cog.svg"
                         height="15px"
                         width="15px"
@@ -19,20 +20,47 @@
             </div>
             <div class="threes-schema__description" v-html="node.description"/>
         </div>
+        <div class="class-schema__content">
+            <pre>{{ schema }}</pre>
+        </div>
+        <modal :show="settings !== null" @close="setNodeSettings">
+            <template #default>
+                <div class="threes-schema__title">
+                    <icon class="threes-schema__icon" :src="node.icon"/>
+                    <editable-text
+                        class="threes-schema__name"
+                        v-model="node.name"
+                        @save="saveName"
+                    />
+                </div>
+                <div class="modal-settings">
+                    <label class="checkbox">
+                        <input type="checkbox" v-model="settings.self_content" />
+                        <span>Включить отображение контента</span>
+                    </label>
+                </div>
+            </template>
+        </modal>
     </div>
 </template>
 
 <script>
 import icon from './icon.vue'
 import EditableText from './EditableText.vue'
+import modal from './modal.vue'
 
 export default {
     name: "Schema",
-    components: { icon, EditableText },
+    components: {
+        icon,
+        modal,
+        EditableText,
+    },
     data() {
         return {
             node: null,
             schema: null,
+            settings: null,
             ths: window.ths,
         }
     },
@@ -64,6 +92,31 @@ export default {
                 },
                 then: response => {
                     this.ths.bus.emit('tree:refresh')
+                }
+            })
+        },
+        getNodeSettings()
+        {
+            ths.api({
+                api: 'nodes.node:get-node-settings',
+                data: {
+                    nid: this.node.nid,
+                },
+                then: response => {
+                    this.settings = response.settings
+                }
+            })
+        },
+        setNodeSettings()
+        {
+            ths.api({
+                api: 'nodes.node:set-node-settings',
+                data: {
+                    nid: this.node.nid,
+                    settings: this.settings
+                },
+                then: response => {
+                    this.settings = null
                 }
             })
         }
@@ -101,6 +154,21 @@ export default {
         &__icon {
             cursor: pointer;
             color: #000
+        }
+    }
+    .modal-settings {
+        padding: 20px;
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+
+            input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+            }
         }
     }
 }

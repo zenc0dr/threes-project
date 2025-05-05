@@ -21,7 +21,7 @@ class Tests
     public function debug()
     {
         dd(
-            ths()->nodes()->model('n7abeanmj9yh')->toArray()
+            ths()->nodes()->model('dmbfxt7vm4xd')->toArray()
         );
 
 
