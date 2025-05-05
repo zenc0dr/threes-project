@@ -89,8 +89,37 @@ class Nodes
         return $data;
     }
 
-    public function getShemaNodes(string $nid): array
+    public function getNodesSchema(string $nid): array
     {
+        $node = Node::find($nid);
+        if (!$node) {
+            return [];
+        }
 
+        $children = $node->resolveChildren();
+
+        $child_schemas = [];
+        foreach ($children as $child) {
+            $subschema = $this->getNodesSchema($child->nid);
+            if (!empty($subschema)) {
+                $child_schemas[] = $subschema;
+            }
+        }
+
+        // Если схема выключена — возвращаем только вложенных
+        if (!($node->props['schema'] ?? false)) {
+            return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
+        }
+
+        $data = $node->getSchemaNode();
+        if (!$data) {
+            return [];
+        }
+
+        if ($child_schemas) {
+            $data['children'] = $child_schemas;
+        }
+
+        return $data;
     }
 }

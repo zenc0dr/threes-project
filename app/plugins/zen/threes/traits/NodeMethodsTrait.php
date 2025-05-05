@@ -176,13 +176,11 @@ trait NodeMethodsTrait
         if ($value instanceof BSONDocument || $value instanceof BSONArray) {
             $value = $value->getArrayCopy();
         }
-
         if (is_array($value)) {
             foreach ($value as $k => $v) {
                 $value[$k] = $this->normalizeValue($v);
             }
         }
-
         return $value;
     }
 }
