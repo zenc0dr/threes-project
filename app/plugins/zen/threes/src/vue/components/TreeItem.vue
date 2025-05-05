@@ -77,15 +77,11 @@ export default {
     .tree-label {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
         user-select: none;
         &.active {
-            background: #e0f2ff;
-            color: #0369a1;
-            font-weight: 600;
-            border-left: 4px solid #0ea5e9;
+            background: #d2ffdb;
+            color: #1a4523;
             border-radius: 4px;
-            padding-left: 0.5rem;
             transition: background 0.2s ease, color 0.2s ease;
         }
     }
@@ -93,7 +89,8 @@ export default {
     .tree-content {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 4px;
+        padding: 2px 0;
     }
 
     .chevron {

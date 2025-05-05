@@ -1,5 +1,14 @@
 <template>
-    <div class="threes-ui">
+    <div class="threes-ui" :class="{ fullscreen: fullscreen }">
+        <div class="threes-settings">
+            <div class="threes-settings__button">
+                <i
+                    :class="fullscreen ? 'oc-icon-compress' : 'oc-icon-expand'"
+                    @click="fullscreen = !fullscreen"
+                    :title="fullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'"
+                />
+            </div>
+        </div>
         <div class="threes-top">
             <div class="tree-container">
                 <Tree />
@@ -23,6 +32,11 @@ import Store from '../components/Store.vue'
 export default {
     name: 'Stand',
     props: ['backend'],
+    data() {
+        return {
+            fullscreen: false
+        }
+    },
     components: {
         Tree,
         Schema,
@@ -51,5 +65,41 @@ export default {
     flex: 1 1 0;
     background: #ededed;
     padding-left: 15px;
+}
+.threes-settings {
+    padding: 3px 4px;
+    background: #e4e4e4;
+
+    i {
+        padding: 2px 0px 2px 8px;
+        background: #939393;
+        color: #fff;
+        border-radius: 3px;
+    }
+}
+.fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #fff;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .threes-top,
+    .threes-bottom {
+        flex: 1 1 auto;
+        overflow: auto;
+        min-height: 0;
+    }
+
+    .tree-container,
+    .schema-container,
+    .store-container {
+        height: 100%;
+        overflow: auto;
+    }
 }
 </style>
