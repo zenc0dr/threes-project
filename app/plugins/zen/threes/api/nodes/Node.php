@@ -30,7 +30,7 @@ class Node
     # http://threes.dc/threes.api/nodes.node:add-node?debug
     protected function addNode(): array
     {
-
+        ths()->nodes()->createNode();
         return [];
     }
 }

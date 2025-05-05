@@ -4,6 +4,7 @@ namespace Zen\Threes\Models;
 
 use MongoDB\Client;
 use MongoDB\Collection as MongoCollection;
+use Zen\Threes\Traits\NodeMethodsTrait;
 
 /**
  * @property string $nid
@@ -17,6 +18,8 @@ use MongoDB\Collection as MongoCollection;
 
 class Node
 {
+    use NodeMethodsTrait;
+
     public static string $database   = 'threes';
     public static string $collection = 'nodes';
 
@@ -30,25 +33,6 @@ class Node
     protected function getNidAttribute(): ?string
     {
         return $this->attributes['_id'] ?? null;
-    }
-
-    public static function client(): Client
-    {
-        return new Client(
-            env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin')
-        );
-    }
-
-    public static function truncate(): void
-    {
-        self::collection()->drop();
-    }
-
-    public static function collection(): MongoCollection
-    {
-        return self::client()
-            ->selectDatabase(self::$database)
-            ->selectCollection(self::$collection);
     }
 
     /**
@@ -68,6 +52,36 @@ class Node
     }
 
     /**
+     * Массив корневых нод
+     * @return array
+     */
+    public static function getRootNodes(): array
+    {
+        $all_nodes_cursor = Node::collection()->find();
+        $all_nodes = iterator_to_array($all_nodes_cursor);
+
+        $all_nids = [];
+        $child_nids = [];
+
+        foreach ($all_nodes as $doc) {
+            $nid = (string) $doc['_id'];
+            $all_nids[] = $nid;
+
+            if (isset($doc['children']) && is_array($doc['children'])) {
+                foreach ($doc['children'] as $child) {
+                    if (isset($child['$id'])) {
+                        $child_nids[] = (string) $child['$id'];
+                    }
+                }
+            }
+        }
+
+        $root_nids = array_diff($all_nids, $child_nids);
+        return array_values(array_filter(array_map(fn($nid) => Node::find($nid), $root_nids)));
+    }
+
+
+    /**
      * Вернуть объект для Ui.Schema
      * @return array|null
      * @throws \ReflectionException
@@ -82,6 +96,7 @@ class Node
             'nid' => $this->nid,
             'icon' => $this->icon,
             'name' => $this->name,
+            'description' => $this->description,
             'handler' => $component_data['handler'],
             'data' => $component_data['data'],
             'props' => $this->props,
@@ -101,6 +116,7 @@ class Node
             'nid' => $this->nid,
             'icon' => $this->icon,
             'name' => $this->name,
+            'description' => $this->description,
         ];
     }
 
@@ -113,11 +129,6 @@ class Node
     public function getIconAttribute(): string
     {
         return ths()->getIcon($this->attributes['icon']);
-    }
-
-    public static function generateNidFromSettings(): string
-    {
-        return ths()->createShortId();
     }
 
     public static function find(string $nid): ?self
@@ -167,10 +178,30 @@ class Node
                 ) > 0;
     }
 
-    public function addChild($node_or_ref): void
+    public function addChild(Node|string $child): void
     {
+        if (is_string($child)) {
+            $child = self::find($child);
+            if (!$child) {
+                throw new \InvalidArgumentException("Node with nid '{$child}' not found.");
+            }
+        }
+
+        $ref = [
+            '$ref' => self::$collection,
+            '$id' => $child->nid,
+        ];
+
         $children = $this->attributes['children'] ?? [];
-        $children[] = $node_or_ref;
+
+        // Предотвращаем дублирование
+        foreach ($children as $existing) {
+            if (($existing['$id'] ?? null) === $child->nid) {
+                return;
+            }
+        }
+
+        $children[] = $ref;
         $this->attributes['children'] = $children;
         $this->save();
     }
@@ -198,43 +229,6 @@ class Node
     public function toArray(): array
     {
         return $this->attributes;
-    }
-
-    protected function normalizeValue($value)
-    {
-        if ($value instanceof \MongoDB\Model\BSONDocument || $value instanceof \MongoDB\Model\BSONArray) {
-            $value = $value->getArrayCopy();
-        }
-
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
-                $value[$k] = $this->normalizeValue($v);
-            }
-        }
-
-        return $value;
-    }
-
-    public function __get($key)
-    {
-        $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
-        if (method_exists($this, $method)) {
-            return $this->$method();
-        }
-
-        return $this->normalizeValue($this->attributes[$key] ?? null);
-    }
-
-    public function __set($key, $value): void
-    {
-        $method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
-
-        if (method_exists($this, $method)) {
-            $this->$method($value);
-            return;
-        }
-
-        $this->attributes[$key] = $value;
     }
 
     private function setTimestamps(): void

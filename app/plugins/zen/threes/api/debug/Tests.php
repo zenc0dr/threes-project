@@ -18,10 +18,16 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+        dd(
+            ths()->nodes()->getNodesTree()
+        );
+
+
         #Node::truncate();
         #$node = ths()->nodes()->createNode();
-        $node = ths()->nodes()->model('n7abeanmj9yh');
-        dd($node->getSchemaNode());
+        //$node = ths()->nodes()->model('n7abeanmj9yh');
+        //dd($node->getSchemaNode());
+        ths()->nodes()->getUiData('n7abeanmj9yh');
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

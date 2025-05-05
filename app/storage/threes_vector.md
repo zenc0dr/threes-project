@@ -708,7 +708,7 @@ class Nodes
 
     public function getUiData(string $nid)
     {
-        
+
     }
 }
 
@@ -3682,127 +3682,13 @@ trait SingletonTrait
 }
 
 ```
-`plugins/zen/threes/updates/m001_frames.php`
+`plugins/zen/threes/updates/m001_features.php`
 ```<?php namespace Zen\Threes\Updates;
 
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class M001Frames extends Migration
-{
-    public function up()
-    {
-        Schema::create('zen_threes_frames', function($table)
-        {
-            $table->increments('id')->comment('Идентификатор фрейма'); # нигде не должен играть роль кроме дерева
-            $table->integer('parent_id')->unsigned()->nullable()->comment('Родительский фрейм');
-            $table->string('nid')->comment('Идентификатор нода');
-            $table->integer('sort_order')->unsigned()->default(0)->comment('Порядок сортировки');
-            $table->integer('nest_left')->unsigned()->comment('Левая граница узла');
-            $table->integer('nest_right')->unsigned()->comment('Правая граница узла');
-            $table->integer('nest_depth')->unsigned()->comment('Уровень вложенности');
-            $table->timestamps();
-        });
-    }
-
-    public function down()
-    {
-        Schema::dropIfExists('zen_threes_frames');
-    }
-}
-
-```
-`plugins/zen/threes/updates/m002_nodes.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class M002Nodes extends Migration
-{
-    public function up()
-    {
-        Schema::create('zen_threes_nodes', function($table)
-        {
-            $table->string('nid')->primary()->comment('Токен нода');
-            $table->text('svg')->nullable()->comment('Код SVG иконки');
-            $table->string('svg_name')->nullable()->comment('Имя файла svg');
-            $table->string('name')->nullable()->comment('Имя нода');
-            $table->string('description')->nullable()->comment('Описание нода');
-            $table->text('data')->nullable()->comment('Данные схемы');
-            $table->text('scheme')->nullable()->comment('Схема интерфейса (yaml)');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
-            $table->unique('nid', 'nid_unique');
-        });
-    }
-
-    public function down()
-    {
-        Schema::dropIfExists('zen_threes_nodes');
-    }
-}
-```
-`plugins/zen/threes/updates/m003_queries.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class M003Queries extends Migration
-{
-    public function up()
-    {
-        Schema::create('zen_threes_queries', function($table)
-        {
-            $table->id();
-            $table->string('call');
-            $table->text('data')->nullable();
-            $table->timestamps();
-        });
-    }
-
-    public function down()
-    {
-        Schema::dropIfExists('zen_threes_queries');
-    }
-}
-
-```
-`plugins/zen/threes/updates/m004_versions.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class M004Versions extends Migration
-{
-    public function up()
-    {
-        Schema::create('zen_threes_versions', function($table)
-        {
-            $table->increments('id')->unsigned();
-            $table->integer('version')->unsigned()->nullable();
-            $table->text('nid')->nullable();
-            $table->text('data')->nullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
-        });
-    }
-
-    public function down()
-    {
-        Schema::dropIfExists('zen_threes_versions');
-    }
-}
-```
-`plugins/zen/threes/updates/m005_features.php`
-```<?php namespace Zen\Threes\Updates;
-
-use Schema;
-use October\Rain\Database\Updates\Migration;
-
-class M005Features extends Migration
+class M001Features extends Migration
 {
     public function up()
     {
@@ -3816,7 +3702,7 @@ class M005Features extends Migration
             $table->text('priority')->nullable()->comment('Приоритет феномена');
             $table->text('status')->nullable()->comment('Статус феномена');
             $table->text('module')->nullable()->comment('Модуль?');
-            
+
 
             $table->text('data')->nullable();
             $table->integer('release')->nullable()->comment('Релиз');
@@ -3835,26 +3721,41 @@ class M005Features extends Migration
         Schema::dropIfExists('zen_threes_features');
     }
 }
+```
+`plugins/zen/threes/updates/m002_queries.php`
+```<?php namespace Zen\Threes\Updates;
 
+use Schema;
+use October\Rain\Database\Updates\Migration;
+
+class M002Queries extends Migration
+{
+    public function up()
+    {
+        Schema::create('zen_threes_queries', function($table)
+        {
+            $table->id();
+            $table->string('call');
+            $table->text('data')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('zen_threes_queries');
+    }
+}
 ```
 `plugins/zen/threes/updates/version.yaml`
 ```v1.0.1:
     - 'Initialize plugin'
 v1.0.2:
-    - 'Create Frames'
-    - m001_frames.php
-v1.0.3:
-    - 'Create Nodes'
-    - m002_nodes.php
-v1.0.4:
-    - 'Create Queries'
-    - m003_queries.php
-v1.0.5:
-    - 'Create Versions'
-    - m004_versions.php
-v1.0.6:
     - 'Created Features'
-    - m005_features.php
+    - m001_features.php
+v1.0.3:
+    - 'Create Queries'
+    - m002_queries.php
 
 ```
 `plugins/zen/threes/views/blueprints/frames/frame.htm`
