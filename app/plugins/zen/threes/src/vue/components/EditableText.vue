@@ -6,11 +6,11 @@
         v-else
         ref="input"
         type="text"
+        class="editable-text__input"
         v-model="model_value"
         @input="onInput"
         @blur="stopEditing"
         @keyup.enter="stopEditing"
-        style="all: unset; width: 100%;"
     />
 </template>
 
@@ -59,3 +59,21 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.editable-text__input {
+    font-size: 24px;
+    font-weight: inherit;
+    font-family: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>

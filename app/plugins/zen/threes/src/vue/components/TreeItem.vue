@@ -1,21 +1,23 @@
 <template>
-    <div class="tree-item" :style="{ paddingLeft: `${depth * 16}px` }">
+    <div class="tree-item">
         <div
             class="tree-label flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-200 transition"
             :class="{ 'bg-blue-100 text-blue-700 font-bold': node.nid === active_nid }"
             @click="toggle"
         >
-            <!-- Шеврон -->
-            <span v-if="has_children" class="chevron w-4 flex justify-center items-center" @click.stop="toggleOpen">
-                {{ open ? '▾' : '▸' }}
-            </span>
-            <span v-else class="chevron w-4"></span>
+            <div class="tree-content flex items-center gap-1" :style="{ marginLeft: `${depth * 16}px` }">
+                <!-- Шеврон -->
+                <span v-if="has_children" class="chevron w-4 flex justify-center items-center" @click.stop="toggleOpen">
+                    {{ open ? '▾' : '▸' }}
+                </span>
+                <span v-else class="chevron w-4"></span>
 
-            <!-- Иконка -->
-            <icon :src="node.icon" width="16px" height="16px" class="mr-1" />
+                <!-- Иконка -->
+                <icon :src="node.icon" width="16px" height="16px" class="mr-1" />
 
-            <!-- Название -->
-            <span class="tree-name truncate" @click="select">{{ node.name }}</span>
+                <!-- Название -->
+                <span class="tree-name truncate" @click="select">{{ node.name }}</span>
+            </div>
         </div>
 
         <div v-show="open" v-if="has_children" class="tree-children">
@@ -30,7 +32,6 @@
         </div>
     </div>
 </template>
-
 
 <script>
 import icon from './icon.vue'
@@ -78,6 +79,12 @@ export default {
         align-items: center;
         gap: 0.25rem;
         user-select: none;
+    }
+
+    .tree-content {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
 
     .chevron {

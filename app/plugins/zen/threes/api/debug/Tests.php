@@ -8,6 +8,8 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Dumper;
 use Zen\Threes\Classes\Gen;
 use Zen\Threes\Models\Node;
+use Zen\Threes\Models\Feature;
+use Zen\Threes\Classes\Nodes;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -28,6 +30,54 @@ class Tests
         //$node = ths()->nodes()->model('n7abeanmj9yh');
         //dd($node->getSchemaNode());
         ths()->nodes()->getUiData('n7abeanmj9yh');
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:backlogToNodes
+    public function backlogToNodes()
+    {
+        $features = Feature::all();
+        Node::truncate();
+
+        // Мапим Feature ID -> Node
+        $featureToNode = [];
+
+        foreach ($features as $feature) {
+            /** @var Feature $feature */
+            $node = app(Nodes::class)->createNode();
+
+            $node->nid = 'node' . $feature->id;
+            $node->name = $feature->name ?? 'Без названия';
+            $node->description = $feature->description ?? '';
+            $node->data = $feature->description ?? '';
+            $node->icon = base_path('plugins/zen/threes/src/images/icons/cog.svg');
+
+            $node->props = [
+                'tree' => true,
+                'schema' => true,
+                'store' => [
+                    'group' => 'Features',
+                    'author' => 'Migration',
+                    'tags' => ["feature", "imported"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ];
+
+            $node->save();
+
+            $featureToNode[$feature->id] = $node;
+        }
+
+        // Устанавливаем связи (иерархию)
+        foreach ($features as $feature) {
+            if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
+                $parentNode = $featureToNode[$feature->parent_id];
+                $childNode = $featureToNode[$feature->id];
+
+                $parentNode->addChild($childNode);
+            }
+        }
+
+        return 'Features успешно перенесены в MongoDB как ноды.';
     }
 
     # http://threes.dc/threes.api/debug.Tests:test

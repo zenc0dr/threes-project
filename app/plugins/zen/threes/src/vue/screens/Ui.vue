@@ -33,7 +33,6 @@ export default {
 <style lang="scss">
 .threes-ui {
     display: flex;
-    padding: 5px;
     background: #f5f5f5;
     margin: 4px;
     flex-direction: column;
@@ -43,9 +42,13 @@ export default {
     flex-direction: row;
     justify-content: space-between;
 }
+.tree-container {
+    border-right: 1px solid #e2e2e2;
+    padding-right: 5px;
+}
 .schema-container {
     display: flex;
     flex: 1 1 0;
-    background: #d3ecec;
+    background: #ededed;
 }
 </style>
