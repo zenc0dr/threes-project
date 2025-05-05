@@ -96,28 +96,42 @@ class Nodes
             return [];
         }
 
-        $children = $node->resolveChildren();
-
-        $child_schemas = [];
-        foreach ($children as $child) {
-            $subschema = $this->getNodesSchema($child->nid);
-            if (!empty($subschema)) {
-                $child_schemas[] = $subschema;
-            }
-        }
-
-        // Если схема выключена — возвращаем только вложенных
-        if (!($node->props['schema'] ?? false)) {
-            return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
-        }
-
+        # Получаем основную структуру узла
         $data = $node->getSchemaNode();
         if (!$data) {
             return [];
         }
 
-        if ($child_schemas) {
-            $data['children'] = $child_schemas;
+        # Если schema выключена — возвращаем только потомков (если show_children разрешено)
+        if (!($node->props['schema'] ?? false)) {
+            if (($node->props['show_children'] ?? true) === false) {
+                return [];
+            }
+
+            $child_schemas = [];
+            foreach ($node->resolveChildren() as $child) {
+                $subschema = $this->getNodesSchema($child->nid);
+                if (!empty($subschema)) {
+                    $child_schemas[] = $subschema;
+                }
+            }
+
+            return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
+        }
+
+        # Если schema включена — добавляем детей только если разрешено
+        if (($node->props['show_children'] ?? true) !== false) {
+            $child_schemas = [];
+            foreach ($node->resolveChildren() as $child) {
+                $subschema = $this->getNodesSchema($child->nid);
+                if (!empty($subschema)) {
+                    $child_schemas[] = $subschema;
+                }
+            }
+
+            if ($child_schemas) {
+                $data['children'] = $child_schemas;
+            }
         }
 
         return $data;
@@ -140,6 +154,7 @@ class Nodes
 
         return [
             'self_content' => $props['self_content'] ?? false,
+            'show_children' => $props['show_children'] ?? false,
         ];
     }
 
@@ -149,6 +164,9 @@ class Nodes
         $props = $node->props;
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
+        }
+        if (isset($settings['show_children'])) {
+            $props['show_children'] = $settings['show_children'];
         }
         $node->props = $props;
         $node->save();

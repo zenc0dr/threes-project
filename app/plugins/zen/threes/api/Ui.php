@@ -14,11 +14,10 @@ class Ui
         ];
     }
 
-    # http://threes.dc/threes.api/ui:get-schema-nodes?nid=n7abeanmj9yh
+    # http://threes.dc/threes.api/ui:get-schema-nodes?nid=dmbfxt7vm4xd
     public function getSchemaNodes(): array
     {
         $nid = request('nid');
-
         $node = ths()->nodes()->model($nid);
 
         return [

@@ -21,7 +21,9 @@
             <div class="threes-schema__description" v-html="node.description"/>
         </div>
         <div class="class-schema__content">
-            <pre>{{ schema }}</pre>
+            <div v-for="item in schema" class="threes-node">
+
+            </div>
         </div>
         <modal :show="settings !== null" @close="setNodeSettings">
             <template #default>
@@ -36,7 +38,11 @@
                 <div class="modal-settings">
                     <label class="checkbox">
                         <input type="checkbox" v-model="settings.self_content" />
-                        <span>Включить отображение контента</span>
+                        <span>Показывать собственный контент</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" v-model="settings.show_children" />
+                        <span>Показывать потомков</span>
                     </label>
                 </div>
             </template>
@@ -58,6 +64,7 @@ export default {
     },
     data() {
         return {
+            nid: null,
             node: null,
             schema: null,
             settings: null,
@@ -67,16 +74,21 @@ export default {
     watch: {
         'ths.data.selected_nid': {
             handler(nid) {
-                if (nid) this.getSchema(nid)
+                if (nid) {
+                    this.nid = nid
+                    this.getSchema()
+                }
             },
             immediate: true
         }
     },
     methods: {
-        getSchema(nid) {
+        getSchema() {
             this.ths.api({
                 api: 'ui:get-schema-nodes',
-                data: { nid },
+                data: {
+                    nid: this.nid
+                },
                 then: response => {
                     this.node = response.node
                     this.schema = response.tree
@@ -158,18 +170,19 @@ export default {
     }
     .modal-settings {
         padding: 20px;
-
         .checkbox {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 16px;
-
             input[type="checkbox"] {
                 width: 16px;
                 height: 16px;
             }
         }
+    }
+    .threes-node {
+
     }
 }
 </style>
