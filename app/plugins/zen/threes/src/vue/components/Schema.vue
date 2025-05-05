@@ -62,3 +62,22 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.threes-schema {
+    flex: 1 1 0;
+    min-height: 100%;
+
+    &__icon {
+        margin-right: 10px;
+    }
+    &__title {
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    &__name {
+        font-size: 24px;
+    }
+}
+</style>
