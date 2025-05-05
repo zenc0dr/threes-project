@@ -1,11 +1,11 @@
 <template>
-    <div v-if="node" class="threes-schema">
+    <div v-if="schema" class="threes-schema">
         <div class="threes-schema__header">
             <div class="threes-schema__title">
-                <icon class="threes-schema__icon" :src="node.icon"/>
+                <icon class="threes-schema__icon" :src="schema.icon"/>
                 <editable-text
                     class="threes-schema__name"
-                    v-model="node.name"
+                    v-model="schema.name"
                     @save="saveName"
                 />
                 <div class="threes-schema__settings">
@@ -18,30 +18,30 @@
                     />
                 </div>
             </div>
-            <div class="threes-schema__description" v-html="node.description"/>
+            <div class="threes-schema__description" v-html="schema.description"/>
         </div>
         <div class="class-schema__content">
-            <div v-for="item in schema" class="threes-node">
-
+            <div v-for="node in schema.children" class="threes-node">
+                {{ node.name }}
             </div>
         </div>
-        <modal :show="settings !== null" @close="setNodeSettings">
+        <modal :show="settings" @close="setNodeSettings">
             <template #default>
                 <div class="threes-schema__title">
-                    <icon class="threes-schema__icon" :src="node.icon"/>
+                    <icon class="threes-schema__icon" :src="schema.icon"/>
                     <editable-text
                         class="threes-schema__name"
-                        v-model="node.name"
+                        v-model="schema.name"
                         @save="saveName"
                     />
                 </div>
                 <div class="modal-settings">
                     <label class="checkbox">
-                        <input type="checkbox" v-model="settings.self_content" />
+                        <input type="checkbox" v-model="schema.self_content" />
                         <span>Показывать собственный контент</span>
                     </label>
                     <label class="checkbox">
-                        <input type="checkbox" v-model="settings.show_children" />
+                        <input type="checkbox" v-model="schema.show_children" />
                         <span>Показывать потомков</span>
                     </label>
                 </div>
@@ -65,7 +65,6 @@ export default {
     data() {
         return {
             nid: null,
-            node: null,
             schema: null,
             settings: null,
             ths: window.ths,
@@ -90,17 +89,18 @@ export default {
                     nid: this.nid
                 },
                 then: response => {
-                    this.node = response.node
-                    this.schema = response.tree
+                    this.schema = response.schema
                 }
             })
         },
         saveName(name) {
-            if (!this.node?.nid || !name) return
+            if (!this.nid || !name) {
+                return
+            }
             this.ths.api({
                 api: 'nodes.node:set-node-name',
                 data: {
-                    nid: this.node.nid, name
+                    nid: this.nid, name
                 },
                 then: response => {
                     this.ths.bus.emit('tree:refresh')
@@ -109,23 +109,24 @@ export default {
         },
         getNodeSettings()
         {
-            ths.api({
-                api: 'nodes.node:get-node-settings',
-                data: {
-                    nid: this.node.nid,
-                },
-                then: response => {
-                    this.settings = response.settings
-                }
-            })
+            this.settings = true
+            // ths.api({
+            //     api: 'nodes.node:get-node-settings',
+            //     data: {
+            //         nid: this.node.nid,
+            //     },
+            //     then: response => {
+            //         this.settings = response.settings
+            //     }
+            // })
         },
         setNodeSettings()
         {
             ths.api({
                 api: 'nodes.node:set-node-settings',
                 data: {
-                    nid: this.node.nid,
-                    settings: this.settings
+                    nid: this.nid,
+                    settings: this.schema.props
                 },
                 then: response => {
                     this.settings = null

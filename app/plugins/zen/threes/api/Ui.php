@@ -17,17 +17,8 @@ class Ui
     # http://threes.dc/threes.api/ui:get-schema-nodes?nid=dmbfxt7vm4xd
     public function getSchemaNodes(): array
     {
-        $nid = request('nid');
-        $node = ths()->nodes()->model($nid);
-
         return [
-            'node' => [
-                'nid' => $nid,
-                'icon' => $node->icon,
-                'name' => $node->name,
-                'description' => $node->description,
-            ],
-            'tree' => ths()->nodes()->getNodesSchema($nid)
+            'schema' => ths()->nodes()->getNodesSchema(request('nid'))
         ];
     }
 }
