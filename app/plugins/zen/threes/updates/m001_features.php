@@ -3,7 +3,7 @@
 use Schema;
 use October\Rain\Database\Updates\Migration;
 
-class M005Features extends Migration
+class M001Features extends Migration
 {
     public function up()
     {
@@ -17,7 +17,7 @@ class M005Features extends Migration
             $table->text('priority')->nullable()->comment('Приоритет феномена');
             $table->text('status')->nullable()->comment('Статус феномена');
             $table->text('module')->nullable()->comment('Модуль?');
-            
+
 
             $table->text('data')->nullable();
             $table->integer('release')->nullable()->comment('Релиз');

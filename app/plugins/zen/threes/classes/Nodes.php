@@ -40,4 +40,9 @@ class Nodes
         $node->save();
         return $node;
     }
+
+    public function getUiData(string $nid)
+    {
+
+    }
 }

@@ -110,24 +110,10 @@ class Threes extends Helpers
         $method = array_pop($path);
         $path = join('\\', $path);
         $class = "\\$path";
-
         if (!$path) {
             return null;
         }
-
-        try {
-            $is_static = (new \ReflectionMethod($class, $method))->isStatic();
-        } catch (\Exception $e) {
-//            dd([
-//                'message' => $e->getMessage(),
-//                '$path' => $path,
-//                '$class' => $class,
-//                '$method' => $method,
-//                '$arguments' => $arguments
-//            ]);
-            return null;
-        }
-
+        $is_static = (new \ReflectionMethod($class, $method))->isStatic();
         if ($is_static) {
             return $class::$method(...$arguments);
         } else {
@@ -151,6 +137,23 @@ class Threes extends Helpers
         $settings = Settings::instance();
         $settings->setAttribute($key, $value);
         $settings->save();
+    }
+}
+
+```
+`plugins/zen/threes/api/Ui.php`
+```<?php
+
+namespace Zen\Threes\Api;
+
+
+
+class Ui
+{
+    # http://threes.dc/threes.api/ui:get-data
+    public function getData()
+    {
+
     }
 }
 
@@ -195,37 +198,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
-        ths()->
-
-        #Gen::run(1);
-        dd(
-            'ok'
-        );
-
-        //ths()->setSetting('vector_yaml', 'LALALA');
-
-
-//        dd(
-//            ths()->ai(
-//                'Привет моделька',
-//                'Ты добрая и ласковая девушка',
-//                'ollama'
-//            )
-//        );
-
-
-        #ths()->getSetting();
-        #ths()->backlog()->generateBacklog();
-
-//        $answer = OpenAiService::query(
-//            'Ты дружелюбная помощница',
-//            'Привет милая, как твои делишки?'
-//        );
-//
-//        dd($answer);
-
-        //ths()->notice()->telegramSendMessage('Какдила?');
+        #Node::truncate();
+        #$node = ths()->nodes()->createNode();
+        $node = ths()->nodes()->model('n7abeanmj9yh');
+        dd($node->getSchemaNode());
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -314,53 +290,27 @@ class Node
     public function getNodes(): array
     {
         return [
-            'nodes' => ths()->nodes()->getNodes(request('nid'))
+
         ];
     }
 
     # http://threes.dc/threes.api/nodes.node:set-nodes?debug
     protected function setNodes()
     {
-        ths()->nodes()->setNodes(
-            request('nid'),
-            request('nodes'),
-        );
         return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:add-line?nid=threes.default.node1
     public function addLine(): array
     {
-        ths()->nodes()->addLine(request('nid'));
         return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:add-node?debug
     protected function addNode(): array
     {
-        ths()->nodes()->addNode(
-            request('nid'),
-            request('parent_nid'),
-            request('line_index')
-        );
+
         return [];
-    }
-}
-
-```
-`plugins/zen/threes/api/nodes/Store.php`
-```<?php
-
-namespace Zen\Threes\Api\nodes;
-
-class Store
-{
-    # http://threes.dc/threes.api/nodes.store:get-store-nodes
-    public function getStoreNodes(): array
-    {
-        return [
-            'store_nodes' => ths()->store()->getStoreNodes(request('filter_text'))
-        ];
     }
 }
 
@@ -586,6 +536,7 @@ use Zen\Threes\Classes\Helpers\Json;
 use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
+use Zen\Threes\Classes\Helpers\Icon;
 
 class Helpers
 {
@@ -596,6 +547,7 @@ class Helpers
     use Strings;  # Слой настроек
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
+    use Icon;     # Сервис иконок
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
@@ -733,6 +685,30 @@ class Nodes
             return Node::find($nid);
         }
         return new Node();
+    }
+
+    /**
+     * Создаёт новый нод по методу шаблона
+     * @param string $template_method
+     * @return Node
+     * @throws \ReflectionException
+     */
+    public function createNode(string $template_method = 'Zen.Threes.Classes.Nodes.Document.textTemplate'): Node
+    {
+        $template = ths()->exe($template_method);
+        $node = $this->model();
+        $node->icon = $template['icon'];
+        $node->name = $template['name'];
+        $node->handler = $template['handler'];
+        $node->data = $template['data'];
+        $node->props = $template['props'];
+        $node->save();
+        return $node;
+    }
+
+    public function getUiData(string $nid)
+    {
+        
     }
 }
 
@@ -937,6 +913,46 @@ trait Files
 }
 
 ```
+`plugins/zen/threes/classes/helpers/Icon.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+use Zen\Threes\Traits\SingletonTrait;
+use Str;
+
+trait Icon
+{
+    use SingletonTrait;
+
+    /**
+     * Создать иконку из пути до файла или строки svg
+     * @param string $svg
+     * @return string
+     */
+    public function setIcon(string $svg): string
+    {
+        if (Str::startsWith($svg, ['<svg', '<?xml'])) {
+            $contents = $svg;
+        } else {
+            $contents = file_get_contents($svg);
+        }
+
+        $hash = md5($contents);
+        $path = ths()->checkDir(storage_path("app/uploads/public/threes/icons/$hash.svg"));
+
+        file_put_contents($path, $contents);
+        return $hash;
+    }
+
+    public function getIcon(string $hash): string
+    {
+        return env('APP_URL') . "/storage/app/uploads/public/threes/icons/$hash.svg";
+    }
+
+}
+
+```
 `plugins/zen/threes/classes/helpers/Json.php`
 ```<?php
 
@@ -1100,10 +1116,15 @@ trait Strings
      * @param int $length
      * @return string
      */
-    public function createShortId(int $length = 8): string
+    public function createShortId(int $length = 12): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        return substr(str_shuffle(str_repeat($chars, 5)), 0, $length);
+        $alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+        $max = strlen($alphabet) - 1;
+        $token = '';
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $alphabet[random_int(0, $max)];
+        }
+        return $token;
     }
 
     /**
@@ -1183,6 +1204,43 @@ trait Yaml
                 $indent
             )
         );
+    }
+}
+
+```
+`plugins/zen/threes/classes/nodes/Document.php`
+```<?php
+
+namespace Zen\Threes\Classes\Nodes;
+
+class Document
+{
+    public function textTemplate(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/cog.svg'),
+            'name' => "Новый документ",
+            'handler' => 'Zen.Threes.Classes.Nodes.Document.text',
+            'data' => 'Привет мир!',
+            'props' => [
+                'tree' => true,
+                'schema' => true,
+                'store' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["text", "documents"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function text($data): array
+    {
+        return [
+            'handler' => 'NodeText',
+            'data' => $data,
+        ];
     }
 }
 
@@ -1705,20 +1763,21 @@ use MongoDB\Collection as MongoCollection;
 
 /**
  * @property string $nid
+ * @property string $icon
  * @property string $name
  * @property string $description
+ * @property string $handler
+ * @property string | array $data
+ * @property array $props
  */
 
 class Node
 {
-    // 📦 Настройки подключения к базе
     public static string $database   = 'threes';
     public static string $collection = 'nodes';
 
-    // 🧬 Внутреннее хранилище данных
     protected array $attributes = [];
 
-    // 🛠 Конструктор инициализирует ноду из массива
     public function __construct(array $data = [])
     {
         $this->attributes = $data;
@@ -1726,11 +1785,9 @@ class Node
 
     protected function getNidAttribute(): ?string
     {
-        // читаем внутренний _id
         return $this->attributes['_id'] ?? null;
     }
 
-    // 🔌 Подключение к MongoDB
     public static function client(): Client
     {
         return new Client(
@@ -1738,13 +1795,11 @@ class Node
         );
     }
 
-    // Сбросить данные таблицы
     public static function truncate(): void
     {
         self::collection()->drop();
     }
 
-    // 🔗 Получение коллекции
     public static function collection(): MongoCollection
     {
         return self::client()
@@ -1752,51 +1807,100 @@ class Node
             ->selectCollection(self::$collection);
     }
 
-    // 🪄 Генерация читаемого nid вида zen.threes.ab3d8d2k
-    public static function generateNidFromSettings(): string
+    /**
+     * Вернуть объект для Ui.Tree
+     * @return array|null
+     */
+    public function getTreeNode(): ?array
     {
-        $author_scope = ths()->getSetting('author_token'); // ожидается "zen.threes"
-        return $author_scope . '.' . ths()->createShortId();
+        if (!$this->props['tree'] ?? false) {
+            return null;
+        }
+        return [
+            'nid' => $this->nid,
+            'icon' => $this->icon,
+            'name' => $this->name,
+        ];
     }
 
-    // 🔎 Поиск по nid (который = _id)
+    /**
+     * Вернуть объект для Ui.Schema
+     * @return array|null
+     * @throws \ReflectionException
+     */
+    public function getSchemaNode(): ?array
+    {
+        if (!$this->props['schema'] ?? false) {
+            return null;
+        }
+        $component_data = ths()->exe($this->handler, null, $this->data);
+        return [
+            'nid' => $this->nid,
+            'icon' => $this->icon,
+            'name' => $this->name,
+            'handler' => $component_data['handler'],
+            'data' => $component_data['data'],
+            'props' => $this->props,
+        ];
+    }
+
+    /**
+     * Вернуть объект для Ui.Store
+     * @return array|null
+     */
+    public function getStoreNode(): ?array
+    {
+        if (!isset($this->props['store'])) {
+            return null;
+        }
+        return [
+            'nid' => $this->nid,
+            'icon' => $this->icon,
+            'name' => $this->name,
+        ];
+    }
+
+    # Геттеры и сеттеры
+    public function setIconAttribute(string $svg): void
+    {
+        $this->attributes['icon'] = ths()->setIcon($svg);
+    }
+
+    public function getIconAttribute(): string
+    {
+        return ths()->getIcon($this->attributes['icon']);
+    }
+
+    public static function generateNidFromSettings(): string
+    {
+        return ths()->createShortId();
+    }
+
     public static function find(string $nid): ?self
     {
         $doc = self::collection()->findOne(['_id' => $nid]);
         return $doc ? new self($doc->getArrayCopy()) : null;
     }
 
-    // 💾 Сохранение (вставка или обновление)
     public function save(): void
     {
         $this->beforeSave();
-
-        // Если ещё нет _id — создаём его
         if (empty($this->attributes['_id'])) {
             $this->attributes['_id'] = self::generateNidFromSettings();
         }
 
-        // Удалим поле 'nid', если случайно попало — теперь используем только _id
-        unset($this->attributes['nid']);
-
-        // Проверяем реально ли есть документ в базе
         if ($this->exists()) {
-            // обновление
             self::collection()->replaceOne(
                 ['_id' => $this->attributes['_id']],
                 $this->attributes
             );
         } else {
-            // вставка
             $result = self::collection()->insertOne($this->attributes);
-            // на случай, если драйвер вернул ObjectId
             $this->attributes['_id'] = (string) $result->getInsertedId();
         }
-
         $this->afterSave();
     }
 
-    // 🗑 Удаление
     public function delete(): void
     {
         if ($this->exists()) {
@@ -1806,7 +1910,6 @@ class Node
         }
     }
 
-    // ✅ Проверка существования документа в БД
     public function exists(): bool
     {
         if (empty($this->attributes['_id'])) {
@@ -1820,7 +1923,6 @@ class Node
                 ) > 0;
     }
 
-    // 🔗 Добавление дочернего узла (в виде embedded или ref)
     public function addChild($node_or_ref): void
     {
         $children = $this->attributes['children'] ?? [];
@@ -1829,7 +1931,6 @@ class Node
         $this->save();
     }
 
-    // 🔍 Загрузка всех потомков по ссылкам ($ref / nid)
     public function resolveChildren(): array
     {
         $resolved = [];
@@ -1845,28 +1946,39 @@ class Node
         return array_filter($resolved);
     }
 
-    // 🪪 Получить текущий идентификатор как строку
     public function getNid(): ?string
     {
         return $this->attributes['_id'] ?? null;
     }
 
-    // 🧾 Преобразование в массив (например, для API/экспорта)
     public function toArray(): array
     {
         return $this->attributes;
     }
 
-    // 🧠 Умные геттеры и сеттеры
+    protected function normalizeValue($value)
+    {
+        if ($value instanceof \MongoDB\Model\BSONDocument || $value instanceof \MongoDB\Model\BSONArray) {
+            $value = $value->getArrayCopy();
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $k => $v) {
+                $value[$k] = $this->normalizeValue($v);
+            }
+        }
+
+        return $value;
+    }
+
     public function __get($key)
     {
-        # Реализация волшебного геттера
         $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
         if (method_exists($this, $method)) {
             return $this->$method();
         }
 
-        return $this->attributes[$key] ?? null;
+        return $this->normalizeValue($this->attributes[$key] ?? null);
     }
 
     public function __set($key, $value): void
@@ -1890,7 +2002,7 @@ class Node
         $this->attributes['updated_at'] = $now;
     }
 
-    // ✨ События (можно переопределить при наследовании)
+    # События
     protected function beforeSave(): void
     {
         $this->setTimestamps();
