@@ -371,7 +371,7 @@ class Node
     }
 
     # http://threes.dc/threes.api/nodes.node:set-node-name?debug
-    protected function setNodeName()
+    protected function setNodeName(): array
     {
         ths()->nodes()->setNodeName(
             request('nid'),

@@ -25,6 +25,7 @@
                 {{ node.name }}
             </div>
         </div>
+        <pre class="node-inside">{{ schema }}</pre>
         <modal :show="settings" @close="setNodeSettings">
             <template #default>
                 <div class="threes-schema__title">
@@ -176,6 +177,12 @@ export default {
     }
     .threes-node {
 
+    }
+    .node-inside {
+        background: #ffffff;
+        margin: 10px;
+        padding: 15px;
+        border-radius: 5px;
     }
 }
 </style>
