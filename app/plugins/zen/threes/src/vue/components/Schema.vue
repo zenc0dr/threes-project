@@ -20,12 +20,13 @@
             </div>
             <div class="threes-schema__description" v-html="schema.description"/>
         </div>
+
+        <Node :node="schema" />
+
         <div class="class-schema__content">
-            <div v-for="node in schema.children" class="threes-node">
-                {{ node.name }}
-            </div>
+            <Node :node="node" v-for="node in schema.children"/>
         </div>
-        <pre class="node-inside">{{ schema }}</pre>
+
         <modal :show="settings" @close="setNodeSettings">
             <template #default>
                 <div class="threes-schema__title">
@@ -55,6 +56,7 @@
 import icon from './icon.vue'
 import EditableText from './EditableText.vue'
 import modal from './modal.vue'
+import Node from './Node.vue'
 
 export default {
     name: "Schema",
@@ -62,6 +64,7 @@ export default {
         icon,
         modal,
         EditableText,
+        Node
     },
     data() {
         return {

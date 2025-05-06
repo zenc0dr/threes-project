@@ -1,16 +1,20 @@
 <template>
 <div class="node-text">
-    {{ data }}
+    {{ node.data }}
 </div>
 </template>
 <script>
 export default {
     name: "NodeText",
-    props: ['data'],
+    props: ['node'],
 }
 </script>
 <style lang="scss">
 .schema-container .node-text {
-    padding: 15px;
+    background: #fff;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 4px;
+    font-size: 17px;
 }
 </style>
