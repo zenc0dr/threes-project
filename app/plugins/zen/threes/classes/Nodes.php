@@ -146,9 +146,6 @@ class Nodes
      */
     public function setNodeName(string $nid, string $name = null): void
     {
-        if (!$name) {
-            return;
-        }
         $node = Node::find($nid);
         $node->name = $name;
         $node->save();

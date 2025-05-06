@@ -1,12 +1,8 @@
 <template>
-    <span v-if="!is_editing" @click="is_editing = true">
-        <slot>{{ model_value }}</slot>
-    </span>
     <input
-        v-else
         ref="input"
         type="text"
-        class="editable-text__input"
+        class="editable-text"
         v-model="model_value"
         @input="onInput"
         @blur="stopEditing"
@@ -26,10 +22,13 @@ export default {
         },
         debounceDelay: {
             type: Number,
-            default: 2000
+            default: 1000
         }
     },
     emits: ['update:modelValue', 'save'],
+    mounted() {
+        this.debounced_save = debounce(this.triggerSave, this.debounceDelay)
+    },
     data() {
         return {
             is_editing: false,
@@ -53,19 +52,16 @@ export default {
         triggerSave() {
             this.$emit('save', this.model_value)
         }
-    },
-    mounted() {
-        this.debounced_save = debounce(this.triggerSave, this.debounceDelay)
     }
 }
 </script>
 
 <style>
-.editable-text__input {
+.editable-text {
     all: unset;
     width: 100%;
     white-space: nowrap;
-    overflow: hidden;
+    border: none;
     text-overflow: ellipsis;
 }
 </style>

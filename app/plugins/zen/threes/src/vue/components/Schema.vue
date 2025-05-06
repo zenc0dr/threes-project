@@ -108,7 +108,7 @@ export default {
             })
         },
         saveName(name) {
-            if (!this.nid || !name) {
+            if (!this.nid) {
                 return
             }
             this.ths.api({
