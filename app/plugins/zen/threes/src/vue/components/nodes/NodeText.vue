@@ -2,12 +2,14 @@
   <textarea
       class="node-text"
       v-model="content"
-      @input="resize"
+      @input="onInput"
       ref="textarea"
   ></textarea>
 </template>
 
 <script>
+import { debounce } from 'lodash'
+
 export default {
     name: "NodeText",
     props: {
@@ -18,26 +20,45 @@ export default {
     },
     data() {
         return {
-            content: this.node.data
+            content: this.node.data,
+            ths: window.ths,
+            debouncedUpdate: null
         };
     },
     watch: {
-        content(newVal) {
-            //this.$emit("update:data", newVal);
-            console.log('Ввод данных', newVal, this.node)
-            this.resize();
+        content(new_val, old_val) {
+            if (new_val === old_val) {
+                return;
+            }
+            this.debouncedUpdate()
         }
     },
     mounted() {
-        this.resize();
+        this.resize()
+        this.debouncedUpdate = debounce(() => this.updateData(this.content), 2000)
     },
     methods: {
+        onInput() {
+            this.resize()
+        },
         resize() {
-            const ta = this.$refs.textarea;
+            const ta = this.$refs.textarea
             if (ta) {
-                ta.style.height = "auto";
-                ta.style.height = ta.scrollHeight + "px";
+                ta.style.height = "auto"
+                ta.style.height = ta.scrollHeight + "px"
             }
+        },
+        updateData(data) {
+            this.ths.api({
+                api: 'nodes.node:update-data',
+                data: {
+                    nid: this.node.nid,
+                    data
+                },
+                then: () => {
+                    this.ths.bus.emit('schema:refresh')
+                }
+            });
         }
     }
 };

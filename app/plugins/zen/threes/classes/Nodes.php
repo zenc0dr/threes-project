@@ -176,7 +176,7 @@ class Nodes
         $node->save();
     }
 
-    public function updateNodeData(string $nid, array $data): void
+    public function updateNodeData(string $nid, array|string|null $data): void
     {
         $node = Node::find($nid);
         $node->data = $data;

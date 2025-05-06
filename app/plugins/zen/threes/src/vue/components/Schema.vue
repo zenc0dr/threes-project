@@ -74,6 +74,12 @@ export default {
             ths: window.ths,
         }
     },
+    mounted() {
+        this.ths.bus.on('schema:refresh', this.getSchema)
+    },
+    unmounted() {
+        this.ths.bus.off('schema:refresh', this.getSchema)
+    },
     watch: {
         'ths.data.selected_nid': {
             handler(nid) {
