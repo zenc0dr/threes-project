@@ -28,14 +28,19 @@ class Node
         return [];
     }
 
+    # http://threes.dc/threes.api/nodes.node:set-node-description?debug
+    protected function setNodeDescription(): array
+    {
+        ths()->nodes()->setNodeDescription(
+            request('nid'),
+            request('description')
+        );
+        return [];
+    }
+
     # http://threes.dc/threes.api/nodes.node:update-data?debug
     protected function updateData(): array
     {
-//        dd(
-//            request('nid'),
-//            request('data')
-//        );
-
         ths()->nodes()->updateNodeData(
             request('nid'),
             request('data')

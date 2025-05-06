@@ -4,6 +4,7 @@
         :is="asyncComponent"
         :data="node.data"
         :node="node"
+        :scope="scope"
     />
 </template>
 
@@ -16,6 +17,11 @@ export default {
         node: {
             type: Object,
             required: true
+        },
+        scope: {
+            type: String,
+            required: false,
+            default: false
         }
     },
     computed: {

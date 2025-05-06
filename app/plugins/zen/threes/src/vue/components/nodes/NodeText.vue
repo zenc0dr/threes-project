@@ -1,10 +1,18 @@
 <template>
-  <textarea
-      class="node-text"
-      v-model="content"
-      @input="onInput"
-      ref="textarea"
-  ></textarea>
+    <div class="node-text">
+        <template v-if="scope === 'schema'">
+            <div class="node-text__header">
+                {{ node.name }}
+            </div>
+        </template>
+        <textarea
+            class="node-text__content"
+            v-model="content"
+            @input="onInput"
+            ref="textarea"
+        >
+        </textarea>
+    </div>
 </template>
 
 <script>
@@ -16,6 +24,11 @@ export default {
         node: {
             type: Object,
             required: true
+        },
+        scope: {
+            type: String,
+            required: false,
+            default: null
         }
     },
     data() {
@@ -66,16 +79,25 @@ export default {
 
 <style lang="scss">
 .node-text {
-    width: 100%;
-    box-sizing: border-box;
     background: #fff;
-    padding: 5px 10px;
-    margin: 7px 5px;
     border-radius: 4px;
-    font-size: 17px;
-    resize: none;
-    overflow: hidden;
-    outline: none;
-    border: none;
+    &__header {
+        font-size: 18px;
+        margin-left: 20px;
+        font-weight: bold;
+        color: #8c8c8c;
+        margin-bottom: -6px;
+    }
+    &__content {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 10px;
+        font-size: 17px;
+        resize: none;
+        overflow: hidden;
+        outline: none;
+        border: none;
+    }
 }
+
 </style>

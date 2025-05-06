@@ -96,15 +96,16 @@ class Nodes
             return [];
         }
 
-        # Получаем основную структуру узла
         $data = $node->getSchemaNode();
         if (!$data) {
             return [];
         }
 
-        # Если schema выключена — возвращаем только потомков (если show_children разрешено)
-        if (!($node->props['schema'] ?? false)) {
-            if (($node->props['show_children'] ?? true) === false) {
+        $props = $node->props;
+
+        // Если schema выключена — возвращаем только потомков (если явно show_children = true)
+        if (!($props['schema'] ?? false)) {
+            if (!isset($props['show_children']) || $props['show_children'] !== true) {
                 return [];
             }
 
@@ -119,8 +120,8 @@ class Nodes
             return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
         }
 
-        # Если schema включена — добавляем детей только если разрешено
-        if (($node->props['show_children'] ?? true) !== false) {
+        // Если schema включена — добавляем детей только если явно show_children = true
+        if (isset($props['show_children']) && $props['show_children'] === true) {
             $child_schemas = [];
             foreach ($node->resolveChildren() as $child) {
                 $subschema = $this->getNodesSchema($child->nid);
@@ -144,6 +145,16 @@ class Nodes
         }
         $node = Node::find($nid);
         $node->name = $name;
+        $node->save();
+    }
+
+    public function setNodeDescription(string $nid, string $description = null): void
+    {
+        if (!$description) {
+            return;
+        }
+        $node = Node::find($nid);
+        $node->description = $description;
         $node->save();
     }
 

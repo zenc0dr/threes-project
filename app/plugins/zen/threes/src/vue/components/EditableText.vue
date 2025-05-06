@@ -60,17 +60,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .editable-text__input {
-    font-size: 24px;
-    font-weight: inherit;
-    font-family: inherit;
-    color: inherit;
-    background: transparent;
-    border: none;
-    outline: none;
-    padding: 0;
-    margin: 0;
+    all: unset;
     width: 100%;
     white-space: nowrap;
     overflow: hidden;

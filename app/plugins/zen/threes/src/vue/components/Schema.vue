@@ -18,13 +18,17 @@
                     />
                 </div>
             </div>
-            <div class="threes-schema__description" v-html="schema.description"/>
+            <editable-text
+                class="threes-schema__description"
+                v-model="schema.description"
+                @save="saveDescription"
+            />
         </div>
 
-        <Node :node="schema" />
+        <Node :node="schema" scope="self_content" />
 
         <div class="class-schema__content">
-            <Node :node="node" v-for="node in schema.children"/>
+            <Node :node="node" v-for="node in schema.children" scope="schema" />
         </div>
 
         <modal :show="settings" @close="setNodeSettings">
@@ -111,6 +115,21 @@ export default {
                 api: 'nodes.node:set-node-name',
                 data: {
                     nid: this.nid, name
+                },
+                then: response => {
+                    this.ths.bus.emit('tree:refresh')
+                }
+            })
+        },
+        saveDescription(description) {
+            if (!this.nid) {
+                return
+            }
+            this.ths.api({
+                api: 'nodes.node:set-node-description',
+                data: {
+                    nid: this.nid,
+                    description
                 },
                 then: response => {
                     this.ths.bus.emit('tree:refresh')
