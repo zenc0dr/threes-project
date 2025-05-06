@@ -149,8 +149,15 @@ trait NodeMethodsTrait
         $this->save();
     }
 
-    public function resolveChildren(): array
+    /**
+     * Получить потомков (Нужно явно указывать получаемые поля)
+     * @param array $fields
+     * @return array
+     */
+    public function resolveChildren(array $fields = []): array
     {
+        $default_fields = ['_id', 'icon', 'name', 'description', 'props'];
+        $fields = array_merge($default_fields, $fields);
         $children = $this->attributes['children'] ?? [];
 
         if ($children instanceof BSONArray || $children instanceof BSONDocument) {
@@ -161,7 +168,14 @@ trait NodeMethodsTrait
 
         foreach ($children as $item) {
             if (isset($item['$ref'], $item['$id'])) {
-                $resolved[] = self::find($item['$id']);
+                $doc = self::collection()->findOne(
+                    ['_id' => $item['$id']],
+                    ['projection' => array_fill_keys($fields, 1)]
+                );
+
+                if ($doc) {
+                    $resolved[] = new self($doc->getArrayCopy());
+                }
             } elseif (isset($item['_id'])) {
                 $resolved[] = new self($item);
             }

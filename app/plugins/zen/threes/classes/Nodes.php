@@ -138,6 +138,12 @@ class Nodes
         return $data;
     }
 
+    /**
+     * Установить имя нода
+     * @param string $nid
+     * @param string|null $name
+     * @return void
+     */
     public function setNodeName(string $nid, string $name = null): void
     {
         if (!$name) {
@@ -148,6 +154,12 @@ class Nodes
         $node->save();
     }
 
+    /**
+     * Сохранить описание нода
+     * @param string $nid
+     * @param string|null $description
+     * @return void
+     */
     public function setNodeDescription(string $nid, string $description = null): void
     {
         if (!$description) {
@@ -158,30 +170,51 @@ class Nodes
         $node->save();
     }
 
+    /**
+     * Тут определяется массив настроек нода
+     * @param string $nid
+     * @return array
+     */
     public function getNodeSettings(string $nid): array
     {
         $node = Node::find($nid);
         $props = $node->props;
 
         return [
+            'tree' => $props['tree'] ?? false,
+            'store' => $props['store'] ?? false,
+            'schema' => $props['schema'] ?? false,
             'self_content' => $props['self_content'] ?? false,
             'show_children' => $props['show_children'] ?? false,
         ];
     }
 
+    /**
+     * Настройки устанавливаются
+     * @param string $nid
+     * @param array $settings
+     * @return void
+     */
     public function setNodeSettings(string $nid, array $settings): void
     {
 
         $node = Node::find($nid);
         $props = $node->props;
 
-        //dd($props, $settings);
-
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
         }
         if (isset($settings['show_children'])) {
             $props['show_children'] = $settings['show_children'];
+        }
+        if (isset($settings['store'])) {
+            $props['store'] = $settings['store'];
+        }
+        if (isset($settings['tree'])) {
+            $props['tree'] = $settings['tree'];
+        }
+        if (isset($settings['schema'])) {
+            $props['schema'] = $settings['schema'];
         }
         $node->props = $props;
         $node->save();

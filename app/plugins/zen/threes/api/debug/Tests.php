@@ -54,7 +54,8 @@ class Tests
             $node->props = [
                 'tree' => true,
                 'schema' => true,
-                'store' => [
+                'store' => false,
+                'store_data' => [
                     'group' => 'Features',
                     'author' => 'Migration',
                     'tags' => ["feature", "imported"],
@@ -63,7 +64,6 @@ class Tests
             ];
 
             $node->save();
-
             $featureToNode[$feature->id] = $node;
         }
 

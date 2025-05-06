@@ -8,14 +8,22 @@ export default {
     name: "Store",
     data() {
         return {
-            nodes: [
-                {
-                    nid: "threes.text.new",
-                    name: "Текстовый документа"
-                }
-            ]
+            ths: window.ths,
+
         }
-    }
+    },
+    // mounted() {
+    //     this.getTree()
+    //     this.ths.bus.on('tree:refresh', this.getTree)
+    // },
+    // unmounted() {
+    //     this.ths.bus.off('tree:refresh', this.getTree)
+    // },
+    // methods: {
+    //     getStore() {
+    //
+    //     }
+    // }
 }
 </script>
 <style lang="scss">

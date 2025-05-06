@@ -10,20 +10,25 @@ class Store
 {
     use SingletonTrait;
 
-    public function getStoreNodes(string $filter_text = null): array
+    public function getStoreNodes(): array
     {
-        $nodes = Node::where(function ($query) use ($filter_text) {
-            if ($filter_text) {
-                $query->orWhere('nid', 'like', "%$filter_text%");
-                $query->orWhere('name', 'like', "%$filter_text%");
-                $query->orWhere('description', 'like', "%$filter_text%");
-            }
-        })->get();
 
-        $output = [];
-        foreach ($nodes as $node) {
-            $output[] = $node->store_item;
+        dd(
+            Node::find('bd6d7vqeca6f')->getSchemaNode()
+        );
+
+
+        $store = [];
+        $root_nodes = Node::getRootNodes();
+        foreach ($root_nodes as $nodes) {
+            foreach ($nodes->resolveChildren(['description']) as $node) {
+
+                dd($node);
+//                $props_store = $node->props['store'] ?? null;
+//                if (!$props_store) {
+//                    continue;
+//                }
+            }
         }
-        return $output;
     }
 }
