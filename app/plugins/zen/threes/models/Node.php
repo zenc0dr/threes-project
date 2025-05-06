@@ -48,6 +48,41 @@ class Node
         }
     }
 
+    public function setDataAttribute(array|string|null $data = null): void
+    {
+        if ($data === null) {
+            $this->attributes['data'] = null;
+        } elseif (is_array($data)) {
+            $this->attributes['data'] = ths()->toJson($data, false);
+        } elseif (is_string($data)) {
+            $this->attributes['data'] = $data;
+        }
+    }
+
+    public function getDataAttribute(): array|string|null
+    {
+        $data = $this->attributes['data'] ?? null;
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        if (is_string($data)) {
+            $trimmed = trim($data);
+            if (($trimmed[0] === '{' && str_ends_with($trimmed, '}')) ||
+                ($trimmed[0] === '[' && str_ends_with($trimmed, ']'))) {
+                $decoded = json_decode($data, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $decoded;
+                }
+            }
+
+            return $data;
+        }
+
+        return null;
+    }
+
     public function getNidAttribute(): ?string
     {
         return $this->attributes['_id'] ?? null;

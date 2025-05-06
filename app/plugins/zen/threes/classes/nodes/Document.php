@@ -4,6 +4,7 @@ namespace Zen\Threes\Classes\Nodes;
 
 class Document
 {
+    # Возвращает шаблон
     public function textTemplate(): array
     {
         return [
@@ -24,11 +25,18 @@ class Document
         ];
     }
 
+    # Обрабатывает данные из БД выводя их компонент NodeText в Ui.Schema
     public function text($data): array
     {
         return [
             'handler' => 'NodeText',
             'data' => $data,
         ];
+    }
+
+    # Обновляет данные в массиве data у нода
+    public function updateData(array $data): array
+    {
+        return $data;
     }
 }

@@ -175,4 +175,11 @@ class Nodes
         $node->props = $props;
         $node->save();
     }
+
+    public function updateNodeData(string $nid, array $data): void
+    {
+        $node = Node::find($nid);
+        $node->data = $data;
+        $node->save();
+    }
 }
