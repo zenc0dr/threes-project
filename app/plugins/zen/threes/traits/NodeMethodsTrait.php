@@ -33,7 +33,7 @@ trait NodeMethodsTrait
 
     public static function collection(): MongoCollection
     {
-        $database = static::$database ?? config('database.connections.mongodb.database', 'threes');
+        $database = static::$database ?? config('database.connections.mongodb.database');
 
         return self::client()
             ->selectDatabase($database)
