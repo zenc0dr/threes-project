@@ -68,11 +68,10 @@ export default {
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        padding: 0 10px;
-        padding-top: 10px;
-        padding-bottom: 8px;
+        padding: 10px 10px 8px;
         border-bottom: 1px solid #e7e7e7;
         background: #fff;
+        border-radius: 4px;
     }
     &__icon {
         width: 20px;

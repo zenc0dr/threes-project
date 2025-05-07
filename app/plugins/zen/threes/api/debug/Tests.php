@@ -20,20 +20,11 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->nodes()->model('dmbfxt7vm4xd')->toArray()
-        );
 
-
-        #Node::truncate();
-        #$node = ths()->nodes()->createNode();
-        //$node = ths()->nodes()->model('n7abeanmj9yh');
-        //dd($node->getSchemaNode());
-        ths()->nodes()->getUiData('n7abeanmj9yh');
     }
 
     # http://threes.dc/threes.api/debug.Tests:backlogToNodes
-    public function backlogToNodes()
+    public function backlogToNodes(): string
     {
         $features = Feature::all();
         Node::truncate();
@@ -55,6 +46,8 @@ class Tests
                 'tree' => true,
                 'schema' => true,
                 'store' => false,
+                'self_content' => true,
+                'show_children' => true,
                 'store_data' => [
                     'group' => 'Features',
                     'author' => 'Migration',
@@ -131,29 +124,4 @@ class Tests
 
         dd($output);
     }
-
-
-
-    public function prepareYamlForParsing(string $yaml_content): string
-    {
-        // Регулярка для ключей вида: Ключ: значение с двоеточием внутри
-        return preg_replace_callback('/^(\s*\w[\w\-]*\s*:\s*)(.*)$/mu', function($matches) {
-            $key = $matches[1];
-            $value = trim($matches[2]);
-
-            // Если значение уже в кавычках — оставляем
-            if (str_starts_with($value, '"') || str_starts_with($value, "'")) {
-                return $matches[0];
-            }
-
-            // Если значение содержит двоеточие и не начинается на [ или { (то есть не массив или объект)
-            if (strpos($value, ':') !== false && !in_array($value[0], ['[', '{'])) {
-                $value = '"' . str_replace('"', '\"', $value) . '"';
-            }
-
-            return $key . $value;
-        }, $yaml_content);
-    }
-
-
 }
