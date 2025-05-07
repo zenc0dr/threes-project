@@ -138,6 +138,13 @@ class Nodes
         return $data;
     }
 
+    public function setNodeIcon(string $nid, string $svg): void
+    {
+        $node = Node::find($nid);
+        $node->icon = $svg;
+        $node->save();
+    }
+
     /**
      * Установить имя нода
      * @param string $nid

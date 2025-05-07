@@ -136,6 +136,7 @@ class Node
             'nid' => $this->nid,
             'icon' => $this->icon,
             'name' => $this->name,
+            'schema' => $this->props['schema'] ?? false,
         ];
     }
 

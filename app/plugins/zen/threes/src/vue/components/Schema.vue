@@ -2,7 +2,18 @@
     <div v-if="schema" class="threes-schema">
         <div class="threes-schema__header">
             <div class="threes-schema__title">
-                <icon class="threes-schema__icon" :src="schema.icon"/>
+                <icon
+                    @click="triggerIconUpload"
+                    class="threes-schema__icon"
+                    :src="schema.icon"
+                />
+                <input
+                    type="file"
+                    ref="iconUpload"
+                    style="display:none"
+                    accept=".svg"
+                    @change="onSvgSelect"
+                />
                 <editable-text
                     class="threes-schema__name"
                     v-model="schema.name"
@@ -175,6 +186,29 @@ export default {
                     this.ths.bus.emit('tree:refresh')
                 }
             })
+        },
+        triggerIconUpload() {
+            this.$refs.iconUpload?.click()
+        },
+        onSvgSelect(event) {
+            const file = event.target.files?.[0]
+            if (!file) return
+            const reader = new FileReader()
+            reader.onload = () => {
+                ths.api({
+                    api: 'nodes.node:set-node-icon',
+                    data: {
+                        nid: this.nid,
+                        svg: reader.result
+                    },
+                    then: response => {
+                        this.ths.bus.emit('tree:refresh')
+                        this.getSchema()
+                    }
+                })
+                this.$refs.iconUpload.value = null
+            }
+            reader.readAsText(file)
         }
     }
 }

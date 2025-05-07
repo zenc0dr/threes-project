@@ -41,9 +41,11 @@ export default {
         this.ths.bus.off('tree:refresh', this.getTree)
     },
     methods: {
-        handleSelect(nid) {
-            this.active_nid = nid
-            ths.data.selected_nid = nid
+        handleSelect(node) {
+            if (node.schema) {
+                this.active_nid = node.nid
+                ths.data.selected_nid = node.nid
+            }
         },
         getTree() {
             ths.api({

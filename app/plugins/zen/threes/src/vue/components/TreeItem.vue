@@ -63,7 +63,7 @@ export default {
             this.open = !this.open
         },
         select() {
-            this.$emit('select', this.node.nid)
+            this.$emit('select', this.node)
         }
     }
 }

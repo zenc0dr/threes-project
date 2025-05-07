@@ -8,6 +8,14 @@ class Node
 {
     use QueryLogTrait;
 
+    public function setNodeIcon()
+    {
+        ths()->nodes()->setNodeIcon(
+            request('nid'),
+            request('svg')
+        );
+    }
+
     # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
     protected function setNodeSettings(): array
     {
