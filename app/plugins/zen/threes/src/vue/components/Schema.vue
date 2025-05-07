@@ -80,6 +80,11 @@ export default {
                     field: 'show_children',
                     label: 'Показывать потомков',
                 },
+                {
+                    type: 'textarea',
+                    field: 'text',
+                    label: 'Напиши стишок',
+                }
             ],
             ths: window.ths,
         }
