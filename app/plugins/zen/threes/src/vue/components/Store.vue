@@ -1,6 +1,6 @@
 <template>
 <div class="threes-store">
-    <div v-for="node in nodes" class="threes-store__node">
+    <div @click="addNode" v-for="node in nodes" class="threes-store__node">
         <div class="threes-store__head">
             <div class="threes-store__icon">
                 <icon :src="node.icon" width="20px" height="20px" />
@@ -43,6 +43,9 @@ export default {
                     this.nodes = response.nodes
                 }
             })
+        },
+        addNode() {
+            console.log(ths.data.selected_nid)
         }
     }
 }
