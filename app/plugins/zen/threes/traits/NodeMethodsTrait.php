@@ -14,14 +14,30 @@ trait NodeMethodsTrait
     // --- Mongo connection ---
     public static function client(): Client
     {
-        return new Client(env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin'));
+        $config = config('database.connections.mongodb');
+
+        $host = $config['host'] ?? '127.0.0.1';
+        $port = $config['port'] ?? 27017;
+        $username = $config['username'] ?? null;
+        $password = $config['password'] ?? null;
+        $authSource = $config['options']['authSource'] ?? 'admin';
+
+        $auth = $username && $password
+            ? "$username:$password@"
+            : '';
+
+        $uri = "mongodb://$auth$host:$port/$authSource";
+
+        return new Client($uri);
     }
 
     public static function collection(): MongoCollection
     {
+        $database = static::$database ?? config('database.connections.mongodb.database', 'threes');
+
         return self::client()
-            ->selectDatabase(self::$database)
-            ->selectCollection(self::$collection);
+            ->selectDatabase($database)
+            ->selectCollection(static::$collection);
     }
 
     public static function truncate(): void
@@ -132,7 +148,7 @@ trait NodeMethodsTrait
         }
 
         $ref = [
-            '$ref' => self::$collection,
+            '$ref' => static::$collection,
             '$id' => $child->nid,
         ];
 

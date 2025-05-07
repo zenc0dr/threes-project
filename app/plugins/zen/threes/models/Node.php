@@ -17,13 +17,14 @@ class Node
 {
     use NodeMethodsTrait;
 
-    public static string $database   = 'threes';
+    public static string $database;
     public static string $collection = 'nodes';
 
     protected array $attributes = [];
 
     public function __construct(array $data = [])
     {
+        static::$database = config('database.connections.mongodb.database');
         $this->attributes = $this->normalizeValue($data);
     }
 
