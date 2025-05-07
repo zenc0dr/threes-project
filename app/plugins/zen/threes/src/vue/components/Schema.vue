@@ -41,16 +41,10 @@
                         @save="saveName"
                     />
                 </div>
-                <div class="modal-settings">
-                    <label class="checkbox">
-                        <input type="checkbox" v-model="schema.props.self_content" />
-                        <span>Показывать собственный контент</span>
-                    </label>
-                    <label class="checkbox">
-                        <input type="checkbox" v-model="schema.props.show_children" />
-                        <span>Показывать потомков</span>
-                    </label>
-                </div>
+                <FormFitter
+                    :scheme="settings_scheme"
+                    v-model="schema.props"
+                />
             </template>
         </modal>
     </div>
@@ -75,6 +69,40 @@ export default {
             nid: null,
             schema: null,
             settings: null,
+            settings_scheme: [
+                {
+                    type: 'switcher',
+                    field: 'self_content',
+                    label: 'Показывать собственный контент',
+                },
+                {
+                    type: 'switcher',
+                    field: 'show_children',
+                    label: 'Показывать потомков',
+                },
+                {
+                    type: 'repeater',
+                    field: 'parameters',
+                    label: 'Параметры запроса',
+                    add_text: 'Добавить параметр',
+                    empty_object: {
+                        key: '',
+                        value: ''
+                    },
+                    scheme: [
+                        {
+                            type: 'string',
+                            field: 'key',
+                            label: 'Ключ'
+                        },
+                        {
+                            type: 'string',
+                            field: 'value',
+                            label: 'Значение'
+                        }
+                    ]
+                }
+            ],
             ths: window.ths,
         }
     },
