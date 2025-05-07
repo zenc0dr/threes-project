@@ -20,13 +20,13 @@ trait NodeMethodsTrait
         $port = $config['port'] ?? 27017;
         $username = $config['username'] ?? null;
         $password = $config['password'] ?? null;
-        $authSource = $config['options']['authSource'] ?? 'admin';
+        $auth_source = $config['options']['authSource'] ?? 'admin';
 
         $auth = $username && $password
             ? "$username:$password@"
             : '';
 
-        $uri = "mongodb://$auth$host:$port/$authSource";
+        $uri = "mongodb://$auth$host:$port/$auth_source";
 
         return new Client($uri);
     }
