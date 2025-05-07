@@ -69,12 +69,6 @@ export default {
             return this.resolveLabel(tab) === this.activeLabel
         },
         tabSetActive(tab) {
-            if (this.element.id && tab.id && window.APP?.tabs_events) {
-                const eventKey = `${this.element.id}.${tab.id}`
-                if (window.APP.tabs_events[eventKey]) {
-                    window.APP.tabs_events[eventKey]()
-                }
-            }
             this.activeLabel = this.resolveLabel(tab)
         }
     }

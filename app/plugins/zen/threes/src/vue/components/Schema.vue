@@ -81,10 +81,20 @@ export default {
                     label: 'Показывать потомков',
                 },
                 {
-                    type: 'textarea',
-                    field: 'text',
-                    label: 'Напиши стишок',
-                }
+                    type: 'switcher',
+                    field: 'tree',
+                    label: 'Показывать в дереве объектов',
+                },
+                {
+                    type: 'switcher',
+                    field: 'schema',
+                    label: 'Показывать в схеме',
+                },
+                {
+                    type: 'switcher',
+                    field: 'store',
+                    label: 'Показывать в магазине',
+                },
             ],
             ths: window.ths,
         }
@@ -162,6 +172,7 @@ export default {
                 then: response => {
                     this.settings = null
                     this.getSchema()
+                    this.ths.bus.emit('tree:refresh')
                 }
             })
         }

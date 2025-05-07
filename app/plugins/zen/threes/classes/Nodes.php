@@ -61,6 +61,11 @@ class Nodes
             return null;
         }
 
+        // Если node не предназначен для дерева — полностью исключаем ветку
+        if (!($node->props['tree'] ?? true)) {
+            return null;
+        }
+
         $children = $node->resolveChildren();
 
         $child_trees = [];
@@ -71,12 +76,6 @@ class Nodes
             }
         }
 
-        // Если node не предназначен для дерева — пропускаем, возвращая только детей
-        if (!($node->props['tree'] ?? true)) {
-            return count($child_trees) > 0 ? ['children' => $child_trees] : null;
-        }
-
-        // Используем getTreeNode() как основу
         $data = $node->getTreeNode();
         if (!$data) {
             return null;
@@ -88,6 +87,7 @@ class Nodes
 
         return $data;
     }
+
 
     public function getNodesSchema(string $nid): array
     {
