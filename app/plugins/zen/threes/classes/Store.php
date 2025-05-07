@@ -14,9 +14,14 @@ class Store
     {
         $store = [];
         $root_nodes = Node::getRootNodes();
-        foreach ($root_nodes as $nodes) {
-            foreach ($nodes->resolveChildren() as $node) {
-                $store[] = $node->getStoreNode();
+        foreach ($root_nodes as $root_node) {
+            if ($root_node->props['store']) {
+                $store[] = $root_node->getStoreNode();
+            }
+            foreach ($root_node->resolveChildren() as $node) {
+                if ($node->props['store']) {
+                    $store[] = $node->getStoreNode();
+                }
             }
         }
         return $store;

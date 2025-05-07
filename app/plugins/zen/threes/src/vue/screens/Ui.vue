@@ -47,24 +47,11 @@ export default {
 <style lang="scss">
 .threes-ui {
     display: flex;
+    flex-direction: column;
     background: #f5f5f5;
     margin: 4px;
-    flex-direction: column;
 }
-.threes-top {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-.tree-container {
-    border-right: 1px solid #e2e2e2;
-    padding-right: 5px;
-}
-.schema-container {
-    display: flex;
-    flex: 1 1 0;
-    background: #ededed;
-}
+
 .threes-settings {
     padding: 3px 4px;
     background: #e4e4e4;
@@ -76,6 +63,34 @@ export default {
         border-radius: 3px;
     }
 }
+
+.threes-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.tree-container {
+    border-right: 1px solid #e2e2e2;
+    padding-right: 5px;
+}
+
+.schema-container {
+    display: flex;
+    flex: 1 1 auto;
+    background: #ededed;
+}
+
+.threes-bottom {
+    margin-top: 15px;
+}
+
+.store-container {
+    padding: 10px;
+}
+
+/* Полноэкранный режим */
 .fullscreen {
     position: fixed;
     inset: 0;
@@ -85,20 +100,25 @@ export default {
     padding: 0 !important;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
+
+    .threes-settings {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
 
     .threes-top,
     .threes-bottom {
-        flex: 1 1 auto;
-        overflow: auto;
-        min-height: 0;
+        flex: none;
+        overflow: visible;
     }
 
     .tree-container,
     .schema-container,
     .store-container {
-        height: 100%;
-        overflow: auto;
+        height: auto;
+        overflow: visible;
     }
 }
 </style>

@@ -184,6 +184,7 @@ export default {
                     this.settings = null
                     this.getSchema()
                     this.ths.bus.emit('tree:refresh')
+                    this.ths.bus.emit('store:refresh')
                 }
             })
         },
@@ -203,6 +204,7 @@ export default {
                     },
                     then: response => {
                         this.ths.bus.emit('tree:refresh')
+                        this.ths.bus.emit('store:refresh')
                         this.getSchema()
                     }
                 })
