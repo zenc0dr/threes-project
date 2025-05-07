@@ -80,28 +80,6 @@ export default {
                     field: 'show_children',
                     label: 'Показывать потомков',
                 },
-                {
-                    type: 'repeater',
-                    field: 'parameters',
-                    label: 'Параметры запроса',
-                    add_text: 'Добавить параметр',
-                    empty_object: {
-                        key: '',
-                        value: ''
-                    },
-                    scheme: [
-                        {
-                            type: 'string',
-                            field: 'key',
-                            label: 'Ключ'
-                        },
-                        {
-                            type: 'string',
-                            field: 'value',
-                            label: 'Значение'
-                        }
-                    ]
-                }
             ],
             ths: window.ths,
         }
