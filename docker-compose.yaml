@@ -11,11 +11,11 @@ services:
       - DB_DATABASE=threes
       - DB_USERNAME=threes
       - DB_PASSWORD=threes
-      - MONGO_DB_HOST=threes-mongo
-      - MONGO_DB_PORT=27017
-      - MONGO_DB_DATABASE=threes
-      - MONGO_DB_USERNAME=root
-      - MONGO_DB_PASSWORD=secret
+      # - MONGO_DB_HOST=threes-mongo
+      # - MONGO_DB_PORT=27017
+      # - MONGO_DB_DATABASE=threes
+      # - MONGO_DB_USERNAME=root
+      # - MONGO_DB_PASSWORD=secret
     build:
       context: ./scripts
     restart: no
@@ -50,21 +50,21 @@ services:
       - ./db:/var/lib/postgresql/data
     networks:
       - web
-  threes-mongo:
-      container_name: threes-mongo
-      image: mongo:6
-      restart: always
-      user: "1000:1000"
-      ports:
-          - "27017:27017"
-      environment:
-          MONGO_INITDB_DATABASE: threes
-          MONGO_INITDB_ROOT_USERNAME: root
-          MONGO_INITDB_ROOT_PASSWORD: secret
-      volumes:
-          - ./mongo:/data/db
-      networks:
-          - web
+  # threes-mongo:
+  #     container_name: threes-mongo
+  #     image: mongo:6
+  #     restart: always
+  #     user: "1000:1000"
+  #     ports:
+  #         - "27017:27017"
+  #     environment:
+  #         MONGO_INITDB_DATABASE: threes
+  #         MONGO_INITDB_ROOT_USERNAME: root
+  #         MONGO_INITDB_ROOT_PASSWORD: secret
+  #     volumes:
+  #         - ./mongo:/data/db
+  #     networks:
+  #         - web
 
 networks:
   web:

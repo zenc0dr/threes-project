@@ -2,46 +2,58 @@
 
 namespace Zen\Threes\Models;
 
-use Zen\Threes\Traits\NodeMethodsTrait;
 
 /**
- * @property string $nid
- * @property string $icon
- * @property string $name
- * @property string $description
- * @property string $handler
- * @property string | array $data
- * @property array $props
+ * @property string $nid - Уникальный идентификатор нода
+ * @property string $icon - Иконка
+ * @property string $name - Имя нода
+ * @property string $description - Описание нода
+ * @property string $handler - Обработчик нода
+ * @property string | array $data - Данные нода
+ * @property array $props - Настройки нода
  */
 class Node
 {
-    use NodeMethodsTrait;
-
-    public static string $database;
-    public static string $collection = 'nodes';
+    private static string $node_storage_path;
 
     protected array $attributes = [];
 
-    public function __construct(array $data = [])
+    protected static array $fields = [
+        'icon'=> 'string',
+        'name' => 'string',
+        'description' => 'string',
+        'handler' => 'string',
+        'data' => 'array',
+        'props' => 'array'
+    ];
+
+    protected static array $extensions = [
+        'string' => 'txt',
+        'array' => 'json',
+        'object' => 'object',
+    ];
+
+    public function __construct(string $nid = null)
     {
-        static::$database = config('database.connections.mongodb.database');
-        $this->attributes = $this->normalizeValue($data);
+        if ($nid) {
+            $this->attributes['nid'] = $nid;
+        }
+        self::$node_storage_path = ths()->checkDir(storage_path('threes/nodes'));
     }
 
-    // Геттеры и Сеттеры
     public function __get($key)
     {
-        $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        $method = $this->studlyCaser('get', $key);
         if (method_exists($this, $method)) {
             return $this->$method();
         }
 
-        return $this->normalizeValue($this->attributes[$key] ?? null);
+        return $this->attributes[$key] ?? null;
     }
 
     public function __set($key, $value): void
     {
-        $method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        $method = $this->studlyCaser('set', $key);
         if (method_exists($this, $method)) {
             $this->$method($value);
         } else {
@@ -49,128 +61,126 @@ class Node
         }
     }
 
-    public function setDataAttribute(array|string|null $data = null): void
+    public static function find(string $nid)
     {
-        if ($data === null) {
-            $this->attributes['data'] = null;
-        } elseif (is_array($data)) {
-            $this->attributes['data'] = ths()->toJson($data, false);
-        } elseif (is_string($data)) {
-            $this->attributes['data'] = $data;
-        }
-    }
-
-    public function getDataAttribute(): array|string|null
-    {
-        $data = $this->attributes['data'] ?? null;
-
-        if (is_array($data)) {
-            return $data;
-        }
-
-        if (is_string($data)) {
-            $trimmed = trim($data);
-            if (($trimmed[0] === '{' && str_ends_with($trimmed, '}')) ||
-                ($trimmed[0] === '[' && str_ends_with($trimmed, ']'))) {
-                $decoded = json_decode($data, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    return $decoded;
-                }
+        $node = new self($nid);
+        $node_path = self::$node_storage_path . "/" . $nid;
+        if (file_exists($node_path)) {
+            foreach (self::$fields as $field_name => $field_format) {
+                $node->loadField($field_name);
             }
+        }
+        return $node;
+    }
 
-            return $data;
+    /**
+     * Метод преобразования строк вида string_name в StringName
+     * @param string $direction
+     * @param string $prefix
+     * @param string $postfix
+     * @return string
+     */
+    private function studlyCaser(
+        string $direction,
+        string $prefix,
+        string $postfix = 'Attribute'
+    ): string {
+        return $direction
+            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $prefix)))
+            . $postfix;
+    }
+
+    /**
+     * Сохранить данные экземпляра
+     * @return void
+     */
+    public function save(): void
+    {
+        $this->beforeSave();
+
+        if (empty($this->attributes['nid'])) {
+            $this->attributes['nid'] = ths()->createShortId();
         }
 
-        return null;
-    }
-
-    public function getNidAttribute(): ?string
-    {
-        return $this->attributes['_id'] ?? null;
-    }
-
-    public function getNid(): ?string
-    {
-        return $this->attributes['_id'] ?? null;
-    }
-
-    public function setIconAttribute(string $svg): void
-    {
-        $this->attributes['icon'] = ths()->setIcon($svg);
-    }
-
-    public function getIconAttribute(): string
-    {
-        return ths()->getIcon($this->attributes['icon']);
-    }
-
-    private function setTimestamps(): void
-    {
-        $now = date('c');
-        if (!$this->exists()) {
-            $this->attributes['created_at'] = $now;
-        }
-        $this->attributes['updated_at'] = $now;
-    }
-
-    protected function beforeSave(): void
-    {
-        $this->setTimestamps();
-    }
-
-    protected function afterSave(): void {}
-
-    public function toArray(): array
-    {
-        return $this->attributes;
-    }
-
-    // ----- Форматы для UI -----
-
-    public function getTreeNode(): ?array
-    {
-        if (!($this->props['tree'] ?? true)) {
-            return null;
+        foreach ($this->attributes as $key => $value) {
+            if ($key === 'nid') {
+                continue;
+            }
+            $this->saveField($key, $value);
         }
 
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'schema' => $this->props['schema'] ?? false,
-        ];
+        $this->afterSave();
     }
 
-    public function getSchemaNode(): ?array
+    private function saveField(string $field_name, string | object | array | int | bool | null $value): void
     {
-        if (!($this->props['schema'] ?? false)) {
-            return null;
+        $field_format = self::$fields[$field_name];
+        $field_extension = self::$extensions[$field_format];
+        $field_path = ths()->checkDir(
+            self::$node_storage_path . "/$this->nid/$field_name.$field_extension"
+        );
+
+        if ($value === null) {
+            unlink($field_path);
+            return;
         }
 
-        $component_data = ths()->exe($this->handler, null, $this->data);
+        if ($field_format === 'object') {
+            $value = serialize($value);
+        }
 
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'description' => $this->description,
-            'handler' => $component_data['handler'],
-            'data' => $component_data['data'],
-            'props' => $this->props,
-        ];
+        if ($field_format === 'array') {
+            $value = ths()->toJson($value);
+        }
+
+        $value = (string) $value;
+        $value = trim($value);
+
+        file_put_contents(
+            $field_path,
+            $value
+        );
     }
 
-    public function getStoreNode(): ?array
+    private function loadField(string $field_name): void
     {
-        if (!isset($this->props['store'])) {
-            return null;
+        $field_format = self::$fields[$field_name];
+        $field_extension = self::$extensions[$field_format];
+        $field_path = self::$node_storage_path . "/$this->nid/$field_name.$field_extension";
+        if (!file_exists($field_path)) {
+            return;
         }
 
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'description' => $this->description,
-        ];
+        $field_data = file_get_contents($field_path);
+        if ($field_format === 'object') {
+            $this->attributes[$field_name] = unserialize($field_data);
+        }
+        if ($field_format === 'array') {
+            $this->attributes[$field_name] = ths()->fromJson($field_data);
+        }
+
+        if ($field_format === 'bool') {
+            $this->attributes[$field_name] = (bool) $field_data;
+        }
+
+        if ($field_format === 'int') {
+            $this->attributes[$field_name] = (int) $field_data;
+        }
+
+        if ($field_format === 'string') {
+            $this->attributes[$field_name] = $field_data;
+        }
+    }
+
+
+
+    public function beforeSave()
+    {
+
+    }
+
+    public function afterSave()
+    {
+
     }
 }

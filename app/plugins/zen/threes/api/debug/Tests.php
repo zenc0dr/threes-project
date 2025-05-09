@@ -20,6 +20,17 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+//        $node = new Node();
+//        $node->name = 'debug';
+//        $node->description = 'Тут я что-то записал';
+//        $node->data = [
+//            'foo' => 'bar'
+//        ];
+//        $node->save();
+
+        $node = Node::find('bbc8jen38sd5');
+
+        dd($node->description);
 
     }
 

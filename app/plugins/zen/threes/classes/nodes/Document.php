@@ -8,7 +8,7 @@ class Document
     public function textTemplate(): array
     {
         return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/cog.svg'),
+            'icon' => base_path('plugins/zen/threes/src/images/icons/doc.svg'),
             'name' => "Новый документ",
             'handler' => 'Zen.Threes.Classes.Nodes.Document.text',
             'data' => 'Привет мир!',
@@ -18,7 +18,27 @@ class Document
                 'store' => [
                     'group' => 'Документы',
                     'author' => 'Threes',
-                    'tags' => ["text", "documents"],
+                    'tags' => ["text", "document"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function builderTemplate()
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/cog.svg'),
+            'name' => "Новая схема",
+            'handler' => 'Zen.Threes.Classes.Nodes.Document.builder',
+            'data' => [],
+            'props' => [
+                'tree' => true,
+                'schema' => true,
+                'store' => [
+                    'group' => 'Схемы',
+                    'author' => 'Threes',
+                    'tags' => ["html", "frontend"],
                     'created_at' => now()->toDateTimeString(),
                 ]
             ]
@@ -30,6 +50,14 @@ class Document
     {
         return [
             'handler' => 'NodeText',
+            'data' => $data,
+        ];
+    }
+
+    public function builder($data): array
+    {
+        return [
+            'handler' => 'NodeBuilder',
             'data' => $data,
         ];
     }
