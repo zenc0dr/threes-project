@@ -28,7 +28,7 @@ class Nodes
      * @return Node
      * @throws \ReflectionException
      */
-    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.DocumentText'): Node
+    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.NodeText'): Node
     {
         $node = $this->model();
         $node->class = $class;

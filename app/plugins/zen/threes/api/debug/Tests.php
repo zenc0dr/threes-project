@@ -23,7 +23,7 @@ class Tests
 
     }
 
-    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=3axhafwjdk5v
+    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
     public function nodeTest()
     {
         $nid = request('nid');
@@ -35,6 +35,12 @@ class Tests
         }
 
         dd($node->icon);
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:truncateNodes
+    public function truncateNodes()
+    {
+        Node::truncate();
     }
 
     # http://threes.dc/threes.api/debug.Tests:backlogToNodes
@@ -49,15 +55,11 @@ class Tests
         $featureToNode = [];
 
         foreach ($features as $feature) {
-            /** @var Feature $feature */
-            //$node = app(Nodes::class)->createNode();
-
             $node = new Node('node' . $feature->id);
             $node->name = $feature->name ?? 'Без названия';
+            $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
             $node->description = $feature->description ?? '';
             $node->data = $feature->description ?? '';
-            $node->icon = base_path('plugins/zen/threes/src/images/icons/cog.svg');
-
             $node->props = [
                 'tree' => true,
                 'schema' => true,
@@ -71,32 +73,37 @@ class Tests
                     'created_at' => now()->toDateTimeString(),
                 ]
             ];
-
             $node->save();
-
             $featureToNode[$feature->id] = $node;
-            $structure[$node->nid] = []; // Подготовим пустой список детей (на случай если root)
+            $structure[$feature->id] = [];
         }
 
+        // Заполняем карту детей
         foreach ($features as $feature) {
-            if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
-                $parentNode = $featureToNode[$feature->parent_id];
-                $childNode = $featureToNode[$feature->id];
-
-                $structure[$parentNode->nid][] = $childNode->nid;
+            if ($feature->parent_id && isset($structure[$feature->parent_id])) {
+                $structure[$feature->parent_id][] = $feature->id;
             }
         }
 
-        // Удаляем пустые "дети" если их нет — для красоты
-        $structure = array_filter($structure, fn($children) => count($children) > 0);
+        // Рекурсивно строим дерево
+        $buildTree = function ($id) use (&$buildTree, $structure, $featureToNode) {
+            $node = $featureToNode[$id];
+            $item = ['nid' => $node->nid];
+            if (!empty($structure[$id])) {
+                $item['nodes'] = array_map($buildTree, $structure[$id]);
+            }
+            return $item;
+        };
 
-        // Сохраняем структуру как JSON
-        $treePath = storage_path('threes/trees/backlog_structure.json');
-        ths()->checkDir($treePath); // гарантируем директорию
-        file_put_contents($treePath, json_encode($structure, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // Найдём корневые элементы (без parent_id)
+        $rootNodes = $features->filter(fn($f) => !$f->parent_id);
+        ths()->setSchema(
+            $rootNodes->map(fn($feature) => $buildTree($feature->id))->values()->all()
+        );
 
-        return 'Features успешно перенесены в файловые ноды, структура сохранена в backlog_structure.json';
+        return 'Features успешно перенесены в файловые ноды';
     }
+
 
     # http://threes.dc/threes.api/debug.Tests:test
     public function test()

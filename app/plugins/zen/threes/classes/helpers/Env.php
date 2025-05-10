@@ -7,6 +7,9 @@ trait Env
     private static array $env = [
         'NODES_STORAGE' => [
             'default' => 'storage/threes/nodes',
+        ],
+        'SCHEMES_STORAGE' => [
+            'default' => 'storage/threes/schemes',
         ]
     ];
     public function env(string $key): ?string

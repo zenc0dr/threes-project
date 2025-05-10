@@ -141,12 +141,27 @@ class Threes extends Helpers
 }
 
 ```
-`plugins/zen/threes/api/Ui.php`
+`plugins/zen/threes/api/Store.php`
 ```<?php
 
 namespace Zen\Threes\Api;
 
+class Store
+{
+    # http://threes.dc/threes.api/store:get
+    public function get()
+    {
+        return [
+            'nodes' => ths()->store()->getStoreNodes()
+        ];
+    }
+}
 
+```
+`plugins/zen/threes/api/Ui.php`
+```<?php
+
+namespace Zen\Threes\Api;
 
 class Ui
 {
@@ -210,41 +225,57 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->nodes()->model('dmbfxt7vm4xd')->toArray()
-        );
 
+    }
 
-        #Node::truncate();
-        #$node = ths()->nodes()->createNode();
-        //$node = ths()->nodes()->model('n7abeanmj9yh');
-        //dd($node->getSchemaNode());
-        ths()->nodes()->getUiData('n7abeanmj9yh');
+    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
+    public function nodeTest()
+    {
+        $nid = request('nid');
+
+        if ($nid) {
+            $node = Node::find($nid);
+        } else {
+            $node = ths()->nodes()->createNodeByClass();
+        }
+
+        dd($node->icon);
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:truncateNodes
+    public function truncateNodes()
+    {
+        Node::truncate();
     }
 
     # http://threes.dc/threes.api/debug.Tests:backlogToNodes
-    public function backlogToNodes()
+    public function backlogToNodes(): string
     {
         $features = Feature::all();
+
+        // Очистим все ноды
         Node::truncate();
 
-        // Мапим Feature ID -> Node
+        $structure = [];
         $featureToNode = [];
 
         foreach ($features as $feature) {
             /** @var Feature $feature */
-            $node = app(Nodes::class)->createNode();
+            //$node = app(Nodes::class)->createNode();
 
-            $node->nid = 'node' . $feature->id;
+            $node = new Node('node' . $feature->id);
             $node->name = $feature->name ?? 'Без названия';
+            $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
             $node->description = $feature->description ?? '';
             $node->data = $feature->description ?? '';
-            $node->icon = base_path('plugins/zen/threes/src/images/icons/cog.svg');
 
             $node->props = [
                 'tree' => true,
                 'schema' => true,
-                'store' => [
+                'store' => false,
+                'self_content' => true,
+                'show_children' => true,
+                'store_data' => [
                     'group' => 'Features',
                     'author' => 'Migration',
                     'tags' => ["feature", "imported"],
@@ -253,21 +284,28 @@ class Tests
             ];
 
             $node->save();
-
             $featureToNode[$feature->id] = $node;
+            $structure[$node->nid] = []; // Подготовим пустой список детей (на случай если root)
         }
 
-        // Устанавливаем связи (иерархию)
         foreach ($features as $feature) {
             if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
                 $parentNode = $featureToNode[$feature->parent_id];
                 $childNode = $featureToNode[$feature->id];
 
-                $parentNode->addChild($childNode);
+                $structure[$parentNode->nid][] = $childNode->nid;
             }
         }
 
-        return 'Features успешно перенесены в MongoDB как ноды.';
+        // Удаляем пустые "дети" если их нет — для красоты
+        $structure = array_filter($structure, fn($children) => count($children) > 0);
+
+        // Сохраняем структуру как JSON
+        $treePath = storage_path('threes/trees/backlog_structure.json');
+        ths()->checkDir($treePath); // гарантируем директорию
+        file_put_contents($treePath, json_encode($structure, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        return 'Features успешно перенесены в файловые ноды, структура сохранена в backlog_structure.json';
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -321,38 +359,13 @@ class Tests
 
         dd($output);
     }
-
-
-
-    public function prepareYamlForParsing(string $yaml_content): string
-    {
-        // Регулярка для ключей вида: Ключ: значение с двоеточием внутри
-        return preg_replace_callback('/^(\s*\w[\w\-]*\s*:\s*)(.*)$/mu', function($matches) {
-            $key = $matches[1];
-            $value = trim($matches[2]);
-
-            // Если значение уже в кавычках — оставляем
-            if (str_starts_with($value, '"') || str_starts_with($value, "'")) {
-                return $matches[0];
-            }
-
-            // Если значение содержит двоеточие и не начинается на [ или { (то есть не массив или объект)
-            if (strpos($value, ':') !== false && !in_array($value[0], ['[', '{'])) {
-                $value = '"' . str_replace('"', '\"', $value) . '"';
-            }
-
-            return $key . $value;
-        }, $yaml_content);
-    }
-
-
 }
 
 ```
 `plugins/zen/threes/api/nodes/Node.php`
 ```<?php
 
-namespace Zen\Threes\Api\nodes;
+namespace Zen\Threes\Api\Nodes;
 
 use Zen\Threes\Traits\QueryLogTrait;
 
@@ -360,13 +373,22 @@ class Node
 {
     use QueryLogTrait;
 
+    public function setNodeIcon(): array
+    {
+        ths()->nodes()->setNodeIcon(
+            request('nid'),
+            request('svg')
+        );
+        return [];
+    }
+
     # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
     protected function setNodeSettings(): array
     {
-        $nid = request('nid');
-        $settings = request('settings');
-
-        ths()->nodes()->setNodeSettings($nid, $settings);
+        ths()->nodes()->setNodeSettings(
+            request('nid'),
+            request('settings')
+        );
         return [];
     }
 
@@ -380,16 +402,24 @@ class Node
         return [];
     }
 
-    # http://threes.dc/threes.api/nodes.node:add-line?nid=threes.default.node1
-    public function addLine(): array
+    # http://threes.dc/threes.api/nodes.node:set-node-description?debug
+    protected function setNodeDescription(): array
     {
+        ths()->nodes()->setNodeDescription(
+            request('nid'),
+            request('description')
+        );
         return [];
     }
 
-    # http://threes.dc/threes.api/nodes.node:add-node?debug
-    protected function addNode(): array
+    # http://threes.dc/threes.api/nodes.node:update-data?debug
+    protected function updateData(): array
     {
-        ths()->nodes()->createNode();
+        ths()->nodes()->updateNodeData(
+            request('nid'),
+            request('data'),
+            request('scope')
+        );
         return [];
     }
 }
@@ -617,6 +647,7 @@ use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
+use Zen\Threes\Classes\Helpers\Env;
 
 class Helpers
 {
@@ -628,6 +659,7 @@ class Helpers
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
     use Icon;     # Сервис иконок
+    use Env;      # Переменные окружения
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
@@ -773,15 +805,15 @@ class Nodes
      * @return Node
      * @throws \ReflectionException
      */
-    public function createNode(string $template_method = 'Zen.Threes.Classes.Nodes.Document.textTemplate'): Node
+    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.NodeText'): Node
     {
-        $template = ths()->exe($template_method);
         $node = $this->model();
-        $node->icon = $template['icon'];
-        $node->name = $template['name'];
-        $node->handler = $template['handler'];
-        $node->data = $template['data'];
-        $node->props = $template['props'];
+        $node->class = $class;
+        $template = $node->exe('template');
+
+        foreach ($template as $field => $value) {
+            $node->$field = $value;
+        }
         $node->save();
         return $node;
     }
@@ -806,6 +838,11 @@ class Nodes
             return null;
         }
 
+        // Если node не предназначен для дерева — полностью исключаем ветку
+        if (!($node->props['tree'] ?? true)) {
+            return null;
+        }
+
         $children = $node->resolveChildren();
 
         $child_trees = [];
@@ -816,12 +853,6 @@ class Nodes
             }
         }
 
-        // Если node не предназначен для дерева — пропускаем, возвращая только детей
-        if (!($node->props['tree'] ?? true)) {
-            return count($child_trees) > 0 ? ['children' => $child_trees] : null;
-        }
-
-        // Используем getTreeNode() как основу
         $data = $node->getTreeNode();
         if (!$data) {
             return null;
@@ -834,6 +865,7 @@ class Nodes
         return $data;
     }
 
+
     public function getNodesSchema(string $nid): array
     {
         $node = Node::find($nid);
@@ -841,15 +873,16 @@ class Nodes
             return [];
         }
 
-        # Получаем основную структуру узла
         $data = $node->getSchemaNode();
         if (!$data) {
             return [];
         }
 
-        # Если schema выключена — возвращаем только потомков (если show_children разрешено)
-        if (!($node->props['schema'] ?? false)) {
-            if (($node->props['show_children'] ?? true) === false) {
+        $props = $node->props;
+
+        // Если schema выключена — возвращаем только потомков (если явно show_children = true)
+        if (!($props['schema'] ?? false)) {
+            if (!isset($props['show_children']) || $props['show_children'] !== true) {
                 return [];
             }
 
@@ -864,8 +897,8 @@ class Nodes
             return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
         }
 
-        # Если schema включена — добавляем детей только если разрешено
-        if (($node->props['show_children'] ?? true) !== false) {
+        // Если schema включена — добавляем детей только если явно show_children = true
+        if (isset($props['show_children']) && $props['show_children'] === true) {
             $child_schemas = [];
             foreach ($node->resolveChildren() as $child) {
                 $subschema = $this->getNodesSchema($child->nid);
@@ -882,34 +915,72 @@ class Nodes
         return $data;
     }
 
+    public function setNodeIcon(string $nid, string $svg): void
+    {
+        $node = Node::find($nid);
+        $node->icon = $svg;
+        $node->save();
+    }
+
+    /**
+     * Установить имя нода
+     * @param string $nid
+     * @param string|null $name
+     * @return void
+     */
     public function setNodeName(string $nid, string $name = null): void
     {
-        if (!$name) {
-            return;
-        }
         $node = Node::find($nid);
         $node->name = $name;
         $node->save();
     }
 
+    /**
+     * Сохранить описание нода
+     * @param string $nid
+     * @param string|null $description
+     * @return void
+     */
+    public function setNodeDescription(string $nid, string $description = null): void
+    {
+        if (!$description) {
+            return;
+        }
+        $node = Node::find($nid);
+        $node->description = $description;
+        $node->save();
+    }
+
+    /**
+     * Тут определяется массив настроек нода
+     * @param string $nid
+     * @return array
+     */
     public function getNodeSettings(string $nid): array
     {
         $node = Node::find($nid);
         $props = $node->props;
 
         return [
+            'tree' => $props['tree'] ?? false,
+            'store' => $props['store'] ?? false,
+            'schema' => $props['schema'] ?? false,
             'self_content' => $props['self_content'] ?? false,
             'show_children' => $props['show_children'] ?? false,
         ];
     }
 
+    /**
+     * Настройки устанавливаются
+     * @param string $nid
+     * @param array $settings
+     * @return void
+     */
     public function setNodeSettings(string $nid, array $settings): void
     {
 
         $node = Node::find($nid);
         $props = $node->props;
-
-        //dd($props, $settings);
 
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
@@ -917,7 +988,23 @@ class Nodes
         if (isset($settings['show_children'])) {
             $props['show_children'] = $settings['show_children'];
         }
+        if (isset($settings['store'])) {
+            $props['store'] = $settings['store'];
+        }
+        if (isset($settings['tree'])) {
+            $props['tree'] = $settings['tree'];
+        }
+        if (isset($settings['schema'])) {
+            $props['schema'] = $settings['schema'];
+        }
         $node->props = $props;
+        $node->save();
+    }
+
+    public function updateNodeData(string $nid, array|string|null $data, $scope = 'set_self_content'): void
+    {
+        $node = Node::find($nid);
+        $node->data = $data;
         $node->save();
     }
 }
@@ -963,21 +1050,21 @@ class Store
 {
     use SingletonTrait;
 
-    public function getStoreNodes(string $filter_text = null): array
+    public function getStoreNodes(): array
     {
-        $nodes = Node::where(function ($query) use ($filter_text) {
-            if ($filter_text) {
-                $query->orWhere('nid', 'like', "%$filter_text%");
-                $query->orWhere('name', 'like', "%$filter_text%");
-                $query->orWhere('description', 'like', "%$filter_text%");
+        $store = [];
+        $root_nodes = Node::getRootNodes();
+        foreach ($root_nodes as $root_node) {
+            if ($root_node->props['store']) {
+                $store[] = $root_node->getStoreNode();
             }
-        })->get();
-
-        $output = [];
-        foreach ($nodes as $node) {
-            $output[] = $node->store_item;
+            foreach ($root_node->resolveChildren() as $node) {
+                if ($node->props['store']) {
+                    $store[] = $node->getStoreNode();
+                }
+            }
         }
-        return $output;
+        return $store;
     }
 }
 
@@ -1071,6 +1158,29 @@ trait Debug
         } else {
             $this->requestExec($name);
         }
+    }
+}
+
+```
+`plugins/zen/threes/classes/helpers/Env.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+trait Env
+{
+    private static array $env = [
+        'NODES_STORAGE' => [
+            'default' => 'storage/threes/nodes',
+        ]
+    ];
+    public function env(string $key): ?string
+    {
+        if (isset(self::$env[$key]['value'])) {
+            return self::$env[$key]['value'];
+        }
+
+        return self::$env[$key]['value'] = base_path(env($key, self::$env[$key]['default']));
     }
 }
 
@@ -1300,6 +1410,9 @@ namespace Zen\Threes\Classes\Helpers;
 
 use Str;
 
+/**
+ * Операции со строками
+ */
 trait Strings
 {
     /**
@@ -1425,10 +1538,11 @@ namespace Zen\Threes\Classes\Nodes;
 
 class Document
 {
-    public function textTemplate(): array
+    # Возвращает шаблон
+    public function template(): array
     {
         return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/cog.svg'),
+            'icon' => base_path('plugins/zen/threes/src/images/icons/doc.svg'),
             'name' => "Новый документ",
             'handler' => 'Zen.Threes.Classes.Nodes.Document.text',
             'data' => 'Привет мир!',
@@ -1438,19 +1552,121 @@ class Document
                 'store' => [
                     'group' => 'Документы',
                     'author' => 'Threes',
-                    'tags' => ["text", "documents"],
+                    'tags' => ["text", "document"],
                     'created_at' => now()->toDateTimeString(),
                 ]
             ]
         ];
     }
 
+    public function builderTemplate()
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/cog.svg'),
+            'name' => "Новая схема",
+            'handler' => 'Zen.Threes.Classes.Nodes.Document.builder',
+            'data' => [],
+            'props' => [
+                'tree' => true,
+                'schema' => true,
+                'store' => [
+                    'group' => 'Схемы',
+                    'author' => 'Threes',
+                    'tags' => ["html", "frontend"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    # Обрабатывает данные из БД выводя их компонент NodeText в Ui.Schema
     public function text($data): array
     {
         return [
             'handler' => 'NodeText',
             'data' => $data,
         ];
+    }
+
+    public function builder($data): array
+    {
+        return [
+            'handler' => 'NodeBuilder',
+            'data' => $data,
+        ];
+    }
+
+    # Обновляет данные в массиве data у нода
+    public function updateData(array $data): array
+    {
+        return $data;
+    }
+}
+
+```
+`plugins/zen/threes/classes/nodes/NodeText.php`
+```<?php
+
+namespace Zen\Threes\Classes\Nodes;
+
+use Zen\Threes\Models\Node;
+
+class NodeText
+{
+    private Node $node;
+    private mixed $data;
+
+    public function __construct($data)
+    {
+        $this->node = $data['node'];
+        $this->data = $data['data'];
+    }
+
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
+            'name' => "Новый документ",
+            'class' => 'Zen.Threes.Classes.Nodes.NodeText',
+            'data' => 'Привет мир!',
+            'props' => [
+                'tree' => true,
+                'schema' => true,
+                'store' => true,
+                'store_data' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["text", "document"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function getSelfContent()
+    {
+        return [
+            'component' => 'NodeText',
+            'data' => $this->data,
+        ];
+    }
+
+    public function setSelfContent()
+    {
+        return $this->data;
+    }
+
+    public function getSchema()
+    {
+        return [
+            'component' => 'NodeText',
+            'data' => $this->data,
+        ];
+    }
+
+    public function setSchema()
+    {
+        return $this->data;
     }
 }
 
@@ -1530,8 +1746,9 @@ class OpenAiService
 
     /**
      * Выполнить запрос к Open Ai
-     * @param string $system_prompt
      * @param string $user_prompt
+     * @param string $system_prompt
+     * @param string $model
      * @return string
      * @throws Exception
      */
@@ -1968,45 +2185,56 @@ class Frame extends Model
 
 namespace Zen\Threes\Models;
 
-use Zen\Threes\Traits\NodeMethodsTrait;
 
 /**
- * @property string $nid
- * @property string $icon
- * @property string $name
- * @property string $description
- * @property string $handler
- * @property string | array $data
- * @property array $props
+ * @property string $nid - Уникальный идентификатор нода
+ * @property string $icon - Иконка
+ * @property string $name - Имя нода
+ * @property string $description - Описание нода
+ * @property string $class - Класс нода
+ * @property array $data - Данные нода
+ * @property array $props - Настройки нода
  */
 class Node
 {
-    use NodeMethodsTrait;
-
-    public static string $database   = 'threes';
-    public static string $collection = 'nodes';
-
     protected array $attributes = [];
 
-    public function __construct(array $data = [])
+    protected static array $fields = [
+        'icon'=> 'string',
+        'name' => 'string',
+        'description' => 'string',
+        'class' => 'string',
+        'data' => 'array',
+        'props' => 'array'
+    ];
+
+    protected static array $extensions = [
+        'string' => 'txt',
+        'array' => 'json',
+        'object' => 'object',
+    ];
+
+    public function __construct(string $nid = null)
     {
-        $this->attributes = $this->normalizeValue($data);
+        if ($nid) {
+            $this->attributes['nid'] = $nid;
+        }
     }
 
-    // Геттеры и Сеттеры
     public function __get($key)
     {
-        $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        $method = $this->studlyCaser('get', $key);
+        $data = $this->attributes[$key] ?? null;
         if (method_exists($this, $method)) {
-            return $this->$method();
+            return $this->$method($data);
         }
 
-        return $this->normalizeValue($this->attributes[$key] ?? null);
+        return $data;
     }
 
     public function __set($key, $value): void
     {
-        $method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        $method = $this->studlyCaser('set', $key);
         if (method_exists($this, $method)) {
             $this->$method($value);
         } else {
@@ -2014,93 +2242,304 @@ class Node
         }
     }
 
-    public function getNidAttribute(): ?string
-    {
-        return $this->attributes['_id'] ?? null;
-    }
-
-    public function getNid(): ?string
-    {
-        return $this->attributes['_id'] ?? null;
-    }
-
+    /**
+     * Сеттер иконки
+     * @param string $svg
+     * @return void
+     */
     public function setIconAttribute(string $svg): void
     {
         $this->attributes['icon'] = ths()->setIcon($svg);
     }
 
-    public function getIconAttribute(): string
+    /**
+     * Геттер иконки
+     * @param string $hash
+     * @return string|null
+     */
+    public function getIconAttribute(string $hash): ?string
     {
-        return ths()->getIcon($this->attributes['icon']);
-    }
-
-    private function setTimestamps(): void
-    {
-        $now = date('c');
-        if (!$this->exists()) {
-            $this->attributes['created_at'] = $now;
-        }
-        $this->attributes['updated_at'] = $now;
-    }
-
-    protected function beforeSave(): void
-    {
-        $this->setTimestamps();
-    }
-
-    protected function afterSave(): void {}
-
-    public function toArray(): array
-    {
-        return $this->attributes;
-    }
-
-    // ----- Форматы для UI -----
-
-    public function getTreeNode(): ?array
-    {
-        if (!($this->props['tree'] ?? true)) {
+        if (!$hash) {
             return null;
         }
-
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-        ];
+        return ths()->getIcon($hash);
     }
 
-    public function getSchemaNode(): ?array
+    /**
+     * Вызов метода класса нода
+     * @param string $method
+     * @param mixed|null $data
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function exe(string $method, mixed $data = null): mixed
     {
-        if (!($this->props['schema'] ?? false)) {
-            return null;
-        }
-
-        $component_data = ths()->exe($this->handler, null, $this->data);
-
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'description' => $this->description,
-            'handler' => $component_data['handler'],
-            'data' => $component_data['data'],
-            'props' => $this->props,
-        ];
+        return ths()->exe("$this->class.$method", [
+            'node' => $this,
+            'data' => $data,
+        ]);
     }
 
-    public function getStoreNode(): ?array
+    /**
+     * Получить атрибут используя dotted path
+     * @param string $path
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public function getAttr(string $path, mixed $default = null): mixed
     {
-        if (!isset($this->props['store'])) {
-            return null;
+        $segments = explode('.', $path);
+        $value = $this->attributes;
+
+        foreach ($segments as $segment) {
+            if (is_array($value) && array_key_exists($segment, $value)) {
+                $value = $value[$segment];
+            } else {
+                return $default;
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Установить атрибут используя dotted path
+     * @param string $path
+     * @param mixed $value
+     * @return void
+     */
+    public function setAttr(string $path, mixed $value): void
+    {
+        $segments = explode('.', $path);
+        $ref = &$this->attributes;
+
+        foreach ($segments as $segment) {
+            if (!is_array($ref)) {
+                $ref = [];
+            }
+            if (!array_key_exists($segment, $ref)) {
+                $ref[$segment] = [];
+            }
+            $ref = &$ref[$segment];
         }
 
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'description' => $this->description,
-        ];
+        $ref = $value;
+    }
+
+    /**
+     * Получить экземпляр нода
+     * @param string $nid
+     * @param array|null $fields - Если указано, будут загружаться только эти поля
+     * @return Node
+     */
+    public static function find(string $nid, ?array $fields = null): ?Node
+    {
+        $node = new self($nid);
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $node_path = "$nodes_storage_path/$nid";
+        if (file_exists($node_path)) {
+            $fields_to_load = $fields ?? array_keys(self::$fields);
+            foreach ($fields_to_load as $field_name) {
+                if (isset(self::$fields[$field_name])) {
+                    $node->loadField($field_name);
+                }
+            }
+        } else {
+            return null;
+        }
+        return $node;
+    }
+
+    /**
+     * Метод преобразования строк вида string_name в StringName
+     * @param string $direction
+     * @param string $prefix
+     * @param string $postfix
+     * @return string
+     */
+    private function studlyCaser(
+        string $direction,
+        string $prefix,
+        string $postfix = 'Attribute'
+    ): string {
+        return $direction
+            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $prefix)))
+            . $postfix;
+    }
+
+    /**
+     * Сохранить данные экземпляра
+     * @return void
+     */
+    public function save(): void
+    {
+        $this->beforeSave();
+
+        if (empty($this->attributes['nid'])) {
+            $this->attributes['nid'] = ths()->createShortId();
+        }
+
+        foreach ($this->attributes as $key => $value) {
+            if ($key === 'nid') {
+                continue;
+            }
+            $this->saveField($key, $value);
+        }
+
+        $this->afterSave();
+    }
+
+    /**
+     * Сохранение значения указанного поля
+     * @param string $field_name Название поля, значение которого необходимо сохранить
+     * @param string|object|array|int|bool|null $value Значение для сохранения. В зависимости от формата поля может быть преобразовано
+     * @return void
+     */
+    private function saveField(string $field_name, string | object | array | int | bool | null $value): void
+    {
+        $field_format = self::$fields[$field_name];
+        $field_extension = self::$extensions[$field_format];
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $field_path = ths()->checkDir(
+            "$nodes_storage_path/$this->nid/$field_name.$field_extension"
+        );
+
+        if ($value === null) {
+            unlink($field_path);
+            return;
+        }
+
+        if ($field_format === 'object') {
+            $value = serialize($value);
+        }
+
+        if ($field_format === 'array') {
+            $value = ths()->toJson($value);
+        }
+
+        $value = (string) $value;
+        $value = trim($value);
+
+        file_put_contents(
+            $field_path,
+            $value,
+            LOCK_EX
+        );
+    }
+
+    /**
+     * Загружает поле нода из хранилища и декодирует его в соответствующем формате.
+     * @param string $field_name - Имя поля, которое необходимо загрузить.
+     * @return void
+     */
+    private function loadField(string $field_name): void
+    {
+        $field_format = self::$fields[$field_name];
+        $field_extension = self::$extensions[$field_format];
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+
+        $field_path = "$nodes_storage_path/$this->nid/$field_name.$field_extension";
+        if (!file_exists($field_path)) {
+            return;
+        }
+
+        $field_data = file_get_contents($field_path);
+        if ($field_format === 'object') {
+            $this->attributes[$field_name] = unserialize($field_data);
+        }
+
+        if ($field_format === 'array') {
+            $this->attributes[$field_name] = ths()->fromJson($field_data);
+        }
+
+        if ($field_format === 'bool') {
+            $this->attributes[$field_name] = (bool) $field_data;
+        }
+
+        if ($field_format === 'int') {
+            $this->attributes[$field_name] = (int) $field_data;
+        }
+
+        if ($field_format === 'string') {
+            $this->attributes[$field_name] = $field_data;
+        }
+    }
+
+    /**
+     * Удаляет нод, если он существует
+     * @return void
+     */
+    public function delete(): void
+    {
+        if (empty($this->attributes['nid'])) {
+            return;
+        }
+
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $path = "$nodes_storage_path/{$this->attributes['nid']}";
+
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $escaped_path = escapeshellarg($path);
+        shell_exec("rm -rf $escaped_path");
+    }
+
+    /**
+     * Удаляет все данные из хранилища нодов.
+     * Позволяет безопасно очистить директорию, содержащую данные нодов.
+     * Если директория хранилища отсутствует или не является директорией, метод завершает выполнение.
+     */
+    public static function truncate(): void
+    {
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($nodes_storage_path);
+        shell_exec("rm -rf $escaped_path/*");
+    }
+
+    /**
+     * Устанавливает значение атрибута 'data'.
+     * @param array|string|null $data.
+     * @return void
+     */
+    public function setDataAttribute(array|string|null $data = null): void
+    {
+        $this->attributes['data'] = [$data];
+    }
+
+    /**
+     * Получить значение атрибута data.
+     * @return array|string|null
+     */
+    public function getDataAttribute(): array|string|null
+    {
+        return $this->attributes['data'][0] ?? null;
+    }
+
+    public function createIconFromTemplate()
+    {
+        if (!$this->class) {
+            return;
+        }
+        $template = $this->exe('template');
+        if (!$template) {
+            return;
+        }
+        $this->icon = $template['icon'];
+    }
+
+
+    public function beforeSave()
+    {
+        $this->createIconFromTemplate();
+    }
+
+    public function afterSave()
+    {
+
     }
 }
 
@@ -2707,7 +3146,7 @@ fields:
 ```{
     "name": "threes",
     "version": "1.0.0",
-    "description": "Threes — это революционная платформа для рекурсивно-модульного программирования, разработанная для упрощения и ускорения процесса разработки. Система позволяет разработчикам создавать гибкие и мощные приложения, используя концепции юнитов и спрайтов, а так-же позволяет версионировать, переиспользовать и распространять решения.",
+    "description": "Threes — это революционная платформа для рекурсивно-модульного программирования смыслов, разработанная человеком (Zenc0dr) и ai (ChatGPT) для людей и ai, для облегчения и ускорения процесса разработки и взаимодействия с информацией.",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -2735,6 +3174,7 @@ fields:
         "quill": "^1.3.7",
         "vue": "^3.5.13",
         "vue-click-outside-element": "^3.1.2",
+        "vue-contenteditable": "^4.1.0",
         "vue-draggable-plus": "^0.6.0",
         "vue-router": "^4.5.0",
         "vue-select": "^4.0.0-beta.6",
@@ -2848,6 +3288,25 @@ Route::match(
         return handleResponse($response);
     }
 );
+
+```
+`plugins/zen/threes/src/js/components-map.js`
+```import FormInputText from '../vue/components/FormInputText.vue';
+import FormInputNumber from "../vue/components/FormInputNumber.vue";
+import FormInputSwitcher from "../vue/components/FormInputSwitcher.vue";
+import FormInputSelect from "../vue/components/FormInputSelect.vue";
+import FormInputRepeater from "../vue/components/FormInputRepeater.vue";
+import FormInputTextArea from "../vue/components/FormInputTextArea.vue";
+
+export default {
+    string: FormInputText,
+    password: FormInputText,
+    number: FormInputNumber,
+    switcher: FormInputSwitcher,
+    select: FormInputSelect,
+    repeater: FormInputRepeater,
+    textarea: FormInputTextArea
+}
 
 ```
 `plugins/zen/threes/src/js/routes.js`
@@ -2986,11 +3445,17 @@ window.ths = {
 }
 
 import vueClickOutsideElement from 'vue-click-outside-element';
+import FormFitter from './../vue/components/FormFitter.vue'
+import FormSection from "../vue/trash/v2/FormSection.vue";
+import FormTabs from "../vue/components/FormTabs.vue";
 
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
 app.use(vueClickOutsideElement)
+app.component('FormFitter', FormFitter)
+app.component('FormSection', FormSection)
+app.component('FormTabs', FormTabs)
 app.mount("#threes");
 
 ```
@@ -3705,195 +4170,6 @@ app.mount("#threes");
 
 .vs--loading .vs__spinner {
     opacity: 1
-}
-
-```
-`plugins/zen/threes/traits/NodeMethodsTrait.php`
-```<?php
-
-namespace Zen\Threes\Traits;
-
-use MongoDB\Client;
-use MongoDB\Collection as MongoCollection;
-use MongoDB\Model\BSONDocument;
-use MongoDB\Model\BSONArray;
-use MongoDB\BSON\ObjectId;
-use Zen\Threes\Models\Node;
-
-trait NodeMethodsTrait
-{
-    // --- Mongo connection ---
-    public static function client(): Client
-    {
-        return new Client(env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin'));
-    }
-
-    public static function collection(): MongoCollection
-    {
-        return self::client()
-            ->selectDatabase(self::$database)
-            ->selectCollection(self::$collection);
-    }
-
-    public static function truncate(): void
-    {
-        self::collection()->drop();
-    }
-
-    public static function generateNidFromSettings(): string
-    {
-        return ths()->createShortId();
-    }
-
-    // --- Основные операции ---
-
-    public static function find(string $nid): ?self
-    {
-        $doc = self::collection()->findOne(['_id' => $nid]);
-
-        if (!$doc && preg_match('/^[a-f\d]{24}$/i', $nid)) {
-            $doc = self::collection()->findOne(['_id' => new ObjectId($nid)]);
-        }
-
-        return $doc ? new self($doc->getArrayCopy()) : null;
-    }
-
-    public function save(): void
-    {
-        $this->beforeSave();
-
-        if (empty($this->attributes['_id'])) {
-            $this->attributes['_id'] = self::generateNidFromSettings();
-        }
-
-        if ($this->exists()) {
-            self::collection()->replaceOne(['_id' => $this->attributes['_id']], $this->attributes);
-        } else {
-            $result = self::collection()->insertOne($this->attributes);
-            $this->attributes['_id'] = (string) $result->getInsertedId();
-        }
-
-        $this->afterSave();
-    }
-
-    public function delete(): void
-    {
-        if ($this->exists()) {
-            self::collection()->deleteOne(['_id' => $this->attributes['_id']]);
-        }
-    }
-
-    public function exists(): bool
-    {
-        if (empty($this->attributes['_id'])) {
-            return false;
-        }
-
-        return self::collection()
-                ->countDocuments(['_id' => $this->attributes['_id']], ['limit' => 1]) > 0;
-    }
-
-    // --- Работа с деревьями ---
-
-    public static function getRootNodes(): array
-    {
-        $all_nodes_cursor = self::collection()->find();
-
-        $all_nodes = array_map(function ($doc) {
-            return $doc instanceof BSONDocument || $doc instanceof BSONArray
-                ? $doc->getArrayCopy()
-                : $doc;
-        }, iterator_to_array($all_nodes_cursor));
-
-        $all_nids = [];
-        $child_nids = [];
-
-        foreach ($all_nodes as $doc) {
-            $nid = (string) ($doc['_id'] ?? null);
-            if ($nid) {
-                $all_nids[] = $nid;
-            }
-
-            $children = $doc['children'] ?? [];
-            if ($children instanceof BSONArray || $children instanceof BSONDocument) {
-                $children = $children->getArrayCopy();
-            }
-
-            foreach ($children as $child) {
-                if (isset($child['$id'])) {
-                    $child_nids[] = (string) $child['$id'];
-                } elseif (isset($child['_id'])) {
-                    $child_nids[] = (string) $child['_id'];
-                }
-            }
-        }
-
-        $root_nids = array_diff($all_nids, $child_nids);
-
-        return array_values(array_filter(array_map(fn($nid) => self::find($nid), $root_nids)));
-    }
-
-    public function addChild(Node|string $child): void
-    {
-        if (is_string($child)) {
-            $child = self::find($child);
-            if (!$child) {
-                throw new \InvalidArgumentException("Node with nid '{$child}' not found.");
-            }
-        }
-
-        $ref = [
-            '$ref' => self::$collection,
-            '$id' => $child->nid,
-        ];
-
-        $children = $this->attributes['children'] ?? [];
-
-        foreach ($children as $existing) {
-            if (($existing['$id'] ?? null) === $child->nid) {
-                return;
-            }
-        }
-
-        $children[] = $ref;
-        $this->attributes['children'] = $children;
-        $this->save();
-    }
-
-    public function resolveChildren(): array
-    {
-        $children = $this->attributes['children'] ?? [];
-
-        if ($children instanceof BSONArray || $children instanceof BSONDocument) {
-            $children = $children->getArrayCopy();
-        }
-
-        $resolved = [];
-
-        foreach ($children as $item) {
-            if (isset($item['$ref'], $item['$id'])) {
-                $resolved[] = self::find($item['$id']);
-            } elseif (isset($item['_id'])) {
-                $resolved[] = new self($item);
-            }
-        }
-
-        return array_filter($resolved);
-    }
-
-    // --- BSON нормализация ---
-    protected function normalizeValue($value)
-    {
-        if ($value instanceof BSONDocument || $value instanceof BSONArray) {
-            $value = $value->getArrayCopy();
-        }
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
-                $value[$k] = $this->normalizeValue($v);
-            }
-        }
-        return $value;
-    }
 }
 
 ```

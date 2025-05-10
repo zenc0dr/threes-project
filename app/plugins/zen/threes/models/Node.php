@@ -41,11 +41,12 @@ class Node
     public function __get($key)
     {
         $method = $this->studlyCaser('get', $key);
+        $data = $this->attributes[$key] ?? null;
         if (method_exists($this, $method)) {
-            return $this->$method();
+            return $this->$method($data);
         }
 
-        return $this->attributes[$key] ?? null;
+        return $data;
     }
 
     public function __set($key, $value): void
@@ -56,6 +57,29 @@ class Node
         } else {
             $this->attributes[$key] = $value;
         }
+    }
+
+    /**
+     * Сеттер иконки
+     * @param string $svg
+     * @return void
+     */
+    public function setIconAttribute(string $svg): void
+    {
+        $this->attributes['icon'] = ths()->setIcon($svg);
+    }
+
+    /**
+     * Геттер иконки
+     * @param string $hash
+     * @return string|null
+     */
+    public function getIconAttribute(string $hash): ?string
+    {
+        if (!$hash) {
+            return null;
+        }
+        return ths()->getIcon($hash);
     }
 
     /**
@@ -312,10 +336,22 @@ class Node
         return $this->attributes['data'][0] ?? null;
     }
 
+    public function createIconFromTemplate()
+    {
+        if (!$this->class) {
+            return;
+        }
+        $template = $this->exe('template');
+        if (!$template) {
+            return;
+        }
+        $this->icon = $template['icon'];
+    }
+
 
     public function beforeSave()
     {
-
+        $this->createIconFromTemplate();
     }
 
     public function afterSave()

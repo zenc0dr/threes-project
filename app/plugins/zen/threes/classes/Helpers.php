@@ -11,6 +11,7 @@ use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
 use Zen\Threes\Classes\Helpers\Env;
+use Zen\Threes\Classes\Helpers\Schema;
 
 class Helpers
 {
@@ -23,6 +24,7 @@ class Helpers
     use Carbon;   # Создание объекта Carbon
     use Icon;     # Сервис иконок
     use Env;      # Переменные окружения
+    use Schema;   # Управление схемами
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
