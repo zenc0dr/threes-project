@@ -42,6 +42,7 @@ export default {
     },
     methods: {
         handleSelect(node) {
+            console.log('Click to node')
             if (node.props.schema) {
                 this.active_nid = node.nid
                 ths.data.selected_nid = node.nid

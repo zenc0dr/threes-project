@@ -3,7 +3,6 @@
         <div
             class="tree-label"
             :class="{ 'active': node.nid === active_nid }"
-            @click="toggle"
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
@@ -37,9 +36,7 @@
 import icon from './icon.vue'
 export default {
     name: 'TreeItem',
-    components: {
-        icon
-    },
+    components: { icon },
     props: {
         node: Object,
         depth: Number,
@@ -56,9 +53,6 @@ export default {
         }
     },
     methods: {
-        toggle() {
-            this.select()
-        },
         toggleOpen() {
             this.open = !this.open
         },
@@ -97,6 +91,7 @@ export default {
         width: 1rem;
         text-align: center;
         flex-shrink: 0;
+        cursor: pointer;
     }
 
     .tree-name {

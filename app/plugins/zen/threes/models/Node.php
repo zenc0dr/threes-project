@@ -341,6 +341,11 @@ class Node
         if (!$this->class) {
             return;
         }
+
+        if (isset($this->attributes['icon']) && !empty($this->attributes['icon'])) {
+            return;
+        }
+
         $template = $this->exe('template');
         if (!$template) {
             return;
