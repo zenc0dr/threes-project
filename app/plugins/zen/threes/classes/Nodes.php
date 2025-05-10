@@ -106,7 +106,7 @@ class Nodes
         if (!$target_branch) {
             return [];
         }
-        return $this->buildSchemaFromBranch($target_branch);
+        return $this->buildSchemaFromBranch($target_branch, true);
     }
 
     /**
@@ -138,7 +138,7 @@ class Nodes
      * @param array $branch
      * @return array|null
      */
-    protected function buildSchemaFromBranch(array $branch): ?array
+    protected function buildSchemaFromBranch(array $branch, bool $is_root = false): ?array
     {
         $nid = $branch['nid'];
         $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'class', 'data']);
@@ -147,24 +147,33 @@ class Nodes
             return null;
         }
 
-        $handler_data = $node->exe('getSchema', $node->data);
+        $props = $node->props ?? [];
+
+        // Контент схемы: либо selfContent, либо getSchema
         $schema_node = [
             'nid' => $node->nid,
             'icon' => $node->icon,
             'name' => $node->name,
-            'component' => $handler_data['component'],
-            'data' => $handler_data['data'],
             'description' => $node->description,
-            'props' => $node->props,
+            'props' => $props,
         ];
 
-        $props = $node->props ?? [];
+        if ($is_root && !empty($props['self_content'])) {
+            $handler_data = $node->exe('getSelfContent', $node->data);
+            $schema_node['component'] = $handler_data['component'];
+            $schema_node['data'] = $handler_data['data'];
+        } elseif (!$is_root) {
+            $handler_data = $node->exe('getSchema', $node->data);
+            $schema_node['component'] = $handler_data['component'];
+            $schema_node['data'] = $handler_data['data'];
+        }
 
+        // Рекурсивно достроим дочерние элементы, если разрешено
         if (!empty($props['show_children']) && !empty($branch['nodes'])) {
             $children = [];
 
             foreach ($branch['nodes'] as $child_branch) {
-                $child_schema = $this->buildSchemaFromBranch($child_branch);
+                $child_schema = $this->buildSchemaFromBranch($child_branch, false);
                 if ($child_schema !== null) {
                     $children[] = $child_schema;
                 }
@@ -177,6 +186,7 @@ class Nodes
 
         return $schema_node;
     }
+
 
 
 

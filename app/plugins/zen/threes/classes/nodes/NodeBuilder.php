@@ -4,7 +4,7 @@ namespace Zen\Threes\Classes\Nodes;
 
 use Zen\Threes\Models\Node;
 
-class NodeText
+class NodeBuilder
 {
     private Node $node;
     private mixed $data;
@@ -18,35 +18,25 @@ class NodeText
     public function template(): array
     {
         return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
-            'name' => "Новый документ",
-            'class' => 'Zen.Threes.Classes.Nodes.NodeText',
-            'data' => 'Привет мир!',
+            'icon' => base_path('plugins/zen/threes/src/images/icons/code.svg'),
+            'name' => "Новый интерфейс",
+            'class' => 'Zen.Threes.Classes.Nodes.NodeBuilder',
+            'data' => null,
             'props' => [
                 'tree' => true,
                 'schema' => true,
                 'store' => true,
                 'store_data' => [
-                    'group' => 'Документы',
+                    'group' => 'Фронтенд',
                     'author' => 'Threes',
-                    'tags' => ["text", "document"],
+                    'tags' => ["html", "frontend"],
                     'created_at' => now()->toDateTimeString(),
                 ]
             ]
         ];
     }
 
-    public function getSelfContent()
-    {
-        return $this->getSchema();
-    }
-
-    public function setSelfContent()
-    {
-        return $this->data;
-    }
-
-    public function getSchema(): array
+    public function getSelfContent(): array
     {
         return [
             'component' => 'NodeText',
@@ -54,8 +44,11 @@ class NodeText
         ];
     }
 
-    public function setSchema()
+    public function getSchema(): array
     {
-        return $this->data;
+        return [
+            'component' => 'NodeBuilder',
+            'data' => $this->data,
+        ];
     }
 }
