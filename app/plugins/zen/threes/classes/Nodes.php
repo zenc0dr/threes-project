@@ -93,21 +93,27 @@ class Nodes
         return array_values(array_filter(array_map($build_tree, $schema)));
     }
 
+    /**
+     * Построение дерева нод
+     * @param string $nid
+     * @param string $schema_code
+     * @return array
+     */
     public function getNodesSchema(string $nid, string $schema_code = 'default'): array
     {
         $schema_nodes = ths()->getSchema($schema_code)['schema_nodes'] ?? [];
-
         $target_branch = $this->findSchemaBranchByNid($schema_nodes, $nid);
-
         if (!$target_branch) {
             return [];
         }
-
         return $this->buildSchemaFromBranch($target_branch);
     }
 
     /**
      * Рекурсивно ищет нужную ветку в schema_nodes по nid
+     * @param array $nodes
+     * @param string $target_nid
+     * @return array|null
      */
     protected function findSchemaBranchByNid(array $nodes, string $target_nid): ?array
     {
@@ -129,11 +135,13 @@ class Nodes
 
     /**
      * Рекурсивно строит дерево схемы, начиная с одной ветки
+     * @param array $branch
+     * @return array|null
      */
     protected function buildSchemaFromBranch(array $branch): ?array
     {
         $nid = $branch['nid'];
-        $node = Node::find($nid, ['name', 'description', 'props']);
+        $node = Node::find($nid, ['name', 'icon', 'description', 'props']);
 
         if (!$node) {
             return null;
@@ -141,6 +149,7 @@ class Nodes
 
         $schema_node = [
             'nid' => $node->nid,
+            'icon' => $node->icon,
             'name' => $node->name,
             'description' => $node->description,
             'props' => $node->props,
@@ -159,7 +168,7 @@ class Nodes
             }
 
             if (!empty($children)) {
-                $schema_node['children'] = $children;
+                $schema_node['nodes'] = $children;
             }
         }
 
