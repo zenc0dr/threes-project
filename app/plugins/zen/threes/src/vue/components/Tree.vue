@@ -42,10 +42,14 @@ export default {
     },
     methods: {
         handleSelect(node) {
-            console.log('Click to node')
             if (node.props.schema) {
-                this.active_nid = node.nid
-                ths.data.selected_nid = node.nid
+                if (this.active_nid === node.nid) {
+                    this.active_nid = null
+                    ths.data.selected_nid = null
+                } else {
+                    this.active_nid = node.nid
+                    ths.data.selected_nid = node.nid
+                }
             }
         },
         getTree() {

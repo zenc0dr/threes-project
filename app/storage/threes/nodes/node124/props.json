@@ -1,7 +1,7 @@
 {
     "tree": true,
     "schema": true,
-    "store": false,
+    "store": true,
     "self_content": true,
     "show_children": true,
     "store_data": {
@@ -11,6 +11,6 @@
             "feature",
             "imported"
         ],
-        "created_at": "2025-05-10 21:32:46"
+        "created_at": "2025-05-10 22:37:22"
     }
 }

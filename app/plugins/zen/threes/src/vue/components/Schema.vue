@@ -121,6 +121,9 @@ export default {
                 if (nid) {
                     this.nid = nid
                     this.getSchema()
+                } else {
+                    this.nid = null
+                    this.schema = null
                 }
             },
             immediate: true

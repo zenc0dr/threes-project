@@ -34,4 +34,16 @@ trait Icon
         return env('APP_URL') . "/storage/app/uploads/public/threes/icons/$hash.svg";
     }
 
+    public function checkIcon(string $path): string
+    {
+        $contents = file_get_contents($path);
+        $hash = md5($contents);
+        $path = storage_path("app/uploads/public/threes/icons/$hash.svg");
+        if (!file_exists($path)) {
+            $path = ths()->checkDir($path);
+            file_put_contents($path, $contents);
+        }
+        return $this->getIcon($hash);
+    }
+
 }
