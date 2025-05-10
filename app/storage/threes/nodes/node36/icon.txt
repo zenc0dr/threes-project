@@ -1,0 +1,1 @@
+/app/plugins/zen/threes/src/images/icons/cog.svg

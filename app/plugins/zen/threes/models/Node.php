@@ -9,13 +9,11 @@ namespace Zen\Threes\Models;
  * @property string $name - Имя нода
  * @property string $description - Описание нода
  * @property string $handler - Обработчик нода
- * @property string | array $data - Данные нода
+ * @property array $data - Данные нода
  * @property array $props - Настройки нода
  */
 class Node
 {
-    private static string $node_storage_path;
-
     protected array $attributes = [];
 
     protected static array $fields = [
@@ -38,7 +36,6 @@ class Node
         if ($nid) {
             $this->attributes['nid'] = $nid;
         }
-        self::$node_storage_path = ths()->checkDir(storage_path('threes/nodes'));
     }
 
     public function __get($key)
@@ -61,14 +58,71 @@ class Node
         }
     }
 
-    public static function find(string $nid)
+    /**
+     * Получить атрибут используя dotted path
+     * @param string $path
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public function getAttr(string $path, mixed $default = null): mixed
+    {
+        $segments = explode('.', $path);
+        $value = $this->attributes;
+
+        foreach ($segments as $segment) {
+            if (is_array($value) && array_key_exists($segment, $value)) {
+                $value = $value[$segment];
+            } else {
+                return $default;
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Установить атрибут используя dotted path
+     * @param string $path
+     * @param mixed $value
+     * @return void
+     */
+    public function setAttr(string $path, mixed $value): void
+    {
+        $segments = explode('.', $path);
+        $ref = &$this->attributes;
+
+        foreach ($segments as $segment) {
+            if (!is_array($ref)) {
+                $ref = [];
+            }
+            if (!array_key_exists($segment, $ref)) {
+                $ref[$segment] = [];
+            }
+            $ref = &$ref[$segment];
+        }
+
+        $ref = $value;
+    }
+
+    /**
+     * Получить экземпляр нода
+     * @param string $nid
+     * @param array|null $fields - Если указано, будут загружаться только эти поля
+     * @return Node
+     */
+    public static function find(string $nid, ?array $fields = null): ?Node
     {
         $node = new self($nid);
-        $node_path = self::$node_storage_path . "/" . $nid;
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $node_path = "$nodes_storage_path/$nid";
         if (file_exists($node_path)) {
-            foreach (self::$fields as $field_name => $field_format) {
-                $node->loadField($field_name);
+            $fields_to_load = $fields ?? array_keys(self::$fields);
+            foreach ($fields_to_load as $field_name) {
+                if (isset(self::$fields[$field_name])) {
+                    $node->loadField($field_name);
+                }
             }
+        } else {
+            return null;
         }
         return $node;
     }
@@ -112,12 +166,19 @@ class Node
         $this->afterSave();
     }
 
+    /**
+     * Сохранение значения указанного поля
+     * @param string $field_name Название поля, значение которого необходимо сохранить
+     * @param string|object|array|int|bool|null $value Значение для сохранения. В зависимости от формата поля может быть преобразовано
+     * @return void
+     */
     private function saveField(string $field_name, string | object | array | int | bool | null $value): void
     {
         $field_format = self::$fields[$field_name];
         $field_extension = self::$extensions[$field_format];
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
         $field_path = ths()->checkDir(
-            self::$node_storage_path . "/$this->nid/$field_name.$field_extension"
+            "$nodes_storage_path/$this->nid/$field_name.$field_extension"
         );
 
         if ($value === null) {
@@ -138,15 +199,23 @@ class Node
 
         file_put_contents(
             $field_path,
-            $value
+            $value,
+            LOCK_EX
         );
     }
 
+    /**
+     * Загружает поле нода из хранилища и декодирует его в соответствующем формате.
+     * @param string $field_name - Имя поля, которое необходимо загрузить.
+     * @return void
+     */
     private function loadField(string $field_name): void
     {
         $field_format = self::$fields[$field_name];
         $field_extension = self::$extensions[$field_format];
-        $field_path = self::$node_storage_path . "/$this->nid/$field_name.$field_extension";
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+
+        $field_path = "$nodes_storage_path/$this->nid/$field_name.$field_extension";
         if (!file_exists($field_path)) {
             return;
         }
@@ -155,6 +224,7 @@ class Node
         if ($field_format === 'object') {
             $this->attributes[$field_name] = unserialize($field_data);
         }
+
         if ($field_format === 'array') {
             $this->attributes[$field_name] = ths()->fromJson($field_data);
         }
@@ -172,6 +242,60 @@ class Node
         }
     }
 
+    /**
+     * Удаляет нод, если он существует
+     * @return void
+     */
+    public function delete(): void
+    {
+        if (empty($this->attributes['nid'])) {
+            return;
+        }
+
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $path = "$nodes_storage_path/{$this->attributes['nid']}";
+
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $escaped_path = escapeshellarg($path);
+        shell_exec("rm -rf $escaped_path");
+    }
+
+    /**
+     * Удаляет все данные из хранилища нодов.
+     * Позволяет безопасно очистить директорию, содержащую данные нодов.
+     * Если директория хранилища отсутствует или не является директорией, метод завершает выполнение.
+     */
+    public static function truncate(): void
+    {
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($nodes_storage_path);
+        shell_exec("rm -rf $escaped_path/*");
+    }
+
+    /**
+     * Устанавливает значение атрибута 'data'.
+     * @param array|string|null $data.
+     * @return void
+     */
+    public function setDataAttribute(array|string|null $data = null): void
+    {
+        $this->attributes['data'] = [$data];
+    }
+
+    /**
+     * Получить значение атрибута data.
+     * @return array|string|null
+     */
+    public function getDataAttribute(): array|string|null
+    {
+        return $this->attributes['data'][0] ?? null;
+    }
 
 
     public function beforeSave()

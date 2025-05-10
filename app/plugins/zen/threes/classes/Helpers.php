@@ -10,6 +10,7 @@ use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
+use Zen\Threes\Classes\Helpers\Env;
 
 class Helpers
 {
@@ -21,6 +22,7 @@ class Helpers
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
     use Icon;     # Сервис иконок
+    use Env;      # Переменные окружения
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid

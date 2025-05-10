@@ -16,6 +16,23 @@ Threes — это инструмент разработчика, позволя�
 8. `routes.php` - Маршрутизация
 9. `Threes.php` - Родительский класс Threes
 10. `webpack.mix.js` - Файл сборки Laravel mix
+
+### Переменные окружения
+`.evn`
+```bash
+APP_URL=http://threes.dc
+BACKEND_URI=/console
+DB_CONNECTION=pgsql
+DB_HOST=threes-db
+DB_PORT=5432
+DB_DATABASE=threes
+DB_USERNAME=threes
+DB_PASSWORD=threes
+# Тут идут настройки и их значения по умолчанию, в .env они добавляются только при переопределении
+NODES_STORAGE=storage/threes/nodes
+```
+>Посмотреть какие переменные окружения существуют и механики их формирования, можно в файле `plugins/zen/threes/classes/helpers/Env.php`
+
 ### Сборка фронтенда
 Актуализация исходников - `npm i`
 Сборка в режиме dev - `npx mix`

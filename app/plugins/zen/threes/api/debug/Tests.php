@@ -20,6 +20,12 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+
+        dd(
+            ths()->env('NODES_STORAGE')
+        );
+
+
 //        $node = new Node();
 //        $node->name = 'debug';
 //        $node->description = 'Тут я что-то записал';
@@ -28,9 +34,11 @@ class Tests
 //        ];
 //        $node->save();
 
-        $node = Node::find('bbc8jen38sd5');
+        $node = Node::find('node14');
 
-        dd($node->description);
+        dd($node->data);
+
+        //$node->delete();
 
     }
 
@@ -38,16 +46,18 @@ class Tests
     public function backlogToNodes(): string
     {
         $features = Feature::all();
+
+        // Очистим все ноды
         Node::truncate();
 
-        // Мапим Feature ID -> Node
+        $structure = [];
         $featureToNode = [];
 
         foreach ($features as $feature) {
             /** @var Feature $feature */
-            $node = app(Nodes::class)->createNode();
+            //$node = app(Nodes::class)->createNode();
 
-            $node->nid = 'node' . $feature->id;
+            $node = new Node('node' . $feature->id);
             $node->name = $feature->name ?? 'Без названия';
             $node->description = $feature->description ?? '';
             $node->data = $feature->description ?? '';
@@ -68,20 +78,29 @@ class Tests
             ];
 
             $node->save();
+
             $featureToNode[$feature->id] = $node;
+            $structure[$node->nid] = []; // Подготовим пустой список детей (на случай если root)
         }
 
-        // Устанавливаем связи (иерархию)
         foreach ($features as $feature) {
             if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
                 $parentNode = $featureToNode[$feature->parent_id];
                 $childNode = $featureToNode[$feature->id];
 
-                $parentNode->addChild($childNode);
+                $structure[$parentNode->nid][] = $childNode->nid;
             }
         }
 
-        return 'Features успешно перенесены в MongoDB как ноды.';
+        // Удаляем пустые "дети" если их нет — для красоты
+        $structure = array_filter($structure, fn($children) => count($children) > 0);
+
+        // Сохраняем структуру как JSON
+        $treePath = storage_path('threes/trees/backlog_structure.json');
+        ths()->checkDir($treePath); // гарантируем директорию
+        file_put_contents($treePath, json_encode($structure, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        return 'Features успешно перенесены в файловые ноды, структура сохранена в backlog_structure.json';
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
