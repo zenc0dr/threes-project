@@ -104,56 +104,9 @@ class Tests
         return 'Features успешно перенесены в файловые ноды';
     }
 
-
     # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
         dd('Threes api works!');
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:testMongo
-    public function testMongo()
-    {
-
-//        dd(
-//            ths()->getSetting('author_token')
-//        );
-
-        //Node::truncate();
-
-        $node = new Node();
-        $node->name = 'Я нод';
-        $node->save();
-        $nid = $node->getNid();
-        $node = Node::find($nid);
-        dd(
-            $node->nid,
-            $node->name
-        );
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:addNodeToChildrenTest?nid=xxxxx&children_nid=yyyyyy
-    public function addNodeToChildrenTest()
-    {
-        ths()->nodes()->model(request('nid'))
-            ->addChild(request('children_nid'));
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:handleYamlFile
-    public function handleYamlFile()
-    {
-        $yaml_path = storage_path('backlog/VB_v1.yaml');
-        $yaml_content = file_get_contents($yaml_path);
-
-        // Подготовка: оборачиваем опасные строки
-        $prepared_yaml = $this->prepareYamlForParsing($yaml_content);
-
-        // Теперь безопасно парсим YAML
-        $data = Yaml::parse($prepared_yaml);
-
-        // Дальше делаешь что хочешь: цитируешь строки, сериализуешь обратно и т.д.
-        $output = Yaml::dump($data, 10, 2);
-
-        dd($output);
     }
 }

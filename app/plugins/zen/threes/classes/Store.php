@@ -12,6 +12,7 @@ class Store
 
     public function getStoreNodes(): array
     {
+        return [];
         $store = [];
         $root_nodes = Node::getRootNodes();
         foreach ($root_nodes as $root_node) {

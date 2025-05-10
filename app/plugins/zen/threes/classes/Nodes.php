@@ -41,52 +41,43 @@ class Nodes
         return $node;
     }
 
-    public function getNodesTree(): array
+    public function getNodesTree(string $schema_code = 'default'): array
     {
-        $roots = Node::getRootNodes();
-        $tree = [];
-        foreach ($roots as $root) {
-            $subtree = $this->getNodeTree($root->nid);
-            if ($subtree !== null) {
-                $tree[] = $subtree;
+        $schema = ths()->getSchema($schema_code)['schema_nodes'];
+
+        $buildTree = function (array $item) use (&$buildTree): ?array {
+            $node = \Zen\Threes\Models\Node::find($item['nid'], ['name', 'description', 'class', 'props']);
+            if (!$node) {
+                return null;
             }
-        }
-        return $tree;
+
+            $result = [
+                'nid' => $node->nid,
+                'name' => $node->name,
+                'description' => $node->description,
+                'class' => $node->class,
+                'props' => $node->props,
+            ];
+
+            if (!empty($item['nodes'])) {
+                $children = [];
+                foreach ($item['nodes'] as $child) {
+                    $childNode = $buildTree($child);
+                    if ($childNode) {
+                        $children[] = $childNode;
+                    }
+                }
+                if (!empty($children)) {
+                    $result['nodes'] = $children;
+                }
+            }
+
+            return $result;
+        };
+
+        return array_values(array_filter(array_map($buildTree, $schema)));
     }
 
-    public function getNodeTree(string $nid): ?array
-    {
-        $node = Node::find($nid);
-        if (!$node) {
-            return null;
-        }
-
-        // Если node не предназначен для дерева — полностью исключаем ветку
-        if (!($node->props['tree'] ?? true)) {
-            return null;
-        }
-
-        $children = $node->resolveChildren();
-
-        $child_trees = [];
-        foreach ($children as $child) {
-            $subtree = $this->getNodeTree($child->nid);
-            if ($subtree !== null) {
-                $child_trees[] = $subtree;
-            }
-        }
-
-        $data = $node->getTreeNode();
-        if (!$data) {
-            return null;
-        }
-
-        if ($child_trees) {
-            $data['children'] = $child_trees;
-        }
-
-        return $data;
-    }
 
 
     public function getNodesSchema(string $nid): array

@@ -7,7 +7,7 @@
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
-                <span v-if="has_children" class="chevron" @click.stop="toggleOpen">
+                <span v-if="has_nodes" class="chevron" @click.stop="toggleOpen">
                     {{ open ? '▾' : '▸' }}
                 </span>
                 <span v-else class="chevron"></span>
@@ -20,9 +20,9 @@
             </div>
         </div>
 
-        <div v-show="open" v-if="has_children" class="tree-children">
+        <div v-show="open" v-if="has_nodes" class="tree-nodes">
             <tree-item
-                v-for="child in node.children"
+                v-for="child in node.nodes"
                 :key="child.nid"
                 :node="child"
                 :depth="depth + 1"
@@ -51,8 +51,8 @@ export default {
         }
     },
     computed: {
-        has_children() {
-            return this.node.children && this.node.children.length > 0
+        has_nodes() {
+            return this.node.nodes && this.node.nodes.length > 0
         }
     },
     methods: {
@@ -106,7 +106,7 @@ export default {
         cursor: pointer;
     }
 
-    .tree-children {
+    .tree-nodes {
         display: flex;
         flex-direction: column;
     }
