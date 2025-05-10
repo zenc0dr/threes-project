@@ -46,13 +46,24 @@ class Nodes
         $schema = ths()->getSchema($schema_code)['schema_nodes'];
 
         $buildTree = function (array $item) use (&$buildTree): ?array {
-            $node = \Zen\Threes\Models\Node::find($item['nid'], ['name', 'description', 'class', 'props']);
+            $node = \Zen\Threes\Models\Node::find(
+                $item['nid'],
+                [
+                    'icon',
+                    'name',
+                    'description',
+                    'class',
+                    'props'
+                ]
+            );
+
             if (!$node) {
                 return null;
             }
 
             $result = [
                 'nid' => $node->nid,
+                'icon' => $node->icon,
                 'name' => $node->name,
                 'description' => $node->description,
                 'class' => $node->class,

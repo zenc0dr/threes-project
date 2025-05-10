@@ -1,5 +1,5 @@
 <template>
-    <div class="threes-nt">
+    <div class="threes-nt w-64 h-full bg-gray-50 overflow-auto p-2 text-sm">
         <div class="tree-list">
             <div class="tree-list__menu">
                 <div @click="show = !show" class="tree-list__menu__button">
