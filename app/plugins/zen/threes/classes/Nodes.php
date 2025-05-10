@@ -141,16 +141,19 @@ class Nodes
     protected function buildSchemaFromBranch(array $branch): ?array
     {
         $nid = $branch['nid'];
-        $node = Node::find($nid, ['name', 'icon', 'description', 'props']);
+        $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'class', 'data']);
 
         if (!$node) {
             return null;
         }
 
+        $handler_data = $node->exe('getSchema', $node->data);
         $schema_node = [
             'nid' => $node->nid,
             'icon' => $node->icon,
             'name' => $node->name,
+            'component' => $handler_data['component'],
+            'data' => $handler_data['data'],
             'description' => $node->description,
             'props' => $node->props,
         ];

@@ -42,7 +42,7 @@ export default {
     },
     methods: {
         handleSelect(node) {
-            if (node.schema) {
+            if (node.props.schema) {
                 this.active_nid = node.nid
                 ths.data.selected_nid = node.nid
             }
