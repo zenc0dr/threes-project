@@ -41,11 +41,15 @@ class Nodes
         return $node;
     }
 
+    /**
+     * Получить дерево нод для меню Tree
+     * @param string $schema_code
+     * @return array
+     */
     public function getNodesTree(string $schema_code = 'default'): array
     {
         $schema = ths()->getSchema($schema_code)['schema_nodes'];
-
-        $buildTree = function (array $item) use (&$buildTree): ?array {
+        $build_tree = function (array $item) use (&$build_tree): ?array {
             $node = \Zen\Threes\Models\Node::find(
                 $item['nid'],
                 [
@@ -73,9 +77,9 @@ class Nodes
             if (!empty($item['nodes'])) {
                 $children = [];
                 foreach ($item['nodes'] as $child) {
-                    $childNode = $buildTree($child);
-                    if ($childNode) {
-                        $children[] = $childNode;
+                    $child_node = $build_tree($child);
+                    if ($child_node) {
+                        $children[] = $child_node;
                     }
                 }
                 if (!empty($children)) {
@@ -86,59 +90,83 @@ class Nodes
             return $result;
         };
 
-        return array_values(array_filter(array_map($buildTree, $schema)));
+        return array_values(array_filter(array_map($build_tree, $schema)));
     }
 
-
-
-    public function getNodesSchema(string $nid): array
+    public function getNodesSchema(string $nid, string $schema_code = 'default'): array
     {
-        $node = Node::find($nid);
-        if (!$node) {
+        $schema_nodes = ths()->getSchema($schema_code)['schema_nodes'] ?? [];
+
+        $target_branch = $this->findSchemaBranchByNid($schema_nodes, $nid);
+
+        if (!$target_branch) {
             return [];
         }
 
-        $data = $node->getSchemaNode();
-        if (!$data) {
-            return [];
-        }
-
-        $props = $node->props;
-
-        // Если schema выключена — возвращаем только потомков (если явно show_children = true)
-        if (!($props['schema'] ?? false)) {
-            if (!isset($props['show_children']) || $props['show_children'] !== true) {
-                return [];
-            }
-
-            $child_schemas = [];
-            foreach ($node->resolveChildren() as $child) {
-                $subschema = $this->getNodesSchema($child->nid);
-                if (!empty($subschema)) {
-                    $child_schemas[] = $subschema;
-                }
-            }
-
-            return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
-        }
-
-        // Если schema включена — добавляем детей только если явно show_children = true
-        if (isset($props['show_children']) && $props['show_children'] === true) {
-            $child_schemas = [];
-            foreach ($node->resolveChildren() as $child) {
-                $subschema = $this->getNodesSchema($child->nid);
-                if (!empty($subschema)) {
-                    $child_schemas[] = $subschema;
-                }
-            }
-
-            if ($child_schemas) {
-                $data['children'] = $child_schemas;
-            }
-        }
-
-        return $data;
+        return $this->buildSchemaFromBranch($target_branch);
     }
+
+    /**
+     * Рекурсивно ищет нужную ветку в schema_nodes по nid
+     */
+    protected function findSchemaBranchByNid(array $nodes, string $target_nid): ?array
+    {
+        foreach ($nodes as $node_item) {
+            if ($node_item['nid'] === $target_nid) {
+                return $node_item;
+            }
+
+            if (!empty($node_item['nodes'])) {
+                $found = $this->findSchemaBranchByNid($node_item['nodes'], $target_nid);
+                if ($found) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Рекурсивно строит дерево схемы, начиная с одной ветки
+     */
+    protected function buildSchemaFromBranch(array $branch): ?array
+    {
+        $nid = $branch['nid'];
+        $node = Node::find($nid, ['name', 'description', 'props']);
+
+        if (!$node) {
+            return null;
+        }
+
+        $schema_node = [
+            'nid' => $node->nid,
+            'name' => $node->name,
+            'description' => $node->description,
+            'props' => $node->props,
+        ];
+
+        $props = $node->props ?? [];
+
+        if (!empty($props['show_children']) && !empty($branch['nodes'])) {
+            $children = [];
+
+            foreach ($branch['nodes'] as $child_branch) {
+                $child_schema = $this->buildSchemaFromBranch($child_branch);
+                if ($child_schema !== null) {
+                    $children[] = $child_schema;
+                }
+            }
+
+            if (!empty($children)) {
+                $schema_node['children'] = $children;
+            }
+        }
+
+        return $schema_node;
+    }
+
+
 
     public function setNodeIcon(string $nid, string $svg): void
     {

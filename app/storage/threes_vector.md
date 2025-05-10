@@ -260,15 +260,11 @@ class Tests
         $featureToNode = [];
 
         foreach ($features as $feature) {
-            /** @var Feature $feature */
-            //$node = app(Nodes::class)->createNode();
-
             $node = new Node('node' . $feature->id);
             $node->name = $feature->name ?? 'Без названия';
             $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
             $node->description = $feature->description ?? '';
             $node->data = $feature->description ?? '';
-
             $node->props = [
                 'tree' => true,
                 'schema' => true,
@@ -282,82 +278,41 @@ class Tests
                     'created_at' => now()->toDateTimeString(),
                 ]
             ];
-
             $node->save();
             $featureToNode[$feature->id] = $node;
-            $structure[$node->nid] = []; // Подготовим пустой список детей (на случай если root)
+            $structure[$feature->id] = [];
         }
 
+        // Заполняем карту детей
         foreach ($features as $feature) {
-            if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
-                $parentNode = $featureToNode[$feature->parent_id];
-                $childNode = $featureToNode[$feature->id];
-
-                $structure[$parentNode->nid][] = $childNode->nid;
+            if ($feature->parent_id && isset($structure[$feature->parent_id])) {
+                $structure[$feature->parent_id][] = $feature->id;
             }
         }
 
-        // Удаляем пустые "дети" если их нет — для красоты
-        $structure = array_filter($structure, fn($children) => count($children) > 0);
+        // Рекурсивно строим дерево
+        $buildTree = function ($id) use (&$buildTree, $structure, $featureToNode) {
+            $node = $featureToNode[$id];
+            $item = ['nid' => $node->nid];
+            if (!empty($structure[$id])) {
+                $item['nodes'] = array_map($buildTree, $structure[$id]);
+            }
+            return $item;
+        };
 
-        // Сохраняем структуру как JSON
-        $treePath = storage_path('threes/trees/backlog_structure.json');
-        ths()->checkDir($treePath); // гарантируем директорию
-        file_put_contents($treePath, json_encode($structure, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // Найдём корневые элементы (без parent_id)
+        $rootNodes = $features->filter(fn($f) => !$f->parent_id);
+        ths()->setSchema(
+            $rootNodes->map(fn($feature) => $buildTree($feature->id))->values()->all()
+        );
 
-        return 'Features успешно перенесены в файловые ноды, структура сохранена в backlog_structure.json';
+        return 'Features успешно перенесены в файловые ноды';
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
         dd('Threes api works!');
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:testMongo
-    public function testMongo()
-    {
-
-//        dd(
-//            ths()->getSetting('author_token')
-//        );
-
-        //Node::truncate();
-
-        $node = new Node();
-        $node->name = 'Я нод';
-        $node->save();
-        $nid = $node->getNid();
-        $node = Node::find($nid);
-        dd(
-            $node->nid,
-            $node->name
-        );
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:addNodeToChildrenTest?nid=xxxxx&children_nid=yyyyyy
-    public function addNodeToChildrenTest()
-    {
-        ths()->nodes()->model(request('nid'))
-            ->addChild(request('children_nid'));
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:handleYamlFile
-    public function handleYamlFile()
-    {
-        $yaml_path = storage_path('backlog/VB_v1.yaml');
-        $yaml_content = file_get_contents($yaml_path);
-
-        // Подготовка: оборачиваем опасные строки
-        $prepared_yaml = $this->prepareYamlForParsing($yaml_content);
-
-        // Теперь безопасно парсим YAML
-        $data = Yaml::parse($prepared_yaml);
-
-        // Дальше делаешь что хочешь: цитируешь строки, сериализуешь обратно и т.д.
-        $output = Yaml::dump($data, 10, 2);
-
-        dd($output);
     }
 }
 
@@ -648,6 +603,7 @@ use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
 use Zen\Threes\Classes\Helpers\Env;
+use Zen\Threes\Classes\Helpers\Schema;
 
 class Helpers
 {
@@ -660,6 +616,7 @@ class Helpers
     use Carbon;   # Создание объекта Carbon
     use Icon;     # Сервис иконок
     use Env;      # Переменные окружения
+    use Schema;   # Управление схемами
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
@@ -818,52 +775,54 @@ class Nodes
         return $node;
     }
 
-    public function getNodesTree(): array
+    public function getNodesTree(string $schema_code = 'default'): array
     {
-        $roots = Node::getRootNodes();
-        $tree = [];
-        foreach ($roots as $root) {
-            $subtree = $this->getNodeTree($root->nid);
-            if ($subtree !== null) {
-                $tree[] = $subtree;
+        $schema = ths()->getSchema($schema_code)['schema_nodes'];
+
+        $buildTree = function (array $item) use (&$buildTree): ?array {
+            $node = \Zen\Threes\Models\Node::find(
+                $item['nid'],
+                [
+                    'icon',
+                    'name',
+                    'description',
+                    'class',
+                    'props'
+                ]
+            );
+
+            if (!$node) {
+                return null;
             }
-        }
-        return $tree;
+
+            $result = [
+                'nid' => $node->nid,
+                'icon' => $node->icon,
+                'name' => $node->name,
+                'description' => $node->description,
+                'class' => $node->class,
+                'props' => $node->props,
+            ];
+
+            if (!empty($item['nodes'])) {
+                $children = [];
+                foreach ($item['nodes'] as $child) {
+                    $childNode = $buildTree($child);
+                    if ($childNode) {
+                        $children[] = $childNode;
+                    }
+                }
+                if (!empty($children)) {
+                    $result['nodes'] = $children;
+                }
+            }
+
+            return $result;
+        };
+
+        return array_values(array_filter(array_map($buildTree, $schema)));
     }
 
-    public function getNodeTree(string $nid): ?array
-    {
-        $node = Node::find($nid);
-        if (!$node) {
-            return null;
-        }
-
-        // Если node не предназначен для дерева — полностью исключаем ветку
-        if (!($node->props['tree'] ?? true)) {
-            return null;
-        }
-
-        $children = $node->resolveChildren();
-
-        $child_trees = [];
-        foreach ($children as $child) {
-            $subtree = $this->getNodeTree($child->nid);
-            if ($subtree !== null) {
-                $child_trees[] = $subtree;
-            }
-        }
-
-        $data = $node->getTreeNode();
-        if (!$data) {
-            return null;
-        }
-
-        if ($child_trees) {
-            $data['children'] = $child_trees;
-        }
-
-        return $data;
-    }
 
 
     public function getNodesSchema(string $nid): array
@@ -1052,6 +1011,7 @@ class Store
 
     public function getStoreNodes(): array
     {
+        return [];
         $store = [];
         $root_nodes = Node::getRootNodes();
         foreach ($root_nodes as $root_node) {
@@ -1172,6 +1132,9 @@ trait Env
     private static array $env = [
         'NODES_STORAGE' => [
             'default' => 'storage/threes/nodes',
+        ],
+        'SCHEMES_STORAGE' => [
+            'default' => 'storage/threes/schemes',
         ]
     ];
     public function env(string $key): ?string
@@ -1363,6 +1326,46 @@ trait Json
                 $no_slashes
             )
         );
+    }
+}
+
+```
+`plugins/zen/threes/classes/helpers/Schema.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+trait Schema
+{
+    /**
+     * @param string $schema_code
+     * @return array|null
+     */
+    public function getSchema(string $schema_code = 'default'): array
+    {
+        $schema_path = ths()->env('SCHEMES_STORAGE');
+        $schema_file = $schema_path . "/$schema_code.json";
+        return ths()->fromJsonFile($schema_file) ?? [];
+    }
+
+    /**
+     * @param string $schema_code
+     * @param string $schema_name
+     * @param array $nodes
+     * @return void
+     */
+    public function setSchema(
+        array $nodes,
+        string $schema_code = 'default',
+        string $schema_name = 'Схема проекта',
+    ): void {
+        $schema_path = ths()->env('SCHEMES_STORAGE');
+        $schema_file = $schema_path . "/$schema_code.json";
+        $schema = [
+            'schema_name' => $schema_name,
+            'schema_nodes' => $nodes
+        ];
+        ths()->toJsonFile($schema_file, $schema);
     }
 }
 

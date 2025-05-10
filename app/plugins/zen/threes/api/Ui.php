@@ -12,7 +12,7 @@ class Ui
         ];
     }
 
-    # http://threes.dc/threes.api/ui:get-schema-nodes?nid=dmbfxt7vm4xd
+    # http://threes.dc/threes.api/ui:get-schema-nodes?nid=node1
     public function getSchemaNodes(): array
     {
         return [
