@@ -8,7 +8,7 @@ namespace Zen\Threes\Models;
  * @property string $icon - Иконка
  * @property string $name - Имя нода
  * @property string $description - Описание нода
- * @property string $handler - Обработчик нода
+ * @property string $class - Класс нода
  * @property array $data - Данные нода
  * @property array $props - Настройки нода
  */
@@ -20,7 +20,7 @@ class Node
         'icon'=> 'string',
         'name' => 'string',
         'description' => 'string',
-        'handler' => 'string',
+        'class' => 'string',
         'data' => 'array',
         'props' => 'array'
     ];
@@ -56,6 +56,21 @@ class Node
         } else {
             $this->attributes[$key] = $value;
         }
+    }
+
+    /**
+     * Вызов метода класса нода
+     * @param string $method
+     * @param mixed|null $data
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function exe(string $method, mixed $data = null): mixed
+    {
+        return ths()->exe("$this->class.$method", [
+            'node' => $this,
+            'data' => $data,
+        ]);
     }
 
     /**

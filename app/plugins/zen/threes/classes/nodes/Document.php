@@ -5,7 +5,7 @@ namespace Zen\Threes\Classes\Nodes;
 class Document
 {
     # Возвращает шаблон
-    public function textTemplate(): array
+    public function template(): array
     {
         return [
             'icon' => base_path('plugins/zen/threes/src/images/icons/doc.svg'),

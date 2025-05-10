@@ -28,15 +28,15 @@ class Nodes
      * @return Node
      * @throws \ReflectionException
      */
-    public function createNode(string $template_method = 'Zen.Threes.Classes.Nodes.Document.textTemplate'): Node
+    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.DocumentText'): Node
     {
-        $template = ths()->exe($template_method);
         $node = $this->model();
-        $node->icon = $template['icon'];
-        $node->name = $template['name'];
-        $node->handler = $template['handler'];
-        $node->data = $template['data'];
-        $node->props = $template['props'];
+        $node->class = $class;
+        $template = $node->exe('template');
+
+        foreach ($template as $field => $value) {
+            $node->$field = $value;
+        }
         $node->save();
         return $node;
     }
@@ -224,7 +224,7 @@ class Nodes
         $node->save();
     }
 
-    public function updateNodeData(string $nid, array|string|null $data): void
+    public function updateNodeData(string $nid, array|string|null $data, $scope = 'set_self_content'): void
     {
         $node = Node::find($nid);
         $node->data = $data;

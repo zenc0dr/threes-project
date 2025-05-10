@@ -1,6 +1,6 @@
 <?php
 
-namespace Zen\Threes\Api\nodes;
+namespace Zen\Threes\Api\Nodes;
 
 use Zen\Threes\Traits\QueryLogTrait;
 
@@ -52,7 +52,8 @@ class Node
     {
         ths()->nodes()->updateNodeData(
             request('nid'),
-            request('data')
+            request('data'),
+            request('scope')
         );
         return [];
     }

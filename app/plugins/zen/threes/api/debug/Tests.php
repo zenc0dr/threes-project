@@ -21,25 +21,20 @@ class Tests
     public function debug()
     {
 
-        dd(
-            ths()->env('NODES_STORAGE')
-        );
+    }
 
+    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=3axhafwjdk5v
+    public function nodeTest()
+    {
+        $nid = request('nid');
 
-//        $node = new Node();
-//        $node->name = 'debug';
-//        $node->description = 'Тут я что-то записал';
-//        $node->data = [
-//            'foo' => 'bar'
-//        ];
-//        $node->save();
+        if ($nid) {
+            $node = Node::find($nid);
+        } else {
+            $node = ths()->nodes()->createNodeByClass();
+        }
 
-        $node = Node::find('node14');
-
-        dd($node->data);
-
-        //$node->delete();
-
+        dd($node->icon);
     }
 
     # http://threes.dc/threes.api/debug.Tests:backlogToNodes
