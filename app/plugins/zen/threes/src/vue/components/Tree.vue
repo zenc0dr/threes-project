@@ -1,11 +1,21 @@
 <template>
-    <div class="threes-nt w-64 h-full bg-gray-50 overflow-auto p-2 text-sm">
+    <div class="threes-nt">
         <div class="tree-list">
             <div class="tree-list__menu">
                 <div @click="show = !show" class="tree-list__menu__button">
                     <i :class="show ? 'oc-icon-caret-left' : 'oc-icon-caret-right'"></i>
                 </div>
+                <div v-if="show" class="tree-list__search">
+                    <i class="oc-icon-search"></i>
+                    <input
+                        type="text"
+                        v-model="search"
+                        class="tree-list__search-input"
+                        placeholder="Поиск..."
+                    />
+                </div>
             </div>
+
             <template v-if="show">
                 <tree-item
                     v-for="item in tree"
@@ -19,6 +29,7 @@
         </div>
     </div>
 </template>
+
 <script>
 import TreeItem from './TreeItem.vue'
 
@@ -30,6 +41,7 @@ export default {
             ths: window.ths,
             show: true,
             active_nid: null,
+            search: '',
             tree: []
         }
     },
@@ -43,17 +55,12 @@ export default {
     methods: {
         handleSelect(node) {
             if (node.props.schema) {
-                if (this.active_nid === node.nid) {
-                    this.active_nid = null
-                    ths.data.selected_nid = null
-                } else {
-                    this.active_nid = node.nid
-                    ths.data.selected_nid = node.nid
-                }
+                this.active_nid = (this.active_nid === node.nid) ? null : node.nid
+                this.ths.data.selected_nid = this.active_nid
             }
         },
         getTree() {
-            ths.api({
+            this.ths.api({
                 api: 'ui:get-tree-nodes',
                 then: response => {
                     this.tree = response.tree
@@ -66,26 +73,57 @@ export default {
 
 <style lang="scss">
 .threes-nt {
+    height: 100%;
+    overflow: auto;
+
     .tree-list {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
     }
-}
 
-.tree-list__menu {
-    display: flex;
-    border-radius: 3px;
-    background: #e3e3e3;
+    .tree-list__menu {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px;
+        border-radius: 3px;
+        background: #e3e3e3;
 
-    &__button {
-        background: #aeaeae;
-        margin: 3px;
+        &__button {
+            background: #aeaeae;
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #ebebeb;
+            cursor: pointer;
+        }
+    }
+
+    .tree-list__search {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: white;
         border-radius: 4px;
-        align-content: center;
-        padding-left: 9px;
-        color: #ebebeb;
-        cursor: pointer;
+        flex-grow: 1;
+        padding-left: 24px;
+
+        i {
+            position: absolute;
+            left: 8px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        &-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 6px 8px;
+            font-size: 13px;
+            color: #333;
+        }
     }
 }
 </style>
