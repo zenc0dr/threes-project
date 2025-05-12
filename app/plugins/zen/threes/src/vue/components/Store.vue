@@ -2,10 +2,10 @@
     <div class="threes-store">
         <div class="threes-store__header">
             <div class="col col-action"></div>
-            <div class="col col-nid">nid</div>
-            <div class="col col-icon">icon</div>
-            <div class="col col-name">name</div>
-            <div class="col col-group">group</div>
+            <div class="col col-nid">#</div>
+            <div class="col col-icon"></div>
+            <div class="col col-name">Название</div>
+            <div class="col col-group">Группа</div>
         </div>
         <div
             class="threes-store__row"
@@ -15,7 +15,7 @@
             <div class="col col-action">
                 <div class="store-btn" @click.stop="addNode(node)">＋</div>
             </div>
-            <div class="col col-nid">{{ node.nid || 'template' }}</div>
+            <div class="col col-nid">{{ node.nid || '--' }}</div>
             <div class="col col-icon">
                 <icon :src="node.icon" width="24px" height="24px" />
             </div>

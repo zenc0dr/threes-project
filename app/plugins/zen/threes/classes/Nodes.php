@@ -283,11 +283,22 @@ class Nodes
         $node->save();
     }
 
-    public function updateNodeData(string $nid, array|string|null $data, $scope = 'set_self_content'): void
-    {
+    /**
+     * Обновить данные нода
+     * @param string $nid
+     * @param array|string|null $data
+     * @param $scope
+     * @return void
+     */
+    public function updateNodeData(
+        string $nid, array|string|null $data,
+        string $scope = 'self_content'
+    ): void {
         $node = Node::find($nid);
+        $node->scope = $scope;
         $node->data = $data;
         $node->save();
+        ths()->messages()->addMessage('Данные нод обновлены');
     }
 
     public function addNode(string $nid = null, string $class = null): void

@@ -1,6 +1,11 @@
 <template>
     <div class="grapes-editor-container">
         <div ref="editorContainer"></div>
+        <div class="grapes-editor-container__panel">
+            <button class="save-button" @click="saveContent">
+                💾 Сохранить
+            </button>
+        </div>
     </div>
 </template>
 
@@ -10,6 +15,17 @@ import 'grapesjs/dist/css/grapes.min.css';
 
 export default {
     name: 'GrapesEditor',
+    props: {
+        node: {
+            type: Object,
+            required: true
+        },
+        scope: {
+            type: String,
+            required: false,
+            default: null
+        }
+    },
     mounted() {
         this.editor = grapesjs.init({
             container: this.$refs.editorContainer,
@@ -31,6 +47,13 @@ export default {
             }
         })
 
+        if (this.node.data) {
+            try {
+                this.editor.setComponents(this.node.data);
+            } catch (e) {
+                console.warn('Ошибка при загрузке компонента:', e);
+            }
+        }
 
         const bm = this.editor.BlockManager;
 
@@ -67,15 +90,28 @@ export default {
     </div>
     `
         });
-
-
-
-
-
     },
+
+    methods: {
+        saveContent() {
+            const html = this.editor.getHtml()
+            ths.api({
+                api: 'nodes.node:update-data',
+                data: {
+                    nid: this.node.nid,
+                    data: html,
+                    scope: this.scope,
+                },
+                then: () => {
+
+                }
+            });
+        }
+    },
+
     unmounted() {
         if (this.editor) {
-            this.editor.destroy();
+            this.editor.destroy()
         }
     }
 };
@@ -84,5 +120,35 @@ export default {
 <style scoped>
 .grapes-editor-container {
     border: 1px solid #ddd;
+    position: relative;
+    padding-bottom: 60px; /* под панель */
+}
+
+.grapes-editor-container__panel {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    padding: 10px;
+    background: #fafafa;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    z-index: 10;
+}
+
+.save-button {
+    background-color: #3490dc;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-button:hover {
+    background-color: #2779bd;
 }
 </style>

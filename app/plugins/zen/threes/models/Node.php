@@ -33,6 +33,8 @@ class Node
         'object' => 'object',
     ];
 
+    public ?string $scope = null;
+
     public function __construct(string $nid = null)
     {
         if ($nid) {
@@ -171,17 +173,17 @@ class Node
     /**
      * Метод преобразования строк вида string_name в StringName
      * @param string $direction
-     * @param string $prefix
+     * @param string $method
      * @param string $postfix
      * @return string
      */
     private function studlyCaser(
         string $direction,
-        string $prefix,
+        string $method,
         string $postfix = 'Attribute'
     ): string {
         return $direction
-            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $prefix)))
+            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method)))
             . $postfix;
     }
 
@@ -335,6 +337,10 @@ class Node
      */
     public function setDataAttribute(array|string|null $data = null): void
     {
+        if ($this->scope) {
+            $method = $this->studlyCaser('set', $this->scope, '');
+            $data = $this->exe($method, $data);
+        }
         $this->attributes['data'] = [$data];
     }
 

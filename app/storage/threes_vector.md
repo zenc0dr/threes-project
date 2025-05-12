@@ -1101,14 +1101,16 @@ class Store
     {
         $store = [];
 
-        $nodes_path = base_path('plugins/zen/threes/classes/nodes');
-        $node_files = ths()->filesList($nodes_path);
+        $nodes_templates_path = base_path('plugins/zen/threes/classes/nodes');
+        $node_templates = ths()->filesList($nodes_templates_path);
 
-        foreach ($node_files as $file) {
-            if ($file['extension'] !== 'php') {
+        foreach ($node_templates as $node_template) {
+            if ($node_template['extension'] !== 'php') {
                 continue;
             }
-            $class = 'Zen.Threes.Classes.Nodes.' . pathinfo($file['name'], PATHINFO_FILENAME);
+
+            $class = 'Zen.Threes.Classes.Nodes.' . pathinfo($node_template['name'], PATHINFO_FILENAME);
+
             try {
                 $node = ths()->nodes()->model();
                 $node->class = $class;
@@ -1708,9 +1710,11 @@ class NodeBuilder
             'class' => 'Zen.Threes.Classes.Nodes.NodeBuilder',
             'data' => null,
             'props' => [
+                'self_content' => true,
+                'show_children' => false,
                 'tree' => true,
                 'schema' => true,
-                'store' => true,
+                'store' => false,
                 'store_data' => [
                     'group' => 'Фронтенд',
                     'author' => 'Threes',
@@ -1723,10 +1727,7 @@ class NodeBuilder
 
     public function getSelfContent(): array
     {
-        return [
-            'component' => 'NodeText',
-            'data' => $this->data,
-        ];
+        return $this->getSchema();
     }
 
     public function getSchema(): array
@@ -1765,9 +1766,11 @@ class NodeText
             'class' => 'Zen.Threes.Classes.Nodes.NodeText',
             'data' => 'Привет мир!',
             'props' => [
+                'self_content' => true,
+                'show_children' => true,
                 'tree' => true,
                 'schema' => true,
-                'store' => true,
+                'store' => false,
                 'store_data' => [
                     'group' => 'Документы',
                     'author' => 'Threes',
@@ -2318,6 +2321,8 @@ class Frame extends Model
 namespace Zen\Threes\Models;
 
 
+use Exception;
+
 /**
  * @property string $nid - Уникальный идентификатор нода
  * @property string $icon - Иконка
@@ -2624,11 +2629,20 @@ class Node
      */
     public static function truncate(): void
     {
+        # Удалить все ноды
         $nodes_storage_path = ths()->env('NODES_STORAGE');
         if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
             return;
         }
         $escaped_path = escapeshellarg($nodes_storage_path);
+        shell_exec("rm -rf $escaped_path/*");
+
+        # Удалить все схемы
+        $schemes_storage_path = ths()->env('SCHEMES_STORAGE');
+        if (!file_exists($schemes_storage_path) || !is_dir($schemes_storage_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($schemes_storage_path);
         shell_exec("rm -rf $escaped_path/*");
     }
 
@@ -2651,7 +2665,13 @@ class Node
         return $this->attributes['data'][0] ?? null;
     }
 
-    public function createIconFromTemplate()
+    /**
+     * Создает иконку из шаблона, если она не указана в атрибутах.
+     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
+     * @return void
+     * @throws Exception
+     */
+    public function createIconFromTemplate(): void
     {
         if (!$this->class) {
             return;
@@ -2668,16 +2688,28 @@ class Node
         $this->icon = $template['icon'];
     }
 
+    public function getDescriptionAttribute(?string $description = null): string
+    {
+        if (!$description) {
+            return '';
+        }
+        return $description;
+    }
 
-    public function beforeSave()
+
+    /**
+     * Выполняет действия перед сохранением.
+     * Создаёт иконку на основе шаблона.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function beforeSave(): void
     {
         $this->createIconFromTemplate();
     }
 
-    public function afterSave()
-    {
-
-    }
+    public function afterSave(){}
 }
 
 ```

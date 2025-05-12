@@ -23,6 +23,8 @@ class NodeText
             'class' => 'Zen.Threes.Classes.Nodes.NodeText',
             'data' => 'Привет мир!',
             'props' => [
+                'self_content' => true,
+                'show_children' => true,
                 'tree' => true,
                 'schema' => true,
                 'store' => false,
@@ -36,7 +38,7 @@ class NodeText
         ];
     }
 
-    public function getSelfContent()
+    public function getSelfContent(): array
     {
         return $this->getSchema();
     }

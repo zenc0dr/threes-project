@@ -23,6 +23,8 @@ class NodeBuilder
             'class' => 'Zen.Threes.Classes.Nodes.NodeBuilder',
             'data' => null,
             'props' => [
+                'self_content' => true,
+                'show_children' => false,
                 'tree' => true,
                 'schema' => true,
                 'store' => false,
@@ -39,6 +41,11 @@ class NodeBuilder
     public function getSelfContent(): array
     {
         return $this->getSchema();
+    }
+
+    public function setSelfContent(): mixed
+    {
+        return $this->data;
     }
 
     public function getSchema(): array
