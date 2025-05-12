@@ -68,4 +68,14 @@ class Node
         );
         return [];
     }
+
+    # http://threes.dc/threes.api/nodes.node:move-node?debug
+    protected function moveNode()
+    {
+        ths()->nodes()->moveNode(
+            request('nid'),
+            request('target_nid'),
+            request('action')
+        );
+    }
 }

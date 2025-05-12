@@ -15,6 +15,12 @@
                         @keydown.enter="submitSearch"
                     />
                 </div>
+                <button
+                    v-if="show && active_nid && !move_mode"
+                    @click="startMove"
+                >
+                    📦 Переместить
+                </button>
             </div>
 
             <template v-if="show">
@@ -25,6 +31,7 @@
                     :depth="0"
                     :active_nid="active_nid"
                     @select="handleSelect"
+                    @move="handleMove"
                 />
             </template>
         </div>
@@ -44,7 +51,9 @@ export default {
             active_nid: null,
             search: '',
             tree: [],
-            searchTimer: null // ⏱ таймер
+            searchTimer: null, // ⏱ таймер,
+            move_mode: false,
+            move_source_nid: null
         }
     },
     watch: {
@@ -84,6 +93,29 @@ export default {
         submitSearch() {
             clearTimeout(this.searchTimer)
             this.getTree()
+        },
+        startMove() {
+            this.move_mode = true
+            this.move_source_nid = this.active_nid
+        },
+        cancelMove() {
+            this.move_mode = false
+            this.move_source_nid = null
+        },
+        handleMove({ target, action }) {
+            ths.api({
+                api: 'nodes.node:move-node',
+                data: {
+                    nid: this.move_source_nid,
+                    target_nid: target,
+                    action: action,
+                },
+                then: () => {
+                    this.move_mode = false
+                    this.move_source_nid = null
+                    this.getTree()
+                }
+            })
         }
     }
 }

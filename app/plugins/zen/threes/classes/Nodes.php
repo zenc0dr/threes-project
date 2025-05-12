@@ -318,4 +318,71 @@ class Nodes
             }
         }
     }
+
+    /**
+     * Переместить нод
+     * @param string $nid
+     * @param string $target_nid
+     * @param string $action - into || after - Указывает разместить нод после или как наследника
+     * @return void
+     */
+    public function moveNode(string $nid, string $target_nid, string $action): void
+    {
+        // Получаем текущую схему
+        $schema = ths()->getSchema();
+        $schema_nodes = $schema['schema_nodes'];
+
+        // Сохраняем узел для перемещения
+        $moving_node = null;
+
+        // Рекурсивно ищем и удаляем перемещаемый узел
+        $remove_node = function (&$nodes) use ($nid, &$moving_node, &$remove_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Рекурсивно ищем целевой узел и вставляем перемещаемый узел
+        $insert_node = function (&$nodes) use ($target_nid, $action, &$moving_node, &$insert_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    if ($action === 'into') {
+                        if (!isset($node['nodes'])) {
+                            $node['nodes'] = [];
+                        }
+                        $node['nodes'][] = $moving_node;
+                    } else if ($action === 'after') {
+                        array_splice($nodes, $key + 1, 0, [$moving_node]);
+                    }
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_node($node['nodes'])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Выполняем перемещение
+        $remove_node($schema_nodes);
+        if ($moving_node) {
+            $insert_node($schema_nodes);
+        }
+
+        // Сохраняем обновленную схему
+        ths()->setSchema($schema_nodes);
+    }
 }

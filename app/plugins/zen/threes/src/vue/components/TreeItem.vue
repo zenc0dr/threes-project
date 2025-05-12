@@ -16,6 +16,10 @@
 
                 <!-- Название -->
                 <span class="tree-name" @click="select">{{ node.name }}</span>
+                <div v-if="$parent.move_mode && node.nid !== $parent.move_source_nid" class="tree-move-target">
+                    <button @click="$emit('move', { target: node.nid, action: 'into' })">➡️</button>
+                    <button @click="$emit('move', { target: node.nid, action: 'after' })">⬇️</button>
+                </div>
             </div>
         </div>
 
