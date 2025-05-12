@@ -14,7 +14,7 @@ class Vector extends Command
             '/app/plugins/zen/threes/package-lock.json',
             '/app/plugins/zen/threes/assets',
             '/app/plugins/zen/threes/controllers',
-            'app/plugins/zen/threes/src/vue/trash',
+            '/app/plugins/zen/threes/src/vue/trash',
         ];
 
         // Файлы, которые нужно включить в любом случае

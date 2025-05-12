@@ -1,6 +1,7 @@
 <template>
     <div class="threes-store">
         <div class="threes-store__header">
+            <div class="col col-action"></div>
             <div class="col col-nid">nid</div>
             <div class="col col-icon">icon</div>
             <div class="col col-name">name</div>
@@ -10,8 +11,10 @@
             class="threes-store__row"
             v-for="node in nodes"
             :key="node.nid"
-            @click="addNode(node)"
         >
+            <div class="col col-action">
+                <div class="store-btn" @click.stop="addNode(node)">＋</div>
+            </div>
             <div class="col col-nid">{{ node.nid || 'template' }}</div>
             <div class="col col-icon">
                 <icon :src="node.icon" width="24px" height="24px" />
@@ -24,11 +27,10 @@
 
 <script>
 import icon from './icon.vue'
+
 export default {
     name: "Store",
-    components: {
-        icon
-    },
+    components: { icon },
     data() {
         return {
             ths: window.ths,
@@ -44,7 +46,7 @@ export default {
     },
     methods: {
         getStore() {
-            ths.api({
+            this.ths.api({
                 api: 'store:get',
                 then: response => {
                     this.nodes = response.nodes
@@ -52,7 +54,16 @@ export default {
             })
         },
         addNode(node) {
-            console.log('Add node', node.nid || 'template')
+            ths.api({
+                api: 'nodes.node:add-node',
+                data: {
+                    nid: node.nid,
+                    class: node.class,
+                },
+                then: response => {
+                    ths.bus.emit('tree:refresh')
+                }
+            })
         }
     }
 }
@@ -101,6 +112,24 @@ export default {
             min-width: 0;
         }
     }
+    .store-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #d0d0d0;
+        color: #333;
+        font-weight: bold;
+        font-size: 13px;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        padding-top: 3px;
 
+        &:hover {
+            background: #bfbfbf;
+        }
+    }
 }
 </style>

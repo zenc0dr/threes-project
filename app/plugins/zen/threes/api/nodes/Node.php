@@ -58,4 +58,14 @@ class Node
         );
         return [];
     }
+
+    # http://threes.dc/threes.api/nodes.node:add-node?debug
+    protected function addNode(): array
+    {
+        ths()->nodes()->addNode(
+            nid: request('nid'),
+            class: request('class'),
+        );
+        return [];
+    }
 }

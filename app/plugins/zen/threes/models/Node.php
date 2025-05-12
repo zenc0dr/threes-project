@@ -3,6 +3,8 @@
 namespace Zen\Threes\Models;
 
 
+use Exception;
+
 /**
  * @property string $nid - Уникальный идентификатор нода
  * @property string $icon - Иконка
@@ -309,11 +311,20 @@ class Node
      */
     public static function truncate(): void
     {
+        # Удалить все ноды
         $nodes_storage_path = ths()->env('NODES_STORAGE');
         if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
             return;
         }
         $escaped_path = escapeshellarg($nodes_storage_path);
+        shell_exec("rm -rf $escaped_path/*");
+
+        # Удалить все схемы
+        $schemes_storage_path = ths()->env('SCHEMES_STORAGE');
+        if (!file_exists($schemes_storage_path) || !is_dir($schemes_storage_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($schemes_storage_path);
         shell_exec("rm -rf $escaped_path/*");
     }
 
@@ -336,7 +347,13 @@ class Node
         return $this->attributes['data'][0] ?? null;
     }
 
-    public function createIconFromTemplate()
+    /**
+     * Создает иконку из шаблона, если она не указана в атрибутах.
+     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
+     * @return void
+     * @throws Exception
+     */
+    public function createIconFromTemplate(): void
     {
         if (!$this->class) {
             return;
@@ -353,14 +370,26 @@ class Node
         $this->icon = $template['icon'];
     }
 
+    public function getDescriptionAttribute(?string $description = null): string
+    {
+        if (!$description) {
+            return '';
+        }
+        return $description;
+    }
 
-    public function beforeSave()
+
+    /**
+     * Выполняет действия перед сохранением.
+     * Создаёт иконку на основе шаблона.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function beforeSave(): void
     {
         $this->createIconFromTemplate();
     }
 
-    public function afterSave()
-    {
-
-    }
+    public function afterSave(){}
 }

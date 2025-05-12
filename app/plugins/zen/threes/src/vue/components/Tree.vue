@@ -12,6 +12,7 @@
                         v-model="search"
                         class="tree-list__search-input"
                         placeholder="Поиск..."
+                        @keydown.enter="submitSearch"
                     />
                 </div>
             </div>
@@ -42,7 +43,16 @@ export default {
             show: true,
             active_nid: null,
             search: '',
-            tree: []
+            tree: [],
+            searchTimer: null // ⏱ таймер
+        }
+    },
+    watch: {
+        search() {
+            clearTimeout(this.searchTimer)
+            this.searchTimer = setTimeout(() => {
+                this.getTree()
+            }, 400)
         }
     },
     mounted() {
@@ -51,6 +61,7 @@ export default {
     },
     unmounted() {
         this.ths.bus.off('tree:refresh', this.getTree)
+        clearTimeout(this.searchTimer)
     },
     methods: {
         handleSelect(node) {
@@ -62,14 +73,22 @@ export default {
         getTree() {
             this.ths.api({
                 api: 'ui:get-tree-nodes',
+                data: {
+                    search: this.search,
+                },
                 then: response => {
                     this.tree = response.tree
                 }
             })
+        },
+        submitSearch() {
+            clearTimeout(this.searchTimer)
+            this.getTree()
         }
     }
 }
 </script>
+
 
 <style lang="scss">
 .threes-nt {
@@ -120,7 +139,9 @@ export default {
             border: none;
             outline: none;
             background: transparent;
-            padding: 6px 8px;
+            padding: 5px 8px;
+            padding-top: 7px;
+            padding-bottom: 2px;
             font-size: 13px;
             color: #333;
         }

@@ -23,7 +23,7 @@ class Nodes
     }
 
     /**
-     * Создаёт новый нод по методу шаблона
+     * Создаёт новый нод по классу шаблона
      * @param string $template_method
      * @return Node
      * @throws \ReflectionException
@@ -44,24 +44,39 @@ class Nodes
     /**
      * Получить дерево нод для меню Tree
      * @param string $schema_code
+     * @param string|null $search
      * @return array
      */
-    public function getNodesTree(string $schema_code = 'default'): array
+    public function getNodesTree(string $schema_code = 'default', string $search = null): array
     {
         $schema = ths()->getSchema($schema_code)['schema_nodes'];
-        $build_tree = function (array $item) use (&$build_tree): ?array {
+        $search = trim(mb_strtolower($search ?? ''));
+
+        $build_tree = function (array $item) use (&$build_tree, $search): ?array {
             $node = \Zen\Threes\Models\Node::find(
                 $item['nid'],
-                [
-                    'icon',
-                    'name',
-                    'description',
-                    'class',
-                    'props'
-                ]
+                ['icon', 'name', 'description', 'class', 'props']
             );
 
-            if (!$node) {
+            if (!$node) return null;
+
+            $children = [];
+            if (!empty($item['nodes'])) {
+                foreach ($item['nodes'] as $child) {
+                    $child_node = $build_tree($child);
+                    if ($child_node) {
+                        $children[] = $child_node;
+                    }
+                }
+            }
+
+            // Фильтрация по name или nid
+            $matches = !$search
+                || str_contains(mb_strtolower($node->name), $search)
+                || str_contains(mb_strtolower($node->nid), $search)
+                || count($children) > 0;
+
+            if (!$matches) {
                 return null;
             }
 
@@ -74,17 +89,8 @@ class Nodes
                 'props' => $node->props,
             ];
 
-            if (!empty($item['nodes'])) {
-                $children = [];
-                foreach ($item['nodes'] as $child) {
-                    $child_node = $build_tree($child);
-                    if ($child_node) {
-                        $children[] = $child_node;
-                    }
-                }
-                if (!empty($children)) {
-                    $result['nodes'] = $children;
-                }
+            if ($children) {
+                $result['nodes'] = $children;
             }
 
             return $result;
@@ -92,6 +98,7 @@ class Nodes
 
         return array_values(array_filter(array_map($build_tree, $schema)));
     }
+
 
     /**
      * Построение дерева нод
@@ -281,5 +288,23 @@ class Nodes
         $node = Node::find($nid);
         $node->data = $data;
         $node->save();
+    }
+
+    public function addNode(string $nid = null, string $class = null): void
+    {
+        $schema = ths()->getSchema();
+        if ($nid && !$class) {
+            $node = Node::find($nid);
+            if ($node) {
+                $schema['schema_nodes'][] = ['nid' => $nid];
+                ths()->setSchema($schema['schema_nodes']);
+            }
+        } elseif ($class) {
+            $node = $this->createNodeByClass($class);
+            if ($node) {
+                $schema['schema_nodes'][] = ['nid' => $node->nid];
+                ths()->setSchema($schema['schema_nodes']);
+            }
+        }
     }
 }

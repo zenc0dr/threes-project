@@ -8,7 +8,9 @@ class Ui
     public function getTreeNodes(): array
     {
         return [
-            'tree' => ths()->nodes()->getNodesTree()
+            'tree' => ths()->nodes()->getNodesTree(
+                search: request('search'),
+            )
         ];
     }
 

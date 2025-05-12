@@ -25,7 +25,7 @@ class NodeBuilder
             'props' => [
                 'tree' => true,
                 'schema' => true,
-                'store' => true,
+                'store' => false,
                 'store_data' => [
                     'group' => 'Фронтенд',
                     'author' => 'Threes',
@@ -38,10 +38,7 @@ class NodeBuilder
 
     public function getSelfContent(): array
     {
-        return [
-            'component' => 'NodeText',
-            'data' => $this->data,
-        ];
+        return $this->getSchema();
     }
 
     public function getSchema(): array

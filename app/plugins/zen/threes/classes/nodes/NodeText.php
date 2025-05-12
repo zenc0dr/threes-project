@@ -25,7 +25,7 @@ class NodeText
             'props' => [
                 'tree' => true,
                 'schema' => true,
-                'store' => true,
+                'store' => false,
                 'store_data' => [
                     'group' => 'Документы',
                     'author' => 'Threes',

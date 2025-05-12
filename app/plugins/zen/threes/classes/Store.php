@@ -14,14 +14,16 @@ class Store
     {
         $store = [];
 
-        $nodes_path = base_path('plugins/zen/threes/classes/nodes');
-        $node_files = ths()->filesList($nodes_path);
+        $nodes_templates_path = base_path('plugins/zen/threes/classes/nodes');
+        $node_templates = ths()->filesList($nodes_templates_path);
 
-        foreach ($node_files as $file) {
-            if ($file['extension'] !== 'php') {
+        foreach ($node_templates as $node_template) {
+            if ($node_template['extension'] !== 'php') {
                 continue;
             }
-            $class = 'Zen.Threes.Classes.Nodes.' . pathinfo($file['name'], PATHINFO_FILENAME);
+
+            $class = 'Zen.Threes.Classes.Nodes.' . pathinfo($node_template['name'], PATHINFO_FILENAME);
+
             try {
                 $node = ths()->nodes()->model();
                 $node->class = $class;
