@@ -24,8 +24,11 @@
                     :node="item"
                     :depth="0"
                     :active_nid="active_nid"
+                    :move_mode="move_mode"
+                    :move_source_nid="move_source_nid"
                     @select="handleSelect"
                     @move="handleMove"
+                    @enable_move="enableMoveMode"
                 />
             </template>
         </div>
@@ -88,28 +91,34 @@ export default {
             clearTimeout(this.searchTimer)
             this.getTree()
         },
-        startMove() {
-            this.move_mode = true
-            this.move_source_nid = this.active_nid
+        enableMoveMode(nid) {
+            console.log('enableMoveMode', this.move_mode)
+            if (this.move_mode) {
+                this.move_mode = false
+                this.move_source_nid = null
+            } else {
+                this.move_source_nid = nid
+                this.move_mode = true
+            }
         },
-        cancelMove() {
+        handleMove(target, action) {
+            console.log(target, action)
+
             this.move_mode = false
             this.move_source_nid = null
-        },
-        handleMove({ target, action }) {
-            ths.api({
-                api: 'nodes.node:move-node',
-                data: {
-                    nid: this.move_source_nid,
-                    target_nid: target,
-                    action: action,
-                },
-                then: () => {
-                    this.move_mode = false
-                    this.move_source_nid = null
-                    this.getTree()
-                }
-            })
+            // ths.api({
+            //     api: 'nodes.node:move-node',
+            //     data: {
+            //         nid: this.move_source_nid,
+            //         target_nid: target,
+            //         action: action,
+            //     },
+            //     then: () => {
+            //         this.move_mode = false
+            //         this.move_source_nid = null
+            //         this.getTree()
+            //     }
+            // })
         }
     }
 }

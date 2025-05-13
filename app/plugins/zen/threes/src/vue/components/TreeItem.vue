@@ -2,7 +2,7 @@
     <div class="tree-item">
         <div
             class="tree-label"
-            :class="{ 'active': node.nid === active_nid }"
+            :class="{ 'active': node.nid === active_nid, 'moved': move_source_nid === node.nid }"
             @click="select"
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
@@ -18,20 +18,36 @@
                 <!-- Название -->
                 <span class="tree-name">{{ node.name }}</span>
                 <div class="tree-item__mover">
-                    <div class="tree-item__btn">
-                        <div class="icon-btn" title="Наружу">
-                            <i class="oc-icon-arrow-left"></i>
+                    <template v-if="move_mode && node.nid !== move_source_nid">
+                        <div class="tree-item__btn">
+                            <div @click.stop="move(node.nid, 'outward')" class="icon-btn" title="Наружу">
+                                <i class="oc-icon-arrow-left"></i>
+                            </div>
+                            <div @click.stop="move(node.nid, 'after')" class="icon-btn" title="Вниз">
+                                <i class="oc-icon-arrow-down"></i>
+                            </div>
+                            <div @click.stop="move(node.nid, 'before')" class="icon-btn" title="Вверх">
+                                <i class="oc-icon-arrow-up"></i>
+                            </div>
+                            <div @click.stop="move(node.nid, 'inside')" class="icon-btn" title="Внутрь">
+                                <i class="oc-icon-arrow-right"></i>
+                            </div>
                         </div>
-                        <div class="icon-btn" title="Вниз">
-                            <i class="oc-icon-arrow-down"></i>
+                    </template>
+                    <template v-else-if="move_mode && node.nid === move_source_nid">
+                        <div @click.stop="enableMoveMode" class="tree-item__btn">
+                            <div class="icon-btn" title="Отменить перемещение">
+                                <i class="oc-icon-stop-circle-o"></i>
+                            </div>
                         </div>
-                        <div class="icon-btn" title="Вверх">
-                            <i class="oc-icon-arrow-up"></i>
+                    </template>
+                    <template v-else>
+                        <div @click.stop="enableMoveMode" class="tree-item__btn">
+                            <div class="icon-btn" title="Переместить">
+                                <i class="oc-icon-move"></i>
+                            </div>
                         </div>
-                        <div class="icon-btn" title="Внутрь">
-                            <i class="oc-icon-arrow-right"></i>
-                        </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -43,7 +59,11 @@
                 :node="child"
                 :depth="depth + 1"
                 :active_nid="active_nid"
+                :move_mode="move_mode"
+                :move_source_nid="move_source_nid"
                 @select="$emit('select', $event)"
+                @move="$emit('move', $event, $event2)"
+                @enable_move="$emit('enable_move', $event)"
             />
         </div>
     </div>
@@ -54,10 +74,13 @@ import icon from './icon.vue'
 export default {
     name: 'TreeItem',
     components: { icon },
+    emits: ['select', 'move', 'enable_move'],
     props: {
         node: Object,
         depth: Number,
-        active_nid: String
+        active_nid: String,
+        move_mode: Boolean,
+        move_source_nid: String,
     },
     data() {
         return {
@@ -75,6 +98,12 @@ export default {
         },
         select() {
             this.$emit('select', this.node)
+        },
+        enableMoveMode() {
+            this.$emit('enable_move', this.node.nid)
+        },
+        move(nid, direction) {
+            this.$emit('move', nid, direction)
         }
     }
 }
@@ -92,6 +121,7 @@ export default {
     &__btn {
         display: flex;
         gap: 6px;
+        margin-right: 5px;
 
         .icon-btn {
             width: 10px;
@@ -132,6 +162,13 @@ export default {
         &:hover {
             background: #f0f0f0;
         }
+        &.moved {
+            background: #bbff88;
+
+            i {
+                color: #205100;
+            }
+        }
     }
 
     .tree-content {
@@ -150,9 +187,10 @@ export default {
     }
 
     .tree-name {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        margin-right: 15px;
+        max-width: 250px;
+        line-height: 15px;
+        margin-left: 3px;
     }
 
     .tree-nodes {
@@ -160,7 +198,7 @@ export default {
         flex-direction: column;
     }
 
-    .tree-item__mover {
+    .tree-label:not(.moved) .tree-item__mover {
         opacity: 0;
         transition: opacity 0.2s ease;
     }
