@@ -45,6 +45,15 @@ class Helpers
     }
 
     /**
+     * Коннекторы
+     * @return Connector
+     */
+    public function connector(): Connector
+    {
+        return Connector::getInstance();
+    }
+
+    /**
      * Система сообщений
      * @return Messages
      */

@@ -16,9 +16,15 @@
 
                 <!-- Название -->
                 <span class="tree-name" @click="select">{{ node.name }}</span>
-                <div v-if="$parent.move_mode && node.nid !== $parent.move_source_nid" class="tree-move-target">
-                    <button @click="$emit('move', { target: node.nid, action: 'into' })">➡️</button>
-                    <button @click="$emit('move', { target: node.nid, action: 'after' })">⬇️</button>
+                <div class="tree-item__mover">
+                    <div class="tree-item__btn">
+                        <div class="icon-btn" title="Вниз">
+                            <i class="pi pi-chevron-down"></i>
+                        </div>
+                        <div class="icon-btn" title="Внутрь">
+                            <i class="pi pi-chevron-right"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -72,6 +78,38 @@ export default {
     display: flex;
     flex-direction: column;
 
+    &__mover {
+        margin-left: auto;
+    }
+
+    &__btn {
+        display: flex;
+        gap: 6px;
+
+        .icon-btn {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 16px;
+            transition: color 0.2s ease;
+
+            &:hover {
+                color: #000;
+            }
+            &:focus {
+                outline: 1px solid #000;
+                outline-offset: 2px;
+            }
+        }
+    }
+
     .tree-label {
         display: flex;
         align-items: center;
@@ -89,6 +127,7 @@ export default {
         align-items: center;
         gap: 4px;
         padding: 2px 0;
+        flex: 1 1 0;
     }
 
     .chevron {
@@ -109,5 +148,15 @@ export default {
         display: flex;
         flex-direction: column;
     }
+
+    .tree-item__mover {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .tree-item:hover .tree-item__mover {
+        opacity: 1;
+    }
+
 }
 </style>

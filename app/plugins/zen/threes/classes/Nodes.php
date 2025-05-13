@@ -99,7 +99,6 @@ class Nodes
         return array_values(array_filter(array_map($build_tree, $schema)));
     }
 
-
     /**
      * Построение дерева нод
      * @param string $nid
@@ -143,7 +142,9 @@ class Nodes
     /**
      * Рекурсивно строит дерево схемы, начиная с одной ветки
      * @param array $branch
+     * @param bool $is_root
      * @return array|null
+     * @throws \ReflectionException
      */
     protected function buildSchemaFromBranch(array $branch, bool $is_root = false): ?array
     {
@@ -194,9 +195,12 @@ class Nodes
         return $schema_node;
     }
 
-
-
-
+    /**
+     * Установить иконку для нода
+     * @param string $nid
+     * @param string $svg
+     * @return void
+     */
     public function setNodeIcon(string $nid, string $svg): void
     {
         $node = Node::find($nid);
@@ -301,6 +305,13 @@ class Nodes
         ths()->messages()->addMessage('Данные нод обновлены');
     }
 
+    /**
+     * Добавить нод
+     * @param string|null $nid
+     * @param string|null $class
+     * @return void
+     * @throws \ReflectionException
+     */
     public function addNode(string $nid = null, string $class = null): void
     {
         $schema = ths()->getSchema();

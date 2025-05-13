@@ -3,7 +3,7 @@
     "show_children": false,
     "tree": true,
     "schema": true,
-    "store": false,
+    "store": true,
     "store_data": {
         "group": "Фронтенд",
         "author": "Threes",

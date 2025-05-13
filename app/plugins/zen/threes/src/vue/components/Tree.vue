@@ -15,12 +15,12 @@
                         @keydown.enter="submitSearch"
                     />
                 </div>
-                <button
-                    v-if="show && active_nid && !move_mode"
-                    @click="startMove"
-                >
-                    📦 Переместить
-                </button>
+<!--                <button-->
+<!--                    v-if="show && active_nid && !move_mode"-->
+<!--                    @click="startMove"-->
+<!--                >-->
+<!--                    📦 Переместить-->
+<!--                </button>-->
             </div>
 
             <template v-if="show">
@@ -51,7 +51,7 @@ export default {
             active_nid: null,
             search: '',
             tree: [],
-            searchTimer: null, // ⏱ таймер,
+            searchTimer: null,
             move_mode: false,
             move_source_nid: null
         }

@@ -20,7 +20,15 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
+        $items = ths()->connector()->mySql([
+            'host' => 'db',
+            'database' => 'azimut',
+            'username' => 'azimut',
+            'password' => 'azimut',
+            'port' => '3306',
+        ])->table('mcmraak_rivercrs_checkins')
+            ->get();
+        dd($items);
     }
 
     # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
