@@ -15,12 +15,6 @@
                         @keydown.enter="submitSearch"
                     />
                 </div>
-<!--                <button-->
-<!--                    v-if="show && active_nid && !move_mode"-->
-<!--                    @click="startMove"-->
-<!--                >-->
-<!--                    📦 Переместить-->
-<!--                </button>-->
             </div>
 
             <template v-if="show">

@@ -3,6 +3,7 @@
         <div
             class="tree-label"
             :class="{ 'active': node.nid === active_nid }"
+            @click="select"
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
@@ -15,14 +16,20 @@
                 <icon :src="node.icon" width="16px" height="16px" />
 
                 <!-- Название -->
-                <span class="tree-name" @click="select">{{ node.name }}</span>
+                <span class="tree-name">{{ node.name }}</span>
                 <div class="tree-item__mover">
                     <div class="tree-item__btn">
+                        <div class="icon-btn" title="Наружу">
+                            <i class="oc-icon-arrow-left"></i>
+                        </div>
                         <div class="icon-btn" title="Вниз">
-                            <i class="pi pi-chevron-down"></i>
+                            <i class="oc-icon-arrow-down"></i>
+                        </div>
+                        <div class="icon-btn" title="Вверх">
+                            <i class="oc-icon-arrow-up"></i>
                         </div>
                         <div class="icon-btn" title="Внутрь">
-                            <i class="pi pi-chevron-right"></i>
+                            <i class="oc-icon-arrow-right"></i>
                         </div>
                     </div>
                 </div>
@@ -87,8 +94,8 @@ export default {
         gap: 6px;
 
         .icon-btn {
-            width: 20px;
-            height: 20px;
+            width: 10px;
+            height: 10px;
             padding: 0;
             border: none;
             background: transparent;
@@ -114,11 +121,16 @@ export default {
         display: flex;
         align-items: center;
         user-select: none;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
         &.active {
-            background: #d2ffdb;
-            color: #1a4523;
-            border-radius: 4px;
+            background: #dfe0ff;
+            color: #000000;
             transition: background 0.2s ease, color 0.2s ease;
+        }
+        &:hover {
+            background: #f0f0f0;
         }
     }
 
@@ -141,7 +153,6 @@ export default {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        cursor: pointer;
     }
 
     .tree-nodes {
@@ -154,7 +165,7 @@ export default {
         transition: opacity 0.2s ease;
     }
 
-    .tree-item:hover .tree-item__mover {
+    .tree-label:hover .tree-item__mover {
         opacity: 1;
     }
 
