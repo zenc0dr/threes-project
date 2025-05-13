@@ -103,7 +103,7 @@ export default {
             this.$emit('enable_move', this.node.nid)
         },
         move(nid, direction) {
-            this.$emit('move', nid, direction)
+            this.$emit('move', {nid, direction})
         }
     }
 }

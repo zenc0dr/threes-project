@@ -334,7 +334,7 @@ class Nodes
      * Переместить нод
      * @param string $nid
      * @param string $target_nid
-     * @param string $action - into || after - Указывает разместить нод после или как наследника
+     * @param string $action - before || after - Указывает разместить нод после или как наследника
      * @return void
      */
     public function moveNode(string $nid, string $target_nid, string $action): void
@@ -368,7 +368,7 @@ class Nodes
         $insert_node = function (&$nodes) use ($target_nid, $action, &$moving_node, &$insert_node) {
             foreach ($nodes as $key => &$node) {
                 if ($node['nid'] === $target_nid) {
-                    if ($action === 'into') {
+                    if ($action === 'before') {
                         if (!isset($node['nodes'])) {
                             $node['nodes'] = [];
                         }

@@ -227,7 +227,15 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
+        $items = ths()->connector()->mySql([
+            'host' => 'db',
+            'database' => 'azimut',
+            'username' => 'azimut',
+            'password' => 'azimut',
+            'port' => '3306',
+        ])->table('mcmraak_rivercrs_checkins')
+            ->get();
+        dd($items);
     }
 
     # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
@@ -390,6 +398,17 @@ class Node
         );
         return [];
     }
+
+    # http://threes.dc/threes.api/nodes.node:move-node?debug
+    protected function moveNode(): array
+    {
+        ths()->nodes()->moveNode(
+            request('nid'),
+            request('target_nid'),
+            request('action')
+        );
+        return [];
+    }
 }
 
 ```
@@ -478,6 +497,26 @@ class Backlog
                 'acceptance_criteria' => $acceptance_criteria,
             ]);
         }
+    }
+}
+
+```
+`plugins/zen/threes/classes/Connector.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Illuminate\Database\Connection;
+use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Classes\Connectors\MySqlConnector;
+
+class Connector
+{
+    use SingletonTrait;
+
+    public function mySql(array $config = []): Connection
+    {
+        return MySqlConnector::connect($config);
     }
 }
 
@@ -647,6 +686,15 @@ class Helpers
     public function store(): Store
     {
         return Store::getInstance();
+    }
+
+    /**
+     * Коннекторы
+     * @return Connector
+     */
+    public function connector(): Connector
+    {
+        return Connector::getInstance();
     }
 
     /**
@@ -846,7 +894,6 @@ class Nodes
         return array_values(array_filter(array_map($build_tree, $schema)));
     }
 
-
     /**
      * Построение дерева нод
      * @param string $nid
@@ -890,7 +937,9 @@ class Nodes
     /**
      * Рекурсивно строит дерево схемы, начиная с одной ветки
      * @param array $branch
+     * @param bool $is_root
      * @return array|null
+     * @throws \ReflectionException
      */
     protected function buildSchemaFromBranch(array $branch, bool $is_root = false): ?array
     {
@@ -941,9 +990,12 @@ class Nodes
         return $schema_node;
     }
 
-
-
-
+    /**
+     * Установить иконку для нода
+     * @param string $nid
+     * @param string $svg
+     * @return void
+     */
     public function setNodeIcon(string $nid, string $svg): void
     {
         $node = Node::find($nid);
@@ -1030,13 +1082,31 @@ class Nodes
         $node->save();
     }
 
-    public function updateNodeData(string $nid, array|string|null $data, $scope = 'set_self_content'): void
-    {
+    /**
+     * Обновить данные нода
+     * @param string $nid
+     * @param array|string|null $data
+     * @param $scope
+     * @return void
+     */
+    public function updateNodeData(
+        string $nid, array|string|null $data,
+        string $scope = 'self_content'
+    ): void {
         $node = Node::find($nid);
+        $node->scope = $scope;
         $node->data = $data;
         $node->save();
+        ths()->messages()->addMessage('Данные нод обновлены');
     }
 
+    /**
+     * Добавить нод
+     * @param string|null $nid
+     * @param string|null $class
+     * @return void
+     * @throws \ReflectionException
+     */
     public function addNode(string $nid = null, string $class = null): void
     {
         $schema = ths()->getSchema();
@@ -1053,6 +1123,73 @@ class Nodes
                 ths()->setSchema($schema['schema_nodes']);
             }
         }
+    }
+
+    /**
+     * Переместить нод
+     * @param string $nid
+     * @param string $target_nid
+     * @param string $action - into || after - Указывает разместить нод после или как наследника
+     * @return void
+     */
+    public function moveNode(string $nid, string $target_nid, string $action): void
+    {
+        // Получаем текущую схему
+        $schema = ths()->getSchema();
+        $schema_nodes = $schema['schema_nodes'];
+
+        // Сохраняем узел для перемещения
+        $moving_node = null;
+
+        // Рекурсивно ищем и удаляем перемещаемый узел
+        $remove_node = function (&$nodes) use ($nid, &$moving_node, &$remove_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Рекурсивно ищем целевой узел и вставляем перемещаемый узел
+        $insert_node = function (&$nodes) use ($target_nid, $action, &$moving_node, &$insert_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    if ($action === 'into') {
+                        if (!isset($node['nodes'])) {
+                            $node['nodes'] = [];
+                        }
+                        $node['nodes'][] = $moving_node;
+                    } else if ($action === 'after') {
+                        array_splice($nodes, $key + 1, 0, [$moving_node]);
+                    }
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_node($node['nodes'])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Выполняем перемещение
+        $remove_node($schema_nodes);
+        if ($moving_node) {
+            $insert_node($schema_nodes);
+        }
+
+        // Сохраняем обновленную схему
+        ths()->setSchema($schema_nodes);
     }
 }
 
@@ -1169,6 +1306,49 @@ class Versions
     use SingletonTrait;
 
     # Методы версионирования в Version
+}
+
+```
+`plugins/zen/threes/classes/connectors/MySqlConnector.php`
+```<?php
+
+namespace Zen\Threes\Classes\Connectors;
+
+use Illuminate\Database\Connection;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+
+class MySqlConnector
+{
+    /**
+     * Устанавливает соединение с базой данных MySQL с возможностью переопределения параметров
+     *
+     * @param array $config Параметры подключения (хост, пользователь, пароль и т.д.)
+     * @return Connection
+     */
+    public static function connect(array $config = []): Connection
+    {
+        // Если конфигурация не передана, используем стандартное подключение
+        if (empty($config)) {
+            return DB::connection('mysql');
+        }
+
+        // Имя для динамического соединения
+        $connectionName = 'mysql_dynamic';
+
+        // Устанавливаем конфигурацию для нового соединения,
+        // используя за основу стандартные настройки MySQL
+        Config::set("database.connections.{$connectionName}", array_merge(
+            config('database.connections.mysql'),
+            $config
+        ));
+
+        // Очищаем кеш соединения, если оно уже было создано
+        DB::purge($connectionName);
+
+        // Возвращаем новое соединение с переопределёнными параметрами
+        return DB::connection($connectionName);
+    }
 }
 
 ```
@@ -1730,6 +1910,11 @@ class NodeBuilder
         return $this->getSchema();
     }
 
+    public function setSelfContent(): mixed
+    {
+        return $this->data;
+    }
+
     public function getSchema(): array
     {
         return [
@@ -1781,7 +1966,7 @@ class NodeText
         ];
     }
 
-    public function getSelfContent()
+    public function getSelfContent(): array
     {
         return $this->getSchema();
     }
@@ -2351,6 +2536,8 @@ class Node
         'object' => 'object',
     ];
 
+    public ?string $scope = null;
+
     public function __construct(string $nid = null)
     {
         if ($nid) {
@@ -2489,17 +2676,17 @@ class Node
     /**
      * Метод преобразования строк вида string_name в StringName
      * @param string $direction
-     * @param string $prefix
+     * @param string $method
      * @param string $postfix
      * @return string
      */
     private function studlyCaser(
         string $direction,
-        string $prefix,
+        string $method,
         string $postfix = 'Attribute'
     ): string {
         return $direction
-            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $prefix)))
+            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method)))
             . $postfix;
     }
 
@@ -2653,6 +2840,10 @@ class Node
      */
     public function setDataAttribute(array|string|null $data = null): void
     {
+        if ($this->scope) {
+            $method = $this->studlyCaser('set', $this->scope, '');
+            $data = $this->exe($method, $data);
+        }
         $this->attributes['data'] = [$data];
     }
 
@@ -3333,7 +3524,7 @@ fields:
     },
     "dependencies": {
         "autoprefixer": "^10.4.20",
-        "axios": "^1.7.9",
+        "axios": "^1.9.0",
         "grapesjs": "^0.22.6",
         "lodash": "^4.17.21",
         "md5": "^2.3.0",
@@ -3510,6 +3701,9 @@ import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
 window.ths = {
+
+    Alerts: null, // Сюда монтируются сообщения
+
     requests_register: {},
     auth_token: null,
     bus: mitt(), // Шина событий
@@ -3578,22 +3772,20 @@ window.ths = {
         }
     },
 
-    // Отправить сообщение
+    // Показать 1 сообщение
     pushMessage(text, type) {
-        if ($ && $.oc && typeof $.oc.flashMsg === 'function') {
-            if (!type) {
-                type = 'info'
-            }
-            $.oc.flashMsg(text, type)
-        } else {
-            console.error('$.oc.flashMsg недоступен')
+        if (this.Alerts !== null) {
+            this.Alerts.push([{
+                text: text,
+                type: type
+            }])
         }
     },
 
     // Показать сообщения
     pushMessages(messages) {
-        for (let i in messages) {
-            this.pushMessage(messages[i])
+        if (this.Alerts !== null) {
+            this.Alerts.push(messages)
         }
     },
 

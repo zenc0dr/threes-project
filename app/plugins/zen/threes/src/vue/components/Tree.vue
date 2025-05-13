@@ -101,13 +101,14 @@ export default {
                 this.move_mode = true
             }
         },
-        handleMove(target, action) {
+        handleMove(action) {
+            console.log('handleMove', action)
             ths.api({
                 api: 'nodes.node:move-node',
                 data: {
                     nid: this.move_source_nid,
-                    target_nid: target,
-                    action: action,
+                    target_nid: action.nid,
+                    action: action.direction,
                 },
                 then: () => {
                     this.move_mode = false
