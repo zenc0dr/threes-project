@@ -339,15 +339,29 @@ class Nodes
      */
     public function moveNode(string $nid, string $target_nid, string $action): void
     {
-        // Получаем текущую схему
-        $schema = ths()->getSchema();
-        $schema_nodes = $schema['schema_nodes'];
+        switch ($action) {
+            case 'before':
+                $this->moveNodeBefore($nid, $target_nid);
+                break;
+            case 'after':
+                $this->moveNodeAfter($nid, $target_nid);
+                break;
+            case 'inside':
+                $this->moveNodeInside($nid, $target_nid);
+                break;
+            case 'outward':
+                $this->moveNodeOutward($nid, $target_nid);
+                break;
+        }
+    }
 
-        // Сохраняем узел для перемещения
+    public function moveNodeBefore(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
         $moving_node = null;
 
-        // Рекурсивно ищем и удаляем перемещаемый узел
-        $remove_node = function (&$nodes) use ($nid, &$moving_node, &$remove_node) {
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$moving_node) {
             foreach ($nodes as $key => &$node) {
                 if ($node['nid'] === $nid) {
                     $moving_node = $node;
@@ -356,30 +370,163 @@ class Nodes
                     return true;
                 }
                 if (!empty($node['nodes'])) {
-                    if ($remove_node($node['nodes'])) {
-                        return true;
-                    }
+                    if ($remove_node($node['nodes'])) return true;
                 }
             }
             return false;
         };
 
-        // Рекурсивно ищем целевой узел и вставляем перемещаемый узел
-        $insert_node = function (&$nodes) use ($target_nid, $action, &$moving_node, &$insert_node) {
+        $insert_before = function (&$nodes) use (&$insert_before, $target_nid, &$moving_node) {
             foreach ($nodes as $key => &$node) {
                 if ($node['nid'] === $target_nid) {
-                    if ($action === 'before') {
-                        if (!isset($node['nodes'])) {
-                            $node['nodes'] = [];
-                        }
-                        $node['nodes'][] = $moving_node;
-                    } else if ($action === 'after') {
-                        array_splice($nodes, $key + 1, 0, [$moving_node]);
-                    }
+                    array_splice($nodes, $key, 0, [$moving_node]);
                     return true;
                 }
                 if (!empty($node['nodes'])) {
-                    if ($insert_node($node['nodes'])) {
+                    if ($insert_before($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $remove_node($schema_nodes);
+        if ($moving_node) $insert_before($schema_nodes);
+        ths()->setSchema($schema_nodes);
+    }
+
+    public function moveNodeAfter(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
+        $moving_node = null;
+
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$moving_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $insert_after = function (&$nodes) use (&$insert_after, $target_nid, &$moving_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    array_splice($nodes, $key + 1, 0, [$moving_node]);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_after($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $remove_node($schema_nodes);
+        if ($moving_node) $insert_after($schema_nodes);
+        ths()->setSchema($schema_nodes);
+    }
+
+    public function moveNodeInside(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
+        $moving_node = null;
+
+        // Защита: нельзя вложить в самого себя или потомка
+        if ($nid === $target_nid || $this->isDescendant($schema_nodes, $nid, $target_nid)) {
+            ths()->messages()->addMessage("Нельзя вложить узел внутрь самого себя или его потомка", "error");
+            return;
+        }
+
+        // Удаление
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$moving_node): bool {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        // Вставка
+        $insert_inside = function (&$nodes) use (&$insert_inside, $target_nid, &$moving_node): bool {
+            foreach ($nodes as &$node) {
+                if ($node['nid'] === $target_nid) {
+                    if (!isset($node['nodes']) || !is_array($node['nodes'])) {
+                        $node['nodes'] = [];
+                    }
+                    $node['nodes'][] = $moving_node;
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_inside($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $remove_node($schema_nodes);
+        if ($moving_node) {
+            $insert_inside($schema_nodes);
+        }
+
+        ths()->setSchema($schema_nodes);
+    }
+
+
+    public function moveNodeOutward(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
+        $moving_node = null;
+
+        // Защита от циклов: нельзя переместить, если target — потомок
+        if ($nid === $target_nid || $this->isDescendant($schema_nodes, $nid, $target_nid)) {
+            ths()->messages()->addMessage("Нельзя поднять узел выше, если он содержит целевой узел", "error");
+            return;
+        }
+
+        // Удаление
+        $remove_node = function (&$nodes, &$parent = null) use (&$remove_node, $nid, &$moving_node): bool {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'], $node)) return true;
+                }
+            }
+            return false;
+        };
+
+        // Поиск родителя target_nid
+        $find_parent = function (&$nodes, string $child_nid, &$parent = null, &$level = null) use (&$find_parent): bool {
+            foreach ($nodes as &$node) {
+                if (!empty($node['nodes']) && is_array($node['nodes'])) {
+                    foreach ($node['nodes'] as &$child) {
+                        if ($child['nid'] === $child_nid) {
+                            $parent = &$node;
+                            $level = &$nodes;
+                            return true;
+                        }
+                    }
+                    if ($find_parent($node['nodes'], $child_nid, $parent, $level)) {
                         return true;
                     }
                 }
@@ -387,13 +534,52 @@ class Nodes
             return false;
         };
 
-        // Выполняем перемещение
         $remove_node($schema_nodes);
-        if ($moving_node) {
-            $insert_node($schema_nodes);
+
+        $parent = null;
+        $level = null;
+        $found = $find_parent($schema_nodes, $target_nid, $parent, $level);
+
+        if ($moving_node && $found && $parent && $level) {
+            foreach ($level as $key => $node) {
+                if ($node['nid'] === $parent['nid']) {
+                    array_splice($level, $key + 1, 0, [$moving_node]);
+                    ths()->setSchema($schema_nodes);
+                    return;
+                }
+            }
         }
 
-        // Сохраняем обновленную схему
+        // Если родитель не найден — перемещаем в корень
+        $schema_nodes[] = $moving_node;
         ths()->setSchema($schema_nodes);
+    }
+
+    private function isDescendant(array $tree, string $parent_nid, string $child_nid): bool
+    {
+        foreach ($tree as $node) {
+            if ($node['nid'] === $parent_nid) {
+                return $this->containsNode($node, $child_nid);
+            }
+            if (!empty($node['nodes']) && $this->isDescendant($node['nodes'], $parent_nid, $child_nid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function containsNode(array $node, string $target_nid): bool
+    {
+        if ($node['nid'] === $target_nid) {
+            return true;
+        }
+        if (!empty($node['nodes'])) {
+            foreach ($node['nodes'] as $child) {
+                if ($this->containsNode($child, $target_nid)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
