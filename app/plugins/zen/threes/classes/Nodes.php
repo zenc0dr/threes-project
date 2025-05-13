@@ -555,6 +555,14 @@ class Nodes
         ths()->setSchema($schema_nodes);
     }
 
+    /**
+     * Проверяет, является ли узел потомком определенного родительского узла в иерархической древовидной структуре.
+     *
+     * @param array $tree Массив древовидной структуры, содержащий узлы.
+     * @param string $parent_nid ID родительского узла для проверки.
+     * @param string $child_nid ID дочернего узла для проверки.
+     * @return bool Возвращает true, если дочерний узел является потомком родительского узла, иначе false.
+     */
     private function isDescendant(array $tree, string $parent_nid, string $child_nid): bool
     {
         foreach ($tree as $node) {
@@ -568,6 +576,13 @@ class Nodes
         return false;
     }
 
+    /**
+     * Проверяет, содержится ли узел с заданным идентификатором в дереве узлов.
+     *
+     * @param array $node Массив, представляющий текущий узел и его потомки.
+     * @param string $target_nid Идентификатор узла, который необходимо найти.
+     * @return bool Возвращает true, если узел с указанным идентификатором найден, иначе false.
+     */
     private function containsNode(array $node, string $target_nid): bool
     {
         if ($node['nid'] === $target_nid) {
