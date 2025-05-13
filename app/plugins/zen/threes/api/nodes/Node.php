@@ -70,7 +70,7 @@ class Node
     }
 
     # http://threes.dc/threes.api/nodes.node:move-node?debug
-    protected function moveNode()
+    protected function moveNode(): array
     {
         ths()->nodes()->moveNode(
             request('nid'),

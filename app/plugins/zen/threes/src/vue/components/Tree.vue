@@ -102,23 +102,19 @@ export default {
             }
         },
         handleMove(target, action) {
-            console.log(target, action)
-
-            this.move_mode = false
-            this.move_source_nid = null
-            // ths.api({
-            //     api: 'nodes.node:move-node',
-            //     data: {
-            //         nid: this.move_source_nid,
-            //         target_nid: target,
-            //         action: action,
-            //     },
-            //     then: () => {
-            //         this.move_mode = false
-            //         this.move_source_nid = null
-            //         this.getTree()
-            //     }
-            // })
+            ths.api({
+                api: 'nodes.node:move-node',
+                data: {
+                    nid: this.move_source_nid,
+                    target_nid: target,
+                    action: action,
+                },
+                then: () => {
+                    this.move_mode = false
+                    this.move_source_nid = null
+                    this.getTree()
+                }
+            })
         }
     }
 }
