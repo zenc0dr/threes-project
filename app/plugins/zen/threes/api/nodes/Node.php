@@ -77,5 +77,6 @@ class Node
             request('target_nid'),
             request('action')
         );
+        return [];
     }
 }
