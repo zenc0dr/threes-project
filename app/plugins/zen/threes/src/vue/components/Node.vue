@@ -29,7 +29,9 @@ export default {
             return this.node?.props?.self_content !== false
         },
         asyncComponent() {
-            if (!this.node.component) return null
+            if (!this.node.component) {
+                return null
+            }
 
             try {
                 return defineAsyncComponent(() =>
