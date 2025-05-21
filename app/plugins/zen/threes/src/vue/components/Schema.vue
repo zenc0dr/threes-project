@@ -37,9 +37,8 @@
         </div>
 
         <Node :node="schema" scope="self_content" />
-
         <div class="class-schema__content">
-            <Node :node="node" v-for="node in schema.children" scope="schema" />
+            <Node :node="node" v-for="node in schema.nodes" scope="schema" />
         </div>
 
         <modal :show="settings" @close="setNodeSettings">
@@ -122,6 +121,9 @@ export default {
                 if (nid) {
                     this.nid = nid
                     this.getSchema()
+                } else {
+                    this.nid = null
+                    this.schema = null
                 }
             },
             immediate: true

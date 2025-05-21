@@ -42,4 +42,16 @@ trait Files
         }
         return collect($output);
     }
+
+    /**
+     * Возвращает список папок в папке
+     * @param string $dir_path
+     * @return array
+     */
+    public function dirList(string $dir_path): array
+    {
+        return array_filter(scandir($dir_path), function ($entry) use ($dir_path) {
+            return $entry !== '.' && $entry !== '..' && is_dir($dir_path . '/' . $entry);
+        });
+    }
 }

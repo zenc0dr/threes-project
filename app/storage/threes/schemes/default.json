@@ -1,0 +1,640 @@
+{
+    "schema_name": "Схема проекта",
+    "schema_nodes": [
+        {
+            "nid": "8fwhewuedy6h"
+        },
+        {
+            "nid": "node7",
+            "nodes": [
+                {
+                    "nid": "node8"
+                },
+                {
+                    "nid": "node9"
+                },
+                {
+                    "nid": "node10"
+                },
+                {
+                    "nid": "node39"
+                },
+                {
+                    "nid": "node40"
+                },
+                {
+                    "nid": "node83"
+                },
+                {
+                    "nid": "node41"
+                }
+            ]
+        },
+        {
+            "nid": "zsgk2c7m3kan",
+            "nodes": [
+                {
+                    "nid": "nnmt34mwrue8"
+                },
+                {
+                    "nid": "9uvmjnpfsqza"
+                }
+            ]
+        },
+        {
+            "nid": "jpqsvzeh94kc",
+            "nodes": []
+        },
+        {
+            "nid": "8uzuqmu4cgwf",
+            "nodes": []
+        },
+        {
+            "nid": "node47",
+            "nodes": [
+                {
+                    "nid": "node79",
+                    "nodes": [
+                        {
+                            "nid": "node111"
+                        },
+                        {
+                            "nid": "node112"
+                        },
+                        {
+                            "nid": "node113",
+                            "nodes": [
+                                {
+                                    "nid": "node146"
+                                },
+                                {
+                                    "nid": "node147"
+                                },
+                                {
+                                    "nid": "node148"
+                                },
+                                {
+                                    "nid": "node149"
+                                },
+                                {
+                                    "nid": "node150",
+                                    "nodes": [
+                                        {
+                                            "nid": "node1",
+                                            "nodes": [
+                                                {
+                                                    "nid": "node2",
+                                                    "nodes": []
+                                                },
+                                                {
+                                                    "nid": "node3"
+                                                },
+                                                {
+                                                    "nid": "node4"
+                                                },
+                                                {
+                                                    "nid": "node5"
+                                                },
+                                                {
+                                                    "nid": "node6"
+                                                },
+                                                {
+                                                    "nid": "node33"
+                                                },
+                                                {
+                                                    "nid": "node34"
+                                                },
+                                                {
+                                                    "nid": "node35"
+                                                },
+                                                {
+                                                    "nid": "node36"
+                                                },
+                                                {
+                                                    "nid": "node37",
+                                                    "nodes": [
+                                                        {
+                                                            "nid": "node69"
+                                                        },
+                                                        {
+                                                            "nid": "node70",
+                                                            "nodes": [
+                                                                {
+                                                                    "nid": "node102"
+                                                                },
+                                                                {
+                                                                    "nid": "node103",
+                                                                    "nodes": [
+                                                                        {
+                                                                            "nid": "node135",
+                                                                            "nodes": [
+                                                                                {
+                                                                                    "nid": "node168"
+                                                                                },
+                                                                                {
+                                                                                    "nid": "node169"
+                                                                                },
+                                                                                {
+                                                                                    "nid": "node170",
+                                                                                    "nodes": [
+                                                                                        {
+                                                                                            "nid": "node11",
+                                                                                            "nodes": [
+                                                                                                {
+                                                                                                    "nid": "y4mrmj3563fa"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node12"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node13"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node14"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node15"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node16",
+                                                                                                    "nodes": [
+                                                                                                        {
+                                                                                                            "nid": "node22",
+                                                                                                            "nodes": [
+                                                                                                                {
+                                                                                                                    "nid": "node23"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "nid": "node25"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "nid": "node26"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "nid": "node54"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "nid": "node55"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "nid": "node56",
+                                                                                                                    "nodes": [
+                                                                                                                        {
+                                                                                                                            "nid": "node88",
+                                                                                                                            "nodes": [
+                                                                                                                                {
+                                                                                                                                    "nid": "node120"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                    "nid": "node121"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                    "nid": "node122"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                    "nid": "node123"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                    "nid": "node68"
+                                                                                                                                }
+                                                                                                                            ]
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "nid": "node89"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "nid": "node90"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "nid": "node91"
+                                                                                                                        }
+                                                                                                                    ]
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "nid": "node57"
+                                                                                                                }
+                                                                                                            ]
+                                                                                                        }
+                                                                                                    ]
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node43"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node44"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node45"
+                                                                                                },
+                                                                                                {
+                                                                                                    "nid": "node46"
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "nid": "node171"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "nid": "node136"
+                                                                        },
+                                                                        {
+                                                                            "nid": "node137"
+                                                                        },
+                                                                        {
+                                                                            "nid": "node138"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "nid": "node104"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "nid": "node71"
+                                                        },
+                                                        {
+                                                            "nid": "node72"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "nid": "node114"
+                        }
+                    ]
+                },
+                {
+                    "nid": "node80"
+                },
+                {
+                    "nid": "node81"
+                }
+            ]
+        },
+        {
+            "nid": "node17",
+            "nodes": [
+                {
+                    "nid": "node18"
+                },
+                {
+                    "nid": "node19"
+                },
+                {
+                    "nid": "node20"
+                },
+                {
+                    "nid": "node21"
+                },
+                {
+                    "nid": "node49"
+                },
+                {
+                    "nid": "node50"
+                },
+                {
+                    "nid": "node51",
+                    "nodes": [
+                        {
+                            "nid": "node84",
+                            "nodes": [
+                                {
+                                    "nid": "node116"
+                                },
+                                {
+                                    "nid": "node117"
+                                },
+                                {
+                                    "nid": "node118"
+                                }
+                            ]
+                        },
+                        {
+                            "nid": "node85"
+                        },
+                        {
+                            "nid": "node86"
+                        }
+                    ]
+                },
+                {
+                    "nid": "node52"
+                }
+            ]
+        },
+        {
+            "nid": "node27",
+            "nodes": [
+                {
+                    "nid": "node28"
+                },
+                {
+                    "nid": "node29"
+                },
+                {
+                    "nid": "node30"
+                },
+                {
+                    "nid": "node31"
+                },
+                {
+                    "nid": "node59"
+                },
+                {
+                    "nid": "node60"
+                },
+                {
+                    "nid": "node61",
+                    "nodes": [
+                        {
+                            "nid": "node93",
+                            "nodes": [
+                                {
+                                    "nid": "node125",
+                                    "nodes": [
+                                        {
+                                            "nid": "node158"
+                                        },
+                                        {
+                                            "nid": "node159"
+                                        },
+                                        {
+                                            "nid": "node160"
+                                        },
+                                        {
+                                            "nid": "node161"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nid": "node126"
+                                },
+                                {
+                                    "nid": "node127"
+                                },
+                                {
+                                    "nid": "node128"
+                                }
+                            ]
+                        },
+                        {
+                            "nid": "node94"
+                        },
+                        {
+                            "nid": "node95"
+                        },
+                        {
+                            "nid": "node96"
+                        }
+                    ]
+                },
+                {
+                    "nid": "node62"
+                }
+            ]
+        },
+        {
+            "nid": "node32",
+            "nodes": [
+                {
+                    "nid": "node64"
+                },
+                {
+                    "nid": "node65"
+                },
+                {
+                    "nid": "node66",
+                    "nodes": [
+                        {
+                            "nid": "node98",
+                            "nodes": [
+                                {
+                                    "nid": "node130",
+                                    "nodes": [
+                                        {
+                                            "nid": "node163"
+                                        },
+                                        {
+                                            "nid": "node164"
+                                        },
+                                        {
+                                            "nid": "node165"
+                                        },
+                                        {
+                                            "nid": "node166"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nid": "node131"
+                                },
+                                {
+                                    "nid": "node132"
+                                },
+                                {
+                                    "nid": "node133"
+                                }
+                            ]
+                        },
+                        {
+                            "nid": "node99"
+                        },
+                        {
+                            "nid": "node100"
+                        }
+                    ]
+                },
+                {
+                    "nid": "node67"
+                }
+            ]
+        },
+        {
+            "nid": "node38"
+        },
+        {
+            "nid": "node42",
+            "nodes": [
+                {
+                    "nid": "node74",
+                    "nodes": [
+                        {
+                            "nid": "node106"
+                        },
+                        {
+                            "nid": "node107"
+                        },
+                        {
+                            "nid": "node108",
+                            "nodes": [
+                                {
+                                    "nid": "node140",
+                                    "nodes": [
+                                        {
+                                            "nid": "node173"
+                                        },
+                                        {
+                                            "nid": "node174"
+                                        },
+                                        {
+                                            "nid": "node175"
+                                        },
+                                        {
+                                            "nid": "node176"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nid": "node141"
+                                },
+                                {
+                                    "nid": "node142"
+                                },
+                                {
+                                    "nid": "node143"
+                                }
+                            ]
+                        },
+                        {
+                            "nid": "node109"
+                        }
+                    ]
+                },
+                {
+                    "nid": "node75"
+                },
+                {
+                    "nid": "node76"
+                },
+                {
+                    "nid": "node77"
+                }
+            ]
+        },
+        {
+            "nid": "node48"
+        },
+        {
+            "nid": "node53"
+        },
+        {
+            "nid": "node58"
+        },
+        {
+            "nid": "node63"
+        },
+        {
+            "nid": "node73"
+        },
+        {
+            "nid": "node78"
+        },
+        {
+            "nid": "node82"
+        },
+        {
+            "nid": "node87"
+        },
+        {
+            "nid": "node92"
+        },
+        {
+            "nid": "node97"
+        },
+        {
+            "nid": "node101"
+        },
+        {
+            "nid": "node105"
+        },
+        {
+            "nid": "node110"
+        },
+        {
+            "nid": "node115"
+        },
+        {
+            "nid": "node119",
+            "nodes": [
+                {
+                    "nid": "node152"
+                },
+                {
+                    "nid": "node153"
+                },
+                {
+                    "nid": "node154"
+                },
+                {
+                    "nid": "node155"
+                },
+                {
+                    "nid": "node156"
+                },
+                {
+                    "nid": "node24"
+                }
+            ]
+        },
+        {
+            "nid": "node124"
+        },
+        {
+            "nid": "node129"
+        },
+        {
+            "nid": "node134"
+        },
+        {
+            "nid": "node139"
+        },
+        {
+            "nid": "node144"
+        },
+        {
+            "nid": "node145",
+            "nodes": [
+                {
+                    "nid": "node178"
+                },
+                {
+                    "nid": "node179"
+                },
+                {
+                    "nid": "node180"
+                },
+                {
+                    "nid": "node181"
+                }
+            ]
+        },
+        {
+            "nid": "node151"
+        },
+        {
+            "nid": "node157"
+        },
+        {
+            "nid": "node162"
+        },
+        {
+            "nid": "node167"
+        },
+        {
+            "nid": "node172"
+        },
+        {
+            "nid": "node177"
+        }
+    ]
+}
