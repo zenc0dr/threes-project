@@ -20,41 +20,60 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->nodes()->model('dmbfxt7vm4xd')->toArray()
-        );
+        $items = ths()->connector()->mySql([
+            'host' => 'db',
+            'database' => 'azimut',
+            'username' => 'azimut',
+            'password' => 'azimut',
+            'port' => '3306',
+        ])->table('mcmraak_rivercrs_checkins')
+            ->get();
+        dd($items);
+    }
 
+    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
+    public function nodeTest()
+    {
+        $nid = request('nid');
 
-        #Node::truncate();
-        #$node = ths()->nodes()->createNode();
-        //$node = ths()->nodes()->model('n7abeanmj9yh');
-        //dd($node->getSchemaNode());
-        ths()->nodes()->getUiData('n7abeanmj9yh');
+        if ($nid) {
+            $node = Node::find($nid);
+        } else {
+            $node = ths()->nodes()->createNodeByClass();
+        }
+
+        dd($node->icon);
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:truncateNodes
+    public function truncateNodes()
+    {
+        Node::truncate();
     }
 
     # http://threes.dc/threes.api/debug.Tests:backlogToNodes
-    public function backlogToNodes()
+    public function backlogToNodes(): string
     {
         $features = Feature::all();
+
+        // Очистим все ноды
         Node::truncate();
 
-        // Мапим Feature ID -> Node
+        $structure = [];
         $featureToNode = [];
 
         foreach ($features as $feature) {
-            /** @var Feature $feature */
-            $node = app(Nodes::class)->createNode();
-
-            $node->nid = 'node' . $feature->id;
+            $node = new Node('node' . $feature->id);
             $node->name = $feature->name ?? 'Без названия';
+            $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
             $node->description = $feature->description ?? '';
             $node->data = $feature->description ?? '';
-            $node->icon = base_path('plugins/zen/threes/src/images/icons/cog.svg');
-
             $node->props = [
                 'tree' => true,
                 'schema' => true,
                 'store' => false,
+                'self_content' => true,
+                'show_children' => true,
                 'store_data' => [
                     'group' => 'Features',
                     'author' => 'Migration',
@@ -62,22 +81,35 @@ class Tests
                     'created_at' => now()->toDateTimeString(),
                 ]
             ];
-
             $node->save();
             $featureToNode[$feature->id] = $node;
+            $structure[$feature->id] = [];
         }
 
-        // Устанавливаем связи (иерархию)
+        // Заполняем карту детей
         foreach ($features as $feature) {
-            if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
-                $parentNode = $featureToNode[$feature->parent_id];
-                $childNode = $featureToNode[$feature->id];
-
-                $parentNode->addChild($childNode);
+            if ($feature->parent_id && isset($structure[$feature->parent_id])) {
+                $structure[$feature->parent_id][] = $feature->id;
             }
         }
 
-        return 'Features успешно перенесены в MongoDB как ноды.';
+        // Рекурсивно строим дерево
+        $buildTree = function ($id) use (&$buildTree, $structure, $featureToNode) {
+            $node = $featureToNode[$id];
+            $item = ['nid' => $node->nid];
+            if (!empty($structure[$id])) {
+                $item['nodes'] = array_map($buildTree, $structure[$id]);
+            }
+            return $item;
+        };
+
+        // Найдём корневые элементы (без parent_id)
+        $rootNodes = $features->filter(fn($f) => !$f->parent_id);
+        ths()->setSchema(
+            $rootNodes->map(fn($feature) => $buildTree($feature->id))->values()->all()
+        );
+
+        return 'Features успешно перенесены в файловые ноды';
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -85,75 +117,4 @@ class Tests
     {
         dd('Threes api works!');
     }
-
-    # http://threes.dc/threes.api/debug.Tests:testMongo
-    public function testMongo()
-    {
-
-//        dd(
-//            ths()->getSetting('author_token')
-//        );
-
-        //Node::truncate();
-
-        $node = new Node();
-        $node->name = 'Я нод';
-        $node->save();
-        $nid = $node->getNid();
-        $node = Node::find($nid);
-        dd(
-            $node->nid,
-            $node->name
-        );
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:addNodeToChildrenTest?nid=xxxxx&children_nid=yyyyyy
-    public function addNodeToChildrenTest()
-    {
-        ths()->nodes()->model(request('nid'))
-            ->addChild(request('children_nid'));
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:handleYamlFile
-    public function handleYamlFile()
-    {
-        $yaml_path = storage_path('backlog/VB_v1.yaml');
-        $yaml_content = file_get_contents($yaml_path);
-
-        // Подготовка: оборачиваем опасные строки
-        $prepared_yaml = $this->prepareYamlForParsing($yaml_content);
-
-        // Теперь безопасно парсим YAML
-        $data = Yaml::parse($prepared_yaml);
-
-        // Дальше делаешь что хочешь: цитируешь строки, сериализуешь обратно и т.д.
-        $output = Yaml::dump($data, 10, 2);
-
-        dd($output);
-    }
-
-
-
-    public function prepareYamlForParsing(string $yaml_content): string
-    {
-        // Регулярка для ключей вида: Ключ: значение с двоеточием внутри
-        return preg_replace_callback('/^(\s*\w[\w\-]*\s*:\s*)(.*)$/mu', function($matches) {
-            $key = $matches[1];
-            $value = trim($matches[2]);
-
-            // Если значение уже в кавычках — оставляем
-            if (str_starts_with($value, '"') || str_starts_with($value, "'")) {
-                return $matches[0];
-            }
-
-            // Если значение содержит двоеточие и не начинается на [ или { (то есть не массив или объект)
-            if (strpos($value, ':') !== false && !in_array($value[0], ['[', '{'])) {
-                $value = '"' . str_replace('"', '\"', $value) . '"';
-            }
-
-            return $key . $value;
-        }, $yaml_content);
-    }
-
-
 }

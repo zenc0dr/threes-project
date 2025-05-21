@@ -9,6 +9,9 @@ import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
 window.ths = {
+
+    Alerts: null, // Сюда монтируются сообщения
+
     requests_register: {},
     auth_token: null,
     bus: mitt(), // Шина событий
@@ -77,22 +80,20 @@ window.ths = {
         }
     },
 
-    // Отправить сообщение
+    // Показать 1 сообщение
     pushMessage(text, type) {
-        if ($ && $.oc && typeof $.oc.flashMsg === 'function') {
-            if (!type) {
-                type = 'info'
-            }
-            $.oc.flashMsg(text, type)
-        } else {
-            console.error('$.oc.flashMsg недоступен')
+        if (this.Alerts !== null) {
+            this.Alerts.push([{
+                text: text,
+                type: type
+            }])
         }
     },
 
     // Показать сообщения
     pushMessages(messages) {
-        for (let i in messages) {
-            this.pushMessage(messages[i])
+        if (this.Alerts !== null) {
+            this.Alerts.push(messages)
         }
     },
 

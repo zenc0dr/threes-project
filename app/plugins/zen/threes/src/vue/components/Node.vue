@@ -29,14 +29,16 @@ export default {
             return this.node?.props?.self_content !== false
         },
         asyncComponent() {
-            if (!this.node.handler) return null
+            if (!this.node.component) {
+                return null
+            }
 
             try {
                 return defineAsyncComponent(() =>
-                    import(`./nodes/${this.node.handler}.vue`)
+                    import(`./nodes/${this.node.component}.vue`)
                 )
             } catch (e) {
-                console.warn(`Не удалось загрузить компонент: ${this.node.handler}`, e)
+                console.warn(`Не удалось загрузить компонент: ${this.node.component}`, e)
                 return null
             }
         }

@@ -52,11 +52,9 @@ class Backlog
             $id = $ids[$id];
             $name = $feature['title'];
             $description = $feature['description'];
-            $category = $feature['category'];
-            $priority = $feature['priority'] ?? 'normal';
-            $status = $feature['status'] ?? 'planned';
+            $category = $feature['group'];
             $tags = $feature['tags'];
-            $dependencies = $feature['dependencies'];
+            //$dependencies = $feature['dependencies'];
             $acceptance_criteria = $feature['acceptance_criteria'];
             $parent_id = $feature['parent_id'] ? $ids[$feature['parent_id']] : null;
             $module = $feature['module'];
@@ -75,9 +73,9 @@ class Backlog
                 'name' => $name,
                 'description' => $description,
                 'category' => $category,
-                'priority' => $priority,
-                'status' => $status,
-                'module' => $module,
+                'priority' => null,
+                'status' => null,
+                'module' => null,
                 'release' => 1,
                 'acceptance_criteria' => $acceptance_criteria,
             ]);

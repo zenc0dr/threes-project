@@ -1,6 +1,6 @@
 <?php
 
-namespace Zen\Threes\Api\nodes;
+namespace Zen\Threes\Api\Nodes;
 
 use Zen\Threes\Traits\QueryLogTrait;
 
@@ -8,12 +8,14 @@ class Node
 {
     use QueryLogTrait;
 
-    public function setNodeIcon()
+    # http://threes.dc/threes.api/nodes.node:setNodeIcon?debug
+    protected function setNodeIcon(): array
     {
         ths()->nodes()->setNodeIcon(
             request('nid'),
             request('svg')
         );
+        return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
@@ -51,7 +53,29 @@ class Node
     {
         ths()->nodes()->updateNodeData(
             request('nid'),
-            request('data')
+            request('data'),
+            request('scope')
+        );
+        return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:add-node?debug
+    protected function addNode(): array
+    {
+        ths()->nodes()->addNode(
+            nid: request('nid'),
+            class: request('class'),
+        );
+        return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:move-node?debug
+    protected function moveNode(): array
+    {
+        ths()->nodes()->moveNode(
+            request('nid'),
+            request('target_nid'),
+            request('action')
         );
         return [];
     }

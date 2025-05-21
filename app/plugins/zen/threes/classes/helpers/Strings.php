@@ -4,6 +4,9 @@ namespace Zen\Threes\Classes\Helpers;
 
 use Str;
 
+/**
+ * Операции со строками
+ */
 trait Strings
 {
     /**

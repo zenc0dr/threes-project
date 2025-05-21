@@ -16,8 +16,9 @@ class OpenAiService
 
     /**
      * Выполнить запрос к Open Ai
-     * @param string $system_prompt
      * @param string $user_prompt
+     * @param string $system_prompt
+     * @param string $model
      * @return string
      * @throws Exception
      */

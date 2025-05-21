@@ -141,12 +141,27 @@ class Threes extends Helpers
 }
 
 ```
-`plugins/zen/threes/api/Ui.php`
+`plugins/zen/threes/api/Store.php`
 ```<?php
 
 namespace Zen\Threes\Api;
 
+class Store
+{
+    # http://threes.dc/threes.api/store:get
+    public function get(): array
+    {
+        return [
+            'nodes' => ths()->store()->getStoreNodes()
+        ];
+    }
+}
 
+```
+`plugins/zen/threes/api/Ui.php`
+```<?php
+
+namespace Zen\Threes\Api;
 
 class Ui
 {
@@ -154,11 +169,13 @@ class Ui
     public function getTreeNodes(): array
     {
         return [
-            'tree' => ths()->nodes()->getNodesTree()
+            'tree' => ths()->nodes()->getNodesTree(
+                search: request('search'),
+            )
         ];
     }
 
-    # http://threes.dc/threes.api/ui:get-schema-nodes?nid=dmbfxt7vm4xd
+    # http://threes.dc/threes.api/ui:get-schema-nodes?nid=node1
     public function getSchemaNodes(): array
     {
         return [
@@ -210,64 +227,96 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->nodes()->model('dmbfxt7vm4xd')->toArray()
-        );
+        $items = ths()->connector()->mySql([
+            'host' => 'db',
+            'database' => 'azimut',
+            'username' => 'azimut',
+            'password' => 'azimut',
+            'port' => '3306',
+        ])->table('mcmraak_rivercrs_checkins')
+            ->get();
+        dd($items);
+    }
 
+    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
+    public function nodeTest()
+    {
+        $nid = request('nid');
 
-        #Node::truncate();
-        #$node = ths()->nodes()->createNode();
-        //$node = ths()->nodes()->model('n7abeanmj9yh');
-        //dd($node->getSchemaNode());
-        ths()->nodes()->getUiData('n7abeanmj9yh');
+        if ($nid) {
+            $node = Node::find($nid);
+        } else {
+            $node = ths()->nodes()->createNodeByClass();
+        }
+
+        dd($node->icon);
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:truncateNodes
+    public function truncateNodes()
+    {
+        Node::truncate();
     }
 
     # http://threes.dc/threes.api/debug.Tests:backlogToNodes
-    public function backlogToNodes()
+    public function backlogToNodes(): string
     {
         $features = Feature::all();
+
+        // Очистим все ноды
         Node::truncate();
 
-        // Мапим Feature ID -> Node
+        $structure = [];
         $featureToNode = [];
 
         foreach ($features as $feature) {
-            /** @var Feature $feature */
-            $node = app(Nodes::class)->createNode();
-
-            $node->nid = 'node' . $feature->id;
+            $node = new Node('node' . $feature->id);
             $node->name = $feature->name ?? 'Без названия';
+            $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
             $node->description = $feature->description ?? '';
             $node->data = $feature->description ?? '';
-            $node->icon = base_path('plugins/zen/threes/src/images/icons/cog.svg');
-
             $node->props = [
                 'tree' => true,
                 'schema' => true,
-                'store' => [
+                'store' => false,
+                'self_content' => true,
+                'show_children' => true,
+                'store_data' => [
                     'group' => 'Features',
                     'author' => 'Migration',
                     'tags' => ["feature", "imported"],
                     'created_at' => now()->toDateTimeString(),
                 ]
             ];
-
             $node->save();
-
             $featureToNode[$feature->id] = $node;
+            $structure[$feature->id] = [];
         }
 
-        // Устанавливаем связи (иерархию)
+        // Заполняем карту детей
         foreach ($features as $feature) {
-            if ($feature->parent_id && isset($featureToNode[$feature->parent_id])) {
-                $parentNode = $featureToNode[$feature->parent_id];
-                $childNode = $featureToNode[$feature->id];
-
-                $parentNode->addChild($childNode);
+            if ($feature->parent_id && isset($structure[$feature->parent_id])) {
+                $structure[$feature->parent_id][] = $feature->id;
             }
         }
 
-        return 'Features успешно перенесены в MongoDB как ноды.';
+        // Рекурсивно строим дерево
+        $buildTree = function ($id) use (&$buildTree, $structure, $featureToNode) {
+            $node = $featureToNode[$id];
+            $item = ['nid' => $node->nid];
+            if (!empty($structure[$id])) {
+                $item['nodes'] = array_map($buildTree, $structure[$id]);
+            }
+            return $item;
+        };
+
+        // Найдём корневые элементы (без parent_id)
+        $rootNodes = $features->filter(fn($f) => !$f->parent_id);
+        ths()->setSchema(
+            $rootNodes->map(fn($feature) => $buildTree($feature->id))->values()->all()
+        );
+
+        return 'Features успешно перенесены в файловые ноды';
     }
 
     # http://threes.dc/threes.api/debug.Tests:test
@@ -275,84 +324,13 @@ class Tests
     {
         dd('Threes api works!');
     }
-
-    # http://threes.dc/threes.api/debug.Tests:testMongo
-    public function testMongo()
-    {
-
-//        dd(
-//            ths()->getSetting('author_token')
-//        );
-
-        //Node::truncate();
-
-        $node = new Node();
-        $node->name = 'Я нод';
-        $node->save();
-        $nid = $node->getNid();
-        $node = Node::find($nid);
-        dd(
-            $node->nid,
-            $node->name
-        );
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:addNodeToChildrenTest?nid=xxxxx&children_nid=yyyyyy
-    public function addNodeToChildrenTest()
-    {
-        ths()->nodes()->model(request('nid'))
-            ->addChild(request('children_nid'));
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:handleYamlFile
-    public function handleYamlFile()
-    {
-        $yaml_path = storage_path('backlog/VB_v1.yaml');
-        $yaml_content = file_get_contents($yaml_path);
-
-        // Подготовка: оборачиваем опасные строки
-        $prepared_yaml = $this->prepareYamlForParsing($yaml_content);
-
-        // Теперь безопасно парсим YAML
-        $data = Yaml::parse($prepared_yaml);
-
-        // Дальше делаешь что хочешь: цитируешь строки, сериализуешь обратно и т.д.
-        $output = Yaml::dump($data, 10, 2);
-
-        dd($output);
-    }
-
-
-
-    public function prepareYamlForParsing(string $yaml_content): string
-    {
-        // Регулярка для ключей вида: Ключ: значение с двоеточием внутри
-        return preg_replace_callback('/^(\s*\w[\w\-]*\s*:\s*)(.*)$/mu', function($matches) {
-            $key = $matches[1];
-            $value = trim($matches[2]);
-
-            // Если значение уже в кавычках — оставляем
-            if (str_starts_with($value, '"') || str_starts_with($value, "'")) {
-                return $matches[0];
-            }
-
-            // Если значение содержит двоеточие и не начинается на [ или { (то есть не массив или объект)
-            if (strpos($value, ':') !== false && !in_array($value[0], ['[', '{'])) {
-                $value = '"' . str_replace('"', '\"', $value) . '"';
-            }
-
-            return $key . $value;
-        }, $yaml_content);
-    }
-
-
 }
 
 ```
 `plugins/zen/threes/api/nodes/Node.php`
 ```<?php
 
-namespace Zen\Threes\Api\nodes;
+namespace Zen\Threes\Api\Nodes;
 
 use Zen\Threes\Traits\QueryLogTrait;
 
@@ -360,13 +338,23 @@ class Node
 {
     use QueryLogTrait;
 
+    # http://threes.dc/threes.api/nodes.node:setNodeIcon?debug
+    protected function setNodeIcon(): array
+    {
+        ths()->nodes()->setNodeIcon(
+            request('nid'),
+            request('svg')
+        );
+        return [];
+    }
+
     # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
     protected function setNodeSettings(): array
     {
-        $nid = request('nid');
-        $settings = request('settings');
-
-        ths()->nodes()->setNodeSettings($nid, $settings);
+        ths()->nodes()->setNodeSettings(
+            request('nid'),
+            request('settings')
+        );
         return [];
     }
 
@@ -380,16 +368,45 @@ class Node
         return [];
     }
 
-    # http://threes.dc/threes.api/nodes.node:add-line?nid=threes.default.node1
-    public function addLine(): array
+    # http://threes.dc/threes.api/nodes.node:set-node-description?debug
+    protected function setNodeDescription(): array
     {
+        ths()->nodes()->setNodeDescription(
+            request('nid'),
+            request('description')
+        );
+        return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:update-data?debug
+    protected function updateData(): array
+    {
+        ths()->nodes()->updateNodeData(
+            request('nid'),
+            request('data'),
+            request('scope')
+        );
         return [];
     }
 
     # http://threes.dc/threes.api/nodes.node:add-node?debug
     protected function addNode(): array
     {
-        ths()->nodes()->createNode();
+        ths()->nodes()->addNode(
+            nid: request('nid'),
+            class: request('class'),
+        );
+        return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:move-node?debug
+    protected function moveNode(): array
+    {
+        ths()->nodes()->moveNode(
+            request('nid'),
+            request('target_nid'),
+            request('action')
+        );
         return [];
     }
 }
@@ -480,6 +497,26 @@ class Backlog
                 'acceptance_criteria' => $acceptance_criteria,
             ]);
         }
+    }
+}
+
+```
+`plugins/zen/threes/classes/Connector.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+use Illuminate\Database\Connection;
+use Zen\Threes\Traits\SingletonTrait;
+use Zen\Threes\Classes\Connectors\MySqlConnector;
+
+class Connector
+{
+    use SingletonTrait;
+
+    public function mySql(array $config = []): Connection
+    {
+        return MySqlConnector::connect($config);
     }
 }
 
@@ -617,6 +654,8 @@ use Zen\Threes\Classes\Helpers\State;
 use Zen\Threes\Classes\Helpers\Strings;
 use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
+use Zen\Threes\Classes\Helpers\Env;
+use Zen\Threes\Classes\Helpers\Schema;
 
 class Helpers
 {
@@ -628,6 +667,8 @@ class Helpers
     use State;    # Управлением состоянием (сессия Threes)
     use Carbon;   # Создание объекта Carbon
     use Icon;     # Сервис иконок
+    use Env;      # Переменные окружения
+    use Schema;   # Управление схемами
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
@@ -645,6 +686,15 @@ class Helpers
     public function store(): Store
     {
         return Store::getInstance();
+    }
+
+    /**
+     * Коннекторы
+     * @return Connector
+     */
+    public function connector(): Connector
+    {
+        return Connector::getInstance();
     }
 
     /**
@@ -768,148 +818,250 @@ class Nodes
     }
 
     /**
-     * Создаёт новый нод по методу шаблона
+     * Создаёт новый нод по классу шаблона
      * @param string $template_method
      * @return Node
      * @throws \ReflectionException
      */
-    public function createNode(string $template_method = 'Zen.Threes.Classes.Nodes.Document.textTemplate'): Node
+    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.NodeText'): Node
     {
-        $template = ths()->exe($template_method);
         $node = $this->model();
-        $node->icon = $template['icon'];
-        $node->name = $template['name'];
-        $node->handler = $template['handler'];
-        $node->data = $template['data'];
-        $node->props = $template['props'];
+        $node->class = $class;
+        $template = $node->exe('template');
+
+        foreach ($template as $field => $value) {
+            $node->$field = $value;
+        }
         $node->save();
         return $node;
     }
 
-    public function getNodesTree(): array
+    /**
+     * Получить дерево нод для меню Tree
+     * @param string $schema_code
+     * @param string|null $search
+     * @return array
+     */
+    public function getNodesTree(string $schema_code = 'default', string $search = null): array
     {
-        $roots = Node::getRootNodes();
-        $tree = [];
-        foreach ($roots as $root) {
-            $subtree = $this->getNodeTree($root->nid);
-            if ($subtree !== null) {
-                $tree[] = $subtree;
+        $schema = ths()->getSchema($schema_code)['schema_nodes'];
+        $search = trim(mb_strtolower($search ?? ''));
+
+        $build_tree = function (array $item) use (&$build_tree, $search): ?array {
+            $node = \Zen\Threes\Models\Node::find(
+                $item['nid'],
+                ['icon', 'name', 'description', 'class', 'props']
+            );
+
+            if (!$node) return null;
+
+            $children = [];
+            if (!empty($item['nodes'])) {
+                foreach ($item['nodes'] as $child) {
+                    $child_node = $build_tree($child);
+                    if ($child_node) {
+                        $children[] = $child_node;
+                    }
+                }
             }
-        }
-        return $tree;
+
+            // Фильтрация по name или nid
+            $matches = !$search
+                || str_contains(mb_strtolower($node->name), $search)
+                || str_contains(mb_strtolower($node->nid), $search)
+                || count($children) > 0;
+
+            if (!$matches) {
+                return null;
+            }
+
+            $result = [
+                'nid' => $node->nid,
+                'icon' => $node->icon,
+                'name' => $node->name,
+                'description' => $node->description,
+                'class' => $node->class,
+                'props' => $node->props,
+            ];
+
+            if ($children) {
+                $result['nodes'] = $children;
+            }
+
+            return $result;
+        };
+
+        return array_values(array_filter(array_map($build_tree, $schema)));
     }
 
-    public function getNodeTree(string $nid): ?array
+    /**
+     * Построение дерева нод
+     * @param string $nid
+     * @param string $schema_code
+     * @return array
+     */
+    public function getNodesSchema(string $nid, string $schema_code = 'default'): array
     {
-        $node = Node::find($nid);
+        $schema_nodes = ths()->getSchema($schema_code)['schema_nodes'] ?? [];
+        $target_branch = $this->findSchemaBranchByNid($schema_nodes, $nid);
+        if (!$target_branch) {
+            return [];
+        }
+        return $this->buildSchemaFromBranch($target_branch, true);
+    }
+
+    /**
+     * Рекурсивно ищет нужную ветку в schema_nodes по nid
+     * @param array $nodes
+     * @param string $target_nid
+     * @return array|null
+     */
+    protected function findSchemaBranchByNid(array $nodes, string $target_nid): ?array
+    {
+        foreach ($nodes as $node_item) {
+            if ($node_item['nid'] === $target_nid) {
+                return $node_item;
+            }
+
+            if (!empty($node_item['nodes'])) {
+                $found = $this->findSchemaBranchByNid($node_item['nodes'], $target_nid);
+                if ($found) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Рекурсивно строит дерево схемы, начиная с одной ветки
+     * @param array $branch
+     * @param bool $is_root
+     * @return array|null
+     * @throws \ReflectionException
+     */
+    protected function buildSchemaFromBranch(array $branch, bool $is_root = false): ?array
+    {
+        $nid = $branch['nid'];
+        $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'class', 'data']);
+
         if (!$node) {
             return null;
         }
 
-        $children = $node->resolveChildren();
+        $props = $node->props ?? [];
 
-        $child_trees = [];
-        foreach ($children as $child) {
-            $subtree = $this->getNodeTree($child->nid);
-            if ($subtree !== null) {
-                $child_trees[] = $subtree;
+        // Контент схемы: либо selfContent, либо getSchema
+        $schema_node = [
+            'nid' => $node->nid,
+            'icon' => $node->icon,
+            'name' => $node->name,
+            'description' => $node->description,
+            'props' => $props,
+        ];
+
+        if ($is_root && !empty($props['self_content'])) {
+            $handler_data = $node->exe('getSelfContent', $node->data);
+            $schema_node['component'] = $handler_data['component'];
+            $schema_node['data'] = $handler_data['data'];
+        } elseif (!$is_root) {
+            $handler_data = $node->exe('getSchema', $node->data);
+            $schema_node['component'] = $handler_data['component'];
+            $schema_node['data'] = $handler_data['data'];
+        }
+
+        // Рекурсивно достроим дочерние элементы, если разрешено
+        if (!empty($props['show_children']) && !empty($branch['nodes'])) {
+            $children = [];
+
+            foreach ($branch['nodes'] as $child_branch) {
+                $child_schema = $this->buildSchemaFromBranch($child_branch, false);
+                if ($child_schema !== null) {
+                    $children[] = $child_schema;
+                }
+            }
+
+            if (!empty($children)) {
+                $schema_node['nodes'] = $children;
             }
         }
 
-        // Если node не предназначен для дерева — пропускаем, возвращая только детей
-        if (!($node->props['tree'] ?? true)) {
-            return count($child_trees) > 0 ? ['children' => $child_trees] : null;
-        }
-
-        // Используем getTreeNode() как основу
-        $data = $node->getTreeNode();
-        if (!$data) {
-            return null;
-        }
-
-        if ($child_trees) {
-            $data['children'] = $child_trees;
-        }
-
-        return $data;
+        return $schema_node;
     }
 
-    public function getNodesSchema(string $nid): array
+    /**
+     * Установить иконку для нода
+     * @param string $nid
+     * @param string $svg
+     * @return void
+     */
+    public function setNodeIcon(string $nid, string $svg): void
     {
         $node = Node::find($nid);
-        if (!$node) {
-            return [];
-        }
-
-        # Получаем основную структуру узла
-        $data = $node->getSchemaNode();
-        if (!$data) {
-            return [];
-        }
-
-        # Если schema выключена — возвращаем только потомков (если show_children разрешено)
-        if (!($node->props['schema'] ?? false)) {
-            if (($node->props['show_children'] ?? true) === false) {
-                return [];
-            }
-
-            $child_schemas = [];
-            foreach ($node->resolveChildren() as $child) {
-                $subschema = $this->getNodesSchema($child->nid);
-                if (!empty($subschema)) {
-                    $child_schemas[] = $subschema;
-                }
-            }
-
-            return count($child_schemas) > 0 ? ['children' => $child_schemas] : [];
-        }
-
-        # Если schema включена — добавляем детей только если разрешено
-        if (($node->props['show_children'] ?? true) !== false) {
-            $child_schemas = [];
-            foreach ($node->resolveChildren() as $child) {
-                $subschema = $this->getNodesSchema($child->nid);
-                if (!empty($subschema)) {
-                    $child_schemas[] = $subschema;
-                }
-            }
-
-            if ($child_schemas) {
-                $data['children'] = $child_schemas;
-            }
-        }
-
-        return $data;
+        $node->icon = $svg;
+        $node->save();
     }
 
+    /**
+     * Установить имя нода
+     * @param string $nid
+     * @param string|null $name
+     * @return void
+     */
     public function setNodeName(string $nid, string $name = null): void
     {
-        if (!$name) {
-            return;
-        }
         $node = Node::find($nid);
         $node->name = $name;
         $node->save();
     }
 
+    /**
+     * Сохранить описание нода
+     * @param string $nid
+     * @param string|null $description
+     * @return void
+     */
+    public function setNodeDescription(string $nid, string $description = null): void
+    {
+        if (!$description) {
+            return;
+        }
+        $node = Node::find($nid);
+        $node->description = $description;
+        $node->save();
+    }
+
+    /**
+     * Тут определяется массив настроек нода
+     * @param string $nid
+     * @return array
+     */
     public function getNodeSettings(string $nid): array
     {
         $node = Node::find($nid);
         $props = $node->props;
 
         return [
+            'tree' => $props['tree'] ?? false,
+            'store' => $props['store'] ?? false,
+            'schema' => $props['schema'] ?? false,
             'self_content' => $props['self_content'] ?? false,
             'show_children' => $props['show_children'] ?? false,
         ];
     }
 
+    /**
+     * Настройки устанавливаются
+     * @param string $nid
+     * @param array $settings
+     * @return void
+     */
     public function setNodeSettings(string $nid, array $settings): void
     {
 
         $node = Node::find($nid);
         $props = $node->props;
-
-        //dd($props, $settings);
 
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
@@ -917,8 +1069,127 @@ class Nodes
         if (isset($settings['show_children'])) {
             $props['show_children'] = $settings['show_children'];
         }
+        if (isset($settings['store'])) {
+            $props['store'] = $settings['store'];
+        }
+        if (isset($settings['tree'])) {
+            $props['tree'] = $settings['tree'];
+        }
+        if (isset($settings['schema'])) {
+            $props['schema'] = $settings['schema'];
+        }
         $node->props = $props;
         $node->save();
+    }
+
+    /**
+     * Обновить данные нода
+     * @param string $nid
+     * @param array|string|null $data
+     * @param $scope
+     * @return void
+     */
+    public function updateNodeData(
+        string $nid, array|string|null $data,
+        string $scope = 'self_content'
+    ): void {
+        $node = Node::find($nid);
+        $node->scope = $scope;
+        $node->data = $data;
+        $node->save();
+        ths()->messages()->addMessage('Данные нод обновлены');
+    }
+
+    /**
+     * Добавить нод
+     * @param string|null $nid
+     * @param string|null $class
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function addNode(string $nid = null, string $class = null): void
+    {
+        $schema = ths()->getSchema();
+        if ($nid && !$class) {
+            $node = Node::find($nid);
+            if ($node) {
+                $schema['schema_nodes'][] = ['nid' => $nid];
+                ths()->setSchema($schema['schema_nodes']);
+            }
+        } elseif ($class) {
+            $node = $this->createNodeByClass($class);
+            if ($node) {
+                $schema['schema_nodes'][] = ['nid' => $node->nid];
+                ths()->setSchema($schema['schema_nodes']);
+            }
+        }
+    }
+
+    /**
+     * Переместить нод
+     * @param string $nid
+     * @param string $target_nid
+     * @param string $action - into || after - Указывает разместить нод после или как наследника
+     * @return void
+     */
+    public function moveNode(string $nid, string $target_nid, string $action): void
+    {
+        // Получаем текущую схему
+        $schema = ths()->getSchema();
+        $schema_nodes = $schema['schema_nodes'];
+
+        // Сохраняем узел для перемещения
+        $moving_node = null;
+
+        // Рекурсивно ищем и удаляем перемещаемый узел
+        $remove_node = function (&$nodes) use ($nid, &$moving_node, &$remove_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Рекурсивно ищем целевой узел и вставляем перемещаемый узел
+        $insert_node = function (&$nodes) use ($target_nid, $action, &$moving_node, &$insert_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    if ($action === 'into') {
+                        if (!isset($node['nodes'])) {
+                            $node['nodes'] = [];
+                        }
+                        $node['nodes'][] = $moving_node;
+                    } else if ($action === 'after') {
+                        array_splice($nodes, $key + 1, 0, [$moving_node]);
+                    }
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_node($node['nodes'])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Выполняем перемещение
+        $remove_node($schema_nodes);
+        if ($moving_node) {
+            $insert_node($schema_nodes);
+        }
+
+        // Сохраняем обновленную схему
+        ths()->setSchema($schema_nodes);
     }
 }
 
@@ -963,21 +1234,60 @@ class Store
 {
     use SingletonTrait;
 
-    public function getStoreNodes(string $filter_text = null): array
+    public function getStoreNodes(): array
     {
-        $nodes = Node::where(function ($query) use ($filter_text) {
-            if ($filter_text) {
-                $query->orWhere('nid', 'like', "%$filter_text%");
-                $query->orWhere('name', 'like', "%$filter_text%");
-                $query->orWhere('description', 'like', "%$filter_text%");
-            }
-        })->get();
+        $store = [];
 
-        $output = [];
-        foreach ($nodes as $node) {
-            $output[] = $node->store_item;
+        $nodes_templates_path = base_path('plugins/zen/threes/classes/nodes');
+        $node_templates = ths()->filesList($nodes_templates_path);
+
+        foreach ($node_templates as $node_template) {
+            if ($node_template['extension'] !== 'php') {
+                continue;
+            }
+
+            $class = 'Zen.Threes.Classes.Nodes.' . pathinfo($node_template['name'], PATHINFO_FILENAME);
+
+            try {
+                $node = ths()->nodes()->model();
+                $node->class = $class;
+                $template = $node->exe('template');
+                $store[] = [
+                    'nid' => null,
+                    'name' => $template['name'] ?? 'Без названия',
+                    'icon' => ths()->checkIcon($template['icon']),
+                    'description' => $template['description'] ?? '',
+                    'class' => $class,
+                    'template' => true,
+                    'group' => $template['props']['store_data']['group'] ?? 'Шаблоны'
+                ];
+            } catch (\Throwable) {
+                continue;
+            }
         }
-        return $output;
+
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $node_dirs = ths()->dirList($nodes_storage_path);
+
+        foreach ($node_dirs as $nid) {
+            $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'class']);
+
+            if (!$node || !($node->props['store'] ?? false)) {
+                continue;
+            }
+
+            $store[] = [
+                'nid' => $node->nid,
+                'name' => $node->name,
+                'icon' => $node->icon,
+                'description' => $node->description,
+                'class' => $node->class,
+                'template' => false,
+                'group' => $node->props['store_data']['group'] ?? 'Сохранённые'
+            ];
+        }
+
+        return $store;
     }
 }
 
@@ -996,6 +1306,49 @@ class Versions
     use SingletonTrait;
 
     # Методы версионирования в Version
+}
+
+```
+`plugins/zen/threes/classes/connectors/MySqlConnector.php`
+```<?php
+
+namespace Zen\Threes\Classes\Connectors;
+
+use Illuminate\Database\Connection;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+
+class MySqlConnector
+{
+    /**
+     * Устанавливает соединение с базой данных MySQL с возможностью переопределения параметров
+     *
+     * @param array $config Параметры подключения (хост, пользователь, пароль и т.д.)
+     * @return Connection
+     */
+    public static function connect(array $config = []): Connection
+    {
+        // Если конфигурация не передана, используем стандартное подключение
+        if (empty($config)) {
+            return DB::connection('mysql');
+        }
+
+        // Имя для динамического соединения
+        $connectionName = 'mysql_dynamic';
+
+        // Устанавливаем конфигурацию для нового соединения,
+        // используя за основу стандартные настройки MySQL
+        Config::set("database.connections.{$connectionName}", array_merge(
+            config('database.connections.mysql'),
+            $config
+        ));
+
+        // Очищаем кеш соединения, если оно уже было создано
+        DB::purge($connectionName);
+
+        // Возвращаем новое соединение с переопределёнными параметрами
+        return DB::connection($connectionName);
+    }
 }
 
 ```
@@ -1075,6 +1428,32 @@ trait Debug
 }
 
 ```
+`plugins/zen/threes/classes/helpers/Env.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+trait Env
+{
+    private static array $env = [
+        'NODES_STORAGE' => [
+            'default' => 'storage/threes/nodes',
+        ],
+        'SCHEMES_STORAGE' => [
+            'default' => 'storage/threes/schemes',
+        ]
+    ];
+    public function env(string $key): ?string
+    {
+        if (isset(self::$env[$key]['value'])) {
+            return self::$env[$key]['value'];
+        }
+
+        return self::$env[$key]['value'] = base_path(env($key, self::$env[$key]['default']));
+    }
+}
+
+```
 `plugins/zen/threes/classes/helpers/Files.php`
 ```<?php
 
@@ -1120,6 +1499,18 @@ trait Files
         }
         return collect($output);
     }
+
+    /**
+     * Возвращает список папок в папке
+     * @param string $dir_path
+     * @return array
+     */
+    public function dirList(string $dir_path): array
+    {
+        return array_filter(scandir($dir_path), function ($entry) use ($dir_path) {
+            return $entry !== '.' && $entry !== '..' && is_dir($dir_path . '/' . $entry);
+        });
+    }
 }
 
 ```
@@ -1158,6 +1549,18 @@ trait Icon
     public function getIcon(string $hash): string
     {
         return env('APP_URL') . "/storage/app/uploads/public/threes/icons/$hash.svg";
+    }
+
+    public function checkIcon(string $path): string
+    {
+        $contents = file_get_contents($path);
+        $hash = md5($contents);
+        $path = storage_path("app/uploads/public/threes/icons/$hash.svg");
+        if (!file_exists($path)) {
+            $path = ths()->checkDir($path);
+            file_put_contents($path, $contents);
+        }
+        return $this->getIcon($hash);
     }
 
 }
@@ -1257,6 +1660,46 @@ trait Json
 }
 
 ```
+`plugins/zen/threes/classes/helpers/Schema.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+trait Schema
+{
+    /**
+     * @param string $schema_code
+     * @return array|null
+     */
+    public function getSchema(string $schema_code = 'default'): array
+    {
+        $schema_path = ths()->env('SCHEMES_STORAGE');
+        $schema_file = $schema_path . "/$schema_code.json";
+        return ths()->fromJsonFile($schema_file) ?? [];
+    }
+
+    /**
+     * @param string $schema_code
+     * @param string $schema_name
+     * @param array $nodes
+     * @return void
+     */
+    public function setSchema(
+        array $nodes,
+        string $schema_code = 'default',
+        string $schema_name = 'Схема проекта',
+    ): void {
+        $schema_path = ths()->env('SCHEMES_STORAGE');
+        $schema_file = $schema_path . "/$schema_code.json";
+        $schema = [
+            'schema_name' => $schema_name,
+            'schema_nodes' => $nodes
+        ];
+        ths()->toJsonFile($schema_file, $schema);
+    }
+}
+
+```
 `plugins/zen/threes/classes/helpers/State.php`
 ```<?php
 
@@ -1300,6 +1743,9 @@ namespace Zen\Threes\Classes\Helpers;
 
 use Str;
 
+/**
+ * Операции со строками
+ */
 trait Strings
 {
     /**
@@ -1418,39 +1864,129 @@ trait Yaml
 }
 
 ```
-`plugins/zen/threes/classes/nodes/Document.php`
+`plugins/zen/threes/classes/nodes/NodeBuilder.php`
 ```<?php
 
 namespace Zen\Threes\Classes\Nodes;
 
-class Document
+use Zen\Threes\Models\Node;
+
+class NodeBuilder
 {
-    public function textTemplate(): array
+    private Node $node;
+    private mixed $data;
+
+    public function __construct($data)
+    {
+        $this->node = $data['node'];
+        $this->data = $data['data'];
+    }
+
+    public function template(): array
     {
         return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/cog.svg'),
-            'name' => "Новый документ",
-            'handler' => 'Zen.Threes.Classes.Nodes.Document.text',
-            'data' => 'Привет мир!',
+            'icon' => base_path('plugins/zen/threes/src/images/icons/code.svg'),
+            'name' => "Новый интерфейс",
+            'class' => 'Zen.Threes.Classes.Nodes.NodeBuilder',
+            'data' => null,
             'props' => [
+                'self_content' => true,
+                'show_children' => false,
                 'tree' => true,
                 'schema' => true,
-                'store' => [
-                    'group' => 'Документы',
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Фронтенд',
                     'author' => 'Threes',
-                    'tags' => ["text", "documents"],
+                    'tags' => ["html", "frontend"],
                     'created_at' => now()->toDateTimeString(),
                 ]
             ]
         ];
     }
 
-    public function text($data): array
+    public function getSelfContent(): array
+    {
+        return $this->getSchema();
+    }
+
+    public function setSelfContent(): mixed
+    {
+        return $this->data;
+    }
+
+    public function getSchema(): array
     {
         return [
-            'handler' => 'NodeText',
-            'data' => $data,
+            'component' => 'NodeBuilder',
+            'data' => $this->data,
         ];
+    }
+}
+
+```
+`plugins/zen/threes/classes/nodes/NodeText.php`
+```<?php
+
+namespace Zen\Threes\Classes\Nodes;
+
+use Zen\Threes\Models\Node;
+
+class NodeText
+{
+    private Node $node;
+    private mixed $data;
+
+    public function __construct($data)
+    {
+        $this->node = $data['node'];
+        $this->data = $data['data'];
+    }
+
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
+            'name' => "Новый документ",
+            'class' => 'Zen.Threes.Classes.Nodes.NodeText',
+            'data' => 'Привет мир!',
+            'props' => [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["text", "document"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function getSelfContent(): array
+    {
+        return $this->getSchema();
+    }
+
+    public function setSelfContent()
+    {
+        return $this->data;
+    }
+
+    public function getSchema(): array
+    {
+        return [
+            'component' => 'NodeText',
+            'data' => $this->data,
+        ];
+    }
+
+    public function setSchema()
+    {
+        return $this->data;
     }
 }
 
@@ -1530,8 +2066,9 @@ class OpenAiService
 
     /**
      * Выполнить запрос к Open Ai
-     * @param string $system_prompt
      * @param string $user_prompt
+     * @param string $system_prompt
+     * @param string $model
      * @return string
      * @throws Exception
      */
@@ -1627,7 +2164,7 @@ class Vector extends Command
             '/app/plugins/zen/threes/package-lock.json',
             '/app/plugins/zen/threes/assets',
             '/app/plugins/zen/threes/controllers',
-            'app/plugins/zen/threes/src/vue/trash',
+            '/app/plugins/zen/threes/src/vue/trash',
         ];
 
         // Файлы, которые нужно включить в любом случае
@@ -1968,45 +2505,60 @@ class Frame extends Model
 
 namespace Zen\Threes\Models;
 
-use Zen\Threes\Traits\NodeMethodsTrait;
+
+use Exception;
 
 /**
- * @property string $nid
- * @property string $icon
- * @property string $name
- * @property string $description
- * @property string $handler
- * @property string | array $data
- * @property array $props
+ * @property string $nid - Уникальный идентификатор нода
+ * @property string $icon - Иконка
+ * @property string $name - Имя нода
+ * @property string $description - Описание нода
+ * @property string $class - Класс нода
+ * @property array $data - Данные нода
+ * @property array $props - Настройки нода
  */
 class Node
 {
-    use NodeMethodsTrait;
-
-    public static string $database   = 'threes';
-    public static string $collection = 'nodes';
-
     protected array $attributes = [];
 
-    public function __construct(array $data = [])
+    protected static array $fields = [
+        'icon'=> 'string',
+        'name' => 'string',
+        'description' => 'string',
+        'class' => 'string',
+        'data' => 'array',
+        'props' => 'array'
+    ];
+
+    protected static array $extensions = [
+        'string' => 'txt',
+        'array' => 'json',
+        'object' => 'object',
+    ];
+
+    public ?string $scope = null;
+
+    public function __construct(string $nid = null)
     {
-        $this->attributes = $this->normalizeValue($data);
+        if ($nid) {
+            $this->attributes['nid'] = $nid;
+        }
     }
 
-    // Геттеры и Сеттеры
     public function __get($key)
     {
-        $method = 'get' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        $method = $this->studlyCaser('get', $key);
+        $data = $this->attributes[$key] ?? null;
         if (method_exists($this, $method)) {
-            return $this->$method();
+            return $this->$method($data);
         }
 
-        return $this->normalizeValue($this->attributes[$key] ?? null);
+        return $data;
     }
 
     public function __set($key, $value): void
     {
-        $method = 'set' . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $key))) . 'Attribute';
+        $method = $this->studlyCaser('set', $key);
         if (method_exists($this, $method)) {
             $this->$method($value);
         } else {
@@ -2014,94 +2566,341 @@ class Node
         }
     }
 
-    public function getNidAttribute(): ?string
-    {
-        return $this->attributes['_id'] ?? null;
-    }
-
-    public function getNid(): ?string
-    {
-        return $this->attributes['_id'] ?? null;
-    }
-
+    /**
+     * Сеттер иконки
+     * @param string $svg
+     * @return void
+     */
     public function setIconAttribute(string $svg): void
     {
         $this->attributes['icon'] = ths()->setIcon($svg);
     }
 
-    public function getIconAttribute(): string
+    /**
+     * Геттер иконки
+     * @param string $hash
+     * @return string|null
+     */
+    public function getIconAttribute(string $hash): ?string
     {
-        return ths()->getIcon($this->attributes['icon']);
-    }
-
-    private function setTimestamps(): void
-    {
-        $now = date('c');
-        if (!$this->exists()) {
-            $this->attributes['created_at'] = $now;
-        }
-        $this->attributes['updated_at'] = $now;
-    }
-
-    protected function beforeSave(): void
-    {
-        $this->setTimestamps();
-    }
-
-    protected function afterSave(): void {}
-
-    public function toArray(): array
-    {
-        return $this->attributes;
-    }
-
-    // ----- Форматы для UI -----
-
-    public function getTreeNode(): ?array
-    {
-        if (!($this->props['tree'] ?? true)) {
+        if (!$hash) {
             return null;
         }
-
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-        ];
+        return ths()->getIcon($hash);
     }
 
-    public function getSchemaNode(): ?array
+    /**
+     * Вызов метода класса нода
+     * @param string $method
+     * @param mixed|null $data
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function exe(string $method, mixed $data = null): mixed
     {
-        if (!($this->props['schema'] ?? false)) {
-            return null;
+        return ths()->exe("$this->class.$method", [
+            'node' => $this,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Получить атрибут используя dotted path
+     * @param string $path
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public function getAttr(string $path, mixed $default = null): mixed
+    {
+        $segments = explode('.', $path);
+        $value = $this->attributes;
+
+        foreach ($segments as $segment) {
+            if (is_array($value) && array_key_exists($segment, $value)) {
+                $value = $value[$segment];
+            } else {
+                return $default;
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Установить атрибут используя dotted path
+     * @param string $path
+     * @param mixed $value
+     * @return void
+     */
+    public function setAttr(string $path, mixed $value): void
+    {
+        $segments = explode('.', $path);
+        $ref = &$this->attributes;
+
+        foreach ($segments as $segment) {
+            if (!is_array($ref)) {
+                $ref = [];
+            }
+            if (!array_key_exists($segment, $ref)) {
+                $ref[$segment] = [];
+            }
+            $ref = &$ref[$segment];
         }
 
-        $component_data = ths()->exe($this->handler, null, $this->data);
-
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'description' => $this->description,
-            'handler' => $component_data['handler'],
-            'data' => $component_data['data'],
-            'props' => $this->props,
-        ];
+        $ref = $value;
     }
 
-    public function getStoreNode(): ?array
+    /**
+     * Получить экземпляр нода
+     * @param string $nid
+     * @param array|null $fields - Если указано, будут загружаться только эти поля
+     * @return Node
+     */
+    public static function find(string $nid, ?array $fields = null): ?Node
     {
-        if (!isset($this->props['store'])) {
+        $node = new self($nid);
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $node_path = "$nodes_storage_path/$nid";
+        if (file_exists($node_path)) {
+            $fields_to_load = $fields ?? array_keys(self::$fields);
+            foreach ($fields_to_load as $field_name) {
+                if (isset(self::$fields[$field_name])) {
+                    $node->loadField($field_name);
+                }
+            }
+        } else {
             return null;
         }
-
-        return [
-            'nid' => $this->nid,
-            'icon' => $this->icon,
-            'name' => $this->name,
-            'description' => $this->description,
-        ];
+        return $node;
     }
+
+    /**
+     * Метод преобразования строк вида string_name в StringName
+     * @param string $direction
+     * @param string $method
+     * @param string $postfix
+     * @return string
+     */
+    private function studlyCaser(
+        string $direction,
+        string $method,
+        string $postfix = 'Attribute'
+    ): string {
+        return $direction
+            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method)))
+            . $postfix;
+    }
+
+    /**
+     * Сохранить данные экземпляра
+     * @return void
+     */
+    public function save(): void
+    {
+        $this->beforeSave();
+
+        if (empty($this->attributes['nid'])) {
+            $this->attributes['nid'] = ths()->createShortId();
+        }
+
+        foreach ($this->attributes as $key => $value) {
+            if ($key === 'nid') {
+                continue;
+            }
+            $this->saveField($key, $value);
+        }
+
+        $this->afterSave();
+    }
+
+    /**
+     * Сохранение значения указанного поля
+     * @param string $field_name Название поля, значение которого необходимо сохранить
+     * @param string|object|array|int|bool|null $value Значение для сохранения. В зависимости от формата поля может быть преобразовано
+     * @return void
+     */
+    private function saveField(string $field_name, string | object | array | int | bool | null $value): void
+    {
+        $field_format = self::$fields[$field_name];
+        $field_extension = self::$extensions[$field_format];
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $field_path = ths()->checkDir(
+            "$nodes_storage_path/$this->nid/$field_name.$field_extension"
+        );
+
+        if ($value === null) {
+            unlink($field_path);
+            return;
+        }
+
+        if ($field_format === 'object') {
+            $value = serialize($value);
+        }
+
+        if ($field_format === 'array') {
+            $value = ths()->toJson($value);
+        }
+
+        $value = (string) $value;
+        $value = trim($value);
+
+        file_put_contents(
+            $field_path,
+            $value,
+            LOCK_EX
+        );
+    }
+
+    /**
+     * Загружает поле нода из хранилища и декодирует его в соответствующем формате.
+     * @param string $field_name - Имя поля, которое необходимо загрузить.
+     * @return void
+     */
+    private function loadField(string $field_name): void
+    {
+        $field_format = self::$fields[$field_name];
+        $field_extension = self::$extensions[$field_format];
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+
+        $field_path = "$nodes_storage_path/$this->nid/$field_name.$field_extension";
+        if (!file_exists($field_path)) {
+            return;
+        }
+
+        $field_data = file_get_contents($field_path);
+        if ($field_format === 'object') {
+            $this->attributes[$field_name] = unserialize($field_data);
+        }
+
+        if ($field_format === 'array') {
+            $this->attributes[$field_name] = ths()->fromJson($field_data);
+        }
+
+        if ($field_format === 'bool') {
+            $this->attributes[$field_name] = (bool) $field_data;
+        }
+
+        if ($field_format === 'int') {
+            $this->attributes[$field_name] = (int) $field_data;
+        }
+
+        if ($field_format === 'string') {
+            $this->attributes[$field_name] = $field_data;
+        }
+    }
+
+    /**
+     * Удаляет нод, если он существует
+     * @return void
+     */
+    public function delete(): void
+    {
+        if (empty($this->attributes['nid'])) {
+            return;
+        }
+
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        $path = "$nodes_storage_path/{$this->attributes['nid']}";
+
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $escaped_path = escapeshellarg($path);
+        shell_exec("rm -rf $escaped_path");
+    }
+
+    /**
+     * Удаляет все данные из хранилища нодов.
+     * Позволяет безопасно очистить директорию, содержащую данные нодов.
+     * Если директория хранилища отсутствует или не является директорией, метод завершает выполнение.
+     */
+    public static function truncate(): void
+    {
+        # Удалить все ноды
+        $nodes_storage_path = ths()->env('NODES_STORAGE');
+        if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($nodes_storage_path);
+        shell_exec("rm -rf $escaped_path/*");
+
+        # Удалить все схемы
+        $schemes_storage_path = ths()->env('SCHEMES_STORAGE');
+        if (!file_exists($schemes_storage_path) || !is_dir($schemes_storage_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($schemes_storage_path);
+        shell_exec("rm -rf $escaped_path/*");
+    }
+
+    /**
+     * Устанавливает значение атрибута 'data'.
+     * @param array|string|null $data.
+     * @return void
+     */
+    public function setDataAttribute(array|string|null $data = null): void
+    {
+        if ($this->scope) {
+            $method = $this->studlyCaser('set', $this->scope, '');
+            $data = $this->exe($method, $data);
+        }
+        $this->attributes['data'] = [$data];
+    }
+
+    /**
+     * Получить значение атрибута data.
+     * @return array|string|null
+     */
+    public function getDataAttribute(): array|string|null
+    {
+        return $this->attributes['data'][0] ?? null;
+    }
+
+    /**
+     * Создает иконку из шаблона, если она не указана в атрибутах.
+     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
+     * @return void
+     * @throws Exception
+     */
+    public function createIconFromTemplate(): void
+    {
+        if (!$this->class) {
+            return;
+        }
+
+        if (isset($this->attributes['icon']) && !empty($this->attributes['icon'])) {
+            return;
+        }
+
+        $template = $this->exe('template');
+        if (!$template) {
+            return;
+        }
+        $this->icon = $template['icon'];
+    }
+
+    public function getDescriptionAttribute(?string $description = null): string
+    {
+        if (!$description) {
+            return '';
+        }
+        return $description;
+    }
+
+
+    /**
+     * Выполняет действия перед сохранением.
+     * Создаёт иконку на основе шаблона.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function beforeSave(): void
+    {
+        $this->createIconFromTemplate();
+    }
+
+    public function afterSave(){}
 }
 
 ```
@@ -2707,7 +3506,7 @@ fields:
 ```{
     "name": "threes",
     "version": "1.0.0",
-    "description": "Threes — это революционная платформа для рекурсивно-модульного программирования, разработанная для упрощения и ускорения процесса разработки. Система позволяет разработчикам создавать гибкие и мощные приложения, используя концепции юнитов и спрайтов, а так-же позволяет версионировать, переиспользовать и распространять решения.",
+    "description": "Threes — это революционная платформа для рекурсивно-модульного программирования смыслов, разработанная человеком (Zenc0dr) и ai (ChatGPT) для людей и ai, для облегчения и ускорения процесса разработки и взаимодействия с информацией.",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -2725,7 +3524,7 @@ fields:
     },
     "dependencies": {
         "autoprefixer": "^10.4.20",
-        "axios": "^1.7.9",
+        "axios": "^1.9.0",
         "grapesjs": "^0.22.6",
         "lodash": "^4.17.21",
         "md5": "^2.3.0",
@@ -2735,6 +3534,7 @@ fields:
         "quill": "^1.3.7",
         "vue": "^3.5.13",
         "vue-click-outside-element": "^3.1.2",
+        "vue-contenteditable": "^4.1.0",
         "vue-draggable-plus": "^0.6.0",
         "vue-router": "^4.5.0",
         "vue-select": "^4.0.0-beta.6",
@@ -2850,6 +3650,25 @@ Route::match(
 );
 
 ```
+`plugins/zen/threes/src/js/components-map.js`
+```import FormInputText from '../vue/components/FormInputText.vue';
+import FormInputNumber from "../vue/components/FormInputNumber.vue";
+import FormInputSwitcher from "../vue/components/FormInputSwitcher.vue";
+import FormInputSelect from "../vue/components/FormInputSelect.vue";
+import FormInputRepeater from "../vue/components/FormInputRepeater.vue";
+import FormInputTextArea from "../vue/components/FormInputTextArea.vue";
+
+export default {
+    string: FormInputText,
+    password: FormInputText,
+    number: FormInputNumber,
+    switcher: FormInputSwitcher,
+    select: FormInputSelect,
+    repeater: FormInputRepeater,
+    textarea: FormInputTextArea
+}
+
+```
 `plugins/zen/threes/src/js/routes.js`
 ```import { createWebHistory, createRouter } from "vue-router";
 
@@ -2882,6 +3701,9 @@ import Threes from '../vue/Threes.vue'
 
 window._ = require('lodash');
 window.ths = {
+
+    Alerts: null, // Сюда монтируются сообщения
+
     requests_register: {},
     auth_token: null,
     bus: mitt(), // Шина событий
@@ -2950,22 +3772,20 @@ window.ths = {
         }
     },
 
-    // Отправить сообщение
+    // Показать 1 сообщение
     pushMessage(text, type) {
-        if ($ && $.oc && typeof $.oc.flashMsg === 'function') {
-            if (!type) {
-                type = 'info'
-            }
-            $.oc.flashMsg(text, type)
-        } else {
-            console.error('$.oc.flashMsg недоступен')
+        if (this.Alerts !== null) {
+            this.Alerts.push([{
+                text: text,
+                type: type
+            }])
         }
     },
 
     // Показать сообщения
     pushMessages(messages) {
-        for (let i in messages) {
-            this.pushMessage(messages[i])
+        if (this.Alerts !== null) {
+            this.Alerts.push(messages)
         }
     },
 
@@ -2986,915 +3806,18 @@ window.ths = {
 }
 
 import vueClickOutsideElement from 'vue-click-outside-element';
+import FormFitter from './../vue/components/FormFitter.vue'
+import FormSection from "../vue/trash/v2/FormSection.vue";
+import FormTabs from "../vue/components/FormTabs.vue";
 
 const app = createApp(Threes);
 app.use(router);
 app.use(PrimeVue, {ripple: true});
 app.use(vueClickOutsideElement)
+app.component('FormFitter', FormFitter)
+app.component('FormSection', FormSection)
+app.component('FormTabs', FormTabs)
 app.mount("#threes");
-
-```
-`plugins/zen/threes/src/vue/trash/Dwarf/inputs/DwarfSelect.css`
-```:root {
-    --vs-colors--lightest: rgba(60, 60, 60, .26);
-    --vs-colors--light: rgba(60, 60, 60, .5);
-    --vs-colors--dark: #333;
-    --vs-colors--darkest: rgba(0, 0, 0, .15);
-    --vs-search-input-color: inherit;
-    --vs-search-input-placeholder-color: inherit;
-    --vs-font-size: 1rem;
-    --vs-line-height: 1.4;
-    --vs-state-disabled-bg: rgb(248, 248, 248);
-    --vs-state-disabled-color: var(--vs-colors--light);
-    --vs-state-disabled-controls-color: var(--vs-colors--light);
-    --vs-state-disabled-cursor: not-allowed;
-    --vs-border-color: var(--vs-colors--lightest);
-    --vs-border-width: 1px;
-    --vs-border-style: solid;
-    --vs-border-radius: 4px;
-    --vs-actions-padding: 4px 6px 0 3px;
-    --vs-controls-color: var(--vs-colors--light);
-    --vs-controls-size: 1;
-    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
-    --vs-selected-bg: #f0f0f0;
-    --vs-selected-color: var(--vs-colors--dark);
-    --vs-selected-border-color: var(--vs-border-color);
-    --vs-selected-border-style: var(--vs-border-style);
-    --vs-selected-border-width: var(--vs-border-width);
-    --vs-dropdown-bg: #fff;
-    --vs-dropdown-color: inherit;
-    --vs-dropdown-z-index: 1000;
-    --vs-dropdown-min-width: 160px;
-    --vs-dropdown-max-height: 350px;
-    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
-    --vs-dropdown-option-bg: #000;
-    --vs-dropdown-option-color: var(--vs-dropdown-color);
-    --vs-dropdown-option-padding: 3px 20px;
-    --vs-dropdown-option--active-bg: #5897fb;
-    --vs-dropdown-option--active-color: #fff;
-    --vs-dropdown-option--deselect-bg: #fb5858;
-    --vs-dropdown-option--deselect-color: #fff;
-    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
-    --vs-transition-duration: .15s
-}
-
-.v-select {
-    position: relative;
-    font-family: inherit;
-    background: #fff;
-}
-
-.v-select, .v-select * {
-    box-sizing: border-box
-}
-
-:root {
-    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
-    --vs-transition-duration: .15s
-}
-
-@-webkit-keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-@keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-.vs__fade-enter-active, .vs__fade-leave-active {
-    pointer-events: none;
-    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
-}
-
-.vs__fade-enter, .vs__fade-leave-to {
-    opacity: 0
-}
-
-:root {
-    --vs-disabled-bg: var(--vs-state-disabled-bg);
-    --vs-disabled-color: var(--vs-state-disabled-color);
-    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
-    cursor: var(--vs-disabled-cursor);
-    background-color: var(--vs-disabled-bg)
-}
-
-.v-select[dir=rtl] .vs__actions {
-    padding: 0 3px 0 6px
-}
-
-.v-select[dir=rtl] .vs__clear {
-    margin-left: 6px;
-    margin-right: 0
-}
-
-.v-select[dir=rtl] .vs__deselect {
-    margin-left: 0;
-    margin-right: 2px
-}
-
-.v-select[dir=rtl] .vs__dropdown-menu {
-    text-align: right
-}
-
-.vs__dropdown-toggle {
-    height: 42px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    display: flex;
-    padding: 0 0 4px;
-    background: none;
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-radius: var(--vs-border-radius);
-    white-space: normal
-}
-
-.vs__selected-options {
-    display: flex;
-    flex-basis: 100%;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    padding: 0 2px;
-    position: relative
-}
-
-.vs__actions {
-    display: flex;
-    align-items: center;
-    padding: var(--vs-actions-padding)
-}
-
-.vs--searchable .vs__dropdown-toggle {
-    height: auto;
-    min-height: 42px;
-    cursor: text
-}
-
-.vs--unsearchable .vs__dropdown-toggle {
-    cursor: pointer
-}
-
-.vs--open .vs__dropdown-toggle {
-    border-bottom-color: transparent;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0
-}
-
-.vs__open-indicator {
-    fill: var(--vs-controls-color);
-    transform: scale(var(--vs-controls-size));
-    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
-    transition-timing-function: var(--vs-transition-timing-function)
-}
-
-.vs--open .vs__open-indicator {
-    transform: rotate(180deg) scale(var(--vs-controls-size))
-}
-
-.vs--loading .vs__open-indicator {
-    opacity: 0
-}
-
-.vs__clear {
-    fill: var(--vs-controls-color);
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    cursor: pointer;
-    margin-right: 8px
-}
-
-.vs__dropdown-menu {
-    display: block;
-    box-sizing: border-box;
-    position: absolute;
-    top: calc(100% - var(--vs-border-width));
-    left: 0;
-    z-index: var(--vs-dropdown-z-index);
-    padding: 5px 0;
-    margin: 0;
-    width: 100%;
-    max-height: var(--vs-dropdown-max-height);
-    min-width: var(--vs-dropdown-min-width);
-    overflow-y: auto;
-    box-shadow: var(--vs-dropdown-box-shadow);
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-top-style: none;
-    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
-    text-align: left;
-    list-style: none;
-    background: var(--vs-dropdown-bg);
-    color: var(--vs-dropdown-color)
-}
-
-.vs__no-options {
-    text-align: center
-}
-
-.vs__dropdown-option {
-    line-height: 1.42857143;
-    display: block;
-    padding: var(--vs-dropdown-option-padding);
-    clear: both;
-    color: var(--vs-dropdown-option-color);
-    white-space: nowrap;
-    cursor: pointer
-}
-
-.vs__dropdown-option--highlight {
-    background: var(--vs-dropdown-option--active-bg);
-    color: var(--vs-dropdown-option--active-color)
-}
-
-.vs__dropdown-option--deselect {
-    background: var(--vs-dropdown-option--deselect-bg);
-    color: var(--vs-dropdown-option--deselect-color)
-}
-
-.vs__dropdown-option--disabled {
-    background: var(--vs-state-disabled-bg);
-    color: var(--vs-state-disabled-color);
-    cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs__selected {
-    display: flex;
-    align-items: center;
-    background-color: var(--vs-selected-bg);
-    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
-    border-radius: var(--vs-border-radius);
-    color: var(--vs-selected-color);
-    line-height: var(--vs-line-height);
-    margin: 4px 2px 0;
-    padding: 0 .25em;
-    z-index: 0
-}
-
-.vs__deselect {
-    display: inline-flex;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    margin-left: 4px;
-    padding: 0;
-    border: 0;
-    cursor: pointer;
-    background: none;
-    fill: var(--vs-controls-color);
-    text-shadow: var(--vs-controls--deselect-text-shadow)
-}
-
-.vs__selected {
-    height: 33px;
-}
-
-.vs--single .vs__selected {
-    background-color: transparent;
-    border-color: transparent
-}
-
-.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
-    position: absolute;
-    opacity: .4
-}
-
-.vs--single.vs--searching .vs__selected {
-    display: none
-}
-
-.vs__search::-webkit-search-cancel-button {
-    display: none
-}
-
-.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
-    display: none
-}
-
-.vs__search, .vs__search:focus {
-    color: var(--vs-search-input-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    line-height: var(--vs-line-height);
-    font-size: var(--vs-font-size);
-    border: 1px solid transparent;
-    border-left: none;
-    outline: none;
-    margin: 4px 0 0;
-    padding: 0 7px;
-    background: none;
-    box-shadow: none;
-    width: 0;
-    max-width: 100%;
-    flex-grow: 1;
-    z-index: 1
-}
-
-.vs__search::-moz-placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs__search::placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs--unsearchable .vs__search {
-    opacity: 1
-}
-
-.vs--unsearchable:not(.vs--disabled) .vs__search {
-    cursor: pointer
-}
-
-.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
-    opacity: .2
-}
-
-.vs__spinner {
-    align-self: center;
-    opacity: 0;
-    font-size: 5px;
-    text-indent: -9999em;
-    overflow: hidden;
-    border-top: .9em solid rgba(100, 100, 100, .1);
-    border-right: .9em solid rgba(100, 100, 100, .1);
-    border-bottom: .9em solid rgba(100, 100, 100, .1);
-    border-left: .9em solid rgba(60, 60, 60, .45);
-    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
-    -webkit-animation: vSelectSpinner 1.1s infinite linear;
-    animation: vSelectSpinner 1.1s infinite linear;
-    transition: opacity .1s
-}
-
-.vs__spinner, .vs__spinner:after {
-    border-radius: 50%;
-    width: 5em;
-    height: 5em;
-    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
-}
-
-.vs--loading .vs__spinner {
-    opacity: 1
-}
-
-```
-`plugins/zen/threes/src/vue/trash/v2/Select.css`
-```:root {
-    --vs-colors--lightest: rgba(60, 60, 60, .26);
-    --vs-colors--light: rgba(60, 60, 60, .5);
-    --vs-colors--dark: #333;
-    --vs-colors--darkest: rgba(0, 0, 0, .15);
-    --vs-search-input-color: inherit;
-    --vs-search-input-placeholder-color: inherit;
-    --vs-font-size: 1rem;
-    --vs-line-height: 1.4;
-    --vs-state-disabled-bg: rgb(248, 248, 248);
-    --vs-state-disabled-color: var(--vs-colors--light);
-    --vs-state-disabled-controls-color: var(--vs-colors--light);
-    --vs-state-disabled-cursor: not-allowed;
-    --vs-border-color: var(--vs-colors--lightest);
-    --vs-border-width: 1px;
-    --vs-border-style: solid;
-    --vs-border-radius: 4px;
-    --vs-actions-padding: 4px 6px 0 3px;
-    --vs-controls-color: var(--vs-colors--light);
-    --vs-controls-size: 1;
-    --vs-controls--deselect-text-shadow: 0 1px 0 #fff;
-    --vs-selected-bg: #f0f0f0;
-    --vs-selected-color: var(--vs-colors--dark);
-    --vs-selected-border-color: var(--vs-border-color);
-    --vs-selected-border-style: var(--vs-border-style);
-    --vs-selected-border-width: var(--vs-border-width);
-    --vs-dropdown-bg: #fff;
-    --vs-dropdown-color: inherit;
-    --vs-dropdown-z-index: 1000;
-    --vs-dropdown-min-width: 160px;
-    --vs-dropdown-max-height: 350px;
-    --vs-dropdown-box-shadow: 0px 3px 6px 0px var(--vs-colors--darkest);
-    --vs-dropdown-option-bg: #000;
-    --vs-dropdown-option-color: var(--vs-dropdown-color);
-    --vs-dropdown-option-padding: 3px 20px;
-    --vs-dropdown-option--active-bg: #5897fb;
-    --vs-dropdown-option--active-color: #fff;
-    --vs-dropdown-option--deselect-bg: #fb5858;
-    --vs-dropdown-option--deselect-color: #fff;
-    --vs-transition-timing-function: cubic-bezier(1, -.115, .975, .855);
-    --vs-transition-duration: .15s
-}
-
-.v-select {
-    position: relative;
-    font-family: inherit;
-    background: #fff;
-}
-
-.v-select, .v-select * {
-    box-sizing: border-box
-}
-
-:root {
-    --vs-transition-timing-function: cubic-bezier(1, .5, .8, 1);
-    --vs-transition-duration: .15s
-}
-
-@-webkit-keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-@keyframes vSelectSpinner {
-    0% {
-        transform: rotate(0)
-    }
-    to {
-        transform: rotate(360deg)
-    }
-}
-
-.vs__fade-enter-active, .vs__fade-leave-active {
-    pointer-events: none;
-    transition: opacity var(--vs-transition-duration) var(--vs-transition-timing-function)
-}
-
-.vs__fade-enter, .vs__fade-leave-to {
-    opacity: 0
-}
-
-:root {
-    --vs-disabled-bg: var(--vs-state-disabled-bg);
-    --vs-disabled-color: var(--vs-state-disabled-color);
-    --vs-disabled-cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs--disabled .vs__dropdown-toggle, .vs--disabled .vs__clear, .vs--disabled .vs__search, .vs--disabled .vs__selected, .vs--disabled .vs__open-indicator {
-    cursor: var(--vs-disabled-cursor);
-    background-color: var(--vs-disabled-bg)
-}
-
-.v-select[dir=rtl] .vs__actions {
-    padding: 0 3px 0 6px
-}
-
-.v-select[dir=rtl] .vs__clear {
-    margin-left: 6px;
-    margin-right: 0
-}
-
-.v-select[dir=rtl] .vs__deselect {
-    margin-left: 0;
-    margin-right: 2px
-}
-
-.v-select[dir=rtl] .vs__dropdown-menu {
-    text-align: right
-}
-
-.vs__dropdown-toggle {
-    height: 42px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    display: flex;
-    padding: 0 0 4px;
-    background: none;
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-radius: var(--vs-border-radius);
-    white-space: normal
-}
-
-.vs__selected-options {
-    display: flex;
-    flex-basis: 100%;
-    flex-grow: 1;
-    flex-wrap: wrap;
-    padding: 0 2px;
-    position: relative
-}
-
-.vs__actions {
-    display: flex;
-    align-items: center;
-    padding: var(--vs-actions-padding)
-}
-
-.vs--searchable .vs__dropdown-toggle {
-    height: auto;
-    min-height: 36px;
-    cursor: text
-}
-
-.vs--unsearchable .vs__dropdown-toggle {
-    cursor: pointer
-}
-
-.vs--open .vs__dropdown-toggle {
-    border-bottom-color: transparent;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0
-}
-
-.vs__open-indicator {
-    fill: var(--vs-controls-color);
-    transform: scale(var(--vs-controls-size));
-    transition: transform var(--vs-transition-duration) var(--vs-transition-timing-function);
-    transition-timing-function: var(--vs-transition-timing-function)
-}
-
-.vs--open .vs__open-indicator {
-    transform: rotate(180deg) scale(var(--vs-controls-size))
-}
-
-.vs--loading .vs__open-indicator {
-    opacity: 0
-}
-
-.vs__clear {
-    fill: var(--vs-controls-color);
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    cursor: pointer;
-    margin-right: 8px
-}
-
-.vs__dropdown-menu {
-    display: block;
-    box-sizing: border-box;
-    position: absolute;
-    top: calc(100% - var(--vs-border-width));
-    left: 0;
-    z-index: var(--vs-dropdown-z-index);
-    padding: 5px 0;
-    margin: 0;
-    width: 100%;
-    max-height: var(--vs-dropdown-max-height);
-    min-width: var(--vs-dropdown-min-width);
-    overflow-y: auto;
-    box-shadow: var(--vs-dropdown-box-shadow);
-    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
-    border-top-style: none;
-    border-radius: 0 0 var(--vs-border-radius) var(--vs-border-radius);
-    text-align: left;
-    list-style: none;
-    background: var(--vs-dropdown-bg);
-    color: var(--vs-dropdown-color)
-}
-
-.vs__no-options {
-    text-align: center
-}
-
-.vs__dropdown-option {
-    line-height: 1.42857143;
-    display: block;
-    padding: var(--vs-dropdown-option-padding);
-    clear: both;
-    color: var(--vs-dropdown-option-color);
-    white-space: nowrap;
-    cursor: pointer
-}
-
-.vs__dropdown-option--highlight {
-    background: var(--vs-dropdown-option--active-bg);
-    color: var(--vs-dropdown-option--active-color)
-}
-
-.vs__dropdown-option--deselect {
-    background: var(--vs-dropdown-option--deselect-bg);
-    color: var(--vs-dropdown-option--deselect-color)
-}
-
-.vs__dropdown-option--disabled {
-    background: var(--vs-state-disabled-bg);
-    color: var(--vs-state-disabled-color);
-    cursor: var(--vs-state-disabled-cursor)
-}
-
-.vs__selected {
-    display: flex;
-    align-items: center;
-    background-color: var(--vs-selected-bg);
-    border: var(--vs-selected-border-width) var(--vs-selected-border-style) var(--vs-selected-border-color);
-    border-radius: var(--vs-border-radius);
-    color: var(--vs-selected-color);
-    line-height: var(--vs-line-height);
-    margin: 4px 2px 0;
-    padding: 0 .25em;
-    z-index: 0
-}
-
-.vs__deselect {
-    display: inline-flex;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    margin-left: 4px;
-    padding: 0;
-    border: 0;
-    cursor: pointer;
-    background: none;
-    fill: var(--vs-controls-color);
-    text-shadow: var(--vs-controls--deselect-text-shadow)
-}
-
-.vs__selected {
-    /*height: 33px;*/
-}
-
-.vs--single .vs__selected {
-    background-color: transparent;
-    border-color: transparent
-}
-
-.vs--single.vs--open .vs__selected, .vs--single.vs--loading .vs__selected {
-    position: absolute;
-    opacity: .4
-}
-
-.vs--single.vs--searching .vs__selected {
-    display: none
-}
-
-.vs__search::-webkit-search-cancel-button {
-    display: none
-}
-
-.vs__search::-webkit-search-decoration, .vs__search::-webkit-search-results-button, .vs__search::-webkit-search-results-decoration, .vs__search::-ms-clear {
-    display: none
-}
-
-.vs__search, .vs__search:focus {
-    color: var(--vs-search-input-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    line-height: var(--vs-line-height);
-    font-size: var(--vs-font-size);
-    border: 1px solid transparent;
-    border-left: none;
-    outline: none;
-    margin: 4px 0 0;
-    padding: 0 7px;
-    background: none;
-    box-shadow: none;
-    width: 0;
-    max-width: 100%;
-    flex-grow: 1;
-    z-index: 1
-}
-
-.vs__search::-moz-placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs__search::placeholder {
-    color: var(--vs-search-input-placeholder-color)
-}
-
-.vs--unsearchable .vs__search {
-    opacity: 1
-}
-
-.vs--unsearchable:not(.vs--disabled) .vs__search {
-    cursor: pointer
-}
-
-.vs--single.vs--searching:not(.vs--open):not(.vs--loading) .vs__search {
-    opacity: .2
-}
-
-.vs__spinner {
-    align-self: center;
-    opacity: 0;
-    font-size: 5px;
-    text-indent: -9999em;
-    overflow: hidden;
-    border-top: .9em solid rgba(100, 100, 100, .1);
-    border-right: .9em solid rgba(100, 100, 100, .1);
-    border-bottom: .9em solid rgba(100, 100, 100, .1);
-    border-left: .9em solid rgba(60, 60, 60, .45);
-    transform: translateZ(0) scale(var(--vs-controls--spinner-size, var(--vs-controls-size)));
-    -webkit-animation: vSelectSpinner 1.1s infinite linear;
-    animation: vSelectSpinner 1.1s infinite linear;
-    transition: opacity .1s
-}
-
-.vs__spinner, .vs__spinner:after {
-    border-radius: 50%;
-    width: 5em;
-    height: 5em;
-    transform: scale(var(--vs-controls--spinner-size, var(--vs-controls-size)))
-}
-
-.vs--loading .vs__spinner {
-    opacity: 1
-}
-
-```
-`plugins/zen/threes/traits/NodeMethodsTrait.php`
-```<?php
-
-namespace Zen\Threes\Traits;
-
-use MongoDB\Client;
-use MongoDB\Collection as MongoCollection;
-use MongoDB\Model\BSONDocument;
-use MongoDB\Model\BSONArray;
-use MongoDB\BSON\ObjectId;
-use Zen\Threes\Models\Node;
-
-trait NodeMethodsTrait
-{
-    // --- Mongo connection ---
-    public static function client(): Client
-    {
-        return new Client(env('MONGO_URL', 'mongodb://root:secret@threes-mongo:27017/admin'));
-    }
-
-    public static function collection(): MongoCollection
-    {
-        return self::client()
-            ->selectDatabase(self::$database)
-            ->selectCollection(self::$collection);
-    }
-
-    public static function truncate(): void
-    {
-        self::collection()->drop();
-    }
-
-    public static function generateNidFromSettings(): string
-    {
-        return ths()->createShortId();
-    }
-
-    // --- Основные операции ---
-
-    public static function find(string $nid): ?self
-    {
-        $doc = self::collection()->findOne(['_id' => $nid]);
-
-        if (!$doc && preg_match('/^[a-f\d]{24}$/i', $nid)) {
-            $doc = self::collection()->findOne(['_id' => new ObjectId($nid)]);
-        }
-
-        return $doc ? new self($doc->getArrayCopy()) : null;
-    }
-
-    public function save(): void
-    {
-        $this->beforeSave();
-
-        if (empty($this->attributes['_id'])) {
-            $this->attributes['_id'] = self::generateNidFromSettings();
-        }
-
-        if ($this->exists()) {
-            self::collection()->replaceOne(['_id' => $this->attributes['_id']], $this->attributes);
-        } else {
-            $result = self::collection()->insertOne($this->attributes);
-            $this->attributes['_id'] = (string) $result->getInsertedId();
-        }
-
-        $this->afterSave();
-    }
-
-    public function delete(): void
-    {
-        if ($this->exists()) {
-            self::collection()->deleteOne(['_id' => $this->attributes['_id']]);
-        }
-    }
-
-    public function exists(): bool
-    {
-        if (empty($this->attributes['_id'])) {
-            return false;
-        }
-
-        return self::collection()
-                ->countDocuments(['_id' => $this->attributes['_id']], ['limit' => 1]) > 0;
-    }
-
-    // --- Работа с деревьями ---
-
-    public static function getRootNodes(): array
-    {
-        $all_nodes_cursor = self::collection()->find();
-
-        $all_nodes = array_map(function ($doc) {
-            return $doc instanceof BSONDocument || $doc instanceof BSONArray
-                ? $doc->getArrayCopy()
-                : $doc;
-        }, iterator_to_array($all_nodes_cursor));
-
-        $all_nids = [];
-        $child_nids = [];
-
-        foreach ($all_nodes as $doc) {
-            $nid = (string) ($doc['_id'] ?? null);
-            if ($nid) {
-                $all_nids[] = $nid;
-            }
-
-            $children = $doc['children'] ?? [];
-            if ($children instanceof BSONArray || $children instanceof BSONDocument) {
-                $children = $children->getArrayCopy();
-            }
-
-            foreach ($children as $child) {
-                if (isset($child['$id'])) {
-                    $child_nids[] = (string) $child['$id'];
-                } elseif (isset($child['_id'])) {
-                    $child_nids[] = (string) $child['_id'];
-                }
-            }
-        }
-
-        $root_nids = array_diff($all_nids, $child_nids);
-
-        return array_values(array_filter(array_map(fn($nid) => self::find($nid), $root_nids)));
-    }
-
-    public function addChild(Node|string $child): void
-    {
-        if (is_string($child)) {
-            $child = self::find($child);
-            if (!$child) {
-                throw new \InvalidArgumentException("Node with nid '{$child}' not found.");
-            }
-        }
-
-        $ref = [
-            '$ref' => self::$collection,
-            '$id' => $child->nid,
-        ];
-
-        $children = $this->attributes['children'] ?? [];
-
-        foreach ($children as $existing) {
-            if (($existing['$id'] ?? null) === $child->nid) {
-                return;
-            }
-        }
-
-        $children[] = $ref;
-        $this->attributes['children'] = $children;
-        $this->save();
-    }
-
-    public function resolveChildren(): array
-    {
-        $children = $this->attributes['children'] ?? [];
-
-        if ($children instanceof BSONArray || $children instanceof BSONDocument) {
-            $children = $children->getArrayCopy();
-        }
-
-        $resolved = [];
-
-        foreach ($children as $item) {
-            if (isset($item['$ref'], $item['$id'])) {
-                $resolved[] = self::find($item['$id']);
-            } elseif (isset($item['_id'])) {
-                $resolved[] = new self($item);
-            }
-        }
-
-        return array_filter($resolved);
-    }
-
-    // --- BSON нормализация ---
-    protected function normalizeValue($value)
-    {
-        if ($value instanceof BSONDocument || $value instanceof BSONArray) {
-            $value = $value->getArrayCopy();
-        }
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
-                $value[$k] = $this->normalizeValue($v);
-            }
-        }
-        return $value;
-    }
-}
 
 ```
 `plugins/zen/threes/traits/QueryLogTrait.php`
