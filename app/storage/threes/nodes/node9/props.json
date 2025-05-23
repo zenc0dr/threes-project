@@ -1,7 +1,7 @@
 {
     "tree": true,
     "schema": true,
-    "store": false,
+    "store": true,
     "self_content": true,
     "show_children": true,
     "store_data": {

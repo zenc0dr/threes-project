@@ -2,31 +2,41 @@
     "schema_name": "Схема проекта",
     "schema_nodes": [
         {
+            "nid": "3vbvs3afj4tt"
+        },
+        {
             "nid": "8fwhewuedy6h"
         },
         {
             "nid": "node7",
             "nodes": [
                 {
-                    "nid": "node8"
+                    "nid": "node8",
+                    "nodes": [
+                        {
+                            "nid": "node41",
+                            "nodes": [
+                                {
+                                    "nid": "node9"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
-                    "nid": "node9"
-                },
-                {
-                    "nid": "node10"
+                    "nid": "node10",
+                    "nodes": [
+                        {
+                            "nid": "nnmt34mwrue8",
+                            "nodes": []
+                        }
+                    ]
                 },
                 {
                     "nid": "node39"
                 },
                 {
-                    "nid": "node40"
-                },
-                {
                     "nid": "node83"
-                },
-                {
-                    "nid": "node41"
                 }
             ]
         },
@@ -34,19 +44,12 @@
             "nid": "zsgk2c7m3kan",
             "nodes": [
                 {
-                    "nid": "nnmt34mwrue8"
-                },
-                {
                     "nid": "9uvmjnpfsqza"
                 }
             ]
         },
         {
             "nid": "jpqsvzeh94kc",
-            "nodes": []
-        },
-        {
-            "nid": "8uzuqmu4cgwf",
             "nodes": []
         },
         {
@@ -265,6 +268,9 @@
                                             ]
                                         }
                                     ]
+                                },
+                                {
+                                    "nid": "node117"
                                 }
                             ]
                         },
@@ -310,9 +316,6 @@
                             "nodes": [
                                 {
                                     "nid": "node116"
-                                },
-                                {
-                                    "nid": "node117"
                                 },
                                 {
                                     "nid": "node118"
@@ -511,10 +514,10 @@
                     ]
                 },
                 {
-                    "nid": "node75"
+                    "nid": "node76"
                 },
                 {
-                    "nid": "node76"
+                    "nid": "node75"
                 },
                 {
                     "nid": "node77"
@@ -526,6 +529,10 @@
         },
         {
             "nid": "node53"
+        },
+        {
+            "nid": "8uzuqmu4cgwf",
+            "nodes": []
         },
         {
             "nid": "node58"
@@ -546,7 +553,17 @@
             "nid": "node87"
         },
         {
-            "nid": "node92"
+            "nid": "node92",
+            "nodes": [
+                {
+                    "nid": "node151",
+                    "nodes": [
+                        {
+                            "nid": "node129"
+                        }
+                    ]
+                }
+            ]
         },
         {
             "nid": "node97"
@@ -579,7 +596,12 @@
                     "nid": "node155"
                 },
                 {
-                    "nid": "node156"
+                    "nid": "node156",
+                    "nodes": [
+                        {
+                            "nid": "node40"
+                        }
+                    ]
                 },
                 {
                     "nid": "node24"
@@ -588,9 +610,6 @@
         },
         {
             "nid": "node124"
-        },
-        {
-            "nid": "node129"
         },
         {
             "nid": "node134"
@@ -619,9 +638,6 @@
             ]
         },
         {
-            "nid": "node151"
-        },
-        {
             "nid": "node157"
         },
         {
@@ -635,6 +651,15 @@
         },
         {
             "nid": "node177"
+        },
+        {
+            "nid": "gdya82cbatf7"
+        },
+        {
+            "nid": "jfbb8te7zzmn"
+        },
+        {
+            "nid": "6a6pqwaxsabx"
         }
     ]
 }

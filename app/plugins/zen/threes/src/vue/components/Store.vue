@@ -59,6 +59,7 @@ export default {
                 data: {
                     nid: node.nid,
                     class: node.class,
+                    after: ths.data.selected_nid,
                 },
                 then: response => {
                     ths.bus.emit('tree:refresh')

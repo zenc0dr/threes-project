@@ -3,7 +3,7 @@
     "schema": true,
     "store": false,
     "self_content": true,
-    "show_children": true,
+    "show_children": false,
     "store_data": {
         "group": "Features",
         "author": "Migration",

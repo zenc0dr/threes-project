@@ -2,7 +2,10 @@
     <div class="threes-nt">
         <div class="tree-list">
             <div class="tree-list__menu">
-                <div @click="show = !show" class="tree-list__menu__button">
+                <div @click="show = !show"
+                     class="tree-list__menu__button"
+                     :title="show ? 'Скрыть меню' : 'Показать меню'"
+                >
                     <i :class="show ? 'oc-icon-caret-left' : 'oc-icon-caret-right'"></i>
                 </div>
                 <div v-if="show" class="tree-list__search">
@@ -92,7 +95,6 @@ export default {
             this.getTree()
         },
         enableMoveMode(nid) {
-            console.log('enableMoveMode', this.move_mode)
             if (this.move_mode) {
                 this.move_mode = false
                 this.move_source_nid = null
@@ -102,7 +104,6 @@ export default {
             }
         },
         handleMove(action) {
-            console.log('handleMove', action)
             ths.api({
                 api: 'nodes.node:move-node',
                 data: {
@@ -138,15 +139,19 @@ export default {
         align-items: center;
         gap: 6px;
         padding: 4px;
-        border-radius: 3px;
-        background: #e3e3e3;
+        padding-bottom: 5px;
 
         &__button {
-            background: #aeaeae;
+            background: #f7f7f7;
             border-radius: 4px;
             padding: 4px 8px;
-            color: #ebebeb;
+            color: #b4b4b4;
             cursor: pointer;
+            transition: 200ms;
+
+            &:hover {
+                background: #e7e7e7;
+            }
         }
     }
 

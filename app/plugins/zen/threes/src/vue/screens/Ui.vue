@@ -68,18 +68,17 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap: 10px;
 }
 
 .tree-container {
     border-right: 1px solid #e2e2e2;
-    padding-right: 5px;
+    background: #ffffff;
 }
 
 .schema-container {
     display: flex;
     flex: 1 1 auto;
-    background: #ededed;
+    background: #f4f4f4;
 }
 
 .threes-bottom {
