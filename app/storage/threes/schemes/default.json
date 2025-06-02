@@ -2,6 +2,9 @@
     "schema_name": "Схема проекта",
     "schema_nodes": [
         {
+            "nid": "w2k9q23ezxu4"
+        },
+        {
             "nid": "3vbvs3afj4tt"
         },
         {
@@ -29,19 +32,16 @@
                             "nid": "node111"
                         },
                         {
-                            "nid": "node112"
-                        },
-                        {
                             "nid": "node113",
                             "nodes": [
-                                {
-                                    "nid": "node146"
-                                },
                                 {
                                     "nid": "node147"
                                 },
                                 {
                                     "nid": "node148"
+                                },
+                                {
+                                    "nid": "node112"
                                 },
                                 {
                                     "nid": "node149"
@@ -243,6 +243,9 @@
                         },
                         {
                             "nid": "node114"
+                        },
+                        {
+                            "nid": "node146"
                         }
                     ]
                 },

@@ -54,7 +54,7 @@ class Node
         ths()->nodes()->updateNodeData(
             request('nid'),
             request('data'),
-            request('scope')
+            request('scope', 'self_content')
         );
         return [];
     }

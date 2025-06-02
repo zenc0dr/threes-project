@@ -295,8 +295,9 @@ class Nodes
      * @return void
      */
     public function updateNodeData(
-        string $nid, array|string|null $data,
-        string $scope = 'self_content'
+        string $nid,
+        array|string|null $data,
+        ?string $scope = 'self_content'
     ): void {
         $node = Node::find($nid);
         $node->scope = $scope;
