@@ -14,68 +14,47 @@
 
                 <!-- Иконка -->
                 <icon :src="node.icon" width="16px" height="16px" />
-
                 <!-- Название -->
                 <span class="tree-name">{{ node.name }}</span>
 
                 <div class="tree-item__mover">
-                    <!--
-                    <div v-if="action === null" class="tree-item__btn" title="Настройки">
-                        <div @click.stop="openNodeSettings" class="icon-btn">
+                    <div v-if="!directions_is_open" class="tree-item__btn" title="Настройки">
+                        <div @click.stop="openActions" class="icon-btn">
                             <i class="oc-icon-cog"></i>
                         </div>
                     </div>
-                    <div v-if="['move', 'copy', 'link'].includes(action)" class="tree-item__mover__move">
 
-                    </div>
-
-                    <div v-if="node_settings !== null && node_settings.nid === node.nid" class="tree-item__menu">
+                    <div v-if="actions_is_open" class="tree-item__menu">
                         <div class="tree-item__menu__body">
-                            <div @click.stop="action('move')" class="icon-btn" title="Перенести">
+                            <div @click.stop="callAction('move')" class="icon-btn" title="Перенести">
                                 <i class="oc-icon-arrow-right"></i>
                             </div>
-                            <div @click.stop="action('copy')" class="icon-btn" title="Копировать">
+                            <div @click.stop="callAction('copy')" class="icon-btn" title="Копировать">
                                 <i class="oc-icon-copy"></i>
                             </div>
-                            <div @click.stop="action('link')" class="icon-btn" title="Создать ссылку">
+                            <div @click.stop="callAction('link')" class="icon-btn" title="Создать ссылку">
                                 <i class="oc-icon-link"></i>
                             </div>
-                            <div @click.stop="action('delete')" class="icon-btn" title="Удалить">
+                            <div @click.stop="callAction('delete')" class="icon-btn" title="Удалить">
                                 <i class="oc-icon-trash"></i>
                             </div>
                         </div>
                     </div>
-                    <template v-if="move_mode && node.nid !== move_source_nid">
-                        <div class="tree-item__btn">
-                            <div @click.stop="move(node.nid, 'outward')" class="icon-btn" title="Наружу">
-                                <i class="oc-icon-arrow-left"></i>
-                            </div>
-                            <div @click.stop="move(node.nid, 'after')" class="icon-btn" title="Вниз">
-                                <i class="oc-icon-arrow-down"></i>
-                            </div>
-                            <div @click.stop="move(node.nid, 'before')" class="icon-btn" title="Вверх">
-                                <i class="oc-icon-arrow-up"></i>
-                            </div>
-                            <div @click.stop="move(node.nid, 'inside')" class="icon-btn" title="Внутрь">
-                                <i class="oc-icon-arrow-right"></i>
-                            </div>
+
+                    <div v-if="directions_is_open" class="tree-item__btn">
+                        <div @click.stop="move(node.nid, 'outward')" class="icon-btn" title="Наружу">
+                            <i class="oc-icon-arrow-left"></i>
                         </div>
-                    </template>
-                    <template v-else-if="move_mode && node.nid === move_source_nid">
-                        <div @click.stop="enableMoveMode" class="tree-item__btn">
-                            <div class="icon-btn" title="Отменить перемещение">
-                                <i class="oc-icon-stop-circle-o"></i>
-                            </div>
+                        <div @click.stop="move(node.nid, 'after')" class="icon-btn" title="Вниз">
+                            <i class="oc-icon-arrow-down"></i>
                         </div>
-                    </template>
-                    <template v-else>
-                        <div @click.stop="enableMoveMode" class="tree-item__btn">
-                            <div class="icon-btn" title="Переместить">
-                                <i class="oc-icon-cog"></i>
-                            </div>
+                        <div @click.stop="move(node.nid, 'before')" class="icon-btn" title="Вверх">
+                            <i class="oc-icon-arrow-up"></i>
                         </div>
-                    </template>
-                    -->
+                        <div @click.stop="move(node.nid, 'inside')" class="icon-btn" title="Внутрь">
+                            <i class="oc-icon-arrow-right"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,6 +65,7 @@
                 :key="child.nid"
                 :node="child"
                 :depth="depth + 1"
+                @move="$emit('move', $event)"
             />
         </div>
     </div>
@@ -96,7 +76,7 @@ import icon from './icon.vue'
 export default {
     name: 'TreeItem',
     components: { icon },
-    emits: [],
+    emits: ['move', 'delete'],
     props: {
         node: Object,
         depth: Number,
@@ -111,42 +91,40 @@ export default {
         has_nodes() {
             return this.node.nodes && this.node.nodes.length > 0
         },
+        // Определить, выбран ли нод
         is_active() {
-            if (!this.ths.data.selected?.node) {
-                return false
-            }
-            return this.ths.data.selected?.node?.nid === this.node.nid
+            return this.ths.data.node_selected_nid === this.node.nid
+        },
+        actions_is_open() {
+            return this.ths.data.node_actions_nid === this.node.nid && this.ths.data.node_action === null
+        },
+        directions_is_open() {
+            return this.ths.data.node_action !== null
         }
-    },
-    mounted() {
-
     },
     methods: {
         // Показать потомков нода
         toggleOpen() {
             this.open = !this.open
         },
+        // Выбрать нод
         select() {
-            this.ths.data.selected = {
-                node: this.node,
+            this.ths.data.node_selected_nid = this.node.nid
+        },
+        openActions() {
+            this.ths.data.node_actions_nid = this.node.nid
+        },
+        callAction(action) {
+            if (['move', 'copy', 'link'].includes(action)) {
+                this.ths.data.node_action = action
+            }
+            if (action === 'delete') {
+                console.log('Удалить нод ' + this.node.nid)
             }
         },
-        // select() {
-        //     this.$emit('select', this.node)
-        // },
-        // openNodeSettings() {
-        //     this.$emit('openNodeSettings', this.node)
-        // },
-        // action(action, data) {
-        //     this.$emit('action', {
-        //         nid: this.node.nid,
-        //         action,
-        //         data
-        //     })
-        // },
-        // move(nid, direction) {
-        //     this.$emit('move', {nid, direction})
-        // }
+        move(nid, direction) {
+            this.$emit('move', {nid, direction})
+        }
     }
 }
 </script>

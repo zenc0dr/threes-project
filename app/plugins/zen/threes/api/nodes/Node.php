@@ -75,7 +75,7 @@ class Node
         ths()->nodes()->moveNode(
             request('nid'),
             request('target_nid'),
-            request('action')
+            request('direction')
         );
         return [];
     }

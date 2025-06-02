@@ -20,6 +20,8 @@
 
 /*! #__NO_SIDE_EFFECTS__ */
 
+/*! Axios v1.9.0 Copyright (c) 2025 Matt Zabriskie and contributors */
+
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
 /**
@@ -48,10 +50,3 @@
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
-
-/**!
- * Sortable 1.14.0
- * @author	RubaXa   <trash@rubaxa.org>
- * @author	owenm    <owen23355@gmail.com>
- * @license MIT
- */

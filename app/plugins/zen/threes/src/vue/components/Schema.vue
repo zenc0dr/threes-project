@@ -129,7 +129,7 @@ export default {
         //     },
         //     immediate: true
         // }
-        'ths.data.selected.node.nid': {
+        'ths.data.node_selected_nid': {
             handler(nid) {
                 if (nid) {
                     this.nid = nid

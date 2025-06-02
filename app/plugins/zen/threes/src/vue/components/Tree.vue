@@ -26,6 +26,7 @@
                     :key="item.nid"
                     :node="item"
                     :depth="0"
+                    @move="moveAction"
                 />
             </template>
         </div>
@@ -62,12 +63,6 @@ export default {
         clearTimeout(this.searchTimer)
     },
     methods: {
-        // handleSelect(node) {
-        //     if (node.props.schema) {
-        //         this.active_nid = (this.active_nid === node.nid) ? null : node.nid
-        //         this.ths.data.selected_nid = this.active_nid
-        //     }
-        // },
         getTree() {
             this.ths.api({
                 api: 'ui:get-tree-nodes',
@@ -81,30 +76,21 @@ export default {
             clearTimeout(this.searchTimer)
             this.getTree()
         },
-        // openNodeSettings(node) {
-        //     this.node_settings = node
-        // },
-        // handleMoveAction({ nid, action }) {
-        //     if (!this.node_settings || !this.action) return
-        //
-        //     this.ths.api({
-        //         api: 'nodes.node:move-node',
-        //         data: {
-        //             nid: this.node_settings.nid,
-        //             target_nid: nid,
-        //             action: action
-        //         },
-        //         then: () => {
-        //             this.node_settings = null
-        //             this.action = null
-        //             this.getTree()
-        //         }
-        //     })
-        // },
-        // actionNode(action) {
-        //     this.action = action
-        //     this.node_settings = null
-        // }
+        moveAction({nid, direction}) {
+            this.ths.api({
+                api: 'nodes.node:move-node',
+                data: {
+                    nid: this.ths.data.node_actions_nid,
+                    target_nid: nid,
+                    direction: direction
+                },
+                then: () => {
+                    this.ths.data.node_actions_nid = null
+                    this.ths.data.node_action = null
+                    this.getTree()
+                }
+            })
+        }
     }
 }
 </script>

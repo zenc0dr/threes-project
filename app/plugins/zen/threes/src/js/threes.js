@@ -20,7 +20,9 @@ window.ths = {
     data: reactive({
         ui_streams: [],
         process: false,
-        selected: null
+        node_selected_nid: null, // string | null - nid выбранного нода
+        node_actions_nid: null, // string | null - nid нода для которого открыты настройки actions
+        node_action: null, // string ex: 'move', 'copy', 'link', 'delete' - Выбранный action
     }),
 
     api(opts) {

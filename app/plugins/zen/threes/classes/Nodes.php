@@ -334,12 +334,12 @@ class Nodes
      * Переместить нод
      * @param string $nid
      * @param string $target_nid
-     * @param string $action - before || after - Указывает разместить нод после или как наследника
+     * @param string $direction - before || after || outward || inside
      * @return void
      */
-    public function moveNode(string $nid, string $target_nid, string $action): void
+    public function moveNode(string $nid, string $target_nid, string $direction): void
     {
-        switch ($action) {
+        switch ($direction) {
             case 'before':
                 $this->moveNodeBefore($nid, $target_nid);
                 break;
