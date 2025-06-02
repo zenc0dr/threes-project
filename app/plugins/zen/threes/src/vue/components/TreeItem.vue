@@ -1,6 +1,7 @@
 <template>
     <div class="tree-item">
         <div
+            @click="select"
             class="tree-label"
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
@@ -101,6 +102,7 @@ export default {
     },
     data() {
         return {
+            ths: window.ths,
             open: false
         }
     },
@@ -109,9 +111,18 @@ export default {
             return this.node.nodes && this.node.nodes.length > 0
         }
     },
+    mounted() {
+
+    },
     methods: {
+        // Показать потомков нода
         toggleOpen() {
             this.open = !this.open
+        },
+        select() {
+            this.ths.data.node_settings = {
+                node: this.node,
+            }
         },
         // select() {
         //     this.$emit('select', this.node)
