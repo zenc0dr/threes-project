@@ -26,12 +26,6 @@
                     :key="item.nid"
                     :node="item"
                     :depth="0"
-                    :active_nid="active_nid"
-                    :move_mode="move_mode"
-                    :move_source_nid="move_source_nid"
-                    @select="handleSelect"
-                    @move="handleMove"
-                    @enable_move="enableMoveMode"
                 />
             </template>
         </div>
@@ -48,20 +42,15 @@ export default {
         return {
             ths: window.ths,
             show: true,
-            active_nid: null,
             search: '',
             tree: [],
             searchTimer: null,
-            move_mode: false,
-            move_source_nid: null
         }
     },
     watch: {
         search() {
             clearTimeout(this.searchTimer)
-            this.searchTimer = setTimeout(() => {
-                this.getTree()
-            }, 400)
+            this.searchTimer = setTimeout(this.getTree, 400)
         }
     },
     mounted() {
@@ -73,18 +62,16 @@ export default {
         clearTimeout(this.searchTimer)
     },
     methods: {
-        handleSelect(node) {
-            if (node.props.schema) {
-                this.active_nid = (this.active_nid === node.nid) ? null : node.nid
-                this.ths.data.selected_nid = this.active_nid
-            }
-        },
+        // handleSelect(node) {
+        //     if (node.props.schema) {
+        //         this.active_nid = (this.active_nid === node.nid) ? null : node.nid
+        //         this.ths.data.selected_nid = this.active_nid
+        //     }
+        // },
         getTree() {
             this.ths.api({
                 api: 'ui:get-tree-nodes',
-                data: {
-                    search: this.search,
-                },
+                data: { search: this.search },
                 then: response => {
                     this.tree = response.tree
                 }
@@ -94,34 +81,33 @@ export default {
             clearTimeout(this.searchTimer)
             this.getTree()
         },
-        enableMoveMode(nid) {
-            if (this.move_mode) {
-                this.move_mode = false
-                this.move_source_nid = null
-            } else {
-                this.move_source_nid = nid
-                this.move_mode = true
-            }
-        },
-        handleMove(action) {
-            ths.api({
-                api: 'nodes.node:move-node',
-                data: {
-                    nid: this.move_source_nid,
-                    target_nid: action.nid,
-                    action: action.direction,
-                },
-                then: () => {
-                    this.move_mode = false
-                    this.move_source_nid = null
-                    this.getTree()
-                }
-            })
-        }
+        // openNodeSettings(node) {
+        //     this.node_settings = node
+        // },
+        // handleMoveAction({ nid, action }) {
+        //     if (!this.node_settings || !this.action) return
+        //
+        //     this.ths.api({
+        //         api: 'nodes.node:move-node',
+        //         data: {
+        //             nid: this.node_settings.nid,
+        //             target_nid: nid,
+        //             action: action
+        //         },
+        //         then: () => {
+        //             this.node_settings = null
+        //             this.action = null
+        //             this.getTree()
+        //         }
+        //     })
+        // },
+        // actionNode(action) {
+        //     this.action = action
+        //     this.node_settings = null
+        // }
     }
 }
 </script>
-
 
 <style lang="scss">
 .threes-nt {

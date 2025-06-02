@@ -20,8 +20,7 @@ window.ths = {
     data: reactive({
         ui_streams: [],
         process: false,
-        nids: [],
-        selected_nid: null
+        node_settings: null // Все операции с нодами
     }),
 
     api(opts) {

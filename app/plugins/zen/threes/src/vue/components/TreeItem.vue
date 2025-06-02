@@ -2,8 +2,6 @@
     <div class="tree-item">
         <div
             class="tree-label"
-            :class="{ 'active': node.nid === active_nid, 'moved': move_source_nid === node.nid }"
-            @click="select"
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
@@ -17,7 +15,34 @@
 
                 <!-- Название -->
                 <span class="tree-name">{{ node.name }}</span>
+
                 <div class="tree-item__mover">
+                    <!--
+                    <div v-if="action === null" class="tree-item__btn" title="Настройки">
+                        <div @click.stop="openNodeSettings" class="icon-btn">
+                            <i class="oc-icon-cog"></i>
+                        </div>
+                    </div>
+                    <div v-if="['move', 'copy', 'link'].includes(action)" class="tree-item__mover__move">
+
+                    </div>
+
+                    <div v-if="node_settings !== null && node_settings.nid === node.nid" class="tree-item__menu">
+                        <div class="tree-item__menu__body">
+                            <div @click.stop="action('move')" class="icon-btn" title="Перенести">
+                                <i class="oc-icon-arrow-right"></i>
+                            </div>
+                            <div @click.stop="action('copy')" class="icon-btn" title="Копировать">
+                                <i class="oc-icon-copy"></i>
+                            </div>
+                            <div @click.stop="action('link')" class="icon-btn" title="Создать ссылку">
+                                <i class="oc-icon-link"></i>
+                            </div>
+                            <div @click.stop="action('delete')" class="icon-btn" title="Удалить">
+                                <i class="oc-icon-trash"></i>
+                            </div>
+                        </div>
+                    </div>
                     <template v-if="move_mode && node.nid !== move_source_nid">
                         <div class="tree-item__btn">
                             <div @click.stop="move(node.nid, 'outward')" class="icon-btn" title="Наружу">
@@ -44,10 +69,11 @@
                     <template v-else>
                         <div @click.stop="enableMoveMode" class="tree-item__btn">
                             <div class="icon-btn" title="Переместить">
-                                <i class="oc-icon-move"></i>
+                                <i class="oc-icon-cog"></i>
                             </div>
                         </div>
                     </template>
+                    -->
                 </div>
             </div>
         </div>
@@ -58,12 +84,6 @@
                 :key="child.nid"
                 :node="child"
                 :depth="depth + 1"
-                :active_nid="active_nid"
-                :move_mode="move_mode"
-                :move_source_nid="move_source_nid"
-                @select="$emit('select', $event)"
-                @move="$emit('move', $event, $event2)"
-                @enable_move="$emit('enable_move', $event)"
             />
         </div>
     </div>
@@ -74,13 +94,10 @@ import icon from './icon.vue'
 export default {
     name: 'TreeItem',
     components: { icon },
-    emits: ['select', 'move', 'enable_move'],
+    emits: [],
     props: {
         node: Object,
         depth: Number,
-        active_nid: String,
-        move_mode: Boolean,
-        move_source_nid: String,
     },
     data() {
         return {
@@ -96,15 +113,22 @@ export default {
         toggleOpen() {
             this.open = !this.open
         },
-        select() {
-            this.$emit('select', this.node)
-        },
-        enableMoveMode() {
-            this.$emit('enable_move', this.node.nid)
-        },
-        move(nid, direction) {
-            this.$emit('move', {nid, direction})
-        }
+        // select() {
+        //     this.$emit('select', this.node)
+        // },
+        // openNodeSettings() {
+        //     this.$emit('openNodeSettings', this.node)
+        // },
+        // action(action, data) {
+        //     this.$emit('action', {
+        //         nid: this.node.nid,
+        //         action,
+        //         data
+        //     })
+        // },
+        // move(nid, direction) {
+        //     this.$emit('move', {nid, direction})
+        // }
     }
 }
 </script>
@@ -116,6 +140,17 @@ export default {
 
     &__mover {
         margin-left: auto;
+    }
+
+    &__menu {
+        height: 0;
+        &__body {
+            display: flex;
+            position: absolute;
+            padding: 5px 6px;
+            background: #fff;
+            border-radius: 4px;
+        }
     }
 
     &__btn {
@@ -143,6 +178,9 @@ export default {
             &:focus {
                 outline: 1px solid #000;
                 outline-offset: 2px;
+            }
+            i {
+                font-size: 13px;
             }
         }
     }
@@ -198,14 +236,14 @@ export default {
         flex-direction: column;
     }
 
-    .tree-label:not(.moved) .tree-item__mover {
-        opacity: 0;
-        transition: opacity 0.2s ease;
-    }
+    //.tree-label:not(.moved) .tree-item__mover {
+    //    opacity: 0;
+    //    transition: opacity 0.2s ease;
+    //}
 
-    .tree-label:hover .tree-item__mover {
-        opacity: 1;
-    }
+    //.tree-label:hover .tree-item__mover {
+    //    opacity: 1;
+    //}
 
 }
 </style>
