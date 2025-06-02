@@ -3,6 +3,7 @@
         <div
             @click="select"
             class="tree-label"
+            :class="{ 'active': is_active }"
         >
             <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
@@ -109,6 +110,12 @@ export default {
     computed: {
         has_nodes() {
             return this.node.nodes && this.node.nodes.length > 0
+        },
+        is_active() {
+            if (!this.ths.data.selected?.node) {
+                return false
+            }
+            return this.ths.data.selected?.node?.nid === this.node.nid
         }
     },
     mounted() {
@@ -120,7 +127,7 @@ export default {
             this.open = !this.open
         },
         select() {
-            this.ths.data.node_settings = {
+            this.ths.data.selected = {
                 node: this.node,
             }
         },

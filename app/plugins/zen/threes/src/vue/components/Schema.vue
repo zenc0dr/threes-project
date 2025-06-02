@@ -116,7 +116,20 @@ export default {
         this.ths.bus.off('schema:refresh', this.getSchema)
     },
     watch: {
-        'ths.data.selected_nid': {
+
+        // 'ths.data.selected_nid': {
+        //     handler(nid) {
+        //         if (nid) {
+        //             this.nid = nid
+        //             this.getSchema()
+        //         } else {
+        //             this.nid = null
+        //             this.schema = null
+        //         }
+        //     },
+        //     immediate: true
+        // }
+        'ths.data.selected.node.nid': {
             handler(nid) {
                 if (nid) {
                     this.nid = nid
