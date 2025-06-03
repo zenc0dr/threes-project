@@ -5,7 +5,7 @@
             class="tree-label"
             :class="{ 'active': is_active }"
         >
-            <div class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
+            <div v-click-outside="clearActions" class="tree-content" :style="{ marginLeft: `${depth * 16}px` }">
                 <!-- Шеврон -->
                 <span v-if="has_nodes" class="chevron" @click.stop="toggleOpen">
                     {{ open ? '▾' : '▸' }}
@@ -124,6 +124,10 @@ export default {
         },
         move(nid, direction) {
             this.$emit('move', {nid, direction})
+        },
+        clearActions() {
+            this.ths.data.node_action = null
+            this.ths.data.node_actions_nid = null
         }
     }
 }

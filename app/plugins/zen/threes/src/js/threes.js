@@ -114,16 +114,18 @@ window.ths = {
     },
 }
 
-import vueClickOutsideElement from 'vue-click-outside-element';
+import vueClickOutsideElement from 'vue-click-outside-element'
 import FormFitter from './../vue/components/FormFitter.vue'
-import FormSection from "../vue/trash/v2/FormSection.vue";
-import FormTabs from "../vue/components/FormTabs.vue";
+import FormSection from "../vue/trash/v2/FormSection.vue"
+import FormTabs from "../vue/components/FormTabs.vue"
+import ClickOutside from '../vue/directives/ClickOutside'
 
-const app = createApp(Threes);
+const app = createApp(Threes)
 app.use(router);
-app.use(PrimeVue, {ripple: true});
+app.use(PrimeVue, {ripple: true})
 app.use(vueClickOutsideElement)
 app.component('FormFitter', FormFitter)
 app.component('FormSection', FormSection)
 app.component('FormTabs', FormTabs)
-app.mount("#threes");
+app.directive('click-outside', ClickOutside)
+app.mount("#threes")
