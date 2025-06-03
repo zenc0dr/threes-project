@@ -12,6 +12,7 @@ use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
 use Zen\Threes\Classes\Helpers\Env;
 use Zen\Threes\Classes\Helpers\Schema;
+use Zen\Threes\Classes\Helpers\Settings;
 
 class Helpers
 {
@@ -25,6 +26,7 @@ class Helpers
     use Icon;     # Сервис иконок
     use Env;      # Переменные окружения
     use Schema;   # Управление схемами
+    use Settings; # Система настроек Threes
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid

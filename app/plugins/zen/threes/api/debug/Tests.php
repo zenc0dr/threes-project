@@ -20,6 +20,14 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+        dd(
+            ths()->getSetting('author_token')
+        );
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:testConnector
+    public function testConnector()
+    {
         $items = ths()->connector()->mySql([
             'host' => 'db',
             'database' => 'azimut',

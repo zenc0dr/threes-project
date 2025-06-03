@@ -3,8 +3,7 @@
 namespace Zen\Threes;
 
 use Zen\Threes\Traits\SingletonTrait;
-use Zen\Threes\Models\Settings;
-use Zen\Threes\classes\Helpers;
+use Zen\Threes\Classes\Helpers;
 
 class Threes extends Helpers
 {
@@ -67,22 +66,5 @@ class Threes extends Helpers
             $instance = new $class($constructor);
             return $instance->$method(...$arguments);
         }
-    }
-
-    /**
-     * Интерфейс для настроек
-     * @param string $key
-     * @return mixed
-     */
-    public function getSetting(string $key): mixed
-    {
-        return Settings::get($key);
-    }
-
-    public function setSetting(string $key, mixed $value): void
-    {
-        $settings = Settings::instance();
-        $settings->setAttribute($key, $value);
-        $settings->save();
     }
 }

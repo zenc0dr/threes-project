@@ -556,6 +556,12 @@ class Nodes
         ths()->setSchema($schema_nodes);
     }
 
+    # Удаляем нод
+    public function deleteNode(string $nid): void
+    {
+        //dd($nid);
+    }
+
     /**
      * Проверяет, является ли узел потомком определенного родительского узла в иерархической древовидной структуре.
      *

@@ -79,4 +79,12 @@ class Node
         );
         return [];
     }
+
+    protected function deleteNode(): array
+    {
+        ths()->nodes()->deleteNode(
+            nid: request('nid')
+        );
+        return [];
+    }
 }
