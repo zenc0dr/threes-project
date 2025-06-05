@@ -122,12 +122,14 @@ export default {
                 ths.data.node_action = action
             }
             if (action === 'delete') {
-                ths.api({
-                    api: 'nodes.node:delete-node',
-                    data: {
-                        nid: this.node.nid
-                    },
-                    then: response => {
+                ths.enqueue({
+                    exec: () => ths.api({
+                        api: 'nodes.node:delete-node',
+                        data: {
+                            nid: this.node.nid
+                        }
+                    }),
+                    then: () => {
                         console.log('Нод удалён')
                     }
                 })

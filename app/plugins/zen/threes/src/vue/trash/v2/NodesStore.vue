@@ -45,25 +45,29 @@ export default {
             if (typeof filter_text === 'undefined') {
                 return
             }
-            ths.api({
-                api: 'nodes.store:get-store-nodes',
-                data: {
-                    filter_text: filter_text
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.store:get-store-nodes',
+                    data: {
+                        filter_text: filter_text
+                    }
+                }),
                 then: response => {
                     this.store_nodes = response.store_nodes
                 }
             })
         },
         addNode(nid) {
-            ths.api({
-                api: 'nodes.node:add-node',
-                data: {
-                    nid,
-                    parent_nid: this.nid,
-                    line_index: this.line_index
-                },
-                then: response => {
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:add-node',
+                    data: {
+                        nid,
+                        parent_nid: this.nid,
+                        line_index: this.line_index
+                    }
+                }),
+                then: () => {
                     this.$emit('update')
                 }
             })

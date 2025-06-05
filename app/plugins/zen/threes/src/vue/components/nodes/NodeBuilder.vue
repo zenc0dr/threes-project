@@ -95,16 +95,15 @@ export default {
     methods: {
         saveContent() {
             const html = this.editor.getHtml()
-            ths.api({
-                api: 'nodes.node:update-data',
-                data: {
-                    nid: this.node.nid,
-                    data: html,
-                    scope: this.scope,
-                },
-                then: () => {
-
-                }
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:update-data',
+                    data: {
+                        nid: this.node.nid,
+                        data: html,
+                        scope: this.scope,
+                    }
+                })
             });
         }
     },

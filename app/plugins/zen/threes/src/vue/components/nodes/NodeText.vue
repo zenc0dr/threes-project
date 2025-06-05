@@ -62,12 +62,14 @@ export default {
             }
         },
         updateData(data) {
-            this.ths.api({
-                api: 'nodes.node:update-data',
-                data: {
-                    nid: this.node.nid,
-                    data
-                },
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'nodes.node:update-data',
+                    data: {
+                        nid: this.node.nid,
+                        data
+                    }
+                }),
                 then: () => {
                     this.ths.bus.emit('schema:refresh')
                 }

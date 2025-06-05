@@ -46,22 +46,26 @@ export default {
     },
     methods: {
         getStore() {
-            this.ths.api({
-                api: 'store:get',
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'store:get'
+                }),
                 then: response => {
                     this.nodes = response.nodes
                 }
             })
         },
         addNode(node) {
-            ths.api({
-                api: 'nodes.node:add-node',
-                data: {
-                    nid: node.nid,
-                    class: node.class,
-                    after: ths.data.selected_nid,
-                },
-                then: response => {
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:add-node',
+                    data: {
+                        nid: node.nid,
+                        class: node.class,
+                        after: ths.data.selected_nid,
+                    }
+                }),
+                then: () => {
                     ths.bus.emit('tree:refresh')
                 }
             })
