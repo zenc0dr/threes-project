@@ -20,10 +20,18 @@ export default {
     components: {
         modal
     },
-    mounted() {
-        if (ths.Submit === null) {
-            ths.Submit = this
+    data() {
+        return {
+            ths: window.ths,
+            confirm: null,
+            opts: null,
         }
+    },
+    mounted() {
+        this.ths.mountComponent('Submit', this)
+    },
+    unmounted() {
+        this.ths.unmountComponent('Submit')
     },
     computed: {
         yes_label() {
@@ -33,22 +41,16 @@ export default {
             return this.confirm?.no_label ?? 'Нет'
         }
     },
-    data() {
-        return {
-            confirm: null,
-        }
-    },
     methods: {
-        push(response, then) {
+        push(response, opts) {
             if (response.confirm === 'no') {
                 return
             }
 
             if (response.confirm === 'yes') {
-                then(response)
+                opts.then(response)
                 return
             }
-
             this.confirm = response.confirm
         },
         accept() {

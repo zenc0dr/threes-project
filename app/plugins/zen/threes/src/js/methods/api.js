@@ -1,24 +1,21 @@
 import axios from 'axios';
 import md5 from 'md5';
 
-export function createApi(
-    {
-        authToken = () => null,
-        onPreloader = () => {},
-        onMessages = () => {},
-        onConfirm = () => {},
-    }
-) {
+export function createApi() {
     const requests_register = {}
 
     return function api(opts) {
         const data = opts.data || null;
-        const axios_options = authToken() ? {
-                withCredentials: true,
-                headers: {
-                    ThreesAuth: authToken()
-                },
-            } : null
+        const ths = window.ths
+
+        // const axios_options = authToken() ? {
+        //         withCredentials: true,
+        //         headers: {
+        //             ThreesAuth: authToken()
+        //         },
+        //     } : null
+
+        const axios_options = null
 
         const api_url = opts.api ? `/threes.api/${opts.api}` : opts.url
         const request_key = md5(api_url + JSON.stringify(data))
@@ -31,33 +28,35 @@ export function createApi(
 
         requests_register[request_key] = setTimeout(() => {
             if (requests_register[request_key]) {
-                onPreloader(true);
+                ths.data.process = true
             }
         }, 2000);
 
         const handleResponse = (response) => {
             delete requests_register[request_key];
-            onPreloader(false);
+            ths.data.process = true
 
             if (response.messages) {
-                onMessages(response.messages);
+                ths.exe('Alerts', 'push', response.messages)
             }
 
+            // Система подтверждения
             if (response.confirm) {
-                onConfirm(response.confirm, opts.then);
-                return;
+                ths.exe('Submit', 'push', response, opts)
+                // Передаёт управление запросом
+                return
             }
 
             if (opts.then) {
                 opts.then(response);
             }
-        };
+        }
 
         const handleError = (error) => {
             delete requests_register[request_key];
-            onPreloader(false);
+            ths.data.process = false
             console.error(error);
-        };
+        }
 
         if (!data) {
             axios.get(api_url, axios_options)
@@ -66,5 +65,5 @@ export function createApi(
             axios.post(api_url, data, axios_options)
                 .then(res => handleResponse(res.data)).catch(handleError)
         }
-    };
+    }
 }

@@ -54,19 +54,23 @@ export default {
             this.searchTimer = setTimeout(this.getTree, 400)
         }
     },
+    created() {
+        this.ths.mountComponent('Tree', this)
+    },
     mounted() {
         this.getTree()
-        //this.ths.bus.on('tree:refresh', this.getTree)
     },
     unmounted() {
-        //this.ths.bus.off('tree:refresh', this.getTree)
+        this.ths.unmountComponent('Tree')
         clearTimeout(this.searchTimer)
     },
     methods: {
         getTree() {
             this.ths.api({
                 api: 'ui:get-tree-nodes',
-                data: { search: this.search },
+                data: {
+                    search: this.search
+                },
                 then: response => {
                     this.tree = response.tree
                 }

@@ -20,47 +20,42 @@ window.ths = {
     auth_token: null, // Токен авторизации
     bus: mitt(), // Шина событий
 
+    // Реактивные данные
     data: reactive({
+
+        // Компоненты Threes
         components: {
             Alerts: null, // Система сообщений
             Submit: null, // Система подтверждения
         },
-        ui_streams: [],
+
+        // Глобальный флаг прелоадера
         process: false,
+
+        // Операции с нодами
         node_selected_nid: null,
         node_actions_nid: null,
         node_action: null,
     }),
 
-    preloader(state) {
-        this.data.process = state
+    // Монтирование компонента
+    mountComponent(name, instance) {
+        this.data.components[name] = instance
     },
-    pushMessage(text, type = 'success') {
-        const Alerts = this.data.components.Alerts
-        if (Alerts) {
-            Alerts.push([{ text, type }])
-        }
+
+    // Размонтирование компонента
+    unmountComponent(name) {
+        this.data.components[name] = null
     },
-    pushMessages(messages) {
-        const Alerts = this.data.components.Alerts
-        if (Alerts) {
-            Alerts.push(messages)
-        }
+
+    // Выполнение метода компонента
+    exe(name, method, ...args) {
+        this.data.components[name][method](...args)
     }
 }
 
-// Отправка запросов
-window.ths.api = createApi({
-    authToken: () => window.ths.auth_token,
-    onPreloader: state => window.ths.preloader(state),
-    onMessages: messages => window.ths.pushMessages(messages),
-    onConfirm: (confirmData, then) => {
-        const Submit = window.ths.data.components.Submit
-        if (Submit) {
-            Submit.push(confirmData, then)
-        }
-    },
-})
+// Сервис отправки запросов
+window.ths.api = createApi();
 
 const app = createApp(Threes);
 app.use(router);

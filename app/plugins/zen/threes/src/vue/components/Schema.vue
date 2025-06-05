@@ -76,6 +76,7 @@ export default {
     },
     data() {
         return {
+            ths: window.ths,
             nid: null,
             schema: null,
             settings: null,
@@ -106,29 +107,15 @@ export default {
                     label: 'Показывать в магазине',
                 },
             ],
-            ths: window.ths,
         }
     },
     mounted() {
-        this.ths.bus.on('schema:refresh', this.getSchema)
+        this.ths.mountComponent('Schema', this)
     },
     unmounted() {
-        this.ths.bus.off('schema:refresh', this.getSchema)
+        this.ths.unmountComponent('Schema')
     },
     watch: {
-
-        // 'ths.data.selected_nid': {
-        //     handler(nid) {
-        //         if (nid) {
-        //             this.nid = nid
-        //             this.getSchema()
-        //         } else {
-        //             this.nid = null
-        //             this.schema = null
-        //         }
-        //     },
-        //     immediate: true
-        // }
         'ths.data.node_selected_nid': {
             handler(nid) {
                 if (nid) {
@@ -164,7 +151,8 @@ export default {
                     nid: this.nid, name
                 },
                 then: response => {
-                    this.ths.bus.emit('tree:refresh')
+                    //this.ths.bus.emit('tree:refresh')
+                    this.ths.exe('Tree', 'getTree')
                 }
             })
         },
@@ -179,7 +167,8 @@ export default {
                     description
                 },
                 then: response => {
-                    this.ths.bus.emit('tree:refresh')
+                    //this.ths.bus.emit('tree:refresh')
+                    this.ths.exe('Tree', 'getTree')
                 }
             })
         },
@@ -198,7 +187,8 @@ export default {
                 then: response => {
                     this.settings = null
                     this.getSchema()
-                    this.ths.bus.emit('tree:refresh')
+                    //this.ths.bus.emit('tree:refresh')
+                    this.ths.exe('Tree', 'getTree')
                     this.ths.bus.emit('store:refresh')
                 }
             })
@@ -218,7 +208,7 @@ export default {
                         svg: reader.result
                     },
                     then: response => {
-                        this.ths.bus.emit('tree:refresh')
+                        this.ths.exe('Tree', 'getTree')
                         this.ths.bus.emit('store:refresh')
                         this.getSchema()
                     }
