@@ -64,9 +64,11 @@ export default {
     },
     methods: {
         getTree() {
-            this.ths.api({
-                api: 'ui:get-tree-nodes',
-                data: { search: this.search },
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'ui:get-tree-nodes',
+                    data: { search: this.search }
+                }),
                 then: response => {
                     this.tree = response.tree
                 }
@@ -77,13 +79,15 @@ export default {
             this.getTree()
         },
         moveAction({nid, direction}) {
-            this.ths.api({
-                api: 'nodes.node:move-node',
-                data: {
-                    nid: this.ths.data.node_actions_nid,
-                    target_nid: nid,
-                    direction: direction
-                },
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'nodes.node:move-node',
+                    data: {
+                        nid: this.ths.data.node_actions_nid,
+                        target_nid: nid,
+                        direction: direction
+                    }
+                }),
                 then: () => {
                     this.ths.data.node_actions_nid = null
                     this.ths.data.node_action = null

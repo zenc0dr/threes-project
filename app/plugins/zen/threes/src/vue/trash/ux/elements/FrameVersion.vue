@@ -33,11 +33,13 @@ export default {
     },
     methods: {
         getVersions() {
-            ths.api({
-                api: 'frames.Frame:getVersions',
-                data: {
-                    fid: this.fid
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'frames.Frame:getVersions',
+                    data: {
+                        fid: this.fid
+                    }
+                }),
                 then: response => {
                     this.version = response.version
                     this.versions = response.versions
@@ -45,24 +47,28 @@ export default {
             })
         },
         restoreVersion() {
-            ths.api({
-                api: 'frames.Frame:restoreVersion',
-                data: {
-                    version_id: this.version
-                },
-                then: response => {
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'frames.Frame:restoreVersion',
+                    data: {
+                        version_id: this.version
+                    }
+                }),
+                then: () => {
                     this.getVersions()
                     this.$emit('update:version')
                 }
             })
         },
         build() {
-            ths.api({
-                api: 'frames.Frame:buildFrame',
-                data: {
-                    fid: this.fid
-                },
-                then: response => {
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'frames.Frame:buildFrame',
+                    data: {
+                        fid: this.fid
+                    }
+                }),
+                then: () => {
                     this.getVersions()
                     this.$emit('update:version')
                 }
