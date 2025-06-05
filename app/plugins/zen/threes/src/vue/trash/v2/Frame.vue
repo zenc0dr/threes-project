@@ -167,42 +167,48 @@ export default {
 
         // Добавить новую линию нодов
         addLine() {
-            ths.api({
-                api: 'nodes.node:add-line',
-                data: {
-                    nid: this.nid
-                },
-                then: response => {
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:add-line',
+                    data: {
+                        nid: this.nid
+                    }
+                }),
+                then: () => {
                     this.getNodes();
-                },
+                }
             });
         },
 
         // Запрос нодов с сервера
         getNodes() {
-            ths.api({
-                api: 'nodes.node:get-nodes',
-                data: {
-                    nid: this.nid
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:get-nodes',
+                    data: {
+                        nid: this.nid
+                    }
+                }),
                 then: response => {
                     this.nodes = response.nodes;
-                },
+                }
             });
         },
 
         // Сохранить текущее расположение нодов
         setNodes() {
             this.selected_nodes = [];
-            ths.api({
-                api: 'nodes.node:set-nodes',
-                data: {
-                    nid: this.nid,
-                    nodes: this.nodes
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:set-nodes',
+                    data: {
+                        nid: this.nid,
+                        nodes: this.nodes
+                    }
+                }),
                 then: () => {
                     this.getNodes();
-                },
+                }
             });
         },
     },

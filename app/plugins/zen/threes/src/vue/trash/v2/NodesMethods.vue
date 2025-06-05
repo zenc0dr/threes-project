@@ -86,12 +86,14 @@ export default {
             if (this.selected_none) {
                 return
             }
-            ths.api({
-                api: 'nodes.Node:removeNodes',
-                data: {
-                    nid: this.nid,
-                    nids: this.nids
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.Node:removeNodes',
+                    data: {
+                        nid: this.nid,
+                        nids: this.nids
+                    }
+                }),
                 then: () => {
                     this.$emit('update')
                 }
@@ -102,12 +104,14 @@ export default {
             if (this.selected_none) {
                 return
             }
-            ths.api({
-                api: 'nodes.Node:copyNodes',
-                data: {
-                    nid: this.nid,
-                    nids: this.nids
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.Node:copyNodes',
+                    data: {
+                        nid: this.nid,
+                        nids: this.nids
+                    }
+                }),
                 then: () => {
                     this.$emit('update')
                 }

@@ -127,24 +127,28 @@ export default {
                 return;
             }
             let node = this.updated_node
-            ths.api({
-                api: 'nodes.Node:update',
-                data: {
-                    fid: this.fid,
-                    node
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.Node:update',
+                    data: {
+                        fid: this.fid,
+                        node
+                    }
+                }),
                 then: response => {
                     this.$emit("update", response.node)
-                },
+                }
             })
         },
         reloadNode() {
-            ths.api({
-                api: 'nodes.Node:getNodeDsl',
-                data: {
-                    fid: this.fid,
-                    nid: this.node.nid
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.Node:getNodeDsl',
+                    data: {
+                        fid: this.fid,
+                        nid: this.node.nid
+                    }
+                }),
                 then: response => {
                     this.$emit("update", response.node)
                 }
