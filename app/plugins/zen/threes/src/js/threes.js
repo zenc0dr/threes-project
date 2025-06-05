@@ -61,9 +61,9 @@ window.ths = {
             }
         }
 
-        const request = !data
-            ? axios.get(api_url, axios_options)
-            : axios.post(api_url, data, axios_options)
+        const request = !data ?
+            axios.get(api_url, axios_options) :
+            axios.post(api_url, data, axios_options)
 
         return request
             .then((response) => {
@@ -96,52 +96,50 @@ window.ths = {
 
     // Постобработка данных
     afterResponse(response, request_key) {
-        delete this.requests_register[request_key]
-        this.preloader(false)
+        delete this.requests_register[request_key];
+        this.preloader(false);
         if (response.messages) {
-            this.pushMessages(response.messages)
+            this.pushMessages(response.messages);
         }
 
         if (response.confirm) {
             if (this.Submit !== null) {
-                this.Submit.push(response)
+                this.Submit.push(response);
             }
-            return null
+            return null;
         }
-        return response
+
+        return response;
     },
+
     preloader(state) {
-        this.data.process = state
+        this.data.process = state;
     },
 
     exec(path, ...args) {
-        if (!path) {
-            return
-        }
-        const [compName, methodName] = path.split('.')
-        const comp = this.data.components[compName]
+        if (!path) return;
+        const [compName, methodName] = path.split('.');
+        const comp = this.data.components[compName];
         if (comp && typeof comp[methodName] === 'function') {
-            return comp[methodName](...args)
+            return comp[methodName](...args);
         }
-        console.warn('ths.exec: component or method not found', path)
+        console.warn('ths.exec: component or method not found', path);
     },
 
     processThen(then, result) {
-        if (!then) {
-            return
-        }
+        if (!then) return;
         const call = (t, res) => {
             if (typeof t === 'string') {
-                return this.exec(t, res)
+                return this.exec(t, res);
             }
             if (typeof t === 'function') {
-                return t(res)
+                return t(res);
             }
-        }
+        };
         if (Array.isArray(then)) {
-            return then.reduce((res, t) => call(t, res), result)
+            return then.reduce((res, t) => call(t, res), result);
         }
-        return call(then, result)
+        return call(then, result);
     },
 
     executeAction(action) {
@@ -187,6 +185,74 @@ window.ths = {
             }
         }, 1000)
     },
+
+    exec(path, ...args) {
+        if (!path) return;
+        const [compName, methodName] = path.split('.');
+        const comp = this.data.components[compName];
+        if (comp && typeof comp[methodName] === 'function') {
+            return comp[methodName](...args);
+        }
+        console.warn('ths.exec: component or method not found', path);
+    },
+
+    processThen(then, result) {
+        if (!then) return;
+        const call = (t, res) => {
+            if (typeof t === 'string') {
+                return this.exec(t, res);
+            }
+            if (typeof t === 'function') {
+                return t(res);
+            }
+        };
+        if (Array.isArray(then)) {
+            return then.reduce((res, t) => call(t, res), result);
+        }
+        return call(then, result);
+    },
+
+    executeAction(action) {
+        let execResult;
+        if (typeof action.exec === 'string') {
+            execResult = this.exec(action.exec, action.data);
+        } else if (typeof action.exec === 'function') {
+            execResult = action.exec(action.data);
+        }
+        Promise.resolve(execResult).then(result => this.processThen(action.then, result));
+    },
+
+    tryFlushQueue() {
+        if (!this.loopStarted) {
+            this.flushLoop();
+        }
+    },
+
+    enqueue(action) {
+        this.tryFlushQueue();
+        action.hash = action.hash || md5(JSON.stringify(action.data));
+        if (!this.queue.find(a => a.hash === action.hash)) {
+            action.delay = action.delay || 0;
+            this.queue.push(action);
+        }
+    },
+
+    flushLoop() {
+        if (this.loopStarted) return;
+        this.loopStarted = true;
+        setInterval(() => {
+            for (let i = 0; i < this.queue.length; i++) {
+                const action = this.queue[i];
+                if (action.delay > 0) {
+                    action.delay -= 1;
+                    continue;
+                }
+                this.queue.splice(i, 1);
+                i--;
+                this.executeAction(action);
+            }
+        }, 1000);
+    },
 }
 
 import vueClickOutsideElement from 'vue-click-outside-element'
@@ -198,7 +264,7 @@ import autoRegisterMixin from './auto-register-mixin'
 
 const app = createApp(Threes)
 app.use(router);
-app.use(PrimeVue, {ripple: true})
+app.use(PrimeVue, { ripple: true })
 app.use(vueClickOutsideElement)
 app.mixin(autoRegisterMixin)
 app.component('FormFitter', FormFitter)
