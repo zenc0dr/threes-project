@@ -87,11 +87,13 @@ export default {
             if (typeof filter_text === 'undefined') {
                 return
             }
-            ths.api({
-                api: 'layers.Layer:getStore',
-                data: {
-                    filter_text
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'layers.Layer:getStore',
+                    data: {
+                        filter_text
+                    }
+                }),
                 then: response => {
                     this.layers = response.layers
                     this.unit_layers = response.unit_layers

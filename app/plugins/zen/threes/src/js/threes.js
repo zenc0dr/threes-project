@@ -19,12 +19,16 @@ window.ths = {
 
     /* Объект для хранения глобальных данных */
     data: reactive({
+        components: {},
         ui_streams: [],
         process: false,
         node_selected_nid: null, // string | null - nid выбранного нода
         node_actions_nid: null, // string | null - nid нода для которого открыты настройки actions
         node_action: null, // string ex: 'move', 'copy', 'link', 'delete' - Выбранный action
     }),
+
+    queue: [],
+    loopStarted: false,
 
     api(opts) {
         let domain = location.origin
@@ -57,29 +61,20 @@ window.ths = {
             }
         }
 
-        if (!data) {
-            axios.get(api_url, axios_options)
-                .then((response) => {
-                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
-                    this.afterResponse(response.data, opts.then, request_key)
-                })
-                .catch((error) => {
-                    delete this.requests_register[request_key]
-                    this.preloader(false)
-                    console.log(error) // todo:debug
-                })
-        } else {
-            axios.post(api_url, data, axios_options)
-                .then((response) => {
-                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
-                    this.afterResponse(response.data, opts.then, request_key)
-                })
-                .catch((error) => {
-                    delete this.requests_register[request_key]
-                    this.preloader(false)
-                    console.log(error) // todo:debug
-                })
-        }
+        const request = !data
+            ? axios.get(api_url, axios_options)
+            : axios.post(api_url, data, axios_options)
+
+        return request
+            .then((response) => {
+                console.log('Threes response [' + request_key + ']', response.data)
+                return this.afterResponse(response.data, request_key)
+            })
+            .catch((error) => {
+                delete this.requests_register[request_key]
+                this.preloader(false)
+                console.log(error)
+            })
     },
 
     // Показать 1 сообщение
@@ -100,27 +95,91 @@ window.ths = {
     },
 
     // Постобработка данных
-    afterResponse(response, then, request_key) {
+    afterResponse(response, request_key) {
         delete this.requests_register[request_key]
         this.preloader(false)
         if (response.messages) {
             this.pushMessages(response.messages)
         }
 
-        // Если ответ с подтверждением, прерываем обработку
         if (response.confirm) {
             if (this.Submit !== null) {
-                this.Submit.push(response, then)
+                this.Submit.push(response)
             }
-            return
+            return null
         }
-
-        if (then) {
-            then(response)
-        }
+        return response
     },
     preloader(state) {
         this.data.process = state
+    },
+
+    exec(path, ...args) {
+        if (!path) return;
+        const [compName, methodName] = path.split('.');
+        const comp = this.data.components[compName];
+        if (comp && typeof comp[methodName] === 'function') {
+            return comp[methodName](...args);
+        }
+        console.warn('ths.exec: component or method not found', path);
+    },
+
+    processThen(then, result) {
+        if (!then) return;
+        const call = (t, res) => {
+            if (typeof t === 'string') {
+                return this.exec(t, res);
+            }
+            if (typeof t === 'function') {
+                return t(res);
+            }
+        };
+        if (Array.isArray(then)) {
+            return then.reduce((res, t) => call(t, res), result);
+        }
+        return call(then, result);
+    },
+
+    executeAction(action) {
+        let execResult;
+        if (typeof action.exec === 'string') {
+            execResult = this.exec(action.exec, action.data);
+        } else if (typeof action.exec === 'function') {
+            execResult = action.exec(action.data);
+        }
+        Promise.resolve(execResult).then(result => this.processThen(action.then, result));
+    },
+
+    tryFlushQueue() {
+        if (!this.loopStarted) {
+            this.flushLoop();
+        }
+    },
+
+    enqueue(action) {
+        this.tryFlushQueue();
+        action.hash = action.hash || md5(JSON.stringify(action.data));
+        if (!this.queue.find(a => a.hash === action.hash)) {
+            action.delay = action.delay || 0;
+            this.queue.push(action);
+        }
+    },
+
+    flushLoop() {
+        if (this.loopStarted) return;
+        this.loopStarted = true;
+        setInterval(() => {
+            for (let i = 0; i < this.queue.length; i++) {
+                const action = this.queue[i];
+                if (action.delay > 0) {
+                    action.delay -= 1;
+                    continue;
+                }
+                this.queue.splice(i, 1);
+                i--;
+                this.executeAction(action);
+            }
+        }, 1000);
     },
 }
 
@@ -129,11 +188,13 @@ import FormFitter from './../vue/components/FormFitter.vue'
 import FormSection from "../vue/trash/v2/FormSection.vue"
 import FormTabs from "../vue/components/FormTabs.vue"
 import ClickOutside from '../vue/directives/ClickOutside'
+import autoRegisterMixin from './auto-register-mixin'
 
 const app = createApp(Threes)
 app.use(router);
 app.use(PrimeVue, {ripple: true})
 app.use(vueClickOutsideElement)
+app.mixin(autoRegisterMixin)
 app.component('FormFitter', FormFitter)
 app.component('FormSection', FormSection)
 app.component('FormTabs', FormTabs)

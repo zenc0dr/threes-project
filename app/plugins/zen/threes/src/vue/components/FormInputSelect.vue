@@ -83,11 +83,13 @@ export default {
             }, 300)
         },
         fetchOptions(query) {
-            ths.api({
-                api: '/api/' + this.search,
-                data: {
-                    search_text: query
-                },
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: '/api/' + this.search,
+                    data: {
+                        search_text: query
+                    }
+                }),
                 then: options => {
                     this.preloader = false
                     this.loadedOptions = options || []
