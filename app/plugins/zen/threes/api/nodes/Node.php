@@ -80,8 +80,13 @@ class Node
         return [];
     }
 
+    # http://threes.dc/threes.api/nodes.node:delete-node?debug
     protected function deleteNode(): array
     {
+        if ($submit = ths()->submit()) {
+            return $submit;
+        }
+
         ths()->nodes()->deleteNode(
             nid: request('nid')
         );

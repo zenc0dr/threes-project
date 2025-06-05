@@ -83,7 +83,6 @@ export default {
     },
     data() {
         return {
-            ths: window.ths,
             open: false
         }
     },
@@ -93,13 +92,15 @@ export default {
         },
         // Определить, выбран ли нод
         is_active() {
-            return this.ths.data.node_selected_nid === this.node.nid
+            return ths.data.node_selected_nid === this.node.nid
         },
+        // Открыта панель с действиями
         actions_is_open() {
-            return this.ths.data.node_actions_nid === this.node.nid && this.ths.data.node_action === null
+            return ths.data.node_actions_nid === this.node.nid && ths.data.node_action === null
         },
+        // Направления перемещения нода открыто
         directions_is_open() {
-            return this.ths.data.node_action !== null
+            return ths.data.node_action !== null
         }
     },
     methods: {
@@ -109,25 +110,37 @@ export default {
         },
         // Выбрать нод
         select() {
-            this.ths.data.node_selected_nid = this.node.nid
+            ths.data.node_selected_nid = this.node.nid
         },
+        // Открыть действия
         openActions() {
-            this.ths.data.node_actions_nid = this.node.nid
+            ths.data.node_actions_nid = this.node.nid
         },
+        // Вызвать действие
         callAction(action) {
             if (['move', 'copy', 'link'].includes(action)) {
-                this.ths.data.node_action = action
+                ths.data.node_action = action
             }
             if (action === 'delete') {
-                console.log('Удалить нод ' + this.node.nid)
+                ths.api({
+                    api: 'nodes.node:delete-node',
+                    data: {
+                        nid: this.node.nid
+                    },
+                    then: response => {
+                        console.log('Нод удалён')
+                    }
+                })
             }
         },
+        // Переместить, скопировать или сделать ссылку
         move(nid, direction) {
             this.$emit('move', {nid, direction})
         },
+        // Очистить действие
         clearActions() {
-            this.ths.data.node_action = null
-            this.ths.data.node_actions_nid = null
+            ths.data.node_action = null
+            ths.data.node_actions_nid = null
         }
     }
 }
@@ -235,15 +248,5 @@ export default {
         display: flex;
         flex-direction: column;
     }
-
-    //.tree-label:not(.moved) .tree-item__mover {
-    //    opacity: 0;
-    //    transition: opacity 0.2s ease;
-    //}
-
-    //.tree-label:hover .tree-item__mover {
-    //    opacity: 1;
-    //}
-
 }
 </style>

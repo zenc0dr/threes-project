@@ -2,12 +2,9 @@
 
 namespace Zen\Threes\Classes\Helpers;
 
-use Zen\Threes\Traits\SingletonTrait;
 
 trait State
 {
-    use SingletonTrait;
-
     private array $state = [];
 
     /**

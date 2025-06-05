@@ -56,8 +56,7 @@ class Plugin extends PluginBase
 namespace Zen\Threes;
 
 use Zen\Threes\Traits\SingletonTrait;
-use Zen\Threes\Models\Settings;
-use Zen\Threes\classes\Helpers;
+use Zen\Threes\Classes\Helpers;
 
 class Threes extends Helpers
 {
@@ -120,23 +119,6 @@ class Threes extends Helpers
             $instance = new $class($constructor);
             return $instance->$method(...$arguments);
         }
-    }
-
-    /**
-     * Интерфейс для настроек
-     * @param string $key
-     * @return mixed
-     */
-    public function getSetting(string $key): mixed
-    {
-        return Settings::get($key);
-    }
-
-    public function setSetting(string $key, mixed $value): void
-    {
-        $settings = Settings::instance();
-        $settings->setAttribute($key, $value);
-        $settings->save();
     }
 }
 
@@ -226,6 +208,14 @@ class Tests
 {
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
+    {
+        dd(
+            ths()->getSetting('author_token')
+        );
+    }
+
+    # http://threes.dc/threes.api/debug.Tests:testConnector
+    public function testConnector()
     {
         $items = ths()->connector()->mySql([
             'host' => 'db',
@@ -384,7 +374,7 @@ class Node
         ths()->nodes()->updateNodeData(
             request('nid'),
             request('data'),
-            request('scope')
+            request('scope', 'self_content')
         );
         return [];
     }
@@ -405,7 +395,20 @@ class Node
         ths()->nodes()->moveNode(
             request('nid'),
             request('target_nid'),
-            request('action')
+            request('direction')
+        );
+        return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:delete-node?debug
+    protected function deleteNode(): array
+    {
+        if ($submit = ths()->submit()) {
+            return $submit;
+        }
+
+        ths()->nodes()->deleteNode(
+            nid: request('nid')
         );
         return [];
     }
@@ -467,11 +470,9 @@ class Backlog
             $id = $ids[$id];
             $name = $feature['title'];
             $description = $feature['description'];
-            $category = $feature['category'];
-            $priority = $feature['priority'] ?? 'normal';
-            $status = $feature['status'] ?? 'planned';
+            $category = $feature['group'];
             $tags = $feature['tags'];
-            $dependencies = $feature['dependencies'];
+            //$dependencies = $feature['dependencies'];
             $acceptance_criteria = $feature['acceptance_criteria'];
             $parent_id = $feature['parent_id'] ? $ids[$feature['parent_id']] : null;
             $module = $feature['module'];
@@ -490,9 +491,9 @@ class Backlog
                 'name' => $name,
                 'description' => $description,
                 'category' => $category,
-                'priority' => $priority,
-                'status' => $status,
-                'module' => $module,
+                'priority' => null,
+                'status' => null,
+                'module' => null,
                 'release' => 1,
                 'acceptance_criteria' => $acceptance_criteria,
             ]);
@@ -646,6 +647,7 @@ class Gen
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Classes\Helpers\Carbon;
 use Zen\Threes\Classes\Helpers\Debug;
 use Zen\Threes\Classes\Helpers\Files;
@@ -656,9 +658,12 @@ use Zen\Threes\Classes\Helpers\Yaml;
 use Zen\Threes\Classes\Helpers\Icon;
 use Zen\Threes\Classes\Helpers\Env;
 use Zen\Threes\Classes\Helpers\Schema;
+use Zen\Threes\Classes\Helpers\Settings;
+use Zen\Threes\Classes\Helpers\Confirm;
 
 class Helpers
 {
+    use SingletonTrait;
     use Debug;    # Методы отладки
     use Files;    # Работа с файлами
     use Json;     # Работа с JSON
@@ -669,6 +674,8 @@ class Helpers
     use Icon;     # Сервис иконок
     use Env;      # Переменные окружения
     use Schema;   # Управление схемами
+    use Settings; # Система настроек Threes
+    use Confirm;  # Система подтверждения
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid
@@ -1090,8 +1097,9 @@ class Nodes
      * @return void
      */
     public function updateNodeData(
-        string $nid, array|string|null $data,
-        string $scope = 'self_content'
+        string $nid,
+        array|string|null $data,
+        ?string $scope = 'self_content'
     ): void {
         $node = Node::find($nid);
         $node->scope = $scope;
@@ -1129,20 +1137,34 @@ class Nodes
      * Переместить нод
      * @param string $nid
      * @param string $target_nid
-     * @param string $action - into || after - Указывает разместить нод после или как наследника
+     * @param string $direction - before || after || outward || inside
      * @return void
      */
-    public function moveNode(string $nid, string $target_nid, string $action): void
+    public function moveNode(string $nid, string $target_nid, string $direction): void
     {
-        // Получаем текущую схему
-        $schema = ths()->getSchema();
-        $schema_nodes = $schema['schema_nodes'];
+        switch ($direction) {
+            case 'before':
+                $this->moveNodeBefore($nid, $target_nid);
+                break;
+            case 'after':
+                $this->moveNodeAfter($nid, $target_nid);
+                break;
+            case 'inside':
+                $this->moveNodeInside($nid, $target_nid);
+                break;
+            case 'outward':
+                $this->moveNodeOutward($nid, $target_nid);
+                break;
+        }
+    }
 
-        // Сохраняем узел для перемещения
+    public function moveNodeBefore(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
         $moving_node = null;
 
-        // Рекурсивно ищем и удаляем перемещаемый узел
-        $remove_node = function (&$nodes) use ($nid, &$moving_node, &$remove_node) {
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$moving_node) {
             foreach ($nodes as $key => &$node) {
                 if ($node['nid'] === $nid) {
                     $moving_node = $node;
@@ -1151,30 +1173,163 @@ class Nodes
                     return true;
                 }
                 if (!empty($node['nodes'])) {
-                    if ($remove_node($node['nodes'])) {
-                        return true;
-                    }
+                    if ($remove_node($node['nodes'])) return true;
                 }
             }
             return false;
         };
 
-        // Рекурсивно ищем целевой узел и вставляем перемещаемый узел
-        $insert_node = function (&$nodes) use ($target_nid, $action, &$moving_node, &$insert_node) {
+        $insert_before = function (&$nodes) use (&$insert_before, $target_nid, &$moving_node) {
             foreach ($nodes as $key => &$node) {
                 if ($node['nid'] === $target_nid) {
-                    if ($action === 'into') {
-                        if (!isset($node['nodes'])) {
-                            $node['nodes'] = [];
-                        }
-                        $node['nodes'][] = $moving_node;
-                    } else if ($action === 'after') {
-                        array_splice($nodes, $key + 1, 0, [$moving_node]);
-                    }
+                    array_splice($nodes, $key, 0, [$moving_node]);
                     return true;
                 }
                 if (!empty($node['nodes'])) {
-                    if ($insert_node($node['nodes'])) {
+                    if ($insert_before($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $remove_node($schema_nodes);
+        if ($moving_node) $insert_before($schema_nodes);
+        ths()->setSchema($schema_nodes);
+    }
+
+    public function moveNodeAfter(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
+        $moving_node = null;
+
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$moving_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $insert_after = function (&$nodes) use (&$insert_after, $target_nid, &$moving_node) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    array_splice($nodes, $key + 1, 0, [$moving_node]);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_after($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $remove_node($schema_nodes);
+        if ($moving_node) $insert_after($schema_nodes);
+        ths()->setSchema($schema_nodes);
+    }
+
+    public function moveNodeInside(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
+        $moving_node = null;
+
+        // Защита: нельзя вложить в самого себя или потомка
+        if ($nid === $target_nid || $this->isDescendant($schema_nodes, $nid, $target_nid)) {
+            ths()->messages()->addMessage("Нельзя вложить узел внутрь самого себя или его потомка", "error");
+            return;
+        }
+
+        // Удаление
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$moving_node): bool {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        // Вставка
+        $insert_inside = function (&$nodes) use (&$insert_inside, $target_nid, &$moving_node): bool {
+            foreach ($nodes as &$node) {
+                if ($node['nid'] === $target_nid) {
+                    if (!isset($node['nodes']) || !is_array($node['nodes'])) {
+                        $node['nodes'] = [];
+                    }
+                    $node['nodes'][] = $moving_node;
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_inside($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        $remove_node($schema_nodes);
+        if ($moving_node) {
+            $insert_inside($schema_nodes);
+        }
+
+        ths()->setSchema($schema_nodes);
+    }
+
+
+    public function moveNodeOutward(string $nid, string $target_nid): void
+    {
+        $schema = ths()->getSchema();
+        $schema_nodes = &$schema['schema_nodes'];
+        $moving_node = null;
+
+        // Защита от циклов: нельзя переместить, если target — потомок
+        if ($nid === $target_nid || $this->isDescendant($schema_nodes, $nid, $target_nid)) {
+            ths()->messages()->addMessage("Нельзя поднять узел выше, если он содержит целевой узел", "error");
+            return;
+        }
+
+        // Удаление
+        $remove_node = function (&$nodes, &$parent = null) use (&$remove_node, $nid, &$moving_node): bool {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    $moving_node = $node;
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($remove_node($node['nodes'], $node)) return true;
+                }
+            }
+            return false;
+        };
+
+        // Поиск родителя target_nid
+        $find_parent = function (&$nodes, string $child_nid, &$parent = null, &$level = null) use (&$find_parent): bool {
+            foreach ($nodes as &$node) {
+                if (!empty($node['nodes']) && is_array($node['nodes'])) {
+                    foreach ($node['nodes'] as &$child) {
+                        if ($child['nid'] === $child_nid) {
+                            $parent = &$node;
+                            $level = &$nodes;
+                            return true;
+                        }
+                    }
+                    if ($find_parent($node['nodes'], $child_nid, $parent, $level)) {
                         return true;
                     }
                 }
@@ -1182,14 +1337,132 @@ class Nodes
             return false;
         };
 
-        // Выполняем перемещение
         $remove_node($schema_nodes);
-        if ($moving_node) {
-            $insert_node($schema_nodes);
+
+        $parent = null;
+        $level = null;
+        $found = $find_parent($schema_nodes, $target_nid, $parent, $level);
+
+        if ($moving_node && $found && $parent && $level) {
+            foreach ($level as $key => $node) {
+                if ($node['nid'] === $parent['nid']) {
+                    array_splice($level, $key + 1, 0, [$moving_node]);
+                    ths()->setSchema($schema_nodes);
+                    return;
+                }
+            }
         }
 
-        // Сохраняем обновленную схему
+        // Если родитель не найден — перемещаем в корень
+        $schema_nodes[] = $moving_node;
         ths()->setSchema($schema_nodes);
+    }
+
+    # Удаляем нод
+    public function deleteNode(string $nid): void
+    {
+        // Текущая схема проекта
+        $schema         = ths()->getSchema();
+        $schema_nodes   = $schema['schema_nodes'] ?? [];
+
+        /** @var string[] $removed_nids */
+        $removed_nids = [];
+
+        /**
+         * Рекурсивно собираем nid-ы ветки и удаляем саму ветку из массива схемы
+         */
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$removed_nids): bool {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    // собрать nid текущего узла + всех потомков
+                    $collect = function (array $branch) use (&$collect, &$removed_nids) {
+                        $removed_nids[] = $branch['nid'];
+                        if (!empty($branch['nodes'])) {
+                            foreach ($branch['nodes'] as $child) {
+                                $collect($child);
+                            }
+                        }
+                    };
+                    $collect($node);
+
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes); // переиндексируем
+                    return true;
+                }
+
+                // поиск глубже
+                if (!empty($node['nodes']) && $remove_node($node['nodes'])) {
+                    // если после удаления у родителя нет детей — чистим ключ
+                    if (empty($node['nodes'])) {
+                        unset($node['nodes']);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Удаляем из схемы
+        $remove_node($schema_nodes);
+        ths()->setSchema($schema_nodes);   // сохраняем обновлённую схему
+
+        // Физически удаляем каталоги всех затронутых нодов
+        foreach (array_unique($removed_nids) as $del_nid) {
+            if ($node = Node::find($del_nid)) {
+                $node->delete();          // см. реализацию delete() в Node :contentReference[oaicite:1]{index=1}
+            }
+        }
+
+        // Сообщение для UI
+        if ($removed_nids) {
+            ths()->messages()->addMessage(
+                'Удалены ноды: ' . implode(', ', $removed_nids)
+            );
+        }
+    }
+
+
+    /**
+     * Проверяет, является ли узел потомком определенного родительского узла в иерархической древовидной структуре.
+     *
+     * @param array $tree Массив древовидной структуры, содержащий узлы.
+     * @param string $parent_nid ID родительского узла для проверки.
+     * @param string $child_nid ID дочернего узла для проверки.
+     * @return bool Возвращает true, если дочерний узел является потомком родительского узла, иначе false.
+     */
+    private function isDescendant(array $tree, string $parent_nid, string $child_nid): bool
+    {
+        foreach ($tree as $node) {
+            if ($node['nid'] === $parent_nid) {
+                return $this->containsNode($node, $child_nid);
+            }
+            if (!empty($node['nodes']) && $this->isDescendant($node['nodes'], $parent_nid, $child_nid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Проверяет, содержится ли узел с заданным идентификатором в дереве узлов.
+     *
+     * @param array $node Массив, представляющий текущий узел и его потомки.
+     * @param string $target_nid Идентификатор узла, который необходимо найти.
+     * @return bool Возвращает true, если узел с указанным идентификатором найден, иначе false.
+     */
+    private function containsNode(array $node, string $target_nid): bool
+    {
+        if ($node['nid'] === $target_nid) {
+            return true;
+        }
+        if (!empty($node['nodes'])) {
+            foreach ($node['nodes'] as $child) {
+                if ($this->containsNode($child, $target_nid)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 
@@ -1368,6 +1641,42 @@ trait Carbon
 }
 
 ```
+`plugins/zen/threes/classes/helpers/Confirm.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+trait Confirm
+{
+    public function submit(
+        string $massage = 'Вы уверены?',
+        string $yes_label = 'Да',
+        string $no_label = 'Нет'
+    ): bool | array {
+        $request = request()->all();
+
+        if (isset($request['confirm']) && $request['confirm'] === 'yes') {
+            return false;
+        }
+
+        if (isset($request['confirm']) && $request['confirm'] === 'no') {
+            return [
+                'success' => false,
+                'message' => 'Отказ от операции'
+            ];
+        }
+
+        return [
+            'confirm' => [
+                'message' => $massage,
+                'yes_label' => $yes_label,
+                'no_label' => $no_label,
+            ]
+        ];
+    }
+}
+
+```
 `plugins/zen/threes/classes/helpers/Debug.php`
 ```<?php
 
@@ -1519,13 +1828,10 @@ trait Files
 
 namespace Zen\Threes\Classes\Helpers;
 
-use Zen\Threes\Traits\SingletonTrait;
 use Str;
 
 trait Icon
 {
-    use SingletonTrait;
-
     /**
      * Создать иконку из пути до файла или строки svg
      * @param string $svg
@@ -1700,17 +2006,48 @@ trait Schema
 }
 
 ```
+`plugins/zen/threes/classes/helpers/Settings.php`
+```<?php
+
+namespace Zen\Threes\Classes\Helpers;
+
+use Zen\Threes\Models\Settings as SettingsModel;
+
+trait Settings
+{
+    /**
+     * Интерфейс для настроек
+     * @param string $key
+     * @return mixed
+     */
+    public function getSetting(string $key): mixed
+    {
+        return SettingsModel::get($key);
+    }
+
+    /**
+     * Вписать настройку
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
+    public function setSetting(string $key, mixed $value): void
+    {
+        $settings = SettingsModel::instance();
+        $settings->setAttribute($key, $value);
+        $settings->save();
+    }
+}
+
+```
 `plugins/zen/threes/classes/helpers/State.php`
 ```<?php
 
 namespace Zen\Threes\Classes\Helpers;
 
-use Zen\Threes\Traits\SingletonTrait;
 
 trait State
 {
-    use SingletonTrait;
-
     private array $state = [];
 
     /**
@@ -3703,6 +4040,7 @@ window._ = require('lodash');
 window.ths = {
 
     Alerts: null, // Сюда монтируются сообщения
+    Submit: null, // Сюда монтируется система подтверждения
 
     requests_register: {},
     auth_token: null,
@@ -3712,8 +4050,9 @@ window.ths = {
     data: reactive({
         ui_streams: [],
         process: false,
-        nids: [],
-        selected_nid: null
+        node_selected_nid: null, // string | null - nid выбранного нода
+        node_actions_nid: null, // string | null - nid нода для которого открыты настройки actions
+        node_action: null, // string ex: 'move', 'copy', 'link', 'delete' - Выбранный action
     }),
 
     api(opts) {
@@ -3791,11 +4130,23 @@ window.ths = {
 
     // Постобработка данных
     afterResponse(response, then, request_key) {
-        delete this.requests_register[request_key]
+
         this.preloader(false)
         if (response.messages) {
             this.pushMessages(response.messages)
         }
+
+        // Если ответ с подтверждением, прерываем обработку
+        if (response.confirm) {
+            if (this.Submit !== null) {
+                this.Submit.push(response, then)
+            }
+            return
+        }
+
+        // Удаляем запрос из очереди
+        delete this.requests_register[request_key]
+
         if (then) {
             then(response)
         }
@@ -3805,19 +4156,47 @@ window.ths = {
     },
 }
 
-import vueClickOutsideElement from 'vue-click-outside-element';
+import vueClickOutsideElement from 'vue-click-outside-element'
 import FormFitter from './../vue/components/FormFitter.vue'
-import FormSection from "../vue/trash/v2/FormSection.vue";
-import FormTabs from "../vue/components/FormTabs.vue";
+import FormSection from "../vue/trash/v2/FormSection.vue"
+import FormTabs from "../vue/components/FormTabs.vue"
+import ClickOutside from '../vue/directives/ClickOutside'
 
-const app = createApp(Threes);
+const app = createApp(Threes)
 app.use(router);
-app.use(PrimeVue, {ripple: true});
+app.use(PrimeVue, {ripple: true})
 app.use(vueClickOutsideElement)
 app.component('FormFitter', FormFitter)
 app.component('FormSection', FormSection)
 app.component('FormTabs', FormTabs)
-app.mount("#threes");
+app.directive('click-outside', ClickOutside)
+app.mount("#threes")
+
+```
+`plugins/zen/threes/src/vue/directives/ClickOutside.js`
+```export default {
+    beforeMount(el, binding) {
+        if (typeof binding.value !== 'function') {
+            console.warn(`[v-click-outside] Expected a function, got ${typeof binding.value}`);
+            return;
+        }
+
+        const bubble = binding.modifiers?.bubble;
+
+        el.__vueClickOutside__ = (e) => {
+            if (bubble || (!el.contains(e.target) && el !== e.target)) {
+                binding.value(e);
+            }
+        };
+
+        document.addEventListener('click', el.__vueClickOutside__);
+    },
+
+    unmounted(el) {
+        document.removeEventListener('click', el.__vueClickOutside__);
+        delete el.__vueClickOutside__;
+    }
+}
 
 ```
 `plugins/zen/threes/traits/QueryLogTrait.php`

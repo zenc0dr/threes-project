@@ -2,13 +2,10 @@
 
 namespace Zen\Threes\Classes\Helpers;
 
-use Zen\Threes\Traits\SingletonTrait;
 use Str;
 
 trait Icon
 {
-    use SingletonTrait;
-
     /**
      * Создать иконку из пути до файла или строки svg
      * @param string $svg

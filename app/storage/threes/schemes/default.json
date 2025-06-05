@@ -5,6 +5,17 @@
             "nid": "w2k9q23ezxu4"
         },
         {
+            "nid": "node105",
+            "nodes": [
+                {
+                    "nid": "node134"
+                },
+                {
+                    "nid": "node48"
+                }
+            ]
+        },
+        {
             "nid": "3vbvs3afj4tt"
         },
         {
@@ -12,15 +23,16 @@
             "nodes": [
                 {
                     "nid": "jpqsvzeh94kc",
-                    "nodes": []
-                }
-            ]
-        },
-        {
-            "nid": "zsgk2c7m3kan",
-            "nodes": [
-                {
-                    "nid": "9uvmjnpfsqza"
+                    "nodes": [
+                        {
+                            "nid": "zsgk2c7m3kan",
+                            "nodes": [
+                                {
+                                    "nid": "9uvmjnpfsqza"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
@@ -444,9 +456,6 @@
                                     "nid": "node131"
                                 },
                                 {
-                                    "nid": "node132"
-                                },
-                                {
                                     "nid": "node133"
                                 }
                             ]
@@ -527,9 +536,6 @@
             ]
         },
         {
-            "nid": "node48"
-        },
-        {
             "nid": "node53"
         },
         {
@@ -547,9 +553,6 @@
         },
         {
             "nid": "node78"
-        },
-        {
-            "nid": "node82"
         },
         {
             "nid": "node87"
@@ -572,9 +575,6 @@
         },
         {
             "nid": "node101"
-        },
-        {
-            "nid": "node105"
         },
         {
             "nid": "node110"
@@ -612,9 +612,6 @@
         },
         {
             "nid": "node124"
-        },
-        {
-            "nid": "node134"
         },
         {
             "nid": "node139"

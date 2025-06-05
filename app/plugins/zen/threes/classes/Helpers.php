@@ -2,6 +2,7 @@
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Traits\SingletonTrait;
 use Zen\Threes\Classes\Helpers\Carbon;
 use Zen\Threes\Classes\Helpers\Debug;
 use Zen\Threes\Classes\Helpers\Files;
@@ -13,9 +14,11 @@ use Zen\Threes\Classes\Helpers\Icon;
 use Zen\Threes\Classes\Helpers\Env;
 use Zen\Threes\Classes\Helpers\Schema;
 use Zen\Threes\Classes\Helpers\Settings;
+use Zen\Threes\Classes\Helpers\Confirm;
 
 class Helpers
 {
+    use SingletonTrait;
     use Debug;    # Методы отладки
     use Files;    # Работа с файлами
     use Json;     # Работа с JSON
@@ -27,6 +30,7 @@ class Helpers
     use Env;      # Переменные окружения
     use Schema;   # Управление схемами
     use Settings; # Система настроек Threes
+    use Confirm;  # Система подтверждения
 
     /**
      * Ноды, хранят информацию для схемы, доступны по $nid

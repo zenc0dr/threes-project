@@ -559,8 +559,66 @@ class Nodes
     # Удаляем нод
     public function deleteNode(string $nid): void
     {
-        //dd($nid);
+        // Текущая схема проекта
+        $schema         = ths()->getSchema();
+        $schema_nodes   = $schema['schema_nodes'] ?? [];
+
+        /** @var string[] $removed_nids */
+        $removed_nids = [];
+
+        /**
+         * Рекурсивно собираем nid-ы ветки и удаляем саму ветку из массива схемы
+         */
+        $remove_node = function (&$nodes) use (&$remove_node, $nid, &$removed_nids): bool {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $nid) {
+                    // собрать nid текущего узла + всех потомков
+                    $collect = function (array $branch) use (&$collect, &$removed_nids) {
+                        $removed_nids[] = $branch['nid'];
+                        if (!empty($branch['nodes'])) {
+                            foreach ($branch['nodes'] as $child) {
+                                $collect($child);
+                            }
+                        }
+                    };
+                    $collect($node);
+
+                    unset($nodes[$key]);
+                    $nodes = array_values($nodes); // переиндексируем
+                    return true;
+                }
+
+                // поиск глубже
+                if (!empty($node['nodes']) && $remove_node($node['nodes'])) {
+                    // если после удаления у родителя нет детей — чистим ключ
+                    if (empty($node['nodes'])) {
+                        unset($node['nodes']);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Удаляем из схемы
+        $remove_node($schema_nodes);
+        ths()->setSchema($schema_nodes);   // сохраняем обновлённую схему
+
+        // Физически удаляем каталоги всех затронутых нодов
+        foreach (array_unique($removed_nids) as $del_nid) {
+            if ($node = Node::find($del_nid)) {
+                $node->delete();          // см. реализацию delete() в Node :contentReference[oaicite:1]{index=1}
+            }
+        }
+
+        // Сообщение для UI
+        if ($removed_nids) {
+            ths()->messages()->addMessage(
+                'Удалены ноды: ' . implode(', ', $removed_nids)
+            );
+        }
     }
+
 
     /**
      * Проверяет, является ли узел потомком определенного родительского узла в иерархической древовидной структуре.

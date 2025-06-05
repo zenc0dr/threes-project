@@ -11,6 +11,7 @@ window._ = require('lodash');
 window.ths = {
 
     Alerts: null, // Сюда монтируются сообщения
+    Submit: null, // Сюда монтируется система подтверждения
 
     requests_register: {},
     auth_token: null,
@@ -105,6 +106,15 @@ window.ths = {
         if (response.messages) {
             this.pushMessages(response.messages)
         }
+
+        // Если ответ с подтверждением, прерываем обработку
+        if (response.confirm) {
+            if (this.Submit !== null) {
+                this.Submit.push(response, then)
+            }
+            return
+        }
+
         if (then) {
             then(response)
         }

@@ -56,10 +56,10 @@ export default {
     },
     mounted() {
         this.getTree()
-        this.ths.bus.on('tree:refresh', this.getTree)
+        //this.ths.bus.on('tree:refresh', this.getTree)
     },
     unmounted() {
-        this.ths.bus.off('tree:refresh', this.getTree)
+        //this.ths.bus.off('tree:refresh', this.getTree)
         clearTimeout(this.searchTimer)
     },
     methods: {
