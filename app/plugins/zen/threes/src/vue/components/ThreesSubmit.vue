@@ -1,6 +1,6 @@
 <template>
     <div class="threes-submit">
-        <modal max-width="600px" title="Подтвердите действие" :show="confirm !== null">
+        <modal max-width="600px" heading="Подтвердите действие" :show="confirm !== null" @close="clear">
             <template #default>
                 {{ confirm.message }}
             </template>
@@ -51,13 +51,20 @@ export default {
                 opts.then(response)
                 return
             }
+            this.opts = opts
             this.confirm = response.confirm
         },
+        clear() {
+            this.confirm = null
+            this.opts = null
+        },
         accept() {
-
+            this.opts.data.confirm = 'yes'
+            this.ths.api(this.opts)
+            this.clear()
         },
         denied() {
-
+            this.clear()
         }
     }
 }

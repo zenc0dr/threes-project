@@ -73,6 +73,7 @@ export default {
                 },
                 then: response => {
                     this.tree = response.tree
+                    this.ths.clearSelection()
                 }
             })
         },

@@ -128,7 +128,7 @@ export default {
                         nid: this.node.nid
                     },
                     then: response => {
-                        console.log('Нод удалён')
+                        ths.exe('Tree', 'getTree')
                     }
                 })
             }

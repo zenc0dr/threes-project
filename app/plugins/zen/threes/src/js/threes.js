@@ -38,6 +38,12 @@ window.ths = {
         node_action: null,
     }),
 
+    clearSelection() {
+        this.data.node_selected_nid = null;
+        this.data.node_actions_nid = null;
+        this.data.node_action = null;
+    },
+
     // Монтирование компонента
     mountComponent(name, instance) {
         this.data.components[name] = instance
