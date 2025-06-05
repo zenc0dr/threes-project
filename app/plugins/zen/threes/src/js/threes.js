@@ -10,15 +10,16 @@ import Threes from '../vue/Threes.vue'
 window._ = require('lodash');
 window.ths = {
 
-    Alerts: null, // Сюда монтируются сообщения
-    Submit: null, // Сюда монтируется система подтверждения
-
     requests_register: {},
     auth_token: null,
     bus: mitt(), // Шина событий
 
     /* Объект для хранения глобальных данных */
     data: reactive({
+        components: {
+            Alerts: null, // Сюда монтируются сообщения
+            Submit: null, // Сюда монтируется система подтверждения
+        },
         ui_streams: [],
         process: false,
         node_selected_nid: null, // string | null - nid выбранного нода
