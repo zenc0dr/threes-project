@@ -1,20 +1,23 @@
 import axios from 'axios';
 import md5 from 'md5';
 
-export function createApi({
-                              getAuthToken = () => null,
-                              onPreloader = () => {},
-                              onMessages = () => {},
-                              onConfirm = () => {},
-                          })
-{
+export function createApi(
+    {
+        authToken = () => null,
+        onPreloader = () => {},
+        onMessages = () => {},
+        onConfirm = () => {},
+    }
+) {
     const requests_register = {}
 
     return function api(opts) {
         const data = opts.data || null;
-        const axios_options = getAuthToken() ? {
+        const axios_options = authToken() ? {
                 withCredentials: true,
-                headers: {PlayAuth: getAuthToken()},
+                headers: {
+                    ThreesAuth: authToken()
+                },
             } : null
 
         const api_url = opts.api ? `/threes.api/${opts.api}` : opts.url

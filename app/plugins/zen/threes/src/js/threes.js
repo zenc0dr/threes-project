@@ -8,22 +8,22 @@ import mitt from 'mitt';
 import _ from 'lodash';
 window._ = _;
 
-import { createApi } from './methods/api';
-
 import vueClickOutsideElement from 'vue-click-outside-element';
 import FormFitter from './../vue/components/FormFitter.vue';
 import FormSection from "../vue/trash/v2/FormSection.vue";
 import FormTabs from "../vue/components/FormTabs.vue";
 import ClickOutside from '../vue/directives/ClickOutside';
 
+import { createApi } from './methods/api';
+
 window.ths = {
-    auth_token: null,
+    auth_token: null, // Токен авторизации
     bus: mitt(), // Шина событий
 
     data: reactive({
         components: {
-            Alerts: null, // Сюда монтируются сообщения
-            Submit: null, // Сюда монтируется система подтверждения
+            Alerts: null, // Система сообщений
+            Submit: null, // Система подтверждения
         },
         ui_streams: [],
         process: false,
@@ -35,53 +35,32 @@ window.ths = {
     preloader(state) {
         this.data.process = state
     },
-
     pushMessage(text, type = 'success') {
         const Alerts = this.data.components.Alerts
         if (Alerts) {
             Alerts.push([{ text, type }])
         }
     },
-
     pushMessages(messages) {
         const Alerts = this.data.components.Alerts
         if (Alerts) {
             Alerts.push(messages)
         }
-    },
-
-    afterResponse(response, then, request_key) {
-        this.preloader(false)
-        if (response.messages) {
-            this.pushMessages(response.messages)
-        }
-
-        if (response.confirm) {
-            const Submit = this.data.components.Submit
-            if (Submit) {
-                Submit.push(response, then)
-            }
-            return
-        }
-
-        if (then) {
-            then(response)
-        }
-    },
+    }
 }
 
-// Подключаем API с передачей зависимостей
+// Отправка запросов
 window.ths.api = createApi({
-    getAuthToken: () => window.ths.auth_token,
+    authToken: () => window.ths.auth_token,
     onPreloader: state => window.ths.preloader(state),
     onMessages: messages => window.ths.pushMessages(messages),
     onConfirm: (confirmData, then) => {
-        const Submit = window.ths.data.components.Submit;
+        const Submit = window.ths.data.components.Submit
         if (Submit) {
-            Submit.push(confirmData, then);
+            Submit.push(confirmData, then)
         }
     },
-});
+})
 
 const app = createApp(Threes);
 app.use(router);
