@@ -144,11 +144,13 @@ export default {
     },
     methods: {
         getSchema() {
-            this.ths.api({
-                api: 'ui:get-schema-nodes',
-                data: {
-                    nid: this.nid
-                },
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'ui:get-schema-nodes',
+                    data: {
+                        nid: this.nid
+                    }
+                }),
                 then: response => {
                     this.schema = response.schema
                 }
@@ -158,12 +160,14 @@ export default {
             if (!this.nid) {
                 return
             }
-            this.ths.api({
-                api: 'nodes.node:set-node-name',
-                data: {
-                    nid: this.nid, name
-                },
-                then: response => {
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'nodes.node:set-node-name',
+                    data: {
+                        nid: this.nid, name
+                    }
+                }),
+                then: () => {
                     this.ths.bus.emit('tree:refresh')
                 }
             })
@@ -172,13 +176,15 @@ export default {
             if (!this.nid) {
                 return
             }
-            this.ths.api({
-                api: 'nodes.node:set-node-description',
-                data: {
-                    nid: this.nid,
-                    description
-                },
-                then: response => {
+            this.ths.enqueue({
+                exec: () => this.ths.api({
+                    api: 'nodes.node:set-node-description',
+                    data: {
+                        nid: this.nid,
+                        description
+                    }
+                }),
+                then: () => {
                     this.ths.bus.emit('tree:refresh')
                 }
             })
@@ -189,13 +195,15 @@ export default {
         },
         setNodeSettings()
         {
-            ths.api({
-                api: 'nodes.node:set-node-settings',
-                data: {
-                    nid: this.nid,
-                    settings: this.schema.props
-                },
-                then: response => {
+            ths.enqueue({
+                exec: () => ths.api({
+                    api: 'nodes.node:set-node-settings',
+                    data: {
+                        nid: this.nid,
+                        settings: this.schema.props
+                    }
+                }),
+                then: () => {
                     this.settings = null
                     this.getSchema()
                     this.ths.bus.emit('tree:refresh')
@@ -211,13 +219,15 @@ export default {
             if (!file) return
             const reader = new FileReader()
             reader.onload = () => {
-                ths.api({
-                    api: 'nodes.node:set-node-icon',
-                    data: {
-                        nid: this.nid,
-                        svg: reader.result
-                    },
-                    then: response => {
+                ths.enqueue({
+                    exec: () => ths.api({
+                        api: 'nodes.node:set-node-icon',
+                        data: {
+                            nid: this.nid,
+                            svg: reader.result
+                        }
+                    }),
+                    then: () => {
                         this.ths.bus.emit('tree:refresh')
                         this.ths.bus.emit('store:refresh')
                         this.getSchema()
