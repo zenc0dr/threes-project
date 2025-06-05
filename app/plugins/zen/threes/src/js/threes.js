@@ -115,29 +115,33 @@ window.ths = {
     },
 
     exec(path, ...args) {
-        if (!path) return;
-        const [compName, methodName] = path.split('.');
-        const comp = this.data.components[compName];
-        if (comp && typeof comp[methodName] === 'function') {
-            return comp[methodName](...args);
+        if (!path) {
+            return
         }
-        console.warn('ths.exec: component or method not found', path);
+        const [compName, methodName] = path.split('.')
+        const comp = this.data.components[compName]
+        if (comp && typeof comp[methodName] === 'function') {
+            return comp[methodName](...args)
+        }
+        console.warn('ths.exec: component or method not found', path)
     },
 
     processThen(then, result) {
-        if (!then) return;
+        if (!then) {
+            return
+        }
         const call = (t, res) => {
             if (typeof t === 'string') {
-                return this.exec(t, res);
+                return this.exec(t, res)
             }
             if (typeof t === 'function') {
-                return t(res);
+                return t(res)
             }
-        };
-        if (Array.isArray(then)) {
-            return then.reduce((res, t) => call(t, res), result);
         }
-        return call(then, result);
+        if (Array.isArray(then)) {
+            return then.reduce((res, t) => call(t, res), result)
+        }
+        return call(then, result)
     },
 
     executeAction(action) {
@@ -152,34 +156,36 @@ window.ths = {
 
     tryFlushQueue() {
         if (!this.loopStarted) {
-            this.flushLoop();
+            this.flushLoop()
         }
     },
 
     enqueue(action) {
-        this.tryFlushQueue();
-        action.hash = action.hash || md5(JSON.stringify(action.data));
+        this.tryFlushQueue()
+        action.hash = action.hash || md5(JSON.stringify(action.data || {}))
         if (!this.queue.find(a => a.hash === action.hash)) {
-            action.delay = action.delay || 0;
-            this.queue.push(action);
+            action.delay = action.delay || 0
+            this.queue.push(action)
         }
     },
 
     flushLoop() {
-        if (this.loopStarted) return;
-        this.loopStarted = true;
+        if (this.loopStarted) {
+            return
+        }
+        this.loopStarted = true
         setInterval(() => {
             for (let i = 0; i < this.queue.length; i++) {
-                const action = this.queue[i];
+                const action = this.queue[i]
                 if (action.delay > 0) {
-                    action.delay -= 1;
-                    continue;
+                    action.delay -= 1
+                    continue
                 }
-                this.queue.splice(i, 1);
-                i--;
-                this.executeAction(action);
+                this.queue.splice(i, 1)
+                i--
+                this.executeAction(action)
             }
-        }, 1000);
+        }, 1000)
     },
 }
 
