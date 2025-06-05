@@ -38,8 +38,7 @@ window.ths = {
         node_action: null,
     }),
 
-    clearSelection() {
-        this.data.node_selected_nid = null;
+    clearNodeActions() {
         this.data.node_actions_nid = null;
         this.data.node_action = null;
     },

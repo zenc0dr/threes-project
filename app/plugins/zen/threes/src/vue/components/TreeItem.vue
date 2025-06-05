@@ -139,8 +139,7 @@ export default {
         },
         // Очистить действие
         clearActions() {
-            ths.data.node_action = null
-            ths.data.node_actions_nid = null
+            ths.clearNodeActions()
         }
     }
 }
