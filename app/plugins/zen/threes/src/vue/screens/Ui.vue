@@ -43,7 +43,6 @@ export default {
     },
     mounted() {
         if (this.nid) {
-            console.log('Текущий nid', this.nid)
             ths.data.node_selected_nid = this.nid
         }
     }

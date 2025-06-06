@@ -65,6 +65,7 @@
                 :key="child.nid"
                 :node="child"
                 :depth="depth + 1"
+                :nodes-to-open="nodesToOpen"
                 @move="$emit('move', $event)"
             />
         </div>
@@ -80,10 +81,19 @@ export default {
     props: {
         node: Object,
         depth: Number,
+        nodesToOpen: {
+            type: Array,
+            default: () => []
+        }
     },
     data() {
         return {
             open: false
+        }
+    },
+    created() {
+        if (this.nodesToOpen.includes(this.node.nid)) {
+            this.open = true
         }
     },
     computed: {

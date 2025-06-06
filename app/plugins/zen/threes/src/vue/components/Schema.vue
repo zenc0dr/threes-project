@@ -139,6 +139,9 @@ export default {
                 then: response => {
                     this.$router.push(`/console/zen/threes/nodecontroller/node/${this.nid}`)
                     this.schema = response.schema
+
+                    // Развернуть пункты меню до активного нода
+                    //ths.exe('Tree', 'unfoldSelectedBranch')
                 }
             })
         },
@@ -152,7 +155,6 @@ export default {
                     nid: this.nid, name
                 },
                 then: response => {
-                    //this.ths.bus.emit('tree:refresh')
                     this.ths.exe('Tree', 'getTree')
                 }
             })
@@ -168,7 +170,6 @@ export default {
                     description
                 },
                 then: response => {
-                    //this.ths.bus.emit('tree:refresh')
                     this.ths.exe('Tree', 'getTree')
                 }
             })
@@ -188,9 +189,8 @@ export default {
                 then: response => {
                     this.settings = null
                     this.getSchema()
-                    //this.ths.bus.emit('tree:refresh')
                     this.ths.exe('Tree', 'getTree')
-                    this.ths.bus.emit('store:refresh')
+                    this.ths.exe('Store', 'getStore')
                 }
             })
         },
@@ -210,7 +210,7 @@ export default {
                     },
                     then: response => {
                         this.ths.exe('Tree', 'getTree')
-                        this.ths.bus.emit('store:refresh')
+                        this.ths.exe('Store', 'getStore')
                         this.getSchema()
                     }
                 })

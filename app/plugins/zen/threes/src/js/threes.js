@@ -24,10 +24,7 @@ window.ths = {
     data: reactive({
 
         // Компоненты Threes
-        components: {
-            Alerts: null, // Система сообщений
-            Submit: null, // Система подтверждения
-        },
+        components: {},
 
         // Глобальный флаг прелоадера
         process: false,

@@ -42,10 +42,8 @@ export default {
     },
     mounted() {
         this.getStore()
-        //this.ths.bus.on('store:refresh', this.getStore)
     },
     unmounted() {
-        //this.ths.bus.off('store:refresh', this.getStore)
         this.ths.unmountComponent('Store')
     },
     methods: {
@@ -66,7 +64,6 @@ export default {
                     after: ths.data.selected_nid,
                 },
                 then: response => {
-                    //ths.bus.emit('tree:refresh')
                     this.ths.exe('Tree', 'getTree')
                 }
             })

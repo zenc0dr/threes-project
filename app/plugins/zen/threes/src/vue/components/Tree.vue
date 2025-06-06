@@ -26,6 +26,7 @@
                     :key="item.nid"
                     :node="item"
                     :depth="0"
+                    :nodes-to-open="nodesToOpen"
                     @move="moveAction"
                 />
             </template>
@@ -46,6 +47,7 @@ export default {
             search: '',
             tree: [],
             searchTimer: null,
+            nodesToOpen: [],
         }
     },
     watch: {
@@ -74,9 +76,50 @@ export default {
                 then: response => {
                     this.tree = response.tree
                     this.ths.clearNodeActions()
+                    this.unfoldSelectedBranch()
                 }
             })
         },
+
+        /**
+         * Находит путь из ID узлов до целевого узла и сохраняет его в this.nodesToOpen.
+         */
+        unfoldSelectedBranch() {
+            if (!this.ths.data.node_selected_nid) {
+                this.nodesToOpen = []
+                return
+            }
+
+            const path = this.findPathToNode(this.tree, this.ths.data.node_selected_nid);
+            this.nodesToOpen = path || [];
+        },
+
+        /**
+         * Рекурсивно ищет путь к узлу в дереве.
+         * @param {Array} nodes - Массив узлов для поиска.
+         * @param {Number} targetNid - ID искомого узла.
+         * @returns {Array|null} - Массив ID узлов от корня до цели, или null, если путь не найден.
+         */
+        findPathToNode(nodes, targetNid) {
+            for (const node of nodes) {
+                // Если текущий узел - цель
+                if (node.nid === targetNid) {
+                    return [node.nid];
+                }
+
+                // Если у узла есть потомки, ищем в них
+                if (node.nodes && node.nodes.length > 0) {
+                    const path = this.findPathToNode(node.nodes, targetNid);
+                    // Если путь найден в потомках, добавляем текущий узел в начало пути
+                    if (path) {
+                        return [node.nid, ...path];
+                    }
+                }
+            }
+            // Путь не найден в этой ветке
+            return null;
+        },
+
         submitSearch() {
             clearTimeout(this.searchTimer)
             this.getTree()

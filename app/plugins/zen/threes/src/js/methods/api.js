@@ -36,6 +36,8 @@ export function createApi() {
             delete requests_register[request_key];
             ths.data.process = true
 
+            console.log(`Threes response [${request_key}]: ${api_url}`, response)
+
             if (response.messages) {
                 ths.exe('Alerts', 'push', response.messages)
             }
