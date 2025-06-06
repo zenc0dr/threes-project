@@ -58,16 +58,14 @@ export default {
         this.ths.mountComponent('Tree', this)
     },
     mounted() {
-        this.getTree(() => {
-            this.openNodeByUrl()
-        })
+        this.getTree()
     },
     unmounted() {
         this.ths.unmountComponent('Tree')
         clearTimeout(this.searchTimer)
     },
     methods: {
-        getTree(fn) {
+        getTree() {
             this.ths.api({
                 api: 'ui:get-tree-nodes',
                 data: {
@@ -76,9 +74,6 @@ export default {
                 then: response => {
                     this.tree = response.tree
                     this.ths.clearNodeActions()
-                    if (fn) {
-                        fn(response)
-                    }
                 }
             })
         },
