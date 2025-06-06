@@ -27,7 +27,7 @@ class NodeController extends Controller
         BackendMenu::setContext('Zen.Threes', 'main', 'nodes');
     }
 
-    public function index()
+    public function node($nid = null)
     {
         $this->addCss(mix('css/threes.css', 'plugins/zen/threes/assets'));
         $this->addJs(mix('js/threes.js', 'plugins/zen/threes/assets'), ['defer' => true]);

@@ -3994,6 +3994,8 @@ import FormInputSwitcher from "../vue/components/FormInputSwitcher.vue";
 import FormInputSelect from "../vue/components/FormInputSelect.vue";
 import FormInputRepeater from "../vue/components/FormInputRepeater.vue";
 import FormInputTextArea from "../vue/components/FormInputTextArea.vue";
+// import FormButton from "../vue/components/FormButton.vue";
+// import FormSeparator from "../vue/components/FormSeparator.vue";
 
 export default {
     string: FormInputText,
@@ -4002,7 +4004,81 @@ export default {
     switcher: FormInputSwitcher,
     select: FormInputSelect,
     repeater: FormInputRepeater,
-    textarea: FormInputTextArea
+    textarea: FormInputTextArea,
+    // button: FormButton,
+    // separator: FormSeparator
+}
+
+```
+`plugins/zen/threes/src/js/methods/api.js`
+```import axios from 'axios';
+import md5 from 'md5';
+
+export function createApi() {
+    const requests_register = {}
+
+    return function api(opts) {
+        const data = opts.data || null;
+        const ths = window.ths
+
+        // const axios_options = authToken() ? {
+        //         withCredentials: true,
+        //         headers: {
+        //             ThreesAuth: authToken()
+        //         },
+        //     } : null
+
+        const axios_options = null
+
+        const api_url = opts.api ? `/threes.api/${opts.api}` : opts.url
+        const request_key = md5(api_url + JSON.stringify(data))
+
+        if (requests_register[request_key]) {
+            return;
+        }
+
+        console.log(`Threes query [${request_key}]: ${api_url}`, data)
+
+        requests_register[request_key] = setTimeout(() => {
+            if (requests_register[request_key]) {
+                ths.data.process = true
+            }
+        }, 2000);
+
+        const handleResponse = (response) => {
+            delete requests_register[request_key];
+            ths.data.process = true
+
+            if (response.messages) {
+                ths.exe('Alerts', 'push', response.messages)
+            }
+
+            // Система подтверждения
+            if (response.confirm) {
+                ths.exe('Submit', 'push', response, opts)
+                // Передаёт управление запросом
+                return
+            }
+
+            if (opts.then) {
+                opts.then(response);
+            }
+        }
+
+        const handleError = (error) => {
+            delete requests_register[request_key];
+            ths.data.process = false
+            console.error(error);
+        }
+
+        if (!data) {
+            axios.get(api_url, axios_options)
+                .then(res => handleResponse(res.data)).catch(handleError)
+        } else {
+            axios.post(api_url, data, axios_options)
+                .then(res => handleResponse(res.data)).catch(handleError)
+        }
+    }
 }
 
 ```
@@ -4011,7 +4087,7 @@ export default {
 
 const routes = [
     {
-        path: "/:backend/zen/threes/nodecontroller",
+        path: "/:backend/zen/threes/nodecontroller/:nid?",
         name: "Frame",
         component: () => import("../vue/screens/Ui.vue"),
         props: true,
@@ -4027,150 +4103,81 @@ export default router;
 
 ```
 `plugins/zen/threes/src/js/threes.js`
-```const axios = require('axios');
-const md5 = require('md5');
-import mitt from 'mitt';
-import { createApp } from 'vue';
-import { reactive } from 'vue'
+```import { createApp } from 'vue';
+import { reactive } from 'vue';
 import router from './routes';
 import PrimeVue from 'primevue/config';
-import Threes from '../vue/Threes.vue'
+import Threes from '../vue/Threes.vue';
 
-window._ = require('lodash');
+import mitt from 'mitt';
+import _ from 'lodash';
+window._ = _;
+
+import vueClickOutsideElement from 'vue-click-outside-element';
+import FormFitter from './../vue/components/FormFitter.vue';
+import FormSection from "../vue/trash/v2/FormSection.vue";
+import FormTabs from "../vue/components/FormTabs.vue";
+import ClickOutside from '../vue/directives/ClickOutside';
+
+import { createApi } from './methods/api';
+
 window.ths = {
-
-    Alerts: null, // Сюда монтируются сообщения
-    Submit: null, // Сюда монтируется система подтверждения
-
-    requests_register: {},
-    auth_token: null,
+    auth_token: null, // Токен авторизации
     bus: mitt(), // Шина событий
 
-    /* Объект для хранения глобальных данных */
+    // Реактивные данные
     data: reactive({
-        ui_streams: [],
+
+        // Компоненты Threes
+        components: {
+            Alerts: null, // Система сообщений
+            Submit: null, // Система подтверждения
+        },
+
+        // Глобальный флаг прелоадера
         process: false,
-        node_selected_nid: null, // string | null - nid выбранного нода
-        node_actions_nid: null, // string | null - nid нода для которого открыты настройки actions
-        node_action: null, // string ex: 'move', 'copy', 'link', 'delete' - Выбранный action
+
+        // Операции с нодами
+        node_selected_nid: null,
+        node_actions_nid: null,
+        node_action: null,
     }),
 
-    api(opts) {
-        let domain = location.origin
-        let data = (opts.data) ? opts.data : null
-        let axios_options = null
-        let api_url = opts.api ? '/threes.api/' + opts.api : opts.url
-        let request_key = md5(api_url + JSON.stringify(data))
-
-        /* Прерываем незавершенный запрос */
-        if (this.requests_register[request_key]) {
-            return
-        }
-
-        /* For debug */
-        console.log('Threes query [' + request_key + ']: ' + api_url, data)
-
-        /* Enable preloader after 2 seconds */
-        this.requests_register[request_key] = setTimeout(() => {
-            if (this.requests_register[request_key]) {
-                this.preloader(true)
-            }
-        }, 2000)
-
-        if (this.auth_token) {
-            axios_options = {
-                withCredentials: true,
-                headers: {
-                    PlayAuth: this.auth_token
-                }
-            }
-        }
-
-        if (!data) {
-            axios.get(api_url, axios_options)
-                .then((response) => {
-                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
-                    this.afterResponse(response.data, opts.then, request_key)
-                })
-                .catch((error) => {
-                    delete this.requests_register[request_key]
-                    this.preloader(false)
-                    console.log(error) // todo:debug
-                })
-        } else {
-            axios.post(api_url, data, axios_options)
-                .then((response) => {
-                    console.log('Threes response [' + request_key + ']', response.data) // todo:debug
-                    this.afterResponse(response.data, opts.then, request_key)
-                })
-                .catch((error) => {
-                    delete this.requests_register[request_key]
-                    this.preloader(false)
-                    console.log(error) // todo:debug
-                })
-        }
+    clearNodeActions() {
+        this.data.node_actions_nid = null;
+        this.data.node_action = null;
     },
 
-    // Показать 1 сообщение
-    pushMessage(text, type) {
-        if (this.Alerts !== null) {
-            this.Alerts.push([{
-                text: text,
-                type: type
-            }])
-        }
+    // Монтирование компонента
+    mountComponent(name, instance) {
+        this.data.components[name] = instance
     },
 
-    // Показать сообщения
-    pushMessages(messages) {
-        if (this.Alerts !== null) {
-            this.Alerts.push(messages)
-        }
+    // Размонтирование компонента
+    unmountComponent(name) {
+        this.data.components[name] = null
     },
 
-    // Постобработка данных
-    afterResponse(response, then, request_key) {
-
-        this.preloader(false)
-        if (response.messages) {
-            this.pushMessages(response.messages)
-        }
-
-        // Если ответ с подтверждением, прерываем обработку
-        if (response.confirm) {
-            if (this.Submit !== null) {
-                this.Submit.push(response, then)
-            }
-            return
-        }
-
-        // Удаляем запрос из очереди
-        delete this.requests_register[request_key]
-
-        if (then) {
-            then(response)
-        }
-    },
-    preloader(state) {
-        this.data.process = state
-    },
+    // Выполнение метода компонента
+    exe(name, method, ...args) {
+        this.data.components[name][method](...args)
+    }
 }
 
-import vueClickOutsideElement from 'vue-click-outside-element'
-import FormFitter from './../vue/components/FormFitter.vue'
-import FormSection from "../vue/trash/v2/FormSection.vue"
-import FormTabs from "../vue/components/FormTabs.vue"
-import ClickOutside from '../vue/directives/ClickOutside'
+// Сервис отправки запросов
+window.ths.api = createApi();
 
-const app = createApp(Threes)
+const app = createApp(Threes);
 app.use(router);
-app.use(PrimeVue, {ripple: true})
-app.use(vueClickOutsideElement)
-app.component('FormFitter', FormFitter)
-app.component('FormSection', FormSection)
-app.component('FormTabs', FormTabs)
-app.directive('click-outside', ClickOutside)
-app.mount("#threes")
+app.use(PrimeVue, { ripple: true });
+app.use(vueClickOutsideElement);
+
+app.component('FormFitter', FormFitter);
+app.component('FormSection', FormSection);
+app.component('FormTabs', FormTabs);
+
+app.directive('click-outside', ClickOutside);
+app.mount("#threes");
 
 ```
 `plugins/zen/threes/src/vue/directives/ClickOutside.js`

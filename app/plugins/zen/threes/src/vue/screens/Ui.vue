@@ -24,14 +24,13 @@
         </div>
     </div>
 </template>
-
 <script>
 import Tree from '../components/Tree.vue'
 import Schema from '../components/Schema.vue'
 import Store from '../components/Store.vue'
 export default {
     name: 'Stand',
-    props: ['backend'],
+    props: ['backend', 'nid'],
     data() {
         return {
             fullscreen: false
@@ -41,6 +40,12 @@ export default {
         Tree,
         Schema,
         Store
+    },
+    mounted() {
+        if (this.nid) {
+            console.log('Текущий nid', this.nid)
+            ths.data.node_selected_nid = this.nid
+        }
     }
 };
 </script>

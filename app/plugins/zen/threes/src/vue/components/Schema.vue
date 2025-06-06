@@ -137,6 +137,7 @@ export default {
                     nid: this.nid
                 },
                 then: response => {
+                    this.$router.push(`/console/zen/threes/nodecontroller/node/${this.nid}`)
                     this.schema = response.schema
                 }
             })
