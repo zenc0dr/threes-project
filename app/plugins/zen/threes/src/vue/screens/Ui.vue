@@ -111,7 +111,7 @@ export default {
 .fullscreen {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: 1;
     background: #fff;
     margin: 0 !important;
     padding: 0 !important;

@@ -46,7 +46,6 @@ export default {
             if (response.confirm === 'no') {
                 return
             }
-
             if (response.confirm === 'yes') {
                 opts.then(response)
                 return
