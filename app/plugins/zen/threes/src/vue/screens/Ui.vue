@@ -1,6 +1,6 @@
 <template>
     <div class="threes-ui" :class="{ fullscreen: fullscreen }">
-        <div class="threes-settings">
+        <div v-if="backend" class="threes-settings">
             <div class="threes-settings__button">
                 <i
                     :class="fullscreen ? 'oc-icon-compress' : 'oc-icon-expand'"
@@ -55,6 +55,10 @@ export default {
             ths.data.node_selected_nid = this.nid
         }
         ths.data.backend = this.backend
+
+        if (!this.backend) {
+            this.fullscreen = true
+        }
     }
 };
 </script>

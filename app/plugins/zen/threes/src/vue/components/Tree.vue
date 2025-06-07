@@ -19,7 +19,6 @@
                     />
                 </div>
             </div>
-
             <template v-if="show">
                 <tree-item
                     v-for="item in tree"
@@ -36,7 +35,6 @@
 
 <script>
 import TreeItem from './TreeItem.vue'
-
 export default {
     name: 'Tree',
     components: { TreeItem },
