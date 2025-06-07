@@ -3918,7 +3918,7 @@ navigation:
                 icon: icon-star-o
             nodes:
                 label: Ноды
-                url: zen/threes/nodecontroller
+                url: zen/threes/nodecontroller/node
                 icon: icon-square
                 permissions:
                     - zen.threes.main
@@ -3986,6 +3986,8 @@ Route::match(
     }
 );
 
+Route::view('/app/node/{nid?}', 'zen.threes::threes');
+
 ```
 `plugins/zen/threes/src/js/components-map.js`
 ```import FormInputText from '../vue/components/FormInputText.vue';
@@ -4049,6 +4051,8 @@ export function createApi() {
             delete requests_register[request_key];
             ths.data.process = true
 
+            console.log(`Threes response [${request_key}]: ${api_url}`, response)
+
             if (response.messages) {
                 ths.exe('Alerts', 'push', response.messages)
             }
@@ -4087,7 +4091,13 @@ export function createApi() {
 
 const routes = [
     {
-        path: "/:backend/zen/threes/nodecontroller/:nid?",
+        path: "/app/node/:nid?",
+        name: "FrameShort",
+        component: () => import("../vue/screens/Ui.vue"),
+        props: true,
+    },
+    {
+        path: "/:backend/zen/threes/nodecontroller/node/:nid?",
         name: "Frame",
         component: () => import("../vue/screens/Ui.vue"),
         props: true,
@@ -4129,19 +4139,27 @@ window.ths = {
     data: reactive({
 
         // Компоненты Threes
-        components: {
-            Alerts: null, // Система сообщений
-            Submit: null, // Система подтверждения
-        },
+        components: {},
 
         // Глобальный флаг прелоадера
         process: false,
+
+        // url-админпанели ocms
+        backend: null,
 
         // Операции с нодами
         node_selected_nid: null,
         node_actions_nid: null,
         node_action: null,
     }),
+
+    getNodeUrl(nid) {
+        if (this.data.backend) {
+            return `/${this.data.backend}/zen/threes/nodecontroller/node/${nid}`
+        } else {
+            return `/app/node/${nid}`
+        }
+    },
 
     clearNodeActions() {
         this.data.node_actions_nid = null;
@@ -4366,6 +4384,35 @@ class Frame_{{ frame_id }}
 #%code_writer%#
     }
 }
+
+```
+`plugins/zen/threes/views/threes.blade.php`
+```<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threes</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="/modules/backend/assets/vendor/bootstrap/bootstrap.css" rel="stylesheet">
+    <link href="/modules/backend/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="/modules/backend/assets/css/october.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ mix('css/threes.css', 'plugins/zen/threes/assets') }}">
+</head>
+<body>
+<main id="threes">
+    Загрузка...
+</main>
+<script src="/modules/system/assets/js/vendor/jquery.min.js"></script>
+<script src="/modules/system/assets/js/vue.bundle-min.js"></script>
+<script src="/modules/system/assets/js/framework-bundle.min.js"></script>
+<script src="/modules/backend/assets/vendor/bootstrap/bootstrap.min.js"></script>
+<script src="/modules/backend/assets/js/vendor-min.js"></script>
+<script src="/modules/backend/assets/js/october-min.js"></script>
+<script src="/modules/system/assets/js/lang/lang.ru.js"></script>
+<script src="{{ mix('js/threes.js', 'plugins/zen/threes/assets') }}" defer></script>
+</body>
+</html>
 
 ```
 `plugins/zen/threes/webpack.mix.js`
