@@ -30,7 +30,16 @@ import Schema from '../components/Schema.vue'
 import Store from '../components/Store.vue'
 export default {
     name: 'Stand',
-    props: ['backend', 'nid'],
+    props: {
+        nid: {
+            type: String,
+            default: null
+        },
+        backend: {
+            type: String,
+            default: null,
+        }
+    },
     data() {
         return {
             fullscreen: false
@@ -45,6 +54,7 @@ export default {
         if (this.nid) {
             ths.data.node_selected_nid = this.nid
         }
+        ths.data.backend = this.backend
     }
 };
 </script>

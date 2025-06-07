@@ -137,11 +137,8 @@ export default {
                     nid: this.nid
                 },
                 then: response => {
-                    this.$router.push(`/console/zen/threes/nodecontroller/node/${this.nid}`)
+                    this.$router.push(ths.getNodeUrl(this.nid))
                     this.schema = response.schema
-
-                    // Развернуть пункты меню до активного нода
-                    //ths.exe('Tree', 'unfoldSelectedBranch')
                 }
             })
         },

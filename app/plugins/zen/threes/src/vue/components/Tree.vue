@@ -97,19 +97,19 @@ export default {
         /**
          * Рекурсивно ищет путь к узлу в дереве.
          * @param {Array} nodes - Массив узлов для поиска.
-         * @param {Number} targetNid - ID искомого узла.
+         * @param {Number} target_nid - ID искомого узла.
          * @returns {Array|null} - Массив ID узлов от корня до цели, или null, если путь не найден.
          */
-        findPathToNode(nodes, targetNid) {
+        findPathToNode(nodes, target_nid) {
             for (const node of nodes) {
                 // Если текущий узел - цель
-                if (node.nid === targetNid) {
+                if (node.nid === target_nid) {
                     return [node.nid];
                 }
 
                 // Если у узла есть потомки, ищем в них
                 if (node.nodes && node.nodes.length > 0) {
-                    const path = this.findPathToNode(node.nodes, targetNid);
+                    const path = this.findPathToNode(node.nodes, target_nid);
                     // Если путь найден в потомках, добавляем текущий узел в начало пути
                     if (path) {
                         return [node.nid, ...path];
@@ -119,7 +119,6 @@ export default {
             // Путь не найден в этой ветке
             return null;
         },
-
         submitSearch() {
             clearTimeout(this.searchTimer)
             this.getTree()

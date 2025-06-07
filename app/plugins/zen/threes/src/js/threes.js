@@ -29,11 +29,22 @@ window.ths = {
         // Глобальный флаг прелоадера
         process: false,
 
+        // url-админпанели ocms
+        backend: null,
+
         // Операции с нодами
         node_selected_nid: null,
         node_actions_nid: null,
         node_action: null,
     }),
+
+    getNodeUrl(nid) {
+        if (this.data.backend) {
+            return `/${this.data.backend}/zen/threes/nodecontroller/node/${nid}`
+        } else {
+            return `/app/node/${nid}`
+        }
+    },
 
     clearNodeActions() {
         this.data.node_actions_nid = null;
