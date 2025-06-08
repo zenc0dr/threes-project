@@ -159,6 +159,7 @@ export default {
 .tree-item {
     display: flex;
     flex-direction: column;
+    white-space: nowrap;
 
     &__mover {
         margin-left: auto;

@@ -142,8 +142,9 @@ export default {
 
 <style lang="scss">
 .threes-nt {
-    height: 100%;
-    overflow: auto;
+    min-height: 100%;
+    min-width: max-content;
+    overflow: visible;
 
     .tree-list {
         display: flex;

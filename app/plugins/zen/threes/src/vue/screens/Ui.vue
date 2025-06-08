@@ -94,12 +94,12 @@ export default {
 }
 
 .tree-container {
-    width: 300px;
     height: 100%;
-    overflow-y: auto;
+    overflow: auto;
     background: #ffffff;
     border-right: 1px solid #e2e2e2;
     flex-shrink: 0;
+    display: flex;
 }
 
 .schema-container {
