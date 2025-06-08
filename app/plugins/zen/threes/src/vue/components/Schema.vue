@@ -220,8 +220,11 @@ export default {
 </script>
 <style lang="scss">
 .threes-schema {
-    flex: 1 1 0;
-    min-height: 100%;
+    flex: 1 1 auto;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 
     &__icon {
         margin-right: 10px;

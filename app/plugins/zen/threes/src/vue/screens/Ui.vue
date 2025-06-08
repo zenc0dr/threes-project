@@ -3,9 +3,10 @@
         <div v-if="backend" class="threes-settings">
             <div class="threes-settings__button">
                 <i
-                    :class="fullscreen ? 'oc-icon-compress' : 'oc-icon-expand'"
-                    @click="fullscreen = !fullscreen"
-                    :title="fullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'"
+                    class="oc-icon-expand"
+                    style="cursor:pointer"
+                    @click="goToApp"
+                    title="Полноэкранный режим"
                 />
             </div>
         </div>
@@ -55,9 +56,13 @@ export default {
             ths.data.node_selected_nid = this.nid
         }
         ths.data.backend = this.backend
-
         if (!this.backend) {
             this.fullscreen = true
+        }
+    },
+    methods: {
+        goToApp() {
+            window.location.href = '/app/node'
         }
     }
 };
@@ -66,8 +71,8 @@ export default {
 .threes-ui {
     display: flex;
     flex-direction: column;
+    height: 100vh;
     background: #f5f5f5;
-    margin: 4px;
 }
 
 .threes-settings {
@@ -84,23 +89,32 @@ export default {
 
 .threes-top {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex: 1 1 auto; // занимать всё оставшееся пространство
+    overflow: hidden;
 }
 
 .tree-container {
-    border-right: 1px solid #e2e2e2;
+    width: 300px;
+    height: 100%;
+    overflow-y: auto;
     background: #ffffff;
+    border-right: 1px solid #e2e2e2;
+    flex-shrink: 0;
 }
 
 .schema-container {
-    display: flex;
     flex: 1 1 auto;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     background: #f4f4f4;
 }
 
 .threes-bottom {
-    margin-top: 15px;
+    flex-shrink: 0;
+    background: #fafafa;
+    border-top: 1px solid #ddd;
 }
 
 .store-container {
@@ -108,34 +122,6 @@ export default {
 }
 
 /* Полноэкранный режим */
-.fullscreen {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    background: #fff;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-
-    .threes-settings {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .threes-top,
-    .threes-bottom {
-        flex: none;
-        overflow: visible;
-    }
-
-    .tree-container,
-    .schema-container,
-    .store-container {
-        height: auto;
-        overflow: visible;
-    }
-}
+//.fullscreen {
+//}
 </style>

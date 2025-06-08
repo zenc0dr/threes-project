@@ -1,12 +1,8 @@
 <template>
-    <div class="node-text">
-        <template v-if="scope === 'schema'">
-            <div class="node-text__header">
-                {{ node.name }}
-            </div>
-        </template>
+    <div class="node-code">
+        Хай йоу
         <textarea
-            class="node-text__content"
+            class="node-code__content"
             v-model="content"
             @input="onInput"
             ref="textarea"
@@ -19,7 +15,7 @@
 import { debounce } from 'lodash'
 
 export default {
-    name: "NodeText",
+    name: "NodeCode",
     props: {
         node: {
             type: Object,
@@ -69,6 +65,7 @@ export default {
                     data
                 },
                 then: () => {
+                    //this.ths.bus.emit('schema:refresh')
                     this.ths.exe('Schema', 'getSchema')
                 }
             });
