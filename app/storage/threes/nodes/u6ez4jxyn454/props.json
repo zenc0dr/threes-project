@@ -5,12 +5,11 @@
     "schema": true,
     "store": false,
     "store_data": {
-        "group": "Документы",
+        "group": "Программирование",
         "author": "Threes",
         "tags": [
-            "text",
-            "document"
+            "code"
         ],
-        "created_at": "2025-05-14 00:12:49"
+        "created_at": "2025-06-08 13:17:42"
     }
 }
