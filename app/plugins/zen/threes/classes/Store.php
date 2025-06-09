@@ -35,7 +35,7 @@ class Store
                 continue;
             }
 
-//            try {
+            try {
                 $node = ths()->nodes()->model();
                 $node->type = $type;
                 $template = $node->exe('template');
@@ -48,9 +48,9 @@ class Store
                     'template' => true,
                     'group' => $template['props']['store_data']['group'] ?? 'Шаблоны'
                 ];
-//            } catch (\Throwable $e) {
-//                continue;
-//            }
+            } catch (\Throwable $e) {
+                continue;
+            }
         }
 
         // Экземпляры нод
@@ -89,5 +89,4 @@ class Store
         );
         File::copyDirectory($default_types, $types_storage_path);
     }
-
 }
