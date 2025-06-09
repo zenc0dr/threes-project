@@ -20,9 +20,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->getSetting('author_token')
-        );
+        ths()->store()->createDefaultNodeTypes();
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector

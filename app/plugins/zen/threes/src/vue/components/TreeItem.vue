@@ -18,7 +18,7 @@
                 <span class="tree-name">{{ node.name }}</span>
 
                 <div class="tree-item__mover">
-                    <div v-if="!directions_is_open" class="tree-item__btn" title="Настройки">
+                    <div v-if="!directions_is_open && !actions_is_open" class="tree-item__btn" title="Настройки">
                         <div @click.stop="openActions" class="icon-btn">
                             <i class="oc-icon-cog"></i>
                         </div>
@@ -165,10 +165,11 @@ export default {
     }
 
     &__menu {
-        height: 0;
+        //height: 0;
+
         &__body {
             display: flex;
-            position: absolute;
+            //position: absolute;
             padding: 5px 6px;
             background: #fff;
             border-radius: 4px;

@@ -851,7 +851,7 @@ class Nodes
      */
     public function getNodesTree(string $schema_code = 'default', string $search = null): array
     {
-        $schema = ths()->getSchema($schema_code)['schema_nodes'];
+        $schema = ths()->getSchema($schema_code)['schema_nodes'] ?? [];
         $search = trim(mb_strtolower($search ?? ''));
 
         $build_tree = function (array $item) use (&$build_tree, $search): ?array {
@@ -2201,133 +2201,6 @@ trait Yaml
 }
 
 ```
-`plugins/zen/threes/classes/nodes/NodeBuilder.php`
-```<?php
-
-namespace Zen\Threes\Classes\Nodes;
-
-use Zen\Threes\Models\Node;
-
-class NodeBuilder
-{
-    private Node $node;
-    private mixed $data;
-
-    public function __construct($data)
-    {
-        $this->node = $data['node'];
-        $this->data = $data['data'];
-    }
-
-    public function template(): array
-    {
-        return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/code.svg'),
-            'name' => "Новый интерфейс",
-            'class' => 'Zen.Threes.Classes.Nodes.NodeBuilder',
-            'data' => null,
-            'props' => [
-                'self_content' => true,
-                'show_children' => false,
-                'tree' => true,
-                'schema' => true,
-                'store' => false,
-                'store_data' => [
-                    'group' => 'Фронтенд',
-                    'author' => 'Threes',
-                    'tags' => ["html", "frontend"],
-                    'created_at' => now()->toDateTimeString(),
-                ]
-            ]
-        ];
-    }
-
-    public function getSelfContent(): array
-    {
-        return $this->getSchema();
-    }
-
-    public function setSelfContent(): mixed
-    {
-        return $this->data;
-    }
-
-    public function getSchema(): array
-    {
-        return [
-            'component' => 'NodeBuilder',
-            'data' => $this->data,
-        ];
-    }
-}
-
-```
-`plugins/zen/threes/classes/nodes/NodeText.php`
-```<?php
-
-namespace Zen\Threes\Classes\Nodes;
-
-use Zen\Threes\Models\Node;
-
-class NodeText
-{
-    private Node $node;
-    private mixed $data;
-
-    public function __construct($data)
-    {
-        $this->node = $data['node'];
-        $this->data = $data['data'];
-    }
-
-    public function template(): array
-    {
-        return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
-            'name' => "Новый документ",
-            'class' => 'Zen.Threes.Classes.Nodes.NodeText',
-            'data' => 'Привет мир!',
-            'props' => [
-                'self_content' => true,
-                'show_children' => true,
-                'tree' => true,
-                'schema' => true,
-                'store' => false,
-                'store_data' => [
-                    'group' => 'Документы',
-                    'author' => 'Threes',
-                    'tags' => ["text", "document"],
-                    'created_at' => now()->toDateTimeString(),
-                ]
-            ]
-        ];
-    }
-
-    public function getSelfContent(): array
-    {
-        return $this->getSchema();
-    }
-
-    public function setSelfContent()
-    {
-        return $this->data;
-    }
-
-    public function getSchema(): array
-    {
-        return [
-            'component' => 'NodeText',
-            'data' => $this->data,
-        ];
-    }
-
-    public function setSchema()
-    {
-        return $this->data;
-    }
-}
-
-```
 `plugins/zen/threes/classes/services/OllamaService.php`
 ```<?php
 
@@ -2850,7 +2723,7 @@ use Exception;
  * @property string $icon - Иконка
  * @property string $name - Имя нода
  * @property string $description - Описание нода
- * @property string $class - Класс нода
+ * @property string $type - Тип нода
  * @property array $data - Данные нода
  * @property array $props - Настройки нода
  */
@@ -2862,7 +2735,7 @@ class Node
         'icon'=> 'string',
         'name' => 'string',
         'description' => 'string',
-        'class' => 'string',
+        'type' => 'string',
         'data' => 'array',
         'props' => 'array'
     ];
@@ -2935,7 +2808,7 @@ class Node
      */
     public function exe(string $method, mixed $data = null): mixed
     {
-        return ths()->exe("$this->class.$method", [
+        return ths()->exe("Zen.Threes.Nodes.$this->type.$this->type.$method", [
             'node' => $this,
             'data' => $data,
         ]);
@@ -3201,7 +3074,7 @@ class Node
      */
     public function createIconFromTemplate(): void
     {
-        if (!$this->class) {
+        if (!$this->type) {
             return;
         }
 
@@ -3839,6 +3712,199 @@ fields:
         type: codeeditor
 
 ```
+`plugins/zen/threes/nodes/NodeBuilder/NodeBuilder.php`
+```<?php
+
+namespace Zen\Threes\Nodes;
+
+use Zen\Threes\Models\Node;
+
+class NodeBuilder
+{
+    private Node $node;
+    private mixed $data;
+
+    public function __construct($data)
+    {
+        $this->node = $data['node'];
+        $this->data = $data['data'];
+    }
+
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/code.svg'),
+            'name' => "Новый интерфейс",
+            'type' => 'NodeBuilder',
+            'data' => null,
+            'props' => [
+                'self_content' => true,
+                'show_children' => false,
+                'tree' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Фронтенд',
+                    'author' => 'Threes',
+                    'tags' => ["html", "frontend"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function getSelfContent(): array
+    {
+        return $this->getSchema();
+    }
+
+    public function setSelfContent(): mixed
+    {
+        return $this->data;
+    }
+
+    public function getSchema(): array
+    {
+        return [
+            'component' => 'NodeBuilder',
+            'data' => $this->data,
+        ];
+    }
+}
+
+```
+`plugins/zen/threes/nodes/NodeCode/NodeCode.php`
+```<?php
+
+namespace Zen\Threes\Nodes;
+
+use Zen\Threes\Models\Node;
+
+class NodeCode
+{
+    private Node $node;
+    private mixed $data;
+
+    public function __construct($data)
+    {
+        $this->node = $data['node'];
+        $this->data = $data['data'];
+    }
+
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/codebase.svg'),
+            'name' => "Генератор кода",
+            'type' => 'NodeCode',
+            'data' => '#',
+            'props' => [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Программирование',
+                    'author' => 'Threes',
+                    'tags' => ["code"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function getSelfContent(): array
+    {
+        return $this->getSchema();
+    }
+
+    public function setSelfContent()
+    {
+        return $this->data;
+    }
+
+    public function getSchema(): array
+    {
+        return [
+            'component' => 'NodeCode',
+            'data' => $this->data,
+        ];
+    }
+
+    public function setSchema()
+    {
+        return $this->data;
+    }
+}
+
+```
+`plugins/zen/threes/nodes/NodeText/NodeText.php`
+```<?php
+
+namespace Zen\Threes\Nodes;
+
+use Zen\Threes\Models\Node;
+
+class NodeText
+{
+    private Node $node;
+    private mixed $data;
+
+    public function __construct($data)
+    {
+        $this->node = $data['node'];
+        $this->data = $data['data'];
+    }
+
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
+            'name' => "Новый документ",
+            'type' => 'NodeText',
+            'data' => 'Привет мир!',
+            'props' => [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["text", "document"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function getSelfContent(): array
+    {
+        return $this->getSchema();
+    }
+
+    public function setSelfContent()
+    {
+        return $this->data;
+    }
+
+    public function getSchema(): array
+    {
+        return [
+            'component' => 'NodeText',
+            'data' => $this->data,
+        ];
+    }
+
+    public function setSchema()
+    {
+        return $this->data;
+    }
+}
+
+```
 `plugins/zen/threes/package.json`
 ```{
     "name": "threes",
@@ -4454,6 +4520,11 @@ mix.sass('src/scss/threes.scss', 'css')
                 __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
             }),
         ],
+        resolve: {
+            alias: {
+                '@nodes': path.resolve(__dirname, 'plugins/zen/threes/nodes'),
+            }
+        }
     });
 
 mix.js('src/js/threes.js', 'js').vue();

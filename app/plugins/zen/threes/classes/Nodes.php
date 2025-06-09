@@ -49,7 +49,7 @@ class Nodes
      */
     public function getNodesTree(string $schema_code = 'default', string $search = null): array
     {
-        $schema = ths()->getSchema($schema_code)['schema_nodes'];
+        $schema = ths()->getSchema($schema_code)['schema_nodes'] ?? [];
         $search = trim(mb_strtolower($search ?? ''));
 
         $build_tree = function (array $item) use (&$build_tree, $search): ?array {

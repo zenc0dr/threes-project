@@ -36,6 +36,11 @@ mix.sass('src/scss/threes.scss', 'css')
                 __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
             }),
         ],
+        resolve: {
+            alias: {
+                '@nodes': path.resolve(__dirname, 'plugins/zen/threes/nodes'),
+            }
+        }
     });
 
 mix.js('src/js/threes.js', 'js').vue();

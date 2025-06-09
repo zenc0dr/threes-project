@@ -9,17 +9,25 @@ trait Files
 {
     /**
      * Проверить адрес файла и рекурсивно создать недостающие папки
-     * @param string $file_path
+     * @param string $path
      * @param int $permissions
      * @return string
      */
-    public function checkDir(string $file_path, int $permissions = 0777): string
+    public function checkDir(string $path, int $permissions = 0777): string
     {
-        $dirname = dirname($file_path);
-        if (!is_dir($dirname)) {
-            mkdir($dirname, $permissions, true);
+        # Проверяем, считается ли путь директорией (по завершающему слэшу)
+        $is_directory = str_ends_with($path, DIRECTORY_SEPARATOR);
+
+        # Определяем, какую директорию нужно создать
+        $target_dir = $is_directory ? rtrim($path, DIRECTORY_SEPARATOR) : dirname($path);
+
+        # Создаём директорию, если её нет
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, $permissions, true);
         }
-        return $file_path;
+
+        # Возвращаем путь без завершающего слэша
+        return rtrim($path, DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -53,5 +61,19 @@ trait Files
         return array_filter(scandir($dir_path), function ($entry) use ($dir_path) {
             return $entry !== '.' && $entry !== '..' && is_dir($dir_path . '/' . $entry);
         });
+    }
+
+    /**
+     * Рекурсивное удаление содержимого директории
+     * @param string $dir_path
+     * @return void
+     */
+    public function shellRemoveDir(string $dir_path): void
+    {
+        if (!file_exists($dir_path) || !is_dir($dir_path) || empty($dir_path)) {
+            return;
+        }
+        $escaped_path = escapeshellarg($dir_path);
+        shell_exec("rm -rf $escaped_path/*");
     }
 }

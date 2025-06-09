@@ -10,7 +10,7 @@ use Exception;
  * @property string $icon - Иконка
  * @property string $name - Имя нода
  * @property string $description - Описание нода
- * @property string $class - Класс нода
+ * @property string $type - Тип нода
  * @property array $data - Данные нода
  * @property array $props - Настройки нода
  */
@@ -22,7 +22,7 @@ class Node
         'icon'=> 'string',
         'name' => 'string',
         'description' => 'string',
-        'class' => 'string',
+        'type' => 'string',
         'data' => 'array',
         'props' => 'array'
     ];
@@ -95,7 +95,7 @@ class Node
      */
     public function exe(string $method, mixed $data = null): mixed
     {
-        return ths()->exe("$this->class.$method", [
+        return ths()->exe("Zen.Threes.Nodes.$this->type.$this->type.$method", [
             'node' => $this,
             'data' => $data,
         ]);
@@ -313,22 +313,17 @@ class Node
      */
     public static function truncate(): void
     {
-        # Удалить все ноды
-        $nodes_storage_path = ths()->env('NODES_STORAGE');
-        if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
-            return;
+        $paths = [
+            ths()->env('NODES_STORAGE'), # Хранилище нод
+            ths()->env('SCHEMES_STORAGE'), # Хранилище схем
+            ths()->env('TYPES_STORAGE') # Хранилище типов
+        ];
+        foreach ($paths as $path) {
+            ths()->shellRemoveDir($path);
         }
-        $escaped_path = escapeshellarg($nodes_storage_path);
-        shell_exec("rm -rf $escaped_path/*");
-
-        # Удалить все схемы
-        $schemes_storage_path = ths()->env('SCHEMES_STORAGE');
-        if (!file_exists($schemes_storage_path) || !is_dir($schemes_storage_path)) {
-            return;
-        }
-        $escaped_path = escapeshellarg($schemes_storage_path);
-        shell_exec("rm -rf $escaped_path/*");
+        ths()->store()->createDefaultNodeTypes();
     }
+
 
     /**
      * Устанавливает значение атрибута 'data'.
@@ -361,7 +356,7 @@ class Node
      */
     public function createIconFromTemplate(): void
     {
-        if (!$this->class) {
+        if (!$this->type) {
             return;
         }
 

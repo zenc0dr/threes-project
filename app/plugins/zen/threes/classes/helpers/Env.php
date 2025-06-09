@@ -8,10 +8,14 @@ trait Env
         'NODES_STORAGE' => [
             'default' => 'storage/threes/nodes',
         ],
+        'TYPES_STORAGE' => [
+            'default' => 'storage/threes/types',
+        ],
         'SCHEMES_STORAGE' => [
             'default' => 'storage/threes/schemes',
         ]
     ];
+
     public function env(string $key): ?string
     {
         if (isset(self::$env[$key]['value'])) {
