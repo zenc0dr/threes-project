@@ -10,69 +10,34 @@ class Store
 {
     use SingletonTrait;
 
+    /**
+     * @return array
+     * @throws \ReflectionException
+     */
     public function getStoreNodes(): array
     {
-//        $nodes_templates_path = ths()->env('TYPES_STORAGE');
-//        $template_files = ths()->filesList($nodes_templates_path, true);
-//        foreach ($template_files as $template_file) {
-//            $template_data = ths()->fromJsonFile($template_file['path']);
-//            $type = str_replace('.json', '', $template_file['name']);
-//            $node = ths()->nodes()->node();
-//            $node->type = $type;
-//            $template = $node->exe('template');
-//            dd($template);
-//
-//        }
-        return [];
-    }
-
-    public function getStoreNodesOLD(): array
-    {
         $store = [];
-
-        $nodes_templates_path = base_path('plugins/zen/threes/nodes');
+        $nodes_templates_path = ths()->env('TYPES_STORAGE');
         $template_files = ths()->filesList($nodes_templates_path, true);
+        foreach ($template_files as $template_file) {
+            $type = str_replace('.json', '', $template_file['name']);
+            $node = ths()->nodes()->node();
+            $node->type = $type;
+            $template = $node->exe('template');
+            $store[] = [
+                'nid' => null,
+                'name' => $template['name'] ?? 'Без названия',
+                'icon' => ths()->checkIcon($template['icon']),
+                'description' => $template['description'] ?? '',
+                'type' => $type,
+                'template' => true,
+                'group' => $template['props']['store_data']['group'] ?? 'Шаблоны'
+            ];
 
-        foreach ($template_files as $file) {
-            if ($file['extension'] !== 'php') {
-                continue;
-            }
-
-            $relative = str_replace($nodes_templates_path . '/', '', $file['path']);
-            $segments = explode('/', $relative);
-
-            if (count($segments) !== 2) {
-                continue;
-            }
-
-            [$type, $filename] = $segments;
-
-            if (pathinfo($filename, PATHINFO_FILENAME) !== $type) {
-                continue;
-            }
-
-            try {
-                $node = ths()->nodes()->node();
-                $node->type = $type;
-                $template = $node->exe('template');
-                $store[] = [
-                    'nid' => null,
-                    'name' => $template['name'] ?? 'Без названия',
-                    'icon' => ths()->checkIcon($template['icon']),
-                    'description' => $template['description'] ?? '',
-                    'type' => $type,
-                    'template' => true,
-                    'group' => $template['props']['store_data']['group'] ?? 'Шаблоны'
-                ];
-            } catch (\Throwable $e) {
-                continue;
-            }
         }
 
-        // Экземпляры нод
         $nodes_storage_path = ths()->env('NODES_STORAGE');
         $node_dirs = ths()->dirList($nodes_storage_path);
-
         foreach ($node_dirs as $nid) {
             $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'type']);
             if (!$node || !($node->props['store'] ?? false)) {
