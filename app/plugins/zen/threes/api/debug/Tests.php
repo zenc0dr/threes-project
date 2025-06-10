@@ -6,7 +6,7 @@ use Http;
 use Zen\Threes\Classes\Services\OpenAiService;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Dumper;
-use Zen\Threes\Classes\Gen;
+//use Zen\Threes\Classes\Gen;
 use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Feature;
 use Zen\Threes\Classes\Nodes;
@@ -20,7 +20,17 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        ths()->store()->createDefaultNodeTypes();
+//        $node = new Node();
+//        $template = ths()->exe('Zen.Threes.Nodes.NodeText.NodeText.template', $node);
+//        dd($template);
+
+        //$node = ths()->nodes()->node('un6d94qy86qs');
+
+        //dd($node->exe('template'));
+
+//        dd(
+//            ths()->nodes()->node('6mznjmbqp4ew')->exe('template')
+//        );
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -45,7 +55,7 @@ class Tests
         if ($nid) {
             $node = Node::find($nid);
         } else {
-            $node = ths()->nodes()->createNodeByClass();
+            $node = ths()->nodes()->createNode();
         }
 
         dd($node->icon);

@@ -14,7 +14,7 @@ class Nodes
      * @param string|null $nid
      * @return Node|null
      */
-    public function model(string $nid = null): ?Node
+    public function node(string $nid = null): ?Node
     {
         if ($nid) {
             return Node::find($nid);
@@ -24,21 +24,13 @@ class Nodes
 
     /**
      * Создаёт новый нод по классу шаблона
-     * @param string $template_method
+     * @param string $type
      * @return Node
-     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.NodeText'): Node
+    public function createNode(string $type = 'Threes.NodeText'): Node
     {
-        $node = $this->model();
-        $node->class = $class;
-        $template = $node->exe('template');
-
-        foreach ($template as $field => $value) {
-            $node->$field = $value;
-        }
-        $node->save();
-        return $node;
+        return $this->node()->create($type);
     }
 
     /**
@@ -55,7 +47,7 @@ class Nodes
         $build_tree = function (array $item) use (&$build_tree, $search): ?array {
             $node = \Zen\Threes\Models\Node::find(
                 $item['nid'],
-                ['icon', 'name', 'description', 'class', 'props']
+                ['icon', 'name', 'description', 'type', 'props']
             );
 
             if (!$node) return null;
@@ -85,7 +77,7 @@ class Nodes
                 'icon' => $node->icon,
                 'name' => $node->name,
                 'description' => $node->description,
-                'class' => $node->class,
+                'type' => $node->type,
                 'props' => $node->props,
             ];
 
@@ -149,7 +141,7 @@ class Nodes
     protected function buildSchemaFromBranch(array $branch, bool $is_root = false): ?array
     {
         $nid = $branch['nid'];
-        $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'class', 'data']);
+        $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'type', 'data']);
 
         if (!$node) {
             return null;
@@ -309,24 +301,28 @@ class Nodes
     /**
      * Добавить нод
      * @param string|null $nid
-     * @param string|null $class
+     * @param string|null $type
+     * @param string $schema_code
      * @return void
-     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public function addNode(string $nid = null, string $class = null): void
-    {
-        $schema = ths()->getSchema();
-        if ($nid && !$class) {
+    public function addNode(
+        string $nid = null,
+        string $type = null,
+        string $schema_code = 'default'
+    ): void {
+        $schema = ths()->getSchema($schema_code);
+        if ($nid) {
             $node = Node::find($nid);
             if ($node) {
                 $schema['schema_nodes'][] = ['nid' => $nid];
-                ths()->setSchema($schema['schema_nodes']);
+                ths()->setSchema($schema['schema_nodes'], $schema_code);
             }
-        } elseif ($class) {
-            $node = $this->createNodeByClass($class);
+        } else {
+            $node = $this->createNode($type ?? 'Threes.NodeText');
             if ($node) {
                 $schema['schema_nodes'][] = ['nid' => $node->nid];
-                ths()->setSchema($schema['schema_nodes']);
+                ths()->setSchema($schema['schema_nodes'], $schema_code);
             }
         }
     }

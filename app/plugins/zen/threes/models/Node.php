@@ -2,7 +2,7 @@
 
 namespace Zen\Threes\Models;
 
-
+use Zen\Threes\Classes\Types;
 use Exception;
 
 /**
@@ -18,13 +18,14 @@ class Node
 {
     protected array $attributes = [];
 
+    # Базовые поля
     protected static array $fields = [
-        'icon'=> 'string',
-        'name' => 'string',
-        'description' => 'string',
-        'type' => 'string',
-        'data' => 'array',
-        'props' => 'array'
+        'icon'=> 'string', // Иконка
+        'name' => 'string', // Название нода
+        'description' => 'string', // Описание нода
+        'type' => 'string', // Тип нода
+        'data' => 'array', // Данные нода
+        'props' => 'array' // Свойства нода
     ];
 
     protected static array $extensions = [
@@ -95,7 +96,8 @@ class Node
      */
     public function exe(string $method, mixed $data = null): mixed
     {
-        return ths()->exe("Zen.Threes.Nodes.$this->type.$this->type.$method", [
+        $type = Types::getType($this->type)['class'];
+        return ths()->exe("$type.$method", [
             'node' => $this,
             'data' => $data,
         ]);
@@ -190,6 +192,7 @@ class Node
     /**
      * Сохранить данные экземпляра
      * @return void
+     * @throws Exception
      */
     public function save(): void
     {
@@ -324,11 +327,11 @@ class Node
         ths()->store()->createDefaultNodeTypes();
     }
 
-
     /**
      * Устанавливает значение атрибута 'data'.
-     * @param array|string|null $data.
+     * @param array|string|null $data .
      * @return void
+     * @throws \ReflectionException
      */
     public function setDataAttribute(array|string|null $data = null): void
     {
@@ -349,28 +352,82 @@ class Node
     }
 
     /**
-     * Создает иконку из шаблона, если она не указана в атрибутах.
-     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
-     * @return void
+     * @param array $data
+     * @return $this
      * @throws Exception
      */
-    public function createIconFromTemplate(): void
+    public function fill(array $data): self
     {
-        if (!$this->type) {
-            return;
-        }
-
-        if (isset($this->attributes['icon']) && !empty($this->attributes['icon'])) {
-            return;
-        }
-
-        $template = $this->exe('template');
-        if (!$template) {
-            return;
-        }
-        $this->icon = $template['icon'];
+        $this->icon = $data['icon'] ?? null;
+        $this->name = $data['name'] ?? '';
+        $this->type = $data['type'] ?? 'Threes.NodeText';
+        $this->description = $data['description'] ?? '';
+        $this->data = $data['data'] ?? null;
+        $this->props = $data['props'] ?? [
+            [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Created',
+                    'author' => 'Threes',
+                    'tags' => ["node"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+        $this->save();
+        return $this;
     }
 
+    /**
+     * Создание нода по шаблону типа
+     * @param string $type
+     * @return $this
+     * @throws Exception
+     */
+    public function create(string $type = 'Threes.NodeText'): self
+    {
+        try {
+            return $this->fill(
+                ths()->exe(Types::getType($type)['class'] . '.template')
+            );
+        } catch (\ReflectionException $exception) {
+            throw new Exception($exception);
+        }
+    }
+
+//    /**
+//     * Создает иконку из шаблона, если она не указана в атрибутах.
+//     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
+//     * @return void
+//     * @throws Exception
+//     */
+//    public function createIconFromTemplate(): void
+//    {
+//        if (!$this->type) {
+//            return;
+//        }
+//
+//        if (isset($this->attributes['icon']) && !empty($this->attributes['icon'])) {
+//            return;
+//        }
+//
+//        $template = $this->exe('template');
+//
+//        if (!$template) {
+//            return;
+//        }
+//        $this->icon = $template['icon'];
+//    }
+
+    /**
+     * Геттер для описания нода
+     * @param string|null $description
+     * @return string
+     */
     public function getDescriptionAttribute(?string $description = null): string
     {
         if (!$description) {
@@ -389,7 +446,7 @@ class Node
      */
     public function beforeSave(): void
     {
-        $this->createIconFromTemplate();
+        //$this->createIconFromTemplate();
     }
 
     public function afterSave(){}

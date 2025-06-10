@@ -12,6 +12,22 @@ class Store
 
     public function getStoreNodes(): array
     {
+//        $nodes_templates_path = ths()->env('TYPES_STORAGE');
+//        $template_files = ths()->filesList($nodes_templates_path, true);
+//        foreach ($template_files as $template_file) {
+//            $template_data = ths()->fromJsonFile($template_file['path']);
+//            $type = str_replace('.json', '', $template_file['name']);
+//            $node = ths()->nodes()->node();
+//            $node->type = $type;
+//            $template = $node->exe('template');
+//            dd($template);
+//
+//        }
+        return [];
+    }
+
+    public function getStoreNodesOLD(): array
+    {
         $store = [];
 
         $nodes_templates_path = base_path('plugins/zen/threes/nodes');
@@ -36,7 +52,7 @@ class Store
             }
 
             try {
-                $node = ths()->nodes()->model();
+                $node = ths()->nodes()->node();
                 $node->type = $type;
                 $template = $node->exe('template');
                 $store[] = [

@@ -64,7 +64,7 @@ class Node
     {
         ths()->nodes()->addNode(
             nid: request('nid'),
-            class: request('class'),
+            type: request('type'),
         );
         return [];
     }

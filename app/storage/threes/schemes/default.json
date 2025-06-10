@@ -1,0 +1,48 @@
+{
+    "schema_name": "Схема проекта",
+    "schema_nodes": [
+        {
+            "nid": "8a9mupg2page"
+        },
+        {
+            "nid": "na34y8ubwyy9"
+        },
+        {
+            "nid": "un6d94qy86qs",
+            "nodes": [
+                {
+                    "nid": "ma6shebbtfrb",
+                    "nodes": [
+                        {
+                            "nid": "etfba3xaxq5e",
+                            "nodes": [
+                                {
+                                    "nid": "e2ve5r5d4hwy",
+                                    "nodes": [
+                                        {
+                                            "nid": "8q7vrk39yu3y",
+                                            "nodes": [
+                                                {
+                                                    "nid": "svq74s7qypxw"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "nid": "dcr224bmufyb"
+        },
+        {
+            "nid": "zkcdvfu6etyb"
+        },
+        {
+            "nid": "zmxjwq9qqy27"
+        }
+    ]
+}

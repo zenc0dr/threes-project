@@ -9,10 +9,12 @@ class NodeText
     private Node $node;
     private mixed $data;
 
-    public function __construct($data)
+    public function __construct($data = null)
     {
-        $this->node = $data['node'];
-        $this->data = $data['data'];
+        if ($data) {
+            $this->node = $data['node'];
+            $this->data = $data['data'];
+        }
     }
 
     public function template(): array
@@ -20,7 +22,6 @@ class NodeText
         return [
             'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
             'name' => "Новый документ",
-            'type' => 'NodeText',
             'data' => 'Привет мир!',
             'props' => [
                 'self_content' => true,
