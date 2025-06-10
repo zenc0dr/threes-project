@@ -20,17 +20,10 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-//        $node = new Node();
-//        $template = ths()->exe('Zen.Threes.Nodes.NodeText.NodeText.template', $node);
-//        dd($template);
 
-        //$node = ths()->nodes()->node('un6d94qy86qs');
+        $node = ths()->nodes()->node('btrs4uyw8329')->exe('template');
 
-        //dd($node->exe('template'));
-
-//        dd(
-//            ths()->nodes()->node('6mznjmbqp4ew')->exe('template')
-//        );
+        dd($node);
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector

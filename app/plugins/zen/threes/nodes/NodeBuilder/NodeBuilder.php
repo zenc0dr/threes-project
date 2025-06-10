@@ -6,13 +6,15 @@ use Zen\Threes\Models\Node;
 
 class NodeBuilder
 {
-    private Node $node;
+    private ?Node $node = null;
     private mixed $data;
 
     public function __construct($data)
     {
-        $this->node = $data['node'];
-        $this->data = $data['data'];
+        if ($data) {
+            $this->node = $data['node'];
+            $this->data = $data['data'];
+        }
     }
 
     public function template(): array

@@ -13,6 +13,7 @@ use Exception;
  * @property string $type - Тип нода
  * @property array $data - Данные нода
  * @property array $props - Настройки нода
+ * @property string $scope - Область действия поля
  */
 class Node
 {
@@ -90,17 +91,13 @@ class Node
     /**
      * Вызов метода класса нода
      * @param string $method
-     * @param mixed|null $data
      * @return mixed
      * @throws \ReflectionException
      */
-    public function exe(string $method, mixed $data = null): mixed
+    public function exe(string $method, string $scope = 'self_content'): mixed
     {
         $type = Types::getType($this->type)['class'];
-        return ths()->exe("$type.$method", [
-            'node' => $this,
-            'data' => $data,
-        ]);
+        return ths()->exe("$type.$method", null, $this, $scope);
     }
 
     /**
@@ -196,7 +193,7 @@ class Node
      */
     public function save(): void
     {
-        $this->beforeSave();
+        //$this->beforeSave();
 
         if (empty($this->attributes['nid'])) {
             $this->attributes['nid'] = ths()->createShortId();

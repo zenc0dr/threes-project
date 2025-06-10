@@ -50,7 +50,9 @@ class Nodes
                 ['icon', 'name', 'description', 'type', 'props']
             );
 
-            if (!$node) return null;
+            if (!$node) {
+                return null;
+            }
 
             $children = [];
             if (!empty($item['nodes'])) {
@@ -149,7 +151,7 @@ class Nodes
 
         $props = $node->props ?? [];
 
-        // Контент схемы: либо selfContent, либо getSchema
+        # Контент схемы: либо selfContent, либо getSchema
         $schema_node = [
             'nid' => $node->nid,
             'icon' => $node->icon,
@@ -158,22 +160,23 @@ class Nodes
             'props' => $props,
         ];
 
-        if ($is_root && !empty($props['self_content'])) {
-            $handler_data = $node->exe('getSelfContent', $node->data);
-            $schema_node['component'] = $handler_data['component'];
-            $schema_node['data'] = $handler_data['data'];
-        } elseif (!$is_root) {
-            $handler_data = $node->exe('getSchema', $node->data);
-            $schema_node['component'] = $handler_data['component'];
-            $schema_node['data'] = $handler_data['data'];
+        # Определяем область представления
+        $scope = $is_root ? 'self_content' : 'content';
+
+        # Устанавливаем флаг "собственный контент"
+        $get_self_content = $props['self_content'] ?? true;
+
+        if ($get_self_content) {
+            $schema_node['data'] = $node->exe('getData', $scope);
+            $schema_node['component'] = $node->exe('ui', $scope);
         }
 
-        // Рекурсивно достроим дочерние элементы, если разрешено
+        # Рекурсивно достроим дочерние элементы, если разрешено
         if (!empty($props['show_children']) && !empty($branch['nodes'])) {
             $children = [];
 
             foreach ($branch['nodes'] as $child_branch) {
-                $child_schema = $this->buildSchemaFromBranch($child_branch, false);
+                $child_schema = $this->buildSchemaFromBranch($child_branch);
                 if ($child_schema !== null) {
                     $children[] = $child_schema;
                 }

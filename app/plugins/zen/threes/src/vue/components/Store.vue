@@ -76,8 +76,8 @@ export default {
                 api: 'nodes.node:add-node',
                 data: {
                     nid: node.nid,
-                    class: node.class,
-                    after: this.ths.data.selected_nid,
+                    type: node.type,
+                    after: this.ths.data.node_selected_nid,
                 },
                 then: response => {
                     this.ths.exe('Tree', 'getTree')

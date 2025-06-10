@@ -35,7 +35,7 @@ export default {
             const component = this.node.component
             try {
                 return defineAsyncComponent(() =>
-                    import(`../../../nodes/${component}/${component}.vue`)
+                    import(`../../../../../../../${component}.vue`)
                 )
             } catch (e) {
                 console.warn(`Не удалось загрузить компонент: ${this.node.component}`, e)

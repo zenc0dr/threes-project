@@ -1,6 +1,6 @@
 <template>
     <div class="node-text">
-        <template v-if="scope === 'schema'">
+        <template v-if="scope === 'content'">
             <div class="node-text__header">
                 {{ node.name }}
             </div>

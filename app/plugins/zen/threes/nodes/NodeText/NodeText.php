@@ -6,17 +6,6 @@ use Zen\Threes\Models\Node;
 
 class NodeText
 {
-    private Node $node;
-    private mixed $data;
-
-    public function __construct($data = null)
-    {
-        if ($data) {
-            $this->node = $data['node'];
-            $this->data = $data['data'];
-        }
-    }
-
     public function template(): array
     {
         return [
@@ -39,26 +28,45 @@ class NodeText
         ];
     }
 
-    public function getSelfContent(): array
+    public function ui($node, $scope)
     {
-        return $this->getSchema();
+        return 'plugins/zen/threes/nodes/NodeText/NodeText';
     }
 
-    public function setSelfContent()
+    public function getData($node, $scope)
     {
-        return $this->data;
+        return $node->data;
     }
 
-    public function getSchema(): array
+    public function setData()
+    {
+
+    }
+
+
+
+    /*
+    public function getSelfContent($node): array
+    {
+        return $this->getSchema($node);
+    }
+
+    public function setSelfContent($node)
+    {
+        return $node->data;
+    }
+
+    public function getSchema($node): array
     {
         return [
             'component' => 'NodeText',
-            'data' => $this->data,
+            'data' => $node->data,
         ];
     }
 
-    public function setSchema()
+    public function setSchema($node)
     {
-        return $this->data;
+        return $node->data;
     }
+    */
 }

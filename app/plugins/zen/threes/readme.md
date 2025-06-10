@@ -79,3 +79,104 @@ if (!function_exists('ths')) {
 | Команда                   | Описание                                                                                                            |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | php artisan threes:vector | Сгенерировать описание кода файлов проекта для ai-анализа, в виде одного `.md` файла `app/storage/threes_vector.md` |
+
+### Базовые нюансы которые нужно знать при разработке новых типов
+###### 1. Конфигурация типа нода
+Для того чтобы появился новый тип нод нужно создать вот такой файл `storage/threes/types/Threes.NodeText.json`.  Определить  хранилище можно в переменной окружения `TYPES_STORAGE` по умолчанию это `storage/threes/types`.
+Имя типа состоит из двух фрагментов `{ИмяАвтора}.{ИмяТипа}.json`
+```json
+{  
+    "class": "Zen.Threes.Nodes.NodeText.NodeText",  
+    "files": [  
+        "plugins/zen/threes/nodes/NodeText/NodeText.php",  
+        "plugins/zen/threes/nodes/NodeText/NodeText.vue"  
+    ],  
+    "store": {  
+        "group": "Документы",  
+        "author": "Alex Blaze",  
+        "tags": ["text", "document"],  
+        "created_at": "2025-06-09 13:15"  
+    }  
+}
+```
+
+`class` - Класс типа нода указанный в формате dot notation
+`files` - Файлы необходимые для работы нода
+`store` - Узел магазина
+	`group` - Группа нод
+	`author` - Автор
+	`tags` - Тэги
+	`created_at` - Создано
+
+###### 2. Необходимые методы класса типа нода
+```php
+<?php  
+  
+namespace Zen\Threes\Nodes\NodeText;  
+  
+use Zen\Threes\Models\Node;  
+  
+class NodeText  
+{  
+    private Node $node;  
+    private mixed $data;  
+  
+    public function __construct($data = null)  
+    {  
+        if ($data) { // Вот такие данные будут входить в класс.
+            $this->node = $data['node'];  
+            $this->data = $data['data'];  
+        }  
+    }  
+  
+    public function template(): array  
+    {  
+        return [  
+            'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),  
+            'name' => "Новый документ",  
+            'data' => 'Привет мир!',  
+            'props' => [  
+                'self_content' => true,  
+                'show_children' => true,  
+                'tree' => true,  
+                'schema' => true,  
+                'store' => false,  
+                'store_data' => [  
+                    'group' => 'Документы',  
+                    'author' => 'Threes',  
+                    'tags' => ["text", "document"],  
+                    'created_at' => now()->toDateTimeString(),  
+                ]  
+            ]  
+        ];  
+    }  
+  
+    public function component()  
+    {  
+  
+    }  
+  
+    public function getSelfContent(): array  
+    {  
+        return $this->getSchema();  
+    }  
+  
+    public function setSelfContent()  
+    {  
+        return $this->data;  
+    }  
+  
+    public function getSchema(): array  
+    {  
+        return [  
+            'component' => 'NodeText',  
+            'data' => $this->data,  
+        ];  
+    }  
+  
+    public function setSchema()  
+    {  
+        return $this->data;  
+    }  
+}
+```
