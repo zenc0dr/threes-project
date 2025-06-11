@@ -13,11 +13,11 @@ import { gfm } from '@milkdown/preset-gfm'
 import { listener, listenerCtx } from '@milkdown/plugin-listener'
 import { history } from '@milkdown/plugin-history'
 import { clipboard } from '@milkdown/plugin-clipboard'
-import { prism } from '@milkdown/plugin-prism'
 import { indent } from '@milkdown/plugin-indent'
 import { block } from '@milkdown/plugin-block'
 import { cursor } from '@milkdown/plugin-cursor'
 import { slashFactory } from '@milkdown/plugin-slash'
+import { commonmark } from '@milkdown/preset-commonmark'
 
 const props = defineProps({
     modelValue: {
@@ -35,11 +35,11 @@ const editor = useEditor((root) =>
                 emit('update:modelValue', markdown)
             })
         })
-        .use(gfm)               // первым
+        .use(commonmark)        // добавляем commonmark первым
+        .use(gfm)               // затем gfm с поддержкой подсветки синтаксиса
         .use(listener)
         .use(history)
         .use(clipboard)
-        .use(prism)
         .use(indent)
         .use(block)
         .use(cursor)
