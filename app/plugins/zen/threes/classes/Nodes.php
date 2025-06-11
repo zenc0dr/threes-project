@@ -319,7 +319,8 @@ class Nodes
         if ($nid) {
             $node = Node::find($nid);
             if ($node) {
-                $schema['schema_nodes'][] = ['nid' => $nid];
+                $new_node = $node->copy();
+                $schema['schema_nodes'][] = ['nid' => $new_node->nid];
                 ths()->setSchema($schema['schema_nodes'], $schema_code);
             }
         } else {

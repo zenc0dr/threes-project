@@ -401,4 +401,52 @@ class Node
         }
         return $description;
     }
+
+    /**
+     * Клонирует текущий нод
+     * @param string|null $target_nid - Если задан, клон будет вставлен после этого нода в схеме
+     * @return Node
+     * @throws Exception
+     */
+    public function copy(?string $target_nid = null): Node
+    {
+        $clone = new self();
+        $clone->attributes['icon'] = $this->attributes['icon'];
+        $clone->name = $this->name . ' (копия)';
+        $clone->description = $this->description;
+        $clone->type = $this->type;
+        $clone->data = $this->getDataAttribute();
+        $clone->props = $this->props;
+        $clone->save();
+
+        // Вставка в схему
+        $schema = ths()->getSchema();
+        $nodes = &$schema['schema_nodes'];
+
+        $new_branch = ['nid' => $clone->nid];
+
+        if ($target_nid) {
+            $insert_after = function (&$nodes) use (&$insert_after, $target_nid, $new_branch) {
+                foreach ($nodes as $i => &$node) {
+                    if ($node['nid'] === $target_nid) {
+                        array_splice($nodes, $i + 1, 0, [$new_branch]);
+                        return true;
+                    }
+                    if (!empty($node['nodes'])) {
+                        if ($insert_after($node['nodes'])) return true;
+                    }
+                }
+                return false;
+            };
+
+            if (!$insert_after($nodes)) {
+                $nodes[] = $new_branch;
+            }
+        } else {
+            $nodes[] = $new_branch;
+        }
+        ths()->setSchema($nodes);
+        ths()->messages()->addMessage("Создан клон нода {$this->nid} → {$clone->nid}");
+        return $clone;
+    }
 }
