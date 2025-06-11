@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@fontsource/exo-2':
+        specifier: ^5.2.6
+        version: 5.2.6
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.4)
@@ -624,6 +627,9 @@ packages:
 
   '@emmetio/stream-reader@2.2.0':
     resolution: {integrity: sha512-fXVXEyFA5Yv3M3n8sUGT7+fvecGrZP4k6FnWWMSZVQf69kAq0LLpaBQLGcPR30m3zMmKYhECP4k/ZkzvhEW5kw==}
+
+  '@fontsource/exo-2@5.2.6':
+    resolution: {integrity: sha512-8JKiOCWQIEY9KmBUhENFRKXk8h0Me0HfDc6ta+zFJz/OjvJOcVEjipCaXLaduob0hZu1CiRH8kB2DnaImbE9lw==}
 
   '@johnsoncodehk/pug-beautify@0.2.2':
     resolution: {integrity: sha512-qqNS/YD0Nck5wtQLCPHAfGVgWbbGafxSPjNh0ekYPFSNNqnDH2kamnduzYly8IiADmeVx/MfAE1njMEjVeHTMA==}
@@ -4291,6 +4297,8 @@ snapshots:
   '@emmetio/stream-reader-utils@0.1.0': {}
 
   '@emmetio/stream-reader@2.2.0': {}
+
+  '@fontsource/exo-2@5.2.6': {}
 
   '@johnsoncodehk/pug-beautify@0.2.2': {}
 

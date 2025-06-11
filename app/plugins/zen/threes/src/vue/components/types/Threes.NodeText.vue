@@ -69,7 +69,7 @@ export default {
                     data
                 },
                 then: () => {
-                    this.ths.exe('Schema', 'getSchema')
+                    //this.ths.exe('Schema', 'getSchema')
                 }
             });
         }

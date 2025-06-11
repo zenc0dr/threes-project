@@ -56,3 +56,4 @@ mix.alias({ '@': path.join(__dirname, 'src/js') });
 // Копирование дополнительных ресурсов
 mix.copyDirectory(path.join(__dirname, 'src/images'), 'assets/images');
 mix.copyDirectory('node_modules/primeicons/fonts', 'assets/fonts/vendor/primeicons');
+mix.copyDirectory('node_modules/@fontsource/exo-2/files', 'assets/css/files');
