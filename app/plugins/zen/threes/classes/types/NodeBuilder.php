@@ -9,6 +9,7 @@ class NodeBuilder
         return [
             'icon' => base_path('plugins/zen/threes/src/images/icons/code.svg'),
             'name' => "Новый интерфейс",
+            'type' => 'Threes.NodeBuilder',
             'data' => '',
             'props' => [
                 'self_content' => true,
@@ -31,13 +32,13 @@ class NodeBuilder
         return 'Threes.NodeBuilder';
     }
 
-    public function getData($node, $scope)
+    public function getData($data)
     {
-        return $node->data;
+        return $data;
     }
 
-    public function setData()
+    public function setData($data)
     {
-
+        return $data;
     }
 }

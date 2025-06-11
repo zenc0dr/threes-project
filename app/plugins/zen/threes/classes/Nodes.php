@@ -151,7 +151,6 @@ class Nodes
 
         $props = $node->props ?? [];
 
-        # Контент схемы: либо selfContent, либо getSchema
         $schema_node = [
             'nid' => $node->nid,
             'icon' => $node->icon,

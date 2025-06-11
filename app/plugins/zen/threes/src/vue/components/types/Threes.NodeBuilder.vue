@@ -27,6 +27,7 @@ export default {
         }
     },
     mounted() {
+        console.log('Монтирую grapesjs')
         this.editor = grapesjs.init({
             container: this.$refs.editorContainer,
             height: '500px',

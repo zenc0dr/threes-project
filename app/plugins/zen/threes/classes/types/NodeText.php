@@ -9,6 +9,7 @@ class NodeText
         return [
             'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
             'name' => "Новый документ",
+            'type' => 'Threes.NodeText',
             'data' => 'Привет мир!',
             'props' => [
                 'self_content' => true,

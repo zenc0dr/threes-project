@@ -1,8 +1,8 @@
 {
-    "class": "Zen.Threes.Nodes.NodeText.NodeText",
+    "class": "Zen.Threes.Classes.Types.NodeText",
     "files": [
-        "plugins/zen/threes/nodes/NodeText/NodeText.php",
-        "plugins/zen/threes/nodes/NodeText/NodeText.vue"
+        "plugins/zen/threes/classes/types/NodeText.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.NodeText.vue"
     ],
     "store": {
         "group": "Документы",
