@@ -48,8 +48,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app",
-            "System\\Console\\": "modules/system/console",
-            "Zen\\Threes\\Nodes\\": "plugins/zen/threes/nodes/"
+            "System\\Console\\": "modules/system/console"
         }
     },
     "minimum-stability": "stable",

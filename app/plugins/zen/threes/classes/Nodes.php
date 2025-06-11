@@ -167,7 +167,7 @@ class Nodes
         $get_self_content = $props['self_content'] ?? true;
 
         if ($get_self_content) {
-            $schema_node['data'] = $node->exe('getData', $scope);
+            $schema_node['data'] = $node->exe('getData', $scope, $node->data);
             $schema_node['component'] = $node->exe('ui', $scope);
         }
 
@@ -294,6 +294,7 @@ class Nodes
         array|string|null $data,
         ?string $scope = 'self_content'
     ): void {
+        //dd($data);
         $node = Node::find($nid);
         $node->scope = $scope;
         $node->data = $data;

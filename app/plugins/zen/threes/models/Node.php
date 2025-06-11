@@ -13,7 +13,7 @@ use Exception;
  * @property string $type - Тип нода
  * @property array $data - Данные нода
  * @property array $props - Настройки нода
- * @property string $scope - Область действия поля
+ * @property string $scope - Область действия нода (виртуальное поле)
  */
 class Node
 {
@@ -35,7 +35,7 @@ class Node
         'object' => 'object',
     ];
 
-    public ?string $scope = null;
+    public ?string $scope = 'self_content'; // Дополнительная метка окружения нода
 
     public function __construct(string $nid = null)
     {
@@ -94,10 +94,10 @@ class Node
      * @return mixed
      * @throws \ReflectionException
      */
-    public function exe(string $method, string $scope = 'self_content'): mixed
+    public function exe(string $method, string $scope = 'self_content', mixed $data = null): mixed
     {
         $type = Types::getType($this->type)['class'];
-        return ths()->exe("$type.$method", null, $this, $scope);
+        return ths()->exe("$type.$method", null, $data, $scope, $this);
     }
 
     /**
@@ -193,20 +193,15 @@ class Node
      */
     public function save(): void
     {
-        //$this->beforeSave();
-
         if (empty($this->attributes['nid'])) {
             $this->attributes['nid'] = ths()->createShortId();
         }
-
         foreach ($this->attributes as $key => $value) {
             if ($key === 'nid') {
                 continue;
             }
             $this->saveField($key, $value);
         }
-
-        $this->afterSave();
     }
 
     /**
@@ -332,11 +327,9 @@ class Node
      */
     public function setDataAttribute(array|string|null $data = null): void
     {
-        if ($this->scope) {
-            $method = $this->studlyCaser('set', $this->scope, '');
-            $data = $this->exe($method, $data);
-        }
-        $this->attributes['data'] = [$data];
+        $this->attributes['data'] = [
+            $this->exe('setData', $this->scope, $data)
+        ];
     }
 
     /**
@@ -396,30 +389,6 @@ class Node
         }
     }
 
-//    /**
-//     * Создает иконку из шаблона, если она не указана в атрибутах.
-//     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
-//     * @return void
-//     * @throws Exception
-//     */
-//    public function createIconFromTemplate(): void
-//    {
-//        if (!$this->type) {
-//            return;
-//        }
-//
-//        if (isset($this->attributes['icon']) && !empty($this->attributes['icon'])) {
-//            return;
-//        }
-//
-//        $template = $this->exe('template');
-//
-//        if (!$template) {
-//            return;
-//        }
-//        $this->icon = $template['icon'];
-//    }
-
     /**
      * Геттер для описания нода
      * @param string|null $description
@@ -432,19 +401,4 @@ class Node
         }
         return $description;
     }
-
-
-    /**
-     * Выполняет действия перед сохранением.
-     * Создаёт иконку на основе шаблона.
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function beforeSave(): void
-    {
-        //$this->createIconFromTemplate();
-    }
-
-    public function afterSave(){}
 }

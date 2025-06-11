@@ -36,8 +36,8 @@ NODES_STORAGE=storage/threes/nodes
 ### Сборка фронтенда
 Актуализация исходников - `npm i`
 Сборка в режиме dev - `npx mix`
-Сборка в режиме обновления - `npx mix watch`
-Сборка production - `npx mix --production`
+Сборка в режиме обновления - `npx mix watch` || `pnpm exec mix watch`
+Сборка production - `npx mix --production` || `pnpm exec mix --production`
 
 ### ths() Хелпер
 Инициация плагина начинается с файла `plugins/zen/threes/init.php` в котором объявляется хелпер `Ths`

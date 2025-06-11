@@ -1,8 +1,8 @@
 {
-    "class": "Zen.Threes.Nodes.NodeBuilder.NodeBuilder",
+    "class": "Zen.Threes.Classes.Types.NodeBuilder",
     "files": [
-        "plugins/zen/threes/nodes/NodeBuilder/NodeBuilder.php",
-        "plugins/zen/threes/nodes/NodeBuilder/NodeBuilder.vue"
+        "plugins/zen/threes/classes/types/NodeBuilder.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.NodeBuilder.vue"
     ],
     "store": {
         "group": "Документы",
