@@ -15,11 +15,7 @@
                     "nodes": [
                         {
                             "nid": "rcdx4xcq5v96",
-                            "nodes": [
-                                {
-                                    "nid": "7xqed7p39g56"
-                                }
-                            ]
+                            "nodes": []
                         }
                     ]
                 }
@@ -33,6 +29,9 @@
         },
         {
             "nid": "jxsjjug58vnt"
+        },
+        {
+            "nid": "7xqed7p39g56"
         },
         {
             "nid": "ntg2466htj9m"
