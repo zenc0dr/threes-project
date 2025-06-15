@@ -353,21 +353,25 @@ class Node
         $this->type = $data['type'] ?? 'Threes.NodeText';
         $this->description = $data['description'] ?? '';
         $this->data = $data['data'] ?? null;
-        $this->props = $data['props'] ?? [
-            [
-                'self_content' => true,
-                'show_children' => true,
-                'tree' => true,
-                'schema' => true,
-                'store' => false,
-                'store_data' => [
-                    'group' => 'Created',
-                    'author' => 'Threes',
-                    'tags' => ["node"],
-                    'created_at' => now()->toDateTimeString(),
+
+        if (!$this->props && !isset($data['props'])) {
+            $this->props = [
+                [
+                    'self_content' => true,
+                    'show_children' => true,
+                    'tree' => true,
+                    'schema' => true,
+                    'store' => false,
+                    'store_data' => [
+                        'group' => 'Created',
+                        'author' => 'Threes',
+                        'tags' => ["node"],
+                        'created_at' => now()->toDateTimeString(),
+                    ]
                 ]
-            ]
-        ];
+            ];
+        }
+
         $this->save();
         return $this;
     }

@@ -3,8 +3,9 @@
       ref="textarea"
       v-model="localContent"
       @input="onInput"
-      class="node-text__content"
-  ></textarea>
+      @keydown="onKeydown"
+    class="node-text__content"
+    ></textarea>
 </template>
 
 <script>
@@ -54,6 +55,12 @@ export default {
 
         emitUpdate() {
             this.$emit('update:modelValue', this.localContent)
+        },
+
+        onKeydown(e) {
+            if (e.key === 'Backspace' && this.localContent === '') {
+                this.$emit('remove')
+            }
         }
     }
 }
