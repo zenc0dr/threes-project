@@ -26,8 +26,9 @@
             >
                 <i v-if="!add_panel" @click.stop="add_panel = true" class="oc-icon-plus node-code__buttons__add"></i>
                 <div v-if="add_panel" class="node-code__add-panel">
-                    <div v-for="type in types" class="node-code__node-type">
-                        <i @click.stop="addType(type)" :class="type.icon" :title="type.description"></i>
+                    <div v-for="type in types" @click.stop="addType(type)" class="node-code__node-type">
+                        <i :class="type.icon" :title="type.description"></i>
+                        {{ type.name }}
                     </div>
                 </div>
             </div>
@@ -168,7 +169,16 @@ export default {
         flex-direction: row;
     }
     &__node-type {
-        padding: 3px;
+        padding: 3px 7px;
+        background: #f1f1f1;
+        border: 1px solid #e7e7e7;
+        border-radius: 4px;
+        margin: 0px 5px;
+        cursor: pointer;
+
+        i {
+            margin-right: -5px;
+        }
     }
 }
 
