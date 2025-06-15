@@ -35,6 +35,7 @@ class Node
             request('nid'),
             request('name')
         );
+        ths()->messages()->addMessage('Имя нода обновлено');
         return [];
     }
 
@@ -45,6 +46,7 @@ class Node
             request('nid'),
             request('description')
         );
+        ths()->messages()->addMessage('Описание нода обновлено');
         return [];
     }
 

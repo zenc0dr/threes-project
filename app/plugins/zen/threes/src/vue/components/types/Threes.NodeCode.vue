@@ -10,20 +10,25 @@
                 <i class="oc-icon-caret-right"></i>
             </div>
         </div>
-        <MilkdownRoot>
-            <MilkdownEditor v-model="content" />
-        </MilkdownRoot>
+        <div class="node-code__code">
+            <component
+                v-for="(block, i) in content"
+                :key="i"
+                :is="block.type"
+                v-model="block.data"
+            />
+        </div>
     </div>
 </template>
 
 <script>
-import { debounce } from 'lodash'
-import MilkdownEditor from '../MilkdownEditor.vue'
-import MilkdownRoot from '../MilkdownRoot.vue'
+import textarea from "./threes_nodecode/textarea.vue";
 
 export default {
     name: "NodeCode",
-    components: { MilkdownEditor, MilkdownRoot },
+    components: {
+        textarea
+    },
     props: {
         node: {
             type: Object,
@@ -37,34 +42,75 @@ export default {
     },
     data() {
         return {
-            content: this.node.data,
-            ths: window.ths,
-            debouncedUpdate: null
+            content: [
+                {
+                    type: 'textarea',
+                    data: '',
+                }
+            ],
         };
     },
     watch: {
-        content(new_val, old_val) {
-            if (new_val !== old_val) {
-                this.debouncedUpdate()
-            }
-        }
+
     },
     mounted() {
-        this.debouncedUpdate = debounce(() => this.updateData(this.content), 2000)
+
     },
     methods: {
-        updateData(data) {
-            this.ths.api({
-                api: 'nodes.node:update-data',
-                data: {
-                    nid: this.node.nid,
-                    data
-                },
-                then: () => {
-                    //this.ths.exe('Schema', 'getSchema')
-                }
-            });
+    }
+};
+</script>
+
+<style lang="scss">
+.node-code {
+    background: #fff;
+    border-radius: 4px;
+
+    &__header {
+        font-size: 18px;
+        margin-left: 20px;
+        font-weight: bold;
+        color: #8c8c8c;
+        margin-bottom: -6px;
+    }
+
+    &__content {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 20px 20px;
+        font-size: 16px;
+        resize: none;
+        overflow: hidden;
+        outline: none;
+        border: none;
+        color: #2e7d32;
+        background: #eafff5;
+        font-family: "Exo 2", sans-serif;
+    }
+
+    &__panel {
+        display: flex;
+        background: #d2f0e1;
+
+
+        &__button {
+            display: flex;
+            padding: 1px 10px;
+            background: #ffffff;
+            color: #57876f;
+            margin: 5px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+
+            &:active {
+
+            }
         }
     }
+
+    &__code {
+
+    }
 }
-</script>
+
+</style>
