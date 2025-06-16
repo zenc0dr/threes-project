@@ -37,15 +37,19 @@
 </template>
 
 <script>
-
-
 import Textarea from "./threes_nodecode/textarea.vue";
+import Method from "./threes_nodecode/method.vue";
+import debounce from 'lodash/debounce';
+import cloneDeep from 'lodash/cloneDeep';
 
 export default {
     name: "NodeCode",
+
     components: {
-        Textarea
+        Textarea,
+        Method
     },
+
     props: {
         node: {
             type: Object,
@@ -53,53 +57,93 @@ export default {
         },
         scope: {
             type: String,
-            required: false,
             default: null
         }
     },
+
     data() {
         return {
             add_panel: false,
-            content: [
-                {
-                    type: 'Textarea',
-                    data: '',
-                }
-            ],
-            types: [ // Просмотреть типы и вывести их
+            content: [],
+            types: [
                 {
                     name: 'Текст',
                     icon: 'oc-icon-font',
                     type: 'Textarea',
-                    description: 'Добавляет текстовый блок',
+                    description: 'Добавляет текстовый блок'
                 },
                 {
                     name: 'Метод',
                     icon: 'oc-icon-play-circle',
                     type: 'Method',
                     description: 'Добавляет метод',
-                },
-            ]
+                    data: {
+                        name: 'Название блока',
+                        desc: 'Описание блока',
+                        code: '#'
+                    }
+                }
+            ],
+            debouncedUpdate: null,
+            initializing: true // 🚩 ФЛАГ!
         };
     },
+
+    created() {
+        this.content = this.node.data?.length ? cloneDeep(this.node.data) : [
+            { type: 'Textarea', data: '' }
+        ];
+
+        this.debouncedUpdate = debounce(this.updateData, 1000);
+    },
+
+    mounted() {
+        // 🚩 После mount и первой инициализации - сброс флага
+        this.$nextTick(() => {
+            this.initializing = false;
+        });
+    },
+
+    watch: {
+        content: {
+            handler() {
+                if (this.initializing) return; // 🚩 Пропускаем первую установку!
+                this.debouncedUpdate();
+            },
+            deep: true
+        }
+    },
+
     methods: {
-        addType(type)
-        {
+        addType(type) {
             this.content.push({
                 type: type.type,
-                data: type.data || '',
-            })
+                data: type.data ? cloneDeep(type.data) : ''
+            });
         },
-        removeComponent(index)
-        {
+
+        removeComponent(index) {
             this.content.splice(index, 1)
         },
-        closePanel()
-        {
-            this.add_panel = false
+
+        closePanel() {
+            this.add_panel = false;
+        },
+
+        updateData() {
+            ths.api({
+                api: 'nodes.node:update-data',
+                data: {
+                    nid: this.node.nid,
+                    data: cloneDeep(this.content)
+                },
+                then: () => {
+
+                }
+            })
         }
     }
-};
+}
 </script>
 
 <style lang="scss">

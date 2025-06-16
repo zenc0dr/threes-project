@@ -35,6 +35,9 @@ class NodeCode
 
     public function getData($data, $scope, $node)
     {
+        if (!is_array($data)) {
+            $data = [];
+        }
         return $data;
     }
 

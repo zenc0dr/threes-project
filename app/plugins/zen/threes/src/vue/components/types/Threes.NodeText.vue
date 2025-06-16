@@ -46,7 +46,7 @@ export default {
             this.debouncedUpdate()
         }
     },
-    mounted() {
+    created() {
         this.resize()
         this.debouncedUpdate = debounce(() => this.updateData(this.content), 2000)
     },

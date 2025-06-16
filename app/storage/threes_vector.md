@@ -356,6 +356,7 @@ class Node
             request('nid'),
             request('name')
         );
+        ths()->messages()->addMessage('Имя нода обновлено');
         return [];
     }
 
@@ -366,6 +367,7 @@ class Node
             request('nid'),
             request('description')
         );
+        ths()->messages()->addMessage('Описание нода обновлено');
         return [];
     }
 
@@ -3217,21 +3219,25 @@ class Node
         $this->type = $data['type'] ?? 'Threes.NodeText';
         $this->description = $data['description'] ?? '';
         $this->data = $data['data'] ?? null;
-        $this->props = $data['props'] ?? [
-            [
-                'self_content' => true,
-                'show_children' => true,
-                'tree' => true,
-                'schema' => true,
-                'store' => false,
-                'store_data' => [
-                    'group' => 'Created',
-                    'author' => 'Threes',
-                    'tags' => ["node"],
-                    'created_at' => now()->toDateTimeString(),
+
+        if (!$this->props && !isset($data['props'])) {
+            $this->props = [
+                [
+                    'self_content' => true,
+                    'show_children' => true,
+                    'tree' => true,
+                    'schema' => true,
+                    'store' => false,
+                    'store_data' => [
+                        'group' => 'Created',
+                        'author' => 'Threes',
+                        'tags' => ["node"],
+                        'created_at' => now()->toDateTimeString(),
+                    ]
                 ]
-            ]
-        ];
+            ];
+        }
+
         $this->save();
         return $this;
     }
@@ -3946,6 +3952,7 @@ fields:
         "@milkdown/plugin-prism": "^7.13.1",
         "@milkdown/plugin-slash": "^7.13.1",
         "@milkdown/plugin-tooltip": "^7.13.1",
+        "@milkdown/preset-gfm": "^7.13.1",
         "@milkdown/vue": "^7.13.1",
         "autoprefixer": "^10.4.20",
         "axios": "^1.9.0",
@@ -4062,6 +4069,9 @@ importers:
         specifier: ^7.13.1
         version: 7.13.1
       '@milkdown/plugin-tooltip':
+        specifier: ^7.13.1
+        version: 7.13.1
+      '@milkdown/preset-gfm':
         specifier: ^7.13.1
         version: 7.13.1
       '@milkdown/vue':
