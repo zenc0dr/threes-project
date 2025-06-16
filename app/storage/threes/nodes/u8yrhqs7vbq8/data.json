@@ -27,6 +27,14 @@
                     "show_code": true
                 }
             }
+        },
+        {
+            "type": "Textarea",
+            "data": "dfasdfasdfasdf\nsadf\nasd\nfas\ndf\nasdfasdfasdf"
+        },
+        {
+            "type": "Textarea",
+            "data": "sdfasdf\n\nsadf\nsa\ndf\nasdfasdfasdfasdfasdf"
         }
     ]
 ]
