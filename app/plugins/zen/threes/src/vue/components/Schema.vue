@@ -41,7 +41,7 @@
             <Node :node="node" v-for="node in schema.nodes" scope="content" />
         </div>
 
-        <modal :show="settings" @close="setNodeSettings">
+        <modal max-width="800px" :show="settings" @close="setNodeSettings">
             <template #default>
                 <div class="threes-schema__title">
                     <icon class="threes-schema__icon" :src="schema.icon"/>
@@ -82,27 +82,27 @@ export default {
             settings: null,
             settings_scheme: [
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'self_content',
                     label: 'Показывать собственный контент',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'show_children',
                     label: 'Показывать потомков',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'tree',
                     label: 'Показывать в дереве объектов',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'schema',
                     label: 'Показывать в схеме',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'store',
                     label: 'Показывать в магазине',
                 },

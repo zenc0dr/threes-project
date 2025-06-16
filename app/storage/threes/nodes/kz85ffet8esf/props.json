@@ -3,7 +3,7 @@
     "show_children": true,
     "tree": true,
     "schema": true,
-    "store": false,
+    "store": true,
     "store_data": {
         "group": "Документы",
         "author": "Threes",

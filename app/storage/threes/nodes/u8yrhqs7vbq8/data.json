@@ -1,0 +1,32 @@
+[
+    [
+        {
+            "type": "Method",
+            "data": {
+                "name": "Название блока",
+                "desc": "Описание блока",
+                "code": "#",
+                "settings": {
+                    "enabled": true,
+                    "show_name": true,
+                    "show_desc": true,
+                    "show_code": true
+                }
+            }
+        },
+        {
+            "type": "Method",
+            "data": {
+                "name": "Название блока",
+                "desc": "Описание блока",
+                "code": "#",
+                "settings": {
+                    "enabled": true,
+                    "show_name": true,
+                    "show_desc": true,
+                    "show_code": true
+                }
+            }
+        }
+    ]
+]

@@ -82,12 +82,19 @@ export default {
                     data: {
                         name: 'Название блока',
                         desc: 'Описание блока',
-                        code: '#'
+                        code: '#',
+                        settings: {
+                            enabled: true,
+                            show_name: false,
+                            show_desc: false,
+                            show_code: false,
+                        }
                     }
                 }
             ],
             debouncedUpdate: null,
-            initializing: true
+            initializing: true,
+
         };
     },
 

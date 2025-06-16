@@ -1,33 +1,38 @@
 <template>
     <div class="code-block">
-        <div class="code-block__header">
-            <input
-                v-model="localValue.name"
-                class="code-block__input"
-                placeholder="Имя метода"
-            />
-            <input
-                v-model="localValue.desc"
-                class="code-block__input"
-                placeholder="Описание"
-            />
+        <div class="code-block__body">
+            <div v-if="modelValue.settings.show_name" class="code-block__slug">
+                {{ name }}
+            </div>
+            <div class="code-block__slug">
+                <i @click="settings_open = true" class="oc-icon-cog code-block__settings"></i>
+            </div>
         </div>
-        <Textarea
-            v-model="localValue.code"
-            @input="onInput"
-        />
+        <modal max-width="600px"
+               heading="Настройки блока"
+               :show="settings_open"
+               @close="settings_open = false">
+            <FormFitter
+                :scheme="settings_scheme"
+                v-model="modelValue.settings"
+            />
+        </modal>
     </div>
 </template>
 
 <script>
 import debounce from 'lodash/debounce'
 import Textarea from './textarea.vue'
+import icon from '../../icon.vue'
+import modal from '../../modal.vue'
 
 export default {
     name: "Method",
 
     components: {
-        Textarea
+        icon,
+        modal,
+        Textarea,
     },
 
     props: {
@@ -43,8 +48,31 @@ export default {
 
     data() {
         return {
+            settings_open: false,
             localValue: { ...this.modelValue },
-            debouncedEmit: null
+            debouncedEmit: null,
+            settings_scheme: [
+                {
+                    type: 'settings_switcher',
+                    field: 'enabled',
+                    label: 'Блок включен',
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'show_name',
+                    label: 'Показывать имя',
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'show_desc',
+                    label: 'Показывать описание',
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'show_code',
+                    label: 'Показывать код',
+                },
+            ],
         }
     },
 
@@ -61,6 +89,12 @@ export default {
         this.debouncedEmit = debounce(this.emitUpdate, 500)
     },
 
+    computed: {
+        name() {
+            return this.modelValue.name || null
+        }
+    },
+
     methods: {
         onInput() {
             this.debouncedEmit()
@@ -73,31 +107,29 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .code-block {
-    background: #f5f5f5;
-    border-radius: 4px;
-    padding: 10px;
-    margin: 10px 0;
+    background: #fff;
 
-    &__header {
+    &__body {
         display: flex;
-        flex-direction: column;
-        margin-bottom: 8px;
+        border: 1px solid #ddede1;
+        background: #f5fff8;
+        color: #66766b;
+        border-radius: 5px;
+        margin: 5px;
+        padding: 5px 8px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    &__input {
-        margin-bottom: 5px;
-        padding: 5px 10px;
-        font-size: 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        outline: none;
-        width: 100%;
+    &__settings {
+        cursor: pointer;
+    }
 
-        &:focus {
-            border-color: #8df1b7;
-        }
+    &__slug {
+
     }
 }
 </style>

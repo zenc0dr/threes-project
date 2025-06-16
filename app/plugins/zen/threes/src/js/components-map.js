@@ -4,8 +4,7 @@ import FormInputSwitcher from "../vue/components/FormInputSwitcher.vue";
 import FormInputSelect from "../vue/components/FormInputSelect.vue";
 import FormInputRepeater from "../vue/components/FormInputRepeater.vue";
 import FormInputTextArea from "../vue/components/FormInputTextArea.vue";
-// import FormButton from "../vue/components/FormButton.vue";
-// import FormSeparator from "../vue/components/FormSeparator.vue";
+import FormSettingsSwitcher from "../vue/components/FormSettingsSwitcher.vue";
 
 export default {
     string: FormInputText,
@@ -15,6 +14,5 @@ export default {
     select: FormInputSelect,
     repeater: FormInputRepeater,
     textarea: FormInputTextArea,
-    // button: FormButton,
-    // separator: FormSeparator
+    settings_switcher: FormSettingsSwitcher,
 }
