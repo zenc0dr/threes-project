@@ -293,12 +293,10 @@ class Nodes
         array|string|null $data,
         ?string $scope = 'self_content'
     ): void {
-        //dd($data);
         $node = Node::find($nid);
         $node->scope = $scope;
         $node->data = $data;
         $node->save();
-        ths()->messages()->addMessage('Данные нод обновлены');
     }
 
     /**

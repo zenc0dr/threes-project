@@ -5,11 +5,13 @@
                 {{ node.name }}
             </div>
         </template>
+        <!--
         <div class="node-code__panel">
             <div class="node-code__panel__button">
                 <i class="oc-icon-caret-right"></i>
             </div>
         </div>
+        -->
         <div class="node-code__code">
             <div class="node-code__block" v-for="(block, i) in content">
                 <component
@@ -85,30 +87,28 @@ export default {
                 }
             ],
             debouncedUpdate: null,
-            initializing: true // 🚩 ФЛАГ!
+            initializing: true
         };
     },
 
     created() {
-        this.content = this.node.data?.length ? cloneDeep(this.node.data) : [
-            { type: 'Textarea', data: '' }
-        ];
-
-        this.debouncedUpdate = debounce(this.updateData, 1000);
+        this.content = this.node.data?.length ? cloneDeep(this.node.data) : []
+        this.debouncedUpdate = debounce(this.updateData, 1000)
     },
 
     mounted() {
-        // 🚩 После mount и первой инициализации - сброс флага
         this.$nextTick(() => {
-            this.initializing = false;
+            this.initializing = false
         });
     },
 
     watch: {
         content: {
             handler() {
-                if (this.initializing) return; // 🚩 Пропускаем первую установку!
-                this.debouncedUpdate();
+                if (this.initializing) {
+                    return
+                }
+                this.debouncedUpdate()
             },
             deep: true
         }

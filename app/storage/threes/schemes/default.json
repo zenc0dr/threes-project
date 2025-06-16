@@ -2,6 +2,12 @@
     "schema_name": "Схема проекта",
     "schema_nodes": [
         {
+            "nid": "z6apxbpsdc28"
+        },
+        {
+            "nid": "j9zrg7azmqae"
+        },
+        {
             "nid": "ws7m5xds4tst",
             "nodes": [
                 {
@@ -62,13 +68,10 @@
             "nid": "kyqcntae2ukg"
         },
         {
-            "nid": "2ehas23yxqds"
-        },
-        {
             "nid": "kep24he8qftc"
         },
         {
-            "nid": "j9zrg7azmqae"
+            "nid": "fv4uuat672kx"
         }
     ]
 }

@@ -35,7 +35,7 @@ class Node
             request('nid'),
             request('name')
         );
-        ths()->messages()->addMessage('Имя нода обновлено');
+        //ths()->messages()->addMessage('Имя нода обновлено');
         return [];
     }
 
@@ -46,7 +46,7 @@ class Node
             request('nid'),
             request('description')
         );
-        ths()->messages()->addMessage('Описание нода обновлено');
+        //ths()->messages()->addMessage('Описание нода обновлено');
         return [];
     }
 
@@ -58,6 +58,7 @@ class Node
             request('data'),
             request('scope', 'self_content')
         );
+        //ths()->messages()->addMessage('Данные нод обновлены');
         return [];
     }
 
@@ -88,7 +89,6 @@ class Node
         if ($submit = ths()->submit()) {
             return $submit;
         }
-
         ths()->nodes()->deleteNode(
             nid: request('nid')
         );

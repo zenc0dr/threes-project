@@ -9,11 +9,10 @@
 </template>
 
 <script>
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 
 export default {
-    name: 'NodeText',
-
+    name: 'Textarea',
     props: {
         modelValue: {
             type: String,
