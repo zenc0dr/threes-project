@@ -12,22 +12,23 @@
                 placeholder="Описание"
             />
         </div>
-        <textarea
-            ref="textarea"
+        <Textarea
             v-model="localValue.code"
             @input="onInput"
-            @keydown="onKeydown"
-            class="code-block__textarea"
-            placeholder="Код метода..."
-        ></textarea>
+        />
     </div>
 </template>
 
 <script>
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
+import Textarea from './textarea.vue'
 
 export default {
     name: "Method",
+
+    components: {
+        Textarea
+    },
 
     props: {
         modelValue: {
@@ -58,31 +59,15 @@ export default {
 
     mounted() {
         this.debouncedEmit = debounce(this.emitUpdate, 500)
-        this.resize()
     },
 
     methods: {
         onInput() {
-            this.resize()
             this.debouncedEmit()
-        },
-
-        resize() {
-            const ta = this.$refs.textarea
-            if (ta) {
-                ta.style.height = 'auto'
-                ta.style.height = ta.scrollHeight + 'px'
-            }
         },
 
         emitUpdate() {
             this.$emit('update:modelValue', this.localValue)
-        },
-
-        onKeydown(e) {
-            if (e.key === 'Backspace' && !this.localValue.code.trim()) {
-                this.$emit('remove')
-            }
         }
     }
 }
@@ -109,23 +94,6 @@ export default {
         border-radius: 4px;
         outline: none;
         width: 100%;
-
-        &:focus {
-            border-color: #8df1b7;
-        }
-    }
-
-    &__textarea {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 5px 10px;
-        font-size: 15px;
-        resize: none;
-        overflow: hidden;
-        outline: none;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: #fff;
 
         &:focus {
             border-color: #8df1b7;

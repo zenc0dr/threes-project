@@ -1,15 +1,23 @@
 [
     [
         {
+            "type": "Method",
+            "data": {
+                "name": "Название блока",
+                "desc": "Описание блока",
+                "code": "#"
+            }
+        },
+        {
             "type": "Textarea",
-            "data": "апывапывап"
+            "data": "тут текст"
         },
         {
             "type": "Method",
             "data": {
                 "name": "Название блока",
                 "desc": "Описание блока",
-                "code": "# выпывап\ndfghdfgh"
+                "code": "#"
             }
         },
         {
