@@ -356,7 +356,7 @@ class Node
             request('nid'),
             request('name')
         );
-        ths()->messages()->addMessage('Имя нода обновлено');
+        //ths()->messages()->addMessage('Имя нода обновлено');
         return [];
     }
 
@@ -367,7 +367,7 @@ class Node
             request('nid'),
             request('description')
         );
-        ths()->messages()->addMessage('Описание нода обновлено');
+        //ths()->messages()->addMessage('Описание нода обновлено');
         return [];
     }
 
@@ -379,6 +379,7 @@ class Node
             request('data'),
             request('scope', 'self_content')
         );
+        //ths()->messages()->addMessage('Данные нод обновлены');
         return [];
     }
 
@@ -409,7 +410,6 @@ class Node
         if ($submit = ths()->submit()) {
             return $submit;
         }
-
         ths()->nodes()->deleteNode(
             nid: request('nid')
         );
@@ -1060,12 +1060,10 @@ class Nodes
         array|string|null $data,
         ?string $scope = 'self_content'
     ): void {
-        //dd($data);
         $node = Node::find($nid);
         $node->scope = $scope;
         $node->data = $data;
         $node->save();
-        ths()->messages()->addMessage('Данные нод обновлены');
     }
 
     /**
@@ -2325,6 +2323,58 @@ class OpenAiService
 }
 
 ```
+`plugins/zen/threes/classes/types/Document.php`
+```<?php
+
+namespace Zen\Threes\Classes\Types;
+
+class Document
+{
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/color_document.svg'),
+            'name' => "Документ",
+            'description' => '',
+            'type' => 'Threes.Document',
+            'data' => null,
+            'props' => [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'tree_children' => false,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["code"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function ui(): string
+    {
+        return 'Threes.Document';
+    }
+
+    public function getData($data)
+    {
+        if (!is_array($data)) {
+            $data = [];
+        }
+        return $data;
+    }
+
+    public function setData($data)
+    {
+        return $data;
+    }
+}
+
+```
 `plugins/zen/threes/classes/types/NodeBuilder.php`
 ```<?php
 
@@ -2410,6 +2460,9 @@ class NodeCode
 
     public function getData($data, $scope, $node)
     {
+        if (!is_array($data)) {
+            $data = [];
+        }
         return $data;
     }
 
@@ -13631,6 +13684,22 @@ snapshots:
   zwitch@2.0.4: {}
 
 ```
+`plugins/zen/threes/resources/default_types/Threes.Document.json`
+```{
+    "class": "Zen.Threes.Classes.Types.Document",
+    "files": [
+        "plugins/zen/threes/classes/types/Document.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.Document.vue"
+    ],
+    "store": {
+        "group": "Документы",
+        "author": "Threes",
+        "tags": ["text", "document"],
+        "created_at": "2025-06-17 08:43"
+    }
+}
+
+```
 `plugins/zen/threes/resources/default_types/Threes.NodeBuilder.json`
 ```{
     "class": "Zen.Threes.Classes.Types.NodeBuilder",
@@ -13742,8 +13811,7 @@ import FormInputSwitcher from "../vue/components/FormInputSwitcher.vue";
 import FormInputSelect from "../vue/components/FormInputSelect.vue";
 import FormInputRepeater from "../vue/components/FormInputRepeater.vue";
 import FormInputTextArea from "../vue/components/FormInputTextArea.vue";
-// import FormButton from "../vue/components/FormButton.vue";
-// import FormSeparator from "../vue/components/FormSeparator.vue";
+import FormSettingsSwitcher from "../vue/components/FormSettingsSwitcher.vue";
 
 export default {
     string: FormInputText,
@@ -13753,8 +13821,7 @@ export default {
     select: FormInputSelect,
     repeater: FormInputRepeater,
     textarea: FormInputTextArea,
-    // button: FormButton,
-    // separator: FormSeparator
+    settings_switcher: FormSettingsSwitcher,
 }
 
 ```

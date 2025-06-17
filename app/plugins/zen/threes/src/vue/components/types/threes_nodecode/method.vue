@@ -22,7 +22,7 @@
 
 <script>
 import debounce from 'lodash/debounce'
-import Textarea from './textarea.vue'
+import Textarea from '../../Textarea.vue'
 import icon from '../../icon.vue'
 import modal from '../../modal.vue'
 

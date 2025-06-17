@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import Textarea from "./threes_nodecode/textarea.vue";
+import Textarea from "../Textarea.vue";
 import Method from "./threes_nodecode/method.vue";
 import debounce from 'lodash/debounce';
 import cloneDeep from 'lodash/cloneDeep';

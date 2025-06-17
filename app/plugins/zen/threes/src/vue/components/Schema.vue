@@ -42,7 +42,7 @@
         </div>
 
         <modal max-width="800px" :show="settings" @close="setNodeSettings">
-            <template #default>
+            <template #heading>
                 <div class="threes-schema__title">
                     <icon class="threes-schema__icon" :src="schema.icon"/>
                     <editable-text
@@ -51,6 +51,8 @@
                         @save="saveName"
                     />
                 </div>
+            </template>
+            <template #default>
                 <FormFitter
                     :scheme="settings_scheme"
                     v-model="schema.props"
