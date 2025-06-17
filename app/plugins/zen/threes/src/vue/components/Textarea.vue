@@ -69,10 +69,8 @@ export default {
 .node-text__content {
     width: 100%;
     box-sizing: border-box;
-    padding: 0;
+    padding: 0 15px;
     font-size: 17px;
-    line-height: 1.2; // чуть меньше межстрочного
-    min-height: 1.2em; // ровно одна строка без лишнего
     resize: none;
     overflow: hidden;
     outline: none;

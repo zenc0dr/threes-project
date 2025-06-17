@@ -145,6 +145,17 @@ class Node
         $ref = $value;
     }
 
+//    public function getPropsAttribute(?array $props = null): ?array
+//    {
+//        if (!$props) {
+//            $props = [
+//                'self_content' => true
+//            ];
+//        }
+//
+//        return $props;
+//    }
+
     /**
      * Получить экземпляр нода
      * @param string $nid
@@ -360,6 +371,7 @@ class Node
                     'self_content' => true,
                     'show_children' => true,
                     'tree' => true,
+                    'tree_children' => true,
                     'schema' => true,
                     'store' => false,
                     'store_data' => [
@@ -370,6 +382,8 @@ class Node
                     ]
                 ]
             ];
+        } else {
+            $this->props = $data['props'];
         }
 
         $this->save();

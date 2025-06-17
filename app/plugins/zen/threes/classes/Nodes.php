@@ -153,7 +153,7 @@ class Nodes
             return null;
         }
 
-        $props = $node->props ?? [];
+        $props = $node->props;
 
         $schema_node = [
             'nid' => $node->nid,
