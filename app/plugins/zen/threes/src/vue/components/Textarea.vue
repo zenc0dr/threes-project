@@ -45,10 +45,11 @@ export default {
         },
 
         resize() {
-            const ta = this.$refs.textarea
+            const ta = this.$refs.textarea;
             if (ta) {
-                ta.style.height = 'auto'
-                ta.style.height = ta.scrollHeight + 'px'
+                ta.style.height = 'auto';
+                const minHeight = parseFloat(getComputedStyle(ta).lineHeight) || 20;
+                ta.style.height = Math.max(ta.scrollHeight, minHeight) + 'px';
             }
         },
 
@@ -68,8 +69,10 @@ export default {
 .node-text__content {
     width: 100%;
     box-sizing: border-box;
-    padding: 5px 10px;
+    padding: 0;
     font-size: 17px;
+    line-height: 1.2; // чуть меньше межстрочного
+    min-height: 1.2em; // ровно одна строка без лишнего
     resize: none;
     overflow: hidden;
     outline: none;
