@@ -333,7 +333,9 @@ class Nodes
 
         if ($source_nid) {
             $source_node = Node::find($source_nid);
-            if (!$source_node) return;
+            if (!$source_node) {
+                return;
+            }
             $new_node = $source_node->copy();
         } else {
             $new_node = $this->createNode($type ?? 'Threes.NodeText');

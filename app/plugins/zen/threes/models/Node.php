@@ -359,6 +359,8 @@ class Node
      */
     public function fill(array $data): self
     {
+
+        //dd($data);
         $this->icon = $data['icon'] ?? null;
         $this->name = $data['name'] ?? '';
         $this->type = $data['type'] ?? 'Threes.NodeText';
@@ -398,13 +400,9 @@ class Node
      */
     public function create(string $type = 'Threes.NodeText'): self
     {
-        try {
-            return $this->fill(
-                ths()->exe(Types::getType($type)['class'] . '.template')
-            );
-        } catch (\ReflectionException $exception) {
-            throw new Exception($exception);
-        }
+        return $this->fill(
+            ths()->exe(Types::getType($type)['class'] . '.template')
+        );
     }
 
     /**
