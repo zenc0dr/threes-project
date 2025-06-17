@@ -1,11 +1,15 @@
 <template>
     <div class="node-document">
-        XXX
+        <Node :node="node" v-for="node in node.nodes" scope="document" />
     </div>
 </template>
 <script>
+import Node from '../Node.vue'
 export default {
     name: "Document",
+    components: {
+        Node
+    },
     props: {
         node: {
             type: Object,
@@ -17,7 +21,9 @@ export default {
         }
     },
     data() {
+        return {
 
+        }
     },
     methods: {
 
@@ -26,6 +32,6 @@ export default {
 </script>
 <style lang="scss">
 .node-document {
-
+    background: #fff;
 }
 </style>

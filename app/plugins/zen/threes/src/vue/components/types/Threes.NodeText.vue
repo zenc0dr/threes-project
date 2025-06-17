@@ -1,22 +1,28 @@
 <template>
-    <div class="node-text">
-        <template v-if="scope === 'schema'">
-            <div class="node-text__header">
-                {{ node.name }}
-            </div>
-        </template>
+    <div class="node-text" v-if="scope === 'schema'">
+        <div class="node-text__header">
+            {{ node.name }}
+        </div>
         <Textarea v-model="content" />
     </div>
+    <template v-else>
+        <Textarea v-model="content" @remove="$emit('remove')" />
+        <div class="node-text__content">
+            <Node :node="node" v-for="node in node.nodes" scope="content" />
+        </div>
+    </template>
 </template>
 
 <script>
 import Textarea from '../Textarea.vue';
-
+import Node from "../Node.vue";
 export default {
     name: "NodeText",
     components: {
+        Node,
         Textarea,
     },
+    emits: ["remove"],
     props: {
         node: {
             type: Object,
@@ -53,7 +59,6 @@ export default {
     },
 };
 </script>
-
 <style lang="scss">
 .node-text {
     background: #fff;
@@ -65,6 +70,10 @@ export default {
         font-weight: bold;
         color: #8c8c8c;
         margin-bottom: -6px;
+    }
+
+    &__content {
+
     }
 }
 </style>

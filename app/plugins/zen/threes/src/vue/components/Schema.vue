@@ -35,12 +35,7 @@
                 @save="saveDescription"
             />
         </div>
-
         <Node :node="schema" scope="self_content" />
-        <div class="class-schema__content">
-            <Node :node="node" v-for="node in schema.nodes" scope="content" />
-        </div>
-
         <modal max-width="800px" :show="settings" @close="setNodeSettings">
             <template #heading>
                 <div class="threes-schema__title">
@@ -86,27 +81,32 @@ export default {
                 {
                     type: 'settings_switcher',
                     field: 'self_content',
-                    label: 'Показывать собственный контент',
+                    label: 'Показывать собственный контент (Schema.self_content)',
                 },
                 {
                     type: 'settings_switcher',
                     field: 'show_children',
-                    label: 'Показывать потомков',
+                    label: 'Показывать потомков в схеме (Schema.show_children)',
                 },
                 {
                     type: 'settings_switcher',
                     field: 'tree',
-                    label: 'Показывать в дереве объектов',
+                    label: 'Показывать в дереве объектов (Tree.tree)',
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'tree_children',
+                    label: 'Показывать потомков в дереве (Tree.tree_children)',
                 },
                 {
                     type: 'settings_switcher',
                     field: 'schema',
-                    label: 'Показывать в схеме',
+                    label: 'Показывать в схеме (Tree.schema)',
                 },
                 {
                     type: 'settings_switcher',
                     field: 'store',
-                    label: 'Показывать в магазине',
+                    label: 'Показывать в магазине (Tree.store)',
                 },
             ],
         }

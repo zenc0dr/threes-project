@@ -15,6 +15,7 @@ class NodeText
                 'self_content' => true,
                 'show_children' => true,
                 'tree' => true,
+                'tree_children' => true,
                 'schema' => true,
                 'store' => false,
                 'store_data' => [

@@ -2,7 +2,6 @@
     <component
         v-if="should_render"
         :is="asyncComponent"
-        :data="node.data"
         :node="node"
         :scope="scope"
     />

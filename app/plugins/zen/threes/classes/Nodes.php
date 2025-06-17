@@ -54,8 +54,12 @@ class Nodes
                 return null;
             }
 
+            if (data_get($node->props, 'tree') === false) {
+                return null;
+            }
+
             $children = [];
-            if (!empty($item['nodes'])) {
+            if (!empty($item['nodes']) && data_get($node->props, 'tree_children') !== false) {
                 foreach ($item['nodes'] as $child) {
                     $child_node = $build_tree($child);
                     if ($child_node) {
@@ -262,9 +266,16 @@ class Nodes
         $node = Node::find($nid);
         $props = $node->props;
 
+        # Установка флага (Собственный контент)
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
         }
+
+        # Установка флага (Показать потомков в дереве)
+        if (isset($settings['tree_children'])) {
+            $props['tree_children'] = $settings['tree_children'];
+        }
+
         if (isset($settings['show_children'])) {
             $props['show_children'] = $settings['show_children'];
         }
