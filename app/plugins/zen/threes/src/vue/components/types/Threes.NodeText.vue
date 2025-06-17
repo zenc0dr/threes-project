@@ -7,9 +7,7 @@
     </div>
     <template v-else>
         <Textarea v-model="content" @remove="$emit('remove')" />
-        <div class="node-text__content">
-            <Node :node="node" v-for="node in node.nodes" scope="content" />
-        </div>
+        <Node :node="node" v-for="node in node.nodes" scope="content" />
     </template>
 </template>
 
@@ -70,10 +68,6 @@ export default {
         font-weight: bold;
         color: #8c8c8c;
         margin-bottom: -6px;
-    }
-
-    &__content {
-
     }
 }
 </style>

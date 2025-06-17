@@ -64,8 +64,7 @@ export default {
     }
 }
 </script>
-
-<style scoped lang="scss">
+<style lang="scss">
 .node-text__content {
     width: 100%;
     box-sizing: border-box;

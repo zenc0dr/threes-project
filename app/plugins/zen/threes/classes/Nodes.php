@@ -311,33 +311,122 @@ class Nodes
     }
 
     /**
-     * Добавить нод
-     * @param string|null $nid
-     * @param string|null $type
-     * @param string $schema_code
+     * Добавить новый или скопированный нод в схему с указанием позиции
+     *
+     * @param string|null $source_nid Нод, который копировать (если нужно)
+     * @param string|null $type Тип нового нода (если нужно создать)
+     * @param string|null $target_nid Нод-таргет, относительно которого вставляем
+     * @param string $direction before|after|inside|outward
+     * @param string $schema_code Код схемы
      * @return void
      * @throws \Exception
      */
     public function addNode(
-        string $nid = null,
+        string $source_nid = null,
         string $type = null,
+        string $target_nid = null,
+        string $direction = 'after',
         string $schema_code = 'default'
     ): void {
         $schema = ths()->getSchema($schema_code);
-        if ($nid) {
-            $node = Node::find($nid);
-            if ($node) {
-                $new_node = $node->copy();
-                $schema['schema_nodes'][] = ['nid' => $new_node->nid];
-                ths()->setSchema($schema['schema_nodes'], $schema_code);
-            }
+        $schema_nodes = &$schema['schema_nodes'];
+
+        if ($source_nid) {
+            $source_node = Node::find($source_nid);
+            if (!$source_node) return;
+            $new_node = $source_node->copy();
         } else {
-            $node = $this->createNode($type ?? 'Threes.NodeText');
-            if ($node) {
-                $schema['schema_nodes'][] = ['nid' => $node->nid];
-                ths()->setSchema($schema['schema_nodes'], $schema_code);
+            $new_node = $this->createNode($type ?? 'Threes.NodeText');
+        }
+
+        $new_branch = ['nid' => $new_node->nid];
+
+        if (!$target_nid) {
+            $schema_nodes[] = $new_branch;
+            ths()->setSchema($schema_nodes, $schema_code);
+            return;
+        }
+
+        $inserted = false;
+
+        $insert = function (&$nodes) use (&$insert, $target_nid, $direction, &$new_branch, &$inserted) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    switch ($direction) {
+                        case 'before':
+                            array_splice($nodes, $key, 0, [$new_branch]);
+                            break;
+                        case 'after':
+                            array_splice($nodes, $key + 1, 0, [$new_branch]);
+                            break;
+                        case 'inside':
+                            if (!isset($node['nodes']) || !is_array($node['nodes'])) {
+                                $node['nodes'] = [];
+                            }
+                            $node['nodes'][] = $new_branch;
+                            break;
+                        case 'outward':
+                            return false;
+                    }
+                    $inserted = true;
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        if ($direction === 'outward') {
+            $parent = null;
+            $level = null;
+            $find_parent = function (&$nodes, string $child_nid, &$parent = null, &$level = null) use (&$find_parent) {
+                foreach ($nodes as &$node) {
+                    if (!empty($node['nodes'])) {
+                        foreach ($node['nodes'] as &$child) {
+                            if ($child['nid'] === $child_nid) {
+                                $parent = &$node;
+                                $level = &$nodes;
+                                return true;
+                            }
+                        }
+                        if ($find_parent($node['nodes'], $child_nid, $parent, $level)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
+            $found = $find_parent($schema_nodes, $target_nid, $parent, $level);
+
+            if ($found && $parent && $level) {
+                foreach ($level as $key => $node) {
+                    if ($node['nid'] === $parent['nid']) {
+                        array_splice($level, $key + 1, 0, [$new_branch]);
+                        $inserted = true;
+                        break;
+                    }
+                }
+            }
+
+            // Если не нашли — в корень
+            if (!$inserted) {
+                $schema_nodes[] = $new_branch;
+            }
+
+        } else {
+            // Остальные действия
+            $insert($schema_nodes);
+
+            if (!$inserted) {
+                // Если не нашли target — в конец корня
+                $schema_nodes[] = $new_branch;
             }
         }
+
+        ths()->setSchema($schema_nodes, $schema_code);
     }
 
     /**
@@ -566,7 +655,7 @@ class Nodes
     }
 
     # Удаляем нод
-    public function deleteNode(string $nid): void
+    public function deleteNode(string $nid): array
     {
         // Текущая схема проекта
         $schema         = ths()->getSchema();
@@ -613,19 +702,16 @@ class Nodes
         $remove_node($schema_nodes);
         ths()->setSchema($schema_nodes);   // сохраняем обновлённую схему
 
+        $removed_nids = array_unique($removed_nids);
+
         // Физически удаляем каталоги всех затронутых нодов
-        foreach (array_unique($removed_nids) as $del_nid) {
+        foreach ($removed_nids as $del_nid) {
             if ($node = Node::find($del_nid)) {
                 $node->delete();          // см. реализацию delete() в Node :contentReference[oaicite:1]{index=1}
             }
         }
 
-        // Сообщение для UI
-        if ($removed_nids) {
-            ths()->messages()->addMessage(
-                'Удалены ноды: ' . implode(', ', $removed_nids)
-            );
-        }
+        return $removed_nids;
     }
 
 

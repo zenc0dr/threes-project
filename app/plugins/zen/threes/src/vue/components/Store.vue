@@ -77,7 +77,8 @@ export default {
                 data: {
                     nid: node.nid,
                     type: node.type,
-                    after: this.ths.data.node_selected_nid,
+                    target_nid: this.ths.data.node_selected_nid,
+                    direction: 'inside',
                 },
                 then: response => {
                     this.ths.exe('Tree', 'getTree')

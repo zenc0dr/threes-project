@@ -4,6 +4,7 @@
         :is="asyncComponent"
         :node="node"
         :scope="scope"
+        @remove="$emit('remove')"
     />
 </template>
 
@@ -23,6 +24,7 @@ export default {
             default: false
         }
     },
+    emits: ['remove'],
     computed: {
         should_render() {
             return this.node?.props?.self_content !== false

@@ -2,5 +2,6 @@
     "self_content": true,
     "show_children": true,
     "tree_children": true,
-    "tree": true
+    "tree": true,
+    "schema": false
 }

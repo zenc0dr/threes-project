@@ -821,8 +821,12 @@ class Nodes
                 return null;
             }
 
+            if (data_get($node->props, 'tree') === false) {
+                return null;
+            }
+
             $children = [];
-            if (!empty($item['nodes'])) {
+            if (!empty($item['nodes']) && data_get($node->props, 'tree_children') !== false) {
                 foreach ($item['nodes'] as $child) {
                     $child_node = $build_tree($child);
                     if ($child_node) {
@@ -1029,9 +1033,16 @@ class Nodes
         $node = Node::find($nid);
         $props = $node->props;
 
+        # Установка флага (Собственный контент)
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
         }
+
+        # Установка флага (Показать потомков в дереве)
+        if (isset($settings['tree_children'])) {
+            $props['tree_children'] = $settings['tree_children'];
+        }
+
         if (isset($settings['show_children'])) {
             $props['show_children'] = $settings['show_children'];
         }
@@ -1077,6 +1088,7 @@ class Nodes
     public function addNode(
         string $nid = null,
         string $type = null,
+        string $after = null,
         string $schema_code = 'default'
     ): void {
         $schema = ths()->getSchema($schema_code);
@@ -2484,13 +2496,14 @@ class NodeText
     {
         return [
             'icon' => base_path('plugins/zen/threes/src/images/icons/document.svg'),
-            'name' => "Новый документ",
+            'name' => "Текст",
             'type' => 'Threes.NodeText',
-            'data' => 'Привет мир!',
+            'data' => '',
             'props' => [
                 'self_content' => true,
                 'show_children' => true,
                 'tree' => true,
+                'tree_children' => true,
                 'schema' => true,
                 'store' => false,
                 'store_data' => [

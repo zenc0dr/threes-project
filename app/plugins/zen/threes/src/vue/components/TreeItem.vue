@@ -120,7 +120,11 @@ export default {
         },
         // Выбрать нод
         select() {
-            ths.data.node_selected_nid = this.node.nid
+            if (ths.data.node_selected_nid === this.node.nid) {
+                ths.data.node_selected_nid = null
+            } else {
+                ths.data.node_selected_nid = this.node.nid
+            }
         },
         // Открыть действия
         openActions() {
