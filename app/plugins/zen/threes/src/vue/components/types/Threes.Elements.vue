@@ -1,4 +1,6 @@
 <template>
+
+
     <EditableText v-model="content" @save="updateData" @remove="$emit('remove')" />
 </template>
 

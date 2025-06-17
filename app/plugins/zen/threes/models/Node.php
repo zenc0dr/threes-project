@@ -359,8 +359,6 @@ class Node
      */
     public function fill(array $data): self
     {
-
-        //dd($data);
         $this->icon = $data['icon'] ?? null;
         $this->name = $data['name'] ?? '';
         $this->type = $data['type'] ?? 'Threes.NodeText';
