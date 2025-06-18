@@ -10,7 +10,7 @@
             <i v-if="!add_panel" @click.stop="add_panel = true" class="oc-icon-plus node-document__buttons__add"></i>
             <div v-if="add_panel" class="node-document__add-panel">
                 <div v-for="type in types" @click.stop="addType(type)" class="node-document__node-type">
-                    <i :class="type.icon" :title="type.description"></i>
+                    <i v-if="type.icon" :class="type.icon" :title="type.description"></i>
                     {{ type.name }}
                 </div>
             </div>
@@ -47,24 +47,27 @@ export default {
                 },
                 {
                     name: 'H1',
-                    icon: 'oc-icon-heading',
                     code: 'Threes.Elements',
                     description: 'Добавляет заголовок H1',
                     data: {type: 'h1'}
                 },
                 {
                     name: 'H2',
-                    icon: 'oc-icon-heading',
                     code: 'Threes.Elements',
                     description: 'Добавляет заголовок H2',
                     data: {type: 'h2'}
                 },
                 {
                     name: 'H3',
-                    icon: 'oc-icon-heading',
                     code: 'Threes.Elements',
                     description: 'Добавляет заголовок H3',
                     data: {type: 'h3'}
+                },
+                {
+                    name: 'Метод',
+                    icon: 'oc-icon-caret-square-o-right',
+                    code: 'Threes.Method',
+                    description: 'Добавляет программный блок'
                 },
             ],
         }

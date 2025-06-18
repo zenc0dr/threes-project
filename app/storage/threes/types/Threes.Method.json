@@ -1,0 +1,13 @@
+{
+    "class": "Zen.Threes.Classes.Types.Method",
+    "files": [
+        "plugins/zen/threes/classes/types/Method.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.Method.vue"
+    ],
+    "store": {
+        "group": "Документы",
+        "author": "Threes",
+        "tags": ["text", "document"],
+        "created_at": "2025-06-17 08:43"
+    }
+}

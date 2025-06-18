@@ -393,8 +393,9 @@ class Node
     /**
      * Создание нода по шаблону типа
      * @param string $type
+     * @param array|null $data
      * @return $this
-     * @throws Exception
+     * @throws \ReflectionException
      */
     public function create(string $type = 'Threes.NodeText', ?array $data = null): self
     {
