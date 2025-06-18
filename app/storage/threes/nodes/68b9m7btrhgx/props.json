@@ -2,7 +2,7 @@
     "self_content": true,
     "show_children": true,
     "tree": true,
-    "tree_children": true,
+    "tree_children": false,
     "schema": true,
     "store": false,
     "store_data": {

@@ -8,7 +8,9 @@
                 <i @click="settings_open = true" class="oc-icon-cog code-block__settings"></i>
             </div>
         </div>
-
+        <div v-if="data.show_code" class="code-block__code">
+            <Textarea v-model="node.data.code" />
+        </div>
         <modal max-width="600px" :show="settings_open" @close="settings_open = false">
             <template #heading>
                 Настройки блока
@@ -23,12 +25,14 @@
 <script>
 import debounce from 'lodash/debounce';
 import modal from '../modal.vue';
+import Textarea from '../Textarea.vue';
 
 export default {
     name: "Method",
 
     components: {
         modal,
+        Textarea
     },
 
     props: {
@@ -44,16 +48,32 @@ export default {
 
     data() {
         return {
-            // ✅ data = node.data напрямую
             data: typeof this.node.data === 'object' && this.node.data !== null ? this.node.data : {},
             ths: window.ths,
+            code: this.node.data?.code ?? '',
             settings_open: false,
             updateDataDebounced: () => {},
             settings_scheme: [
-                { type: 'settings_switcher', field: 'enabled', label: 'Блок включен' },
-                { type: 'settings_switcher', field: 'show_name', label: 'Показывать имя' },
-                { type: 'settings_switcher', field: 'show_desc', label: 'Показывать описание' },
-                { type: 'settings_switcher', field: 'show_code', label: 'Показывать код' },
+                {
+                    type: 'settings_switcher',
+                    field: 'enabled',
+                    label: 'Блок включен'
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'show_name',
+                    label: 'Показывать имя'
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'show_desc',
+                    label: 'Показывать описание'
+                },
+                {
+                    type: 'settings_switcher',
+                    field: 'show_code',
+                    label: 'Показывать код'
+                },
             ],
         };
     },
