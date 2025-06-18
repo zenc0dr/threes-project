@@ -189,8 +189,11 @@ export default {
       if (this.editor) {
         try {
           const newExtension = this.languageExtensions[this.currentLanguage] || javascript()
-          this.editor.dispatch({
-            effects: EditorState.reconfigure.of([
+          
+          // Создаем новое состояние с обновленными расширениями
+          const newState = EditorState.create({
+            doc: this.editor.state.doc,
+            extensions: [
               ...this.createBasicSetup(),
               newExtension,
               this.theme === 'dark' ? oneDark : [],
@@ -214,8 +217,11 @@ export default {
                   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
                 }
               })
-            ])
+            ]
           })
+          
+          // Применяем новое состояние
+          this.editor.setState(newState)
         } catch (error) {
           console.error('Ошибка смены языка в CodeEditor:', error)
         }
