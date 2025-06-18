@@ -23,8 +23,9 @@
 import { EditorView, ViewPlugin, lineNumbers, keymap } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
-import { bracketMatching } from '@codemirror/language'
+import { bracketMatching, syntaxHighlighting } from '@codemirror/language'
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
+import { classHighlighter, tags } from '@lezer/highlight'
 import { javascript } from '@codemirror/lang-javascript'
 import { php } from '@codemirror/lang-php'
 import { python } from '@codemirror/lang-python'
@@ -93,36 +94,54 @@ export default {
   mounted() {
     this.debouncedEmit = debounce(this.emitUpdate, 300)
     this.$nextTick(() => {
-      this.initEditor()
+      setTimeout(() => {
+        this.initEditor()
+      }, 100)
     })
   },
 
   beforeUnmount() {
     if (this.editor) {
-      this.editor.destroy()
+      try {
+        this.editor.destroy()
+      } catch (error) {
+        console.warn('Ошибка при уничтожении редактора:', error)
+      }
+      this.editor = null
     }
   },
 
   watch: {
     modelValue(newValue) {
       if (this.editor && newValue !== this.editor.state.doc.toString()) {
-        this.editor.dispatch({
-          changes: {
-            from: 0,
-            to: this.editor.state.doc.length,
-            insert: newValue
-          }
-        })
+        try {
+          this.editor.dispatch({
+            changes: {
+              from: 0,
+              to: this.editor.state.doc.length,
+              insert: newValue
+            }
+          })
+        } catch (error) {
+          console.warn('Ошибка при обновлении содержимого:', error)
+        }
       }
     },
     
     language(newLanguage) {
       this.currentLanguage = newLanguage
-      this.changeLanguage()
+      if (this.editor) {
+        this.changeLanguage()
+      }
     }
   },
 
   methods: {
+    // Создаем собственную тему подсветки
+    createHighlightStyle() {
+      return syntaxHighlighting(classHighlighter)
+    },
+
     // Создаем собственный basicSetup
     createBasicSetup() {
       return [
@@ -130,6 +149,7 @@ export default {
         bracketMatching(),
         closeBrackets(),
         history(),
+        this.createHighlightStyle(),
         keymap.of([
           ...closeBracketsKeymap,
           ...defaultKeymap,
@@ -140,6 +160,13 @@ export default {
 
     initEditor() {
       try {
+        if (!this.$refs.editorContainer) {
+          console.warn('DOM элемент для редактора не найден')
+          return
+        }
+
+        this.$refs.editorContainer.innerHTML = ''
+
         const extensions = [
           ...this.createBasicSetup(),
           this.languageExtensions[this.currentLanguage] || javascript(),
@@ -162,7 +189,16 @@ export default {
             },
             '.cm-scroller': {
               fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
-            }
+            },
+            // Добавляем стили для подсветки
+            '.cm-keyword': { color: '#d73a49' },
+            '.cm-string': { color: '#032f62' },
+            '.cm-comment': { color: '#6a737d', fontStyle: 'italic' },
+            '.cm-number': { color: '#005cc5' },
+            '.cm-operator': { color: '#d73a49' },
+            '.cm-function': { color: '#6f42c1' },
+            '.cm-className': { color: '#6f42c1' },
+            '.cm-propertyName': { color: '#005cc5' }
           })
         ]
 
@@ -171,7 +207,7 @@ export default {
         }
 
         const state = EditorState.create({
-          doc: this.modelValue,
+          doc: this.modelValue || '',
           extensions
         })
 
@@ -179,6 +215,13 @@ export default {
           state,
           parent: this.$refs.editorContainer
         })
+
+        setTimeout(() => {
+          if (this.editor) {
+            this.editor.focus()
+          }
+        }, 50)
+
       } catch (error) {
         console.error('Ошибка инициализации CodeEditor:', error)
         this.createFallbackTextarea()
@@ -186,7 +229,7 @@ export default {
     },
 
     changeLanguage() {
-      if (this.editor) {
+      if (this.editor && this.$refs.editorContainer) {
         try {
           const newExtension = this.languageExtensions[this.currentLanguage] || javascript()
           
@@ -215,7 +258,16 @@ export default {
                 },
                 '.cm-scroller': {
                   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
-                }
+                },
+                // Добавляем стили для подсветки
+                '.cm-keyword': { color: '#d73a49' },
+                '.cm-string': { color: '#032f62' },
+                '.cm-comment': { color: '#6a737d', fontStyle: 'italic' },
+                '.cm-number': { color: '#005cc5' },
+                '.cm-operator': { color: '#d73a49' },
+                '.cm-function': { color: '#6f42c1' },
+                '.cm-className': { color: '#6f42c1' },
+                '.cm-propertyName': { color: '#005cc5' }
               })
             ]
           })
@@ -229,8 +281,10 @@ export default {
     },
 
     createFallbackTextarea() {
+      if (!this.$refs.editorContainer) return
+      
       const textarea = document.createElement('textarea')
-      textarea.value = this.modelValue
+      textarea.value = this.modelValue || ''
       textarea.style.width = '100%'
       textarea.style.height = this.height
       textarea.style.fontFamily = 'Monaco, Menlo, "Ubuntu Mono", monospace'
@@ -249,8 +303,12 @@ export default {
 
     emitUpdate() {
       if (this.editor) {
-        const content = this.editor.state.doc.toString()
-        this.$emit('update:modelValue', content)
+        try {
+          const content = this.editor.state.doc.toString()
+          this.$emit('update:modelValue', content)
+        } catch (error) {
+          console.warn('Ошибка при эмите обновления:', error)
+        }
       }
     },
 
@@ -261,19 +319,27 @@ export default {
 
     setValue(value) {
       if (this.editor) {
-        this.editor.dispatch({
-          changes: {
-            from: 0,
-            to: this.editor.state.doc.length,
-            insert: value
-          }
-        })
+        try {
+          this.editor.dispatch({
+            changes: {
+              from: 0,
+              to: this.editor.state.doc.length,
+              insert: value || ''
+            }
+          })
+        } catch (error) {
+          console.warn('Ошибка при установке значения:', error)
+        }
       }
     },
 
     focus() {
       if (this.editor) {
-        this.editor.focus()
+        try {
+          this.editor.focus()
+        } catch (error) {
+          console.warn('Ошибка при фокусировке:', error)
+        }
       }
     }
   }

@@ -23,6 +23,7 @@ declare module '@codemirror/view' {
 
 declare module '@codemirror/language' {
   export const bracketMatching: any;
+  export const syntaxHighlighting: any;
 }
 
 declare module '@codemirror/autocomplete' {
@@ -72,4 +73,9 @@ declare module '@codemirror/lang-markdown' {
 
 declare module '@codemirror/theme-one-dark' {
   export const oneDark: any;
+}
+
+declare module '@lezer/highlight' {
+  export const tags: any;
+  export const classHighlighter: any;
 } 
