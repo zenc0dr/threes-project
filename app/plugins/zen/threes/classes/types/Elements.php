@@ -36,6 +36,12 @@ class Elements
 
     public function getData($data)
     {
+        if (!$data) {
+            $data = [
+                'content' => '',
+                'settings' => []
+            ];
+        }
         return $data;
     }
 

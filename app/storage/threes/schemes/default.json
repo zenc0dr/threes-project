@@ -2,31 +2,19 @@
     "schema_name": "Схема проекта",
     "schema_nodes": [
         {
-            "nid": "93w9nwn9qrsz",
+            "nid": "68b9m7btrhgx",
             "nodes": [
                 {
-                    "nid": "h7p3kv7qn7gv"
+                    "nid": "z3e2nfsuw765"
                 },
                 {
-                    "nid": "cztty8c4yfkh"
+                    "nid": "b4hf4bqrfd9b"
                 },
                 {
-                    "nid": "skbh7y4zju6f"
+                    "nid": "4fwz6f63tx9t"
                 },
                 {
-                    "nid": "7nfdcx83gfua"
-                },
-                {
-                    "nid": "4cgq7hdencpk"
-                },
-                {
-                    "nid": "n7shxewxnte2"
-                },
-                {
-                    "nid": "vzp7x5cm8ry9"
-                },
-                {
-                    "nid": "napgump3sabr"
+                    "nid": "nw9kuknnwgdm"
                 }
             ]
         }

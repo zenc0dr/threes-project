@@ -7,6 +7,13 @@
     "/images/icons/color_document.svg": "/images/icons/color_document.svg",
     "/images/icons/default-icon.svg": "/images/icons/default-icon.svg",
     "/images/icons/document.svg": "/images/icons/document.svg",
+    "/images/icons/elements.svg": "/images/icons/elements.svg",
+    "/images/icons/h1.svg": "/images/icons/h1.svg",
+    "/images/icons/h2.svg": "/images/icons/h2.svg",
+    "/images/icons/h3.svg": "/images/icons/h3.svg",
+    "/images/icons/h4.svg": "/images/icons/h4.svg",
+    "/images/icons/h5.svg": "/images/icons/h5.svg",
+    "/images/icons/h6.svg": "/images/icons/h6.svg",
     "/images/icons/threes.svg": "/images/icons/threes.svg",
     "/images/node_types/do.svg": "/images/node_types/do.svg",
     "/images/node_types/else.svg": "/images/node_types/else.svg",
@@ -200,6 +207,5 @@
     "/css/files/exo-2-vietnamese-900-italic.woff": "/css/files/exo-2-vietnamese-900-italic.woff",
     "/css/files/exo-2-vietnamese-900-italic.woff2": "/css/files/exo-2-vietnamese-900-italic.woff2",
     "/css/files/exo-2-vietnamese-900-normal.woff": "/css/files/exo-2-vietnamese-900-normal.woff",
-    "/css/files/exo-2-vietnamese-900-normal.woff2": "/css/files/exo-2-vietnamese-900-normal.woff2",
-    "/images/icons/elements.svg": "/images/icons/elements.svg"
+    "/css/files/exo-2-vietnamese-900-normal.woff2": "/css/files/exo-2-vietnamese-900-normal.woff2"
 }
