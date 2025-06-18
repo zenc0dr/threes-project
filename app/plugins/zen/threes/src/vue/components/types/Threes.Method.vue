@@ -1,8 +1,8 @@
 <template>
     <div class="code-block">
-        <div class="code-block__body">
+        <div class="code-block__body" :class="{disabled:!data.enabled}">
             <div v-if="data.show_name" class="code-block__slug">
-                {{ node.name }}
+                {{ data.name }}
             </div>
             <div class="code-block__slug">
                 <i @click="settings_open = true" class="oc-icon-cog code-block__settings"></i>
@@ -50,10 +50,14 @@ export default {
         return {
             data: typeof this.node.data === 'object' && this.node.data !== null ? this.node.data : {},
             ths: window.ths,
-            code: this.node.data?.code ?? '',
             settings_open: false,
             updateDataDebounced: () => {},
             settings_scheme: [
+                {
+                    type: 'string',
+                    field: 'name',
+                    label: 'Название блока'
+                },
                 {
                     type: 'settings_switcher',
                     field: 'enabled',
@@ -126,6 +130,13 @@ export default {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        transition: 300ms;
+
+        &.disabled {
+            background: #fafafa;
+            border-color: #ebebeb;
+            color: #ababab;
+        }
     }
 
     &__settings {

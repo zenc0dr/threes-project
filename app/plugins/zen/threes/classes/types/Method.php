@@ -10,7 +10,15 @@ class Method
             'icon' => base_path('plugins/zen/threes/src/images/icons/api.svg'),
             'name' => "Блок метод",
             'type' => 'Threes.Method',
-            'data' => '',
+            'data' => [
+                'enabled' => true,
+                'name' => 'Программный блок',
+                'show_name' => true,
+                'desc' => '',
+                'show_desc' => false,
+                'code' => '',
+                'show_code' => false,
+            ],
             'props' => [
                 'self_content' => true,
                 'show_children' => true,
@@ -33,12 +41,12 @@ class Method
         return 'Threes.Method';
     }
 
-    public function getData($data, $scope, $node)
+    public function getData(?array $data = null)
     {
         return $data;
     }
 
-    public function setData($data, $scope, $node)
+    public function setData($data)
     {
         return $data;
     }
