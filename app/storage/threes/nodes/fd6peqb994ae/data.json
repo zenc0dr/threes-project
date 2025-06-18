@@ -5,7 +5,7 @@
         "show_name": true,
         "desc": "",
         "show_desc": false,
-        "code": "ааа\n\nааа\n\nвыапывап",
+        "code": "<?php\n\nnamespace Zen\\Threes\\Classes\\Types;\n\nclass Method\n{\n    public function template(): array\n    {\n        return [\n            'icon' => base_path('plugins\/zen\/threes\/src\/images\/icons\/api.svg'),\n            'name' => \"Блок метод\",\n            'type' => 'Threes.Method',\n            'data' => [\n                'enabled' => true,\n                'name' => 'Программный блок',\n                'show_name' => true,\n                'desc' => '',\n                'show_desc' => false,\n                'code' => '',\n                'show_code' => false,\n            ],\n            'props' => [\n                'self_content' => true,\n                'show_children' => true,\n                'tree' => true,\n                'tree_children' => true,\n                'schema' => true,\n                'store' => false,\n                'store_data' => [\n                    'group' => 'Документы',\n                    'author' => 'Threes',\n                    'tags' => [\"text\", \"document\"],\n                    'created_at' => now()->toDateTimeString(),\n                ]\n            ]\n        ];\n    }\n\n    public function ui(): string\n    {\n        return 'Threes.Method';\n    }\n\n    public function getData(?array $data = null)\n    {\n        return $data;\n    }\n\n    public function setData($data)\n    {\n        return $data;\n    }\n}",
         "show_code": true
     }
 ]

@@ -10,7 +10,11 @@
         </div>
 
         <div v-if="data.show_code" class="code-block__code">
-            <CodeEditor v-model="data.code" />
+            <CodeEditor 
+                v-model="data.code" 
+                :language="data.language || 'javascript'"
+                :height="'300px'"
+            />
         </div>
 
         <modal max-width="600px" :show="settings_open" @close="settings_open = false">
@@ -79,6 +83,24 @@ export default {
                     type: 'settings_switcher',
                     field: 'show_code',
                     label: 'Показывать код'
+                },
+                {
+                    type: 'dropdown',
+                    field: 'language',
+                    label: 'Язык программирования',
+                    options: [
+                        { id: 'javascript', name: 'JavaScript' },
+                        { id: 'php', name: 'PHP' },
+                        { id: 'python', name: 'Python' },
+                        { id: 'html', name: 'HTML' },
+                        { id: 'css', name: 'CSS' },
+                        { id: 'sql', name: 'SQL' },
+                        { id: 'json', name: 'JSON' },
+                        { id: 'xml', name: 'XML' },
+                        { id: 'yaml', name: 'YAML' },
+                        { id: 'markdown', name: 'Markdown' },
+                        { id: 'typescript', name: 'TypeScript' }
+                    ]
                 },
             ],
         };

@@ -20,8 +20,11 @@
 </template>
 
 <script>
-import { EditorView, basicSetup } from 'codemirror'
+import { EditorView, ViewPlugin, lineNumbers, keymap } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import { bracketMatching } from '@codemirror/language'
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
 import { javascript } from '@codemirror/lang-javascript'
 import { php } from '@codemirror/lang-php'
 import { python } from '@codemirror/lang-python'
@@ -89,7 +92,9 @@ export default {
 
   mounted() {
     this.debouncedEmit = debounce(this.emitUpdate, 300)
-    this.initEditor()
+    this.$nextTick(() => {
+      this.initEditor()
+    })
   },
 
   beforeUnmount() {
@@ -118,76 +123,122 @@ export default {
   },
 
   methods: {
-    initEditor() {
-      const extensions = [
-        basicSetup,
-        this.languageExtensions[this.currentLanguage] || javascript(),
-        this.theme === 'dark' ? oneDark : [],
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            this.debouncedEmit()
-          }
-        }),
-        EditorView.theme({
-          '&': {
-            height: this.height,
-            fontSize: '14px'
-          },
-          '.cm-editor': {
-            border: '1px solid #ddd',
-            borderRadius: '4px'
-          },
-          '.cm-scroller': {
-            fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
-          }
-        })
+    // Создаем собственный basicSetup
+    createBasicSetup() {
+      return [
+        lineNumbers(),
+        bracketMatching(),
+        closeBrackets(),
+        history(),
+        keymap.of([
+          ...closeBracketsKeymap,
+          ...defaultKeymap,
+          ...historyKeymap
+        ])
       ]
+    },
 
-      if (this.readOnly) {
-        extensions.push(EditorState.readOnly.of(true))
+    initEditor() {
+      try {
+        const extensions = [
+          ...this.createBasicSetup(),
+          this.languageExtensions[this.currentLanguage] || javascript(),
+          this.theme === 'dark' ? oneDark : [],
+          ViewPlugin.define(view => ({
+            update: (update) => {
+              if (update.docChanged) {
+                this.debouncedEmit()
+              }
+            }
+          })),
+          EditorView.theme({
+            '&': {
+              height: this.height,
+              fontSize: '14px'
+            },
+            '.cm-editor': {
+              border: '1px solid #ddd',
+              borderRadius: '4px'
+            },
+            '.cm-scroller': {
+              fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
+            }
+          })
+        ]
+
+        if (this.readOnly) {
+          extensions.push(EditorState.readOnly.of(true))
+        }
+
+        const state = EditorState.create({
+          doc: this.modelValue,
+          extensions
+        })
+
+        this.editor = new EditorView({
+          state,
+          parent: this.$refs.editorContainer
+        })
+      } catch (error) {
+        console.error('Ошибка инициализации CodeEditor:', error)
+        this.createFallbackTextarea()
       }
-
-      const state = EditorState.create({
-        doc: this.modelValue,
-        extensions
-      })
-
-      this.editor = new EditorView({
-        state,
-        parent: this.$refs.editorContainer
-      })
     },
 
     changeLanguage() {
       if (this.editor) {
-        const newExtension = this.languageExtensions[this.currentLanguage] || javascript()
-        
-        this.editor.dispatch({
-          effects: EditorState.reconfigure.of([
-            basicSetup,
-            newExtension,
-            this.theme === 'dark' ? oneDark : [],
-            EditorView.updateListener.of((update) => {
-              if (update.docChanged) {
-                this.debouncedEmit()
-              }
-            }),
-            EditorView.theme({
-              '&': {
-                height: this.height,
-                fontSize: '14px'
-              },
-              '.cm-editor': {
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              },
-              '.cm-scroller': {
-                fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
-              }
-            })
-          ])
-        })
+        try {
+          const newExtension = this.languageExtensions[this.currentLanguage] || javascript()
+          this.editor.dispatch({
+            effects: EditorState.reconfigure.of([
+              ...this.createBasicSetup(),
+              newExtension,
+              this.theme === 'dark' ? oneDark : [],
+              ViewPlugin.define(view => ({
+                update: (update) => {
+                  if (update.docChanged) {
+                    this.debouncedEmit()
+                  }
+                }
+              })),
+              EditorView.theme({
+                '&': {
+                  height: this.height,
+                  fontSize: '14px'
+                },
+                '.cm-editor': {
+                  border: '1px solid #ddd',
+                  borderRadius: '4px'
+                },
+                '.cm-scroller': {
+                  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace'
+                }
+              })
+            ])
+          })
+        } catch (error) {
+          console.error('Ошибка смены языка в CodeEditor:', error)
+        }
       }
+    },
+
+    createFallbackTextarea() {
+      const textarea = document.createElement('textarea')
+      textarea.value = this.modelValue
+      textarea.style.width = '100%'
+      textarea.style.height = this.height
+      textarea.style.fontFamily = 'Monaco, Menlo, "Ubuntu Mono", monospace'
+      textarea.style.fontSize = '14px'
+      textarea.style.border = '1px solid #ddd'
+      textarea.style.borderRadius = '4px'
+      textarea.style.padding = '8px'
+      textarea.style.resize = 'vertical'
+      
+      textarea.addEventListener('input', (e) => {
+        this.$emit('update:modelValue', e.target.value)
+      })
+      
+      this.$refs.editorContainer.appendChild(textarea)
     },
 
     emitUpdate() {

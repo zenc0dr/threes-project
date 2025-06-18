@@ -12,6 +12,7 @@ export default {
     number: FormInputNumber,
     switcher: FormInputSwitcher,
     select: FormInputSelect,
+    dropdown: FormInputSelect,
     repeater: FormInputRepeater,
     textarea: FormInputTextArea,
     settings_switcher: FormSettingsSwitcher,

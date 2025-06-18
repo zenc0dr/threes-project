@@ -4,7 +4,14 @@
     "description": "Threes — это революционная платформа для рекурсивно-модульного программирования смыслов, разработанная человеком (Zenc0dr) и ai (ChatGPT) для людей и ai, для облегчения и ускорения процесса разработки и взаимодействия с информацией.",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production"
     },
     "author": "Alex Blaze",
     "license": "MIT",
