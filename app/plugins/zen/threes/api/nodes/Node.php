@@ -68,8 +68,9 @@ class Node
         ths()->nodes()->addNode(
             source_nid: request('nid'),
             type: request('type'),
-            target_nid:  request('target_nid'),
-            direction:  request('direction'),
+            target_nid: request('target_nid'),
+            data: request('data'),
+            direction: request('direction'),
         );
         return [];
     }

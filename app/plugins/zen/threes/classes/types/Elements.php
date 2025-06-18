@@ -4,14 +4,25 @@ namespace Zen\Threes\Classes\Types;
 
 class Elements
 {
-    public function template(): array
+    public function template(?array $data = []): array
     {
+
+        if ($data) {
+            $type = $data['type'];
+            $data = [
+                'content' => "Заголовок $type",
+                'settings' => [
+                    'type' => $type
+                ]
+            ];
+        }
+
         return [
             'icon' => base_path('plugins/zen/threes/src/images/icons/elements.svg'),
             'name' => "Элементы",
             'description' => '',
             'type' => 'Threes.Elements',
-            'data' => [],
+            'data' => $data,
             'props' => [
                 'self_content' => true,
                 'show_children' => false,
@@ -38,8 +49,10 @@ class Elements
     {
         if (!$data) {
             $data = [
-                'content' => '',
-                'settings' => []
+                'content' => 'Заголовок h1',
+                'settings' => [
+                    'type' => 'h1'
+                ]
             ];
         }
         return $data;

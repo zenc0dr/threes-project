@@ -48,8 +48,23 @@ export default {
                 {
                     name: 'H1',
                     icon: 'oc-icon-heading',
-                    code: 'Header',
-                    description: 'Добавляет заголовок H1'
+                    code: 'Threes.Elements',
+                    description: 'Добавляет заголовок H1',
+                    data: {type: 'h1'}
+                },
+                {
+                    name: 'H2',
+                    icon: 'oc-icon-heading',
+                    code: 'Threes.Elements',
+                    description: 'Добавляет заголовок H2',
+                    data: {type: 'h2'}
+                },
+                {
+                    name: 'H3',
+                    icon: 'oc-icon-heading',
+                    code: 'Threes.Elements',
+                    description: 'Добавляет заголовок H3',
+                    data: {type: 'h3'}
                 },
             ],
         }
@@ -66,6 +81,7 @@ export default {
                     type: type.code,
                     target_nid: ths.data.node_selected_nid,
                     direction: 'inside',
+                    data: type.data || null
                 },
                 then: response => {
                     ths.exe('Tree', 'getTree')

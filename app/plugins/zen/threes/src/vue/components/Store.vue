@@ -82,6 +82,7 @@ export default {
                 },
                 then: response => {
                     this.ths.exe('Tree', 'getTree')
+                    this.ths.exe('Schema', 'getSchema')
                 }
             })
         }

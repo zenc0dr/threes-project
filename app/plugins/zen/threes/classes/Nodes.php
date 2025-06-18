@@ -25,12 +25,13 @@ class Nodes
     /**
      * Создаёт новый нод по классу шаблона
      * @param string $type
+     * @param array|null $data - Данные передаваемые в шаблон
      * @return Node
      * @throws \Exception
      */
-    public function createNode(string $type = 'Threes.NodeText'): Node
+    public function createNode(string $type = 'Threes.NodeText', ?array $data = null): Node
     {
-        return $this->node()->create($type);
+        return $this->node()->create($type, $data);
     }
 
     /**
@@ -315,7 +316,8 @@ class Nodes
      *
      * @param string|null $source_nid Нод, который копировать (если нужно)
      * @param string|null $type Тип нового нода (если нужно создать)
-     * @param string|null $target_nid Нод-таргет, относительно которого вставляем
+     * @param string|null $target_nid Нод относительно которого вставляем
+     * @param array $data
      * @param string $direction before|after|inside|outward
      * @param string $schema_code Код схемы
      * @return void
@@ -325,6 +327,7 @@ class Nodes
         string $source_nid = null,
         string $type = null,
         string $target_nid = null,
+        ?array $data = null,
         string $direction = 'after',
         string $schema_code = 'default'
     ): void {
@@ -338,7 +341,7 @@ class Nodes
             }
             $new_node = $source_node->copy();
         } else {
-            $new_node = $this->createNode($type ?? 'Threes.NodeText');
+            $new_node = $this->createNode($type ?? 'Threes.NodeText', $data);
         }
 
         $new_branch = ['nid' => $new_node->nid];

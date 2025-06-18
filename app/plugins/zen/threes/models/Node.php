@@ -396,10 +396,10 @@ class Node
      * @return $this
      * @throws Exception
      */
-    public function create(string $type = 'Threes.NodeText'): self
+    public function create(string $type = 'Threes.NodeText', ?array $data = null): self
     {
         return $this->fill(
-            ths()->exe(Types::getType($type)['class'] . '.template')
+            ths()->exe(Types::getType($type)['class'] . '.template', null, $data)
         );
     }
 
