@@ -1,6 +1,6 @@
 <template>
     <div class="code-block">
-        <div class="code-block__body" :class="{disabled:!data.enabled}">
+        <div class="code-block__body" :class="{ disabled: !data.enabled }">
             <div v-if="data.show_name" class="code-block__slug">
                 {{ data.name }}
             </div>
@@ -8,13 +8,13 @@
                 <i @click="settings_open = true" class="oc-icon-cog code-block__settings"></i>
             </div>
         </div>
+
         <div v-if="data.show_code" class="code-block__code">
-            <Textarea v-model="node.data.code" />
+            <Textarea v-model="data.code" />
         </div>
+
         <modal max-width="600px" :show="settings_open" @close="settings_open = false">
-            <template #heading>
-                Настройки блока
-            </template>
+            <template #heading>Настройки блока</template>
             <template #default>
                 <FormFitter :scheme="settings_scheme" v-model="data" />
             </template>
@@ -48,10 +48,10 @@ export default {
 
     data() {
         return {
-            data: typeof this.node.data === 'object' && this.node.data !== null ? this.node.data : {},
+            data: JSON.parse(JSON.stringify(this.node.data || {})), // создаём изначальный клон!
             ths: window.ths,
             settings_open: false,
-            updateDataDebounced: () => {},
+            updateDataDebounced: null,
             settings_scheme: [
                 {
                     type: 'string',
@@ -82,23 +82,17 @@ export default {
         };
     },
 
+    created() {
+        this.updateDataDebounced = debounce(this.updateData, 300);
+    },
+
     watch: {
-        'node.data': {
-            handler(newVal) {
-                this.data = typeof newVal === 'object' && newVal !== null ? newVal : {};
-            },
-            deep: true,
-        },
         data: {
             handler() {
                 this.updateDataDebounced();
             },
             deep: true,
         },
-    },
-
-    created() {
-        this.updateDataDebounced = debounce(this.updateData, 300);
     },
 
     methods: {

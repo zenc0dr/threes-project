@@ -1,0 +1,11 @@
+[
+    {
+        "enabled": true,
+        "name": "Программный блок",
+        "show_name": true,
+        "desc": "",
+        "show_desc": false,
+        "code": "ааа\n\nааа\n\nвыапывап",
+        "show_code": true
+    }
+]

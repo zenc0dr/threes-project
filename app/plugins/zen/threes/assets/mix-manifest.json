@@ -1,6 +1,7 @@
 {
     "/js/threes.js": "/js/threes.js",
     "/css/threes.css": "/css/threes.css",
+    "/images/icons/api.svg": "/images/icons/api.svg",
     "/images/icons/code.svg": "/images/icons/code.svg",
     "/images/icons/codebase.svg": "/images/icons/codebase.svg",
     "/images/icons/cog.svg": "/images/icons/cog.svg",
@@ -207,6 +208,5 @@
     "/css/files/exo-2-vietnamese-900-italic.woff": "/css/files/exo-2-vietnamese-900-italic.woff",
     "/css/files/exo-2-vietnamese-900-italic.woff2": "/css/files/exo-2-vietnamese-900-italic.woff2",
     "/css/files/exo-2-vietnamese-900-normal.woff": "/css/files/exo-2-vietnamese-900-normal.woff",
-    "/css/files/exo-2-vietnamese-900-normal.woff2": "/css/files/exo-2-vietnamese-900-normal.woff2",
-    "/images/icons/api.svg": "/images/icons/api.svg"
+    "/css/files/exo-2-vietnamese-900-normal.woff2": "/css/files/exo-2-vietnamese-900-normal.woff2"
 }
