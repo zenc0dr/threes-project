@@ -10,7 +10,7 @@
         </div>
 
         <div v-if="data.show_code" class="code-block__code">
-            <Textarea v-model="data.code" />
+            <CodeEditor v-model="data.code" />
         </div>
 
         <modal max-width="600px" :show="settings_open" @close="settings_open = false">
@@ -26,13 +26,15 @@
 import debounce from 'lodash/debounce';
 import modal from '../modal.vue';
 import Textarea from '../Textarea.vue';
+import CodeEditor from '../CodeEditor.vue';
 
 export default {
     name: "Method",
 
     components: {
         modal,
-        Textarea
+        Textarea,
+        CodeEditor
     },
 
     props: {
