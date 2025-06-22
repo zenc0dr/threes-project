@@ -1,10 +1,10 @@
 [
     {
         "enabled": true,
-        "name": "Программный блок",
+        "name": "Интерфейс кода",
         "show_name": true,
         "desc": "",
-        "show_desc": false,
+        "show_desc": true,
         "code": "<?php\n\n# Коммент\n\nnamespace Zen\\Threes\\Classes\\Types;\n\n",
         "show_code": true,
         "language": "php"
