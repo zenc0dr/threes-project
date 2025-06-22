@@ -2,7 +2,7 @@
 
 namespace Zen\Threes\Models;
 
-
+use Zen\Threes\Classes\Types;
 use Exception;
 
 /**
@@ -10,21 +10,23 @@ use Exception;
  * @property string $icon - Иконка
  * @property string $name - Имя нода
  * @property string $description - Описание нода
- * @property string $class - Класс нода
+ * @property string $type - Тип нода
  * @property array $data - Данные нода
  * @property array $props - Настройки нода
+ * @property string $scope - Область действия нода (виртуальное поле)
  */
 class Node
 {
     protected array $attributes = [];
 
+    # Базовые поля
     protected static array $fields = [
-        'icon'=> 'string',
-        'name' => 'string',
-        'description' => 'string',
-        'class' => 'string',
-        'data' => 'array',
-        'props' => 'array'
+        'icon'=> 'string', // Иконка
+        'name' => 'string', // Название нода
+        'description' => 'string', // Описание нода
+        'type' => 'string', // Тип нода
+        'data' => 'array', // Данные нода
+        'props' => 'array' // Свойства нода
     ];
 
     protected static array $extensions = [
@@ -33,7 +35,7 @@ class Node
         'object' => 'object',
     ];
 
-    public ?string $scope = null;
+    public ?string $scope = 'self_content'; // Дополнительная метка окружения нода
 
     public function __construct(string $nid = null)
     {
@@ -89,16 +91,13 @@ class Node
     /**
      * Вызов метода класса нода
      * @param string $method
-     * @param mixed|null $data
      * @return mixed
      * @throws \ReflectionException
      */
-    public function exe(string $method, mixed $data = null): mixed
+    public function exe(string $method, string $scope = 'self_content', mixed $data = null): mixed
     {
-        return ths()->exe("$this->class.$method", [
-            'node' => $this,
-            'data' => $data,
-        ]);
+        $type = Types::getType($this->type)['class'];
+        return ths()->exe("$type.$method", null, $data, $scope, $this);
     }
 
     /**
@@ -146,6 +145,17 @@ class Node
         $ref = $value;
     }
 
+//    public function getPropsAttribute(?array $props = null): ?array
+//    {
+//        if (!$props) {
+//            $props = [
+//                'self_content' => true
+//            ];
+//        }
+//
+//        return $props;
+//    }
+
     /**
      * Получить экземпляр нода
      * @param string $nid
@@ -190,23 +200,19 @@ class Node
     /**
      * Сохранить данные экземпляра
      * @return void
+     * @throws Exception
      */
     public function save(): void
     {
-        $this->beforeSave();
-
         if (empty($this->attributes['nid'])) {
             $this->attributes['nid'] = ths()->createShortId();
         }
-
         foreach ($this->attributes as $key => $value) {
             if ($key === 'nid') {
                 continue;
             }
             $this->saveField($key, $value);
         }
-
-        $this->afterSave();
     }
 
     /**
@@ -313,35 +319,28 @@ class Node
      */
     public static function truncate(): void
     {
-        # Удалить все ноды
-        $nodes_storage_path = ths()->env('NODES_STORAGE');
-        if (!file_exists($nodes_storage_path) || !is_dir($nodes_storage_path)) {
-            return;
+        $paths = [
+            ths()->env('NODES_STORAGE'), # Хранилище нод
+            ths()->env('SCHEMES_STORAGE'), # Хранилище схем
+            ths()->env('TYPES_STORAGE') # Хранилище типов
+        ];
+        foreach ($paths as $path) {
+            ths()->shellRemoveDir($path);
         }
-        $escaped_path = escapeshellarg($nodes_storage_path);
-        shell_exec("rm -rf $escaped_path/*");
-
-        # Удалить все схемы
-        $schemes_storage_path = ths()->env('SCHEMES_STORAGE');
-        if (!file_exists($schemes_storage_path) || !is_dir($schemes_storage_path)) {
-            return;
-        }
-        $escaped_path = escapeshellarg($schemes_storage_path);
-        shell_exec("rm -rf $escaped_path/*");
+        ths()->store()->createDefaultNodeTypes();
     }
 
     /**
      * Устанавливает значение атрибута 'data'.
-     * @param array|string|null $data.
+     * @param array|string|null $data .
      * @return void
+     * @throws \ReflectionException
      */
     public function setDataAttribute(array|string|null $data = null): void
     {
-        if ($this->scope) {
-            $method = $this->studlyCaser('set', $this->scope, '');
-            $data = $this->exe($method, $data);
-        }
-        $this->attributes['data'] = [$data];
+        $this->attributes['data'] = [
+            $this->exe('setData', $this->scope, $data)
+        ];
     }
 
     /**
@@ -354,28 +353,62 @@ class Node
     }
 
     /**
-     * Создает иконку из шаблона, если она не указана в атрибутах.
-     * Если класс отсутствует или шаблон не найден, метод завершает выполнение.
-     * @return void
+     * @param array $data
+     * @return $this
      * @throws Exception
      */
-    public function createIconFromTemplate(): void
+    public function fill(array $data): self
     {
-        if (!$this->class) {
-            return;
+        $this->icon = $data['icon'] ?? null;
+        $this->name = $data['name'] ?? '';
+        $this->type = $data['type'] ?? 'Threes.NodeText';
+        $this->description = $data['description'] ?? '';
+        $this->data = $data['data'] ?? null;
+
+        if (!$this->props && !isset($data['props'])) {
+            $this->props = [
+                [
+                    'self_content' => true,
+                    'show_children' => true,
+                    'tree' => true,
+                    'tree_children' => true,
+                    'schema' => true,
+                    'store' => false,
+                    'store_data' => [
+                        'group' => 'Created',
+                        'author' => 'Threes',
+                        'tags' => ["node"],
+                        'created_at' => now()->toDateTimeString(),
+                    ]
+                ]
+            ];
+        } else {
+            $this->props = $data['props'];
         }
 
-        if (isset($this->attributes['icon']) && !empty($this->attributes['icon'])) {
-            return;
-        }
-
-        $template = $this->exe('template');
-        if (!$template) {
-            return;
-        }
-        $this->icon = $template['icon'];
+        $this->save();
+        return $this;
     }
 
+    /**
+     * Создание нода по шаблону типа
+     * @param string $type
+     * @param array|null $data
+     * @return $this
+     * @throws \ReflectionException
+     */
+    public function create(string $type = 'Threes.NodeText', ?array $data = null): self
+    {
+        return $this->fill(
+            ths()->exe(Types::getType($type)['class'] . '.template', null, $data)
+        );
+    }
+
+    /**
+     * Геттер для описания нода
+     * @param string|null $description
+     * @return string
+     */
     public function getDescriptionAttribute(?string $description = null): string
     {
         if (!$description) {
@@ -384,18 +417,51 @@ class Node
         return $description;
     }
 
-
     /**
-     * Выполняет действия перед сохранением.
-     * Создаёт иконку на основе шаблона.
-     *
-     * @return void
+     * Клонирует текущий нод
+     * @param string|null $target_nid - Если задан, клон будет вставлен после этого нода в схеме
+     * @return Node
      * @throws Exception
      */
-    public function beforeSave(): void
+    public function copy(?string $target_nid = null): Node
     {
-        $this->createIconFromTemplate();
-    }
+        $clone = new self();
+        $clone->attributes['icon'] = $this->attributes['icon'];
+        $clone->name = $this->name . ' (копия)';
+        $clone->description = $this->description;
+        $clone->type = $this->type;
+        $clone->data = $this->getDataAttribute();
+        $clone->props = $this->props;
+        $clone->save();
 
-    public function afterSave(){}
+        // Вставка в схему
+        $schema = ths()->getSchema();
+        $nodes = &$schema['schema_nodes'];
+
+        $new_branch = ['nid' => $clone->nid];
+
+        if ($target_nid) {
+            $insert_after = function (&$nodes) use (&$insert_after, $target_nid, $new_branch) {
+                foreach ($nodes as $i => &$node) {
+                    if ($node['nid'] === $target_nid) {
+                        array_splice($nodes, $i + 1, 0, [$new_branch]);
+                        return true;
+                    }
+                    if (!empty($node['nodes'])) {
+                        if ($insert_after($node['nodes'])) return true;
+                    }
+                }
+                return false;
+            };
+
+            if (!$insert_after($nodes)) {
+                $nodes[] = $new_branch;
+            }
+        } else {
+            $nodes[] = $new_branch;
+        }
+        ths()->setSchema($nodes);
+        ths()->messages()->addMessage("Создан клон нода {$this->nid} → {$clone->nid}");
+        return $clone;
+    }
 }

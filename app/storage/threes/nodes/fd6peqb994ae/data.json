@@ -1,0 +1,12 @@
+[
+    {
+        "enabled": true,
+        "name": "Программный блок",
+        "show_name": true,
+        "desc": "",
+        "show_desc": false,
+        "code": "<?php\n\n# Коммент\n\nnamespace Zen\\Threes\\Classes\\Types;\n\n",
+        "show_code": true,
+        "language": "php"
+    }
+]

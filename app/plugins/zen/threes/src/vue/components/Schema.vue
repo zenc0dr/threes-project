@@ -35,14 +35,9 @@
                 @save="saveDescription"
             />
         </div>
-
         <Node :node="schema" scope="self_content" />
-        <div class="class-schema__content">
-            <Node :node="node" v-for="node in schema.nodes" scope="schema" />
-        </div>
-
-        <modal :show="settings" @close="setNodeSettings">
-            <template #default>
+        <modal max-width="800px" :show="settings" @close="setNodeSettings">
+            <template #heading>
                 <div class="threes-schema__title">
                     <icon class="threes-schema__icon" :src="schema.icon"/>
                     <editable-text
@@ -51,6 +46,8 @@
                         @save="saveName"
                     />
                 </div>
+            </template>
+            <template #default>
                 <FormFitter
                     :scheme="settings_scheme"
                     v-model="schema.props"
@@ -76,59 +73,51 @@ export default {
     },
     data() {
         return {
+            ths: window.ths,
             nid: null,
             schema: null,
             settings: null,
             settings_scheme: [
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'self_content',
-                    label: 'Показывать собственный контент',
+                    label: 'Показывать собственный контент (Schema.self_content)',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'show_children',
-                    label: 'Показывать потомков',
+                    label: 'Показывать потомков в схеме (Schema.show_children)',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'tree',
-                    label: 'Показывать в дереве объектов',
+                    label: 'Показывать в дереве объектов (Tree.tree)',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
+                    field: 'tree_children',
+                    label: 'Показывать потомков в дереве (Tree.tree_children)',
+                },
+                {
+                    type: 'settings_switcher',
                     field: 'schema',
-                    label: 'Показывать в схеме',
+                    label: 'Показывать в схеме (Tree.schema)',
                 },
                 {
-                    type: 'switcher',
+                    type: 'settings_switcher',
                     field: 'store',
-                    label: 'Показывать в магазине',
+                    label: 'Показывать в магазине (Tree.store)',
                 },
             ],
-            ths: window.ths,
         }
     },
     mounted() {
-        this.ths.bus.on('schema:refresh', this.getSchema)
+        this.ths.mountComponent('Schema', this)
     },
     unmounted() {
-        this.ths.bus.off('schema:refresh', this.getSchema)
+        this.ths.unmountComponent('Schema')
     },
     watch: {
-
-        // 'ths.data.selected_nid': {
-        //     handler(nid) {
-        //         if (nid) {
-        //             this.nid = nid
-        //             this.getSchema()
-        //         } else {
-        //             this.nid = null
-        //             this.schema = null
-        //         }
-        //     },
-        //     immediate: true
-        // }
         'ths.data.node_selected_nid': {
             handler(nid) {
                 if (nid) {
@@ -144,14 +133,13 @@ export default {
     },
     methods: {
         getSchema() {
-            this.ths.enqueue({
-                exec: () => this.ths.api({
-                    api: 'ui:get-schema-nodes',
-                    data: {
-                        nid: this.nid
-                    }
-                }),
+            this.ths.api({
+                api: 'ui:get-schema-nodes',
+                data: {
+                    nid: this.nid
+                },
                 then: response => {
+                    this.$router.push(ths.getNodeUrl(this.nid))
                     this.schema = response.schema
                 }
             })
@@ -160,15 +148,13 @@ export default {
             if (!this.nid) {
                 return
             }
-            this.ths.enqueue({
-                exec: () => this.ths.api({
-                    api: 'nodes.node:set-node-name',
-                    data: {
-                        nid: this.nid, name
-                    }
-                }),
-                then: () => {
-                    this.ths.bus.emit('tree:refresh')
+            this.ths.api({
+                api: 'nodes.node:set-node-name',
+                data: {
+                    nid: this.nid, name
+                },
+                then: response => {
+                    this.ths.exe('Tree', 'getTree')
                 }
             })
         },
@@ -176,16 +162,14 @@ export default {
             if (!this.nid) {
                 return
             }
-            this.ths.enqueue({
-                exec: () => this.ths.api({
-                    api: 'nodes.node:set-node-description',
-                    data: {
-                        nid: this.nid,
-                        description
-                    }
-                }),
-                then: () => {
-                    this.ths.bus.emit('tree:refresh')
+            this.ths.api({
+                api: 'nodes.node:set-node-description',
+                data: {
+                    nid: this.nid,
+                    description
+                },
+                then: response => {
+                    this.ths.exe('Tree', 'getTree')
                 }
             })
         },
@@ -195,19 +179,17 @@ export default {
         },
         setNodeSettings()
         {
-            ths.enqueue({
-                exec: () => ths.api({
-                    api: 'nodes.node:set-node-settings',
-                    data: {
-                        nid: this.nid,
-                        settings: this.schema.props
-                    }
-                }),
-                then: () => {
+            ths.api({
+                api: 'nodes.node:set-node-settings',
+                data: {
+                    nid: this.nid,
+                    settings: this.schema.props
+                },
+                then: response => {
                     this.settings = null
                     this.getSchema()
-                    this.ths.bus.emit('tree:refresh')
-                    this.ths.bus.emit('store:refresh')
+                    this.ths.exe('Tree', 'getTree')
+                    this.ths.exe('Store', 'getStore')
                 }
             })
         },
@@ -219,17 +201,15 @@ export default {
             if (!file) return
             const reader = new FileReader()
             reader.onload = () => {
-                ths.enqueue({
-                    exec: () => ths.api({
-                        api: 'nodes.node:set-node-icon',
-                        data: {
-                            nid: this.nid,
-                            svg: reader.result
-                        }
-                    }),
-                    then: () => {
-                        this.ths.bus.emit('tree:refresh')
-                        this.ths.bus.emit('store:refresh')
+                ths.api({
+                    api: 'nodes.node:set-node-icon',
+                    data: {
+                        nid: this.nid,
+                        svg: reader.result
+                    },
+                    then: response => {
+                        this.ths.exe('Tree', 'getTree')
+                        this.ths.exe('Store', 'getStore')
                         this.getSchema()
                     }
                 })
@@ -242,8 +222,11 @@ export default {
 </script>
 <style lang="scss">
 .threes-schema {
-    flex: 1 1 0;
-    min-height: 100%;
+    flex: 1 1 auto;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 
     &__icon {
         margin-right: 10px;

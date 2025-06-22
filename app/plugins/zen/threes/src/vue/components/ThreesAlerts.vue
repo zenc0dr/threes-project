@@ -24,18 +24,26 @@ export default {
     },
     data() {
         return {
+            ths: window.ths,
             alerts: []
         }
     },
     created() {
-        ths.Alerts = this
+        this.ths.mountComponent('Alerts', this)
+    },
+    unmounted() {
+        this.ths.unmountComponent('Alerts')
     },
     methods: {
-        push(alerts)
+        push(input)
         {
-            alerts.map(alert => {
-                this.alerts.push(alert)
-            })
+            if (Array.isArray(input)) {
+                input.forEach(alert => {
+                    this.alerts.push(alert)
+                })
+            } else {
+                this.alerts.push(input)
+            }
         }
     }
 }

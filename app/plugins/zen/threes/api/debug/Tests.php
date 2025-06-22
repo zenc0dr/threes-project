@@ -6,10 +6,11 @@ use Http;
 use Zen\Threes\Classes\Services\OpenAiService;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Dumper;
-use Zen\Threes\Classes\Gen;
+//use Zen\Threes\Classes\Gen;
 use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Feature;
 use Zen\Threes\Classes\Nodes;
+use Zen\Threes\Console\Vector;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -20,9 +21,11 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        dd(
-            ths()->getSetting('author_token')
-        );
+        $command = new Vector();
+        $command->setOutputCallback(function ($message) {
+            echo $message . '<br>';
+        });
+        $command->handle();
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -47,7 +50,7 @@ class Tests
         if ($nid) {
             $node = Node::find($nid);
         } else {
-            $node = ths()->nodes()->createNodeByClass();
+            $node = ths()->nodes()->createNode();
         }
 
         dd($node->icon);

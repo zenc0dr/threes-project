@@ -19,13 +19,13 @@
                     />
                 </div>
             </div>
-
             <template v-if="show">
                 <tree-item
                     v-for="item in tree"
                     :key="item.nid"
                     :node="item"
                     :depth="0"
+                    :nodes-to-open="nodesToOpen"
                     @move="moveAction"
                 />
             </template>
@@ -35,7 +35,6 @@
 
 <script>
 import TreeItem from './TreeItem.vue'
-
 export default {
     name: 'Tree',
     components: { TreeItem },
@@ -46,6 +45,7 @@ export default {
             search: '',
             tree: [],
             searchTimer: null,
+            nodesToOpen: [],
         }
     },
     watch: {
@@ -54,40 +54,81 @@ export default {
             this.searchTimer = setTimeout(this.getTree, 400)
         }
     },
+    created() {
+        this.ths.mountComponent('Tree', this)
+    },
     mounted() {
         this.getTree()
-        //this.ths.bus.on('tree:refresh', this.getTree)
     },
     unmounted() {
-        //this.ths.bus.off('tree:refresh', this.getTree)
+        this.ths.unmountComponent('Tree')
         clearTimeout(this.searchTimer)
     },
     methods: {
         getTree() {
-            this.ths.enqueue({
-                exec: () => this.ths.api({
-                    api: 'ui:get-tree-nodes',
-                    data: { search: this.search }
-                }),
+            this.ths.api({
+                api: 'ui:get-tree-nodes',
+                data: {
+                    search: this.search
+                },
                 then: response => {
                     this.tree = response.tree
+                    this.ths.clearNodeActions()
+                    this.unfoldSelectedBranch()
                 }
             })
+        },
+
+        /**
+         * Находит путь из ID узлов до целевого узла и сохраняет его в this.nodesToOpen.
+         */
+        unfoldSelectedBranch() {
+            if (!this.ths.data.node_selected_nid) {
+                this.nodesToOpen = []
+                return
+            }
+
+            const path = this.findPathToNode(this.tree, this.ths.data.node_selected_nid);
+            this.nodesToOpen = path || [];
+        },
+
+        /**
+         * Рекурсивно ищет путь к узлу в дереве.
+         * @param {Array} nodes - Массив узлов для поиска.
+         * @param {Number} target_nid - ID искомого узла.
+         * @returns {Array|null} - Массив ID узлов от корня до цели, или null, если путь не найден.
+         */
+        findPathToNode(nodes, target_nid) {
+            for (const node of nodes) {
+                // Если текущий узел - цель
+                if (node.nid === target_nid) {
+                    return [node.nid];
+                }
+
+                // Если у узла есть потомки, ищем в них
+                if (node.nodes && node.nodes.length > 0) {
+                    const path = this.findPathToNode(node.nodes, target_nid);
+                    // Если путь найден в потомках, добавляем текущий узел в начало пути
+                    if (path) {
+                        return [node.nid, ...path];
+                    }
+                }
+            }
+            // Путь не найден в этой ветке
+            return null;
         },
         submitSearch() {
             clearTimeout(this.searchTimer)
             this.getTree()
         },
         moveAction({nid, direction}) {
-            this.ths.enqueue({
-                exec: () => this.ths.api({
-                    api: 'nodes.node:move-node',
-                    data: {
-                        nid: this.ths.data.node_actions_nid,
-                        target_nid: nid,
-                        direction: direction
-                    }
-                }),
+            this.ths.api({
+                api: 'nodes.node:move-node',
+                data: {
+                    nid: this.ths.data.node_actions_nid,
+                    target_nid: nid,
+                    direction: direction
+                },
                 then: () => {
                     this.ths.data.node_actions_nid = null
                     this.ths.data.node_action = null
@@ -101,8 +142,9 @@ export default {
 
 <style lang="scss">
 .threes-nt {
-    height: 100%;
-    overflow: auto;
+    min-height: 100%;
+    min-width: max-content;
+    overflow: visible;
 
     .tree-list {
         display: flex;

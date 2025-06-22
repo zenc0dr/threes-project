@@ -2,9 +2,9 @@
     <component
         v-if="should_render"
         :is="asyncComponent"
-        :data="node.data"
         :node="node"
         :scope="scope"
+        @remove="$emit('remove')"
     />
 </template>
 
@@ -24,6 +24,7 @@ export default {
             default: false
         }
     },
+    emits: ['remove'],
     computed: {
         should_render() {
             return this.node?.props?.self_content !== false
@@ -32,10 +33,10 @@ export default {
             if (!this.node.component) {
                 return null
             }
-
+            const component = this.node.component
             try {
                 return defineAsyncComponent(() =>
-                    import(`./nodes/${this.node.component}.vue`)
+                    import(`./types/${component}.vue`)
                 )
             } catch (e) {
                 console.warn(`Не удалось загрузить компонент: ${this.node.component}`, e)

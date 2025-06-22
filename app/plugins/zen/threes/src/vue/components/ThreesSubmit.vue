@@ -1,6 +1,6 @@
 <template>
     <div class="threes-submit">
-        <modal max-width="600px" title="Подтвердите действие" :show="confirm !== null">
+        <modal max-width="600px" heading="Подтвердите действие" :show="confirm !== null" @close="clear">
             <template #default>
                 {{ confirm.message }}
             </template>
@@ -20,10 +20,18 @@ export default {
     components: {
         modal
     },
-    mounted() {
-        if (ths.Submit === null) {
-            ths.Submit = this
+    data() {
+        return {
+            ths: window.ths,
+            confirm: null,
+            opts: null,
         }
+    },
+    mounted() {
+        this.ths.mountComponent('Submit', this)
+    },
+    unmounted() {
+        this.ths.unmountComponent('Submit')
     },
     computed: {
         yes_label() {
@@ -33,36 +41,35 @@ export default {
             return this.confirm?.no_label ?? 'Нет'
         }
     },
-    data() {
-        return {
-            confirm: null,
-        }
-    },
     methods: {
-        push(response, then) {
+        push(response, opts) {
             if (response.confirm === 'no') {
                 return
             }
-
             if (response.confirm === 'yes') {
-                then(response)
+                opts.then(response)
                 return
             }
-
+            this.opts = opts
             this.confirm = response.confirm
         },
+        clear() {
+            this.confirm = null
+            this.opts = null
+        },
         accept() {
-
+            this.opts.data.confirm = 'yes'
+            this.ths.api(this.opts)
+            this.clear()
         },
         denied() {
-
+            this.clear()
         }
     }
 }
 </script>
 <style lang="scss">
 .threes-submit {
-
     &__panel {
         display: flex;
         justify-content: flex-end;

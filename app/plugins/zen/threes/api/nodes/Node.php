@@ -35,6 +35,7 @@ class Node
             request('nid'),
             request('name')
         );
+        //ths()->messages()->addMessage('Имя нода обновлено');
         return [];
     }
 
@@ -45,6 +46,7 @@ class Node
             request('nid'),
             request('description')
         );
+        //ths()->messages()->addMessage('Описание нода обновлено');
         return [];
     }
 
@@ -56,6 +58,7 @@ class Node
             request('data'),
             request('scope', 'self_content')
         );
+        //ths()->messages()->addMessage('Данные нод обновлены');
         return [];
     }
 
@@ -63,8 +66,11 @@ class Node
     protected function addNode(): array
     {
         ths()->nodes()->addNode(
-            nid: request('nid'),
-            class: request('class'),
+            source_nid: request('nid'),
+            type: request('type'),
+            target_nid: request('target_nid'),
+            data: request('data'),
+            direction: request('direction'),
         );
         return [];
     }
@@ -83,13 +89,19 @@ class Node
     # http://threes.dc/threes.api/nodes.node:delete-node?debug
     protected function deleteNode(): array
     {
-        if ($submit = ths()->submit()) {
-            return $submit;
+        if (!request()->has('without_submit')) {
+            if ($submit = ths()->submit()) {
+                return $submit;
+            }
         }
-
-        ths()->nodes()->deleteNode(
+        $removed_nids = ths()->nodes()->deleteNode(
             nid: request('nid')
         );
+
+        if (!request()->has('without_submit')) {
+            ths()->messages()->addMessage('Удалены ноды: ' . join(', ', $removed_nids));
+        }
+
         return [];
     }
 }

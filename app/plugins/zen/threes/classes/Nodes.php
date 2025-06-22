@@ -14,7 +14,7 @@ class Nodes
      * @param string|null $nid
      * @return Node|null
      */
-    public function model(string $nid = null): ?Node
+    public function node(string $nid = null): ?Node
     {
         if ($nid) {
             return Node::find($nid);
@@ -24,21 +24,14 @@ class Nodes
 
     /**
      * Создаёт новый нод по классу шаблона
-     * @param string $template_method
+     * @param string $type
+     * @param array|null $data - Данные передаваемые в шаблон
      * @return Node
-     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public function createNodeByClass(string $class = 'Zen.Threes.Classes.Nodes.NodeText'): Node
+    public function createNode(string $type = 'Threes.NodeText', ?array $data = null): Node
     {
-        $node = $this->model();
-        $node->class = $class;
-        $template = $node->exe('template');
-
-        foreach ($template as $field => $value) {
-            $node->$field = $value;
-        }
-        $node->save();
-        return $node;
+        return $this->node()->create($type, $data);
     }
 
     /**
@@ -49,19 +42,25 @@ class Nodes
      */
     public function getNodesTree(string $schema_code = 'default', string $search = null): array
     {
-        $schema = ths()->getSchema($schema_code)['schema_nodes'];
+        $schema = ths()->getSchema($schema_code)['schema_nodes'] ?? [];
         $search = trim(mb_strtolower($search ?? ''));
 
         $build_tree = function (array $item) use (&$build_tree, $search): ?array {
             $node = \Zen\Threes\Models\Node::find(
                 $item['nid'],
-                ['icon', 'name', 'description', 'class', 'props']
+                ['icon', 'name', 'description', 'type', 'props']
             );
 
-            if (!$node) return null;
+            if (!$node) {
+                return null;
+            }
+
+            if (data_get($node->props, 'tree') === false) {
+                return null;
+            }
 
             $children = [];
-            if (!empty($item['nodes'])) {
+            if (!empty($item['nodes']) && data_get($node->props, 'tree_children') !== false) {
                 foreach ($item['nodes'] as $child) {
                     $child_node = $build_tree($child);
                     if ($child_node) {
@@ -85,7 +84,7 @@ class Nodes
                 'icon' => $node->icon,
                 'name' => $node->name,
                 'description' => $node->description,
-                'class' => $node->class,
+                'type' => $node->type,
                 'props' => $node->props,
             ];
 
@@ -149,15 +148,14 @@ class Nodes
     protected function buildSchemaFromBranch(array $branch, bool $is_root = false): ?array
     {
         $nid = $branch['nid'];
-        $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'class', 'data']);
+        $node = Node::find($nid, ['name', 'icon', 'description', 'props', 'type', 'data']);
 
         if (!$node) {
             return null;
         }
 
-        $props = $node->props ?? [];
+        $props = $node->props;
 
-        // Контент схемы: либо selfContent, либо getSchema
         $schema_node = [
             'nid' => $node->nid,
             'icon' => $node->icon,
@@ -166,22 +164,23 @@ class Nodes
             'props' => $props,
         ];
 
-        if ($is_root && !empty($props['self_content'])) {
-            $handler_data = $node->exe('getSelfContent', $node->data);
-            $schema_node['component'] = $handler_data['component'];
-            $schema_node['data'] = $handler_data['data'];
-        } elseif (!$is_root) {
-            $handler_data = $node->exe('getSchema', $node->data);
-            $schema_node['component'] = $handler_data['component'];
-            $schema_node['data'] = $handler_data['data'];
+        # Определяем область представления
+        $scope = $is_root ? 'self_content' : 'content';
+
+        # Устанавливаем флаг "собственный контент"
+        $get_self_content = $props['self_content'] ?? true;
+
+        if ($get_self_content) {
+            $schema_node['data'] = $node->exe('getData', $scope, $node->data);
+            $schema_node['component'] = $node->exe('ui', $scope);
         }
 
-        // Рекурсивно достроим дочерние элементы, если разрешено
+        # Рекурсивно достроим дочерние элементы, если разрешено
         if (!empty($props['show_children']) && !empty($branch['nodes'])) {
             $children = [];
 
             foreach ($branch['nodes'] as $child_branch) {
-                $child_schema = $this->buildSchemaFromBranch($child_branch, false);
+                $child_schema = $this->buildSchemaFromBranch($child_branch);
                 if ($child_schema !== null) {
                     $children[] = $child_schema;
                 }
@@ -268,9 +267,16 @@ class Nodes
         $node = Node::find($nid);
         $props = $node->props;
 
+        # Установка флага (Собственный контент)
         if (isset($settings['self_content'])) {
             $props['self_content'] = $settings['self_content'];
         }
+
+        # Установка флага (Показать потомков в дереве)
+        if (isset($settings['tree_children'])) {
+            $props['tree_children'] = $settings['tree_children'];
+        }
+
         if (isset($settings['show_children'])) {
             $props['show_children'] = $settings['show_children'];
         }
@@ -303,32 +309,129 @@ class Nodes
         $node->scope = $scope;
         $node->data = $data;
         $node->save();
-        ths()->messages()->addMessage('Данные нод обновлены');
     }
 
     /**
-     * Добавить нод
-     * @param string|null $nid
-     * @param string|null $class
+     * Добавить новый или скопированный нод в схему с указанием позиции
+     *
+     * @param string|null $source_nid Нод, который копировать (если нужно)
+     * @param string|null $type Тип нового нода (если нужно создать)
+     * @param string|null $target_nid Нод относительно которого вставляем
+     * @param array $data
+     * @param string $direction before|after|inside|outward
+     * @param string $schema_code Код схемы
      * @return void
-     * @throws \ReflectionException
+     * @throws \Exception
      */
-    public function addNode(string $nid = null, string $class = null): void
-    {
-        $schema = ths()->getSchema();
-        if ($nid && !$class) {
-            $node = Node::find($nid);
-            if ($node) {
-                $schema['schema_nodes'][] = ['nid' => $nid];
-                ths()->setSchema($schema['schema_nodes']);
+    public function addNode(
+        string $source_nid = null,
+        string $type = null,
+        string $target_nid = null,
+        ?array $data = null,
+        string $direction = 'after',
+        string $schema_code = 'default'
+    ): void {
+        $schema = ths()->getSchema($schema_code);
+        $schema_nodes = &$schema['schema_nodes'];
+
+        if ($source_nid) {
+            $source_node = Node::find($source_nid);
+            if (!$source_node) {
+                return;
             }
-        } elseif ($class) {
-            $node = $this->createNodeByClass($class);
-            if ($node) {
-                $schema['schema_nodes'][] = ['nid' => $node->nid];
-                ths()->setSchema($schema['schema_nodes']);
+            $new_node = $source_node->copy();
+        } else {
+            $new_node = $this->createNode($type ?? 'Threes.NodeText', $data);
+        }
+
+        $new_branch = ['nid' => $new_node->nid];
+
+        if (!$target_nid) {
+            $schema_nodes[] = $new_branch;
+            ths()->setSchema($schema_nodes, $schema_code);
+            return;
+        }
+
+        $inserted = false;
+
+        $insert = function (&$nodes) use (&$insert, $target_nid, $direction, &$new_branch, &$inserted) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    switch ($direction) {
+                        case 'before':
+                            array_splice($nodes, $key, 0, [$new_branch]);
+                            break;
+                        case 'after':
+                            array_splice($nodes, $key + 1, 0, [$new_branch]);
+                            break;
+                        case 'inside':
+                            if (!isset($node['nodes']) || !is_array($node['nodes'])) {
+                                $node['nodes'] = [];
+                            }
+                            $node['nodes'][] = $new_branch;
+                            break;
+                        case 'outward':
+                            return false;
+                    }
+                    $inserted = true;
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        if ($direction === 'outward') {
+            $parent = null;
+            $level = null;
+            $find_parent = function (&$nodes, string $child_nid, &$parent = null, &$level = null) use (&$find_parent) {
+                foreach ($nodes as &$node) {
+                    if (!empty($node['nodes'])) {
+                        foreach ($node['nodes'] as &$child) {
+                            if ($child['nid'] === $child_nid) {
+                                $parent = &$node;
+                                $level = &$nodes;
+                                return true;
+                            }
+                        }
+                        if ($find_parent($node['nodes'], $child_nid, $parent, $level)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
+            $found = $find_parent($schema_nodes, $target_nid, $parent, $level);
+
+            if ($found && $parent && $level) {
+                foreach ($level as $key => $node) {
+                    if ($node['nid'] === $parent['nid']) {
+                        array_splice($level, $key + 1, 0, [$new_branch]);
+                        $inserted = true;
+                        break;
+                    }
+                }
+            }
+
+            // Если не нашли — в корень
+            if (!$inserted) {
+                $schema_nodes[] = $new_branch;
+            }
+
+        } else {
+            // Остальные действия
+            $insert($schema_nodes);
+
+            if (!$inserted) {
+                // Если не нашли target — в конец корня
+                $schema_nodes[] = $new_branch;
             }
         }
+
+        ths()->setSchema($schema_nodes, $schema_code);
     }
 
     /**
@@ -557,7 +660,7 @@ class Nodes
     }
 
     # Удаляем нод
-    public function deleteNode(string $nid): void
+    public function deleteNode(string $nid): array
     {
         // Текущая схема проекта
         $schema         = ths()->getSchema();
@@ -604,19 +707,16 @@ class Nodes
         $remove_node($schema_nodes);
         ths()->setSchema($schema_nodes);   // сохраняем обновлённую схему
 
+        $removed_nids = array_unique($removed_nids);
+
         // Физически удаляем каталоги всех затронутых нодов
-        foreach (array_unique($removed_nids) as $del_nid) {
+        foreach ($removed_nids as $del_nid) {
             if ($node = Node::find($del_nid)) {
                 $node->delete();          // см. реализацию delete() в Node :contentReference[oaicite:1]{index=1}
             }
         }
 
-        // Сообщение для UI
-        if ($removed_nids) {
-            ths()->messages()->addMessage(
-                'Удалены ноды: ' . implode(', ', $removed_nids)
-            );
-        }
+        return $removed_nids;
     }
 
 
