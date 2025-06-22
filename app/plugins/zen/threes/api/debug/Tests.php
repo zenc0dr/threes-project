@@ -10,6 +10,7 @@ use Symfony\Component\Yaml\Dumper;
 use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Feature;
 use Zen\Threes\Classes\Nodes;
+use Zen\Threes\Console\Vector;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -20,10 +21,11 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
-        $node = ths()->nodes()->node('btrs4uyw8329')->exe('template');
-
-        dd($node);
+        $command = new Vector();
+        $command->setOutputCallback(function ($message) {
+            echo $message . '<br>';
+        });
+        $command->handle();
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector

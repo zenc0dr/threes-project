@@ -199,6 +199,7 @@ use Symfony\Component\Yaml\Dumper;
 use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Feature;
 use Zen\Threes\Classes\Nodes;
+use Zen\Threes\Console\Vector;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -209,10 +210,11 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
-        $node = ths()->nodes()->node('btrs4uyw8329')->exe('template');
-
-        dd($node);
+        $command = new Vector();
+        $command->setOutputCallback(function ($message) {
+            echo $message . '<br>';
+        });
+        $command->handle();
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -387,8 +389,11 @@ class Node
     protected function addNode(): array
     {
         ths()->nodes()->addNode(
-            nid: request('nid'),
+            source_nid: request('nid'),
             type: request('type'),
+            target_nid: request('target_nid'),
+            data: request('data'),
+            direction: request('direction'),
         );
         return [];
     }
@@ -407,12 +412,19 @@ class Node
     # http://threes.dc/threes.api/nodes.node:delete-node?debug
     protected function deleteNode(): array
     {
-        if ($submit = ths()->submit()) {
-            return $submit;
+        if (!request()->has('without_submit')) {
+            if ($submit = ths()->submit()) {
+                return $submit;
+            }
         }
-        ths()->nodes()->deleteNode(
+        $removed_nids = ths()->nodes()->deleteNode(
             nid: request('nid')
         );
+
+        if (!request()->has('without_submit')) {
+            ths()->messages()->addMessage('Удалены ноды: ' . join(', ', $removed_nids));
+        }
+
         return [];
     }
 }
@@ -792,12 +804,13 @@ class Nodes
     /**
      * Создаёт новый нод по классу шаблона
      * @param string $type
+     * @param array|null $data - Данные передаваемые в шаблон
      * @return Node
      * @throws \Exception
      */
-    public function createNode(string $type = 'Threes.NodeText'): Node
+    public function createNode(string $type = 'Threes.NodeText', ?array $data = null): Node
     {
-        return $this->node()->create($type);
+        return $this->node()->create($type, $data);
     }
 
     /**
@@ -920,7 +933,7 @@ class Nodes
             return null;
         }
 
-        $props = $node->props ?? [];
+        $props = $node->props;
 
         $schema_node = [
             'nid' => $node->nid,
@@ -1078,34 +1091,126 @@ class Nodes
     }
 
     /**
-     * Добавить нод
-     * @param string|null $nid
-     * @param string|null $type
-     * @param string $schema_code
+     * Добавить новый или скопированный нод в схему с указанием позиции
+     *
+     * @param string|null $source_nid Нод, который копировать (если нужно)
+     * @param string|null $type Тип нового нода (если нужно создать)
+     * @param string|null $target_nid Нод относительно которого вставляем
+     * @param array $data
+     * @param string $direction before|after|inside|outward
+     * @param string $schema_code Код схемы
      * @return void
      * @throws \Exception
      */
     public function addNode(
-        string $nid = null,
+        string $source_nid = null,
         string $type = null,
-        string $after = null,
+        string $target_nid = null,
+        ?array $data = null,
+        string $direction = 'after',
         string $schema_code = 'default'
     ): void {
         $schema = ths()->getSchema($schema_code);
-        if ($nid) {
-            $node = Node::find($nid);
-            if ($node) {
-                $new_node = $node->copy();
-                $schema['schema_nodes'][] = ['nid' => $new_node->nid];
-                ths()->setSchema($schema['schema_nodes'], $schema_code);
+        $schema_nodes = &$schema['schema_nodes'];
+
+        if ($source_nid) {
+            $source_node = Node::find($source_nid);
+            if (!$source_node) {
+                return;
             }
+            $new_node = $source_node->copy();
         } else {
-            $node = $this->createNode($type ?? 'Threes.NodeText');
-            if ($node) {
-                $schema['schema_nodes'][] = ['nid' => $node->nid];
-                ths()->setSchema($schema['schema_nodes'], $schema_code);
+            $new_node = $this->createNode($type ?? 'Threes.NodeText', $data);
+        }
+
+        $new_branch = ['nid' => $new_node->nid];
+
+        if (!$target_nid) {
+            $schema_nodes[] = $new_branch;
+            ths()->setSchema($schema_nodes, $schema_code);
+            return;
+        }
+
+        $inserted = false;
+
+        $insert = function (&$nodes) use (&$insert, $target_nid, $direction, &$new_branch, &$inserted) {
+            foreach ($nodes as $key => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    switch ($direction) {
+                        case 'before':
+                            array_splice($nodes, $key, 0, [$new_branch]);
+                            break;
+                        case 'after':
+                            array_splice($nodes, $key + 1, 0, [$new_branch]);
+                            break;
+                        case 'inside':
+                            if (!isset($node['nodes']) || !is_array($node['nodes'])) {
+                                $node['nodes'] = [];
+                            }
+                            $node['nodes'][] = $new_branch;
+                            break;
+                        case 'outward':
+                            return false;
+                    }
+                    $inserted = true;
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        if ($direction === 'outward') {
+            $parent = null;
+            $level = null;
+            $find_parent = function (&$nodes, string $child_nid, &$parent = null, &$level = null) use (&$find_parent) {
+                foreach ($nodes as &$node) {
+                    if (!empty($node['nodes'])) {
+                        foreach ($node['nodes'] as &$child) {
+                            if ($child['nid'] === $child_nid) {
+                                $parent = &$node;
+                                $level = &$nodes;
+                                return true;
+                            }
+                        }
+                        if ($find_parent($node['nodes'], $child_nid, $parent, $level)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
+            $found = $find_parent($schema_nodes, $target_nid, $parent, $level);
+
+            if ($found && $parent && $level) {
+                foreach ($level as $key => $node) {
+                    if ($node['nid'] === $parent['nid']) {
+                        array_splice($level, $key + 1, 0, [$new_branch]);
+                        $inserted = true;
+                        break;
+                    }
+                }
+            }
+
+            // Если не нашли — в корень
+            if (!$inserted) {
+                $schema_nodes[] = $new_branch;
+            }
+
+        } else {
+            // Остальные действия
+            $insert($schema_nodes);
+
+            if (!$inserted) {
+                // Если не нашли target — в конец корня
+                $schema_nodes[] = $new_branch;
             }
         }
+
+        ths()->setSchema($schema_nodes, $schema_code);
     }
 
     /**
@@ -1334,7 +1439,7 @@ class Nodes
     }
 
     # Удаляем нод
-    public function deleteNode(string $nid): void
+    public function deleteNode(string $nid): array
     {
         // Текущая схема проекта
         $schema         = ths()->getSchema();
@@ -1381,19 +1486,16 @@ class Nodes
         $remove_node($schema_nodes);
         ths()->setSchema($schema_nodes);   // сохраняем обновлённую схему
 
+        $removed_nids = array_unique($removed_nids);
+
         // Физически удаляем каталоги всех затронутых нодов
-        foreach (array_unique($removed_nids) as $del_nid) {
+        foreach ($removed_nids as $del_nid) {
             if ($node = Node::find($del_nid)) {
                 $node->delete();          // см. реализацию delete() в Node :contentReference[oaicite:1]{index=1}
             }
         }
 
-        // Сообщение для UI
-        if ($removed_nids) {
-            ths()->messages()->addMessage(
-                'Удалены ноды: ' . implode(', ', $removed_nids)
-            );
-        }
+        return $removed_nids;
     }
 
 
@@ -1799,21 +1901,110 @@ trait Files
      * Возвращает коллекцию со списком файлов в указанной папке
      * @param string $dir_path - Путь к папке
      * @param bool $recursive - Рекурсивное сканирование (отключено по умолчанию)
+     * @param array $settings - Настройки исключений exclude_names, exclude_paths, allowed_extensions
      * @return Collection
      */
-    public function filesList(string $dir_path, bool $recursive = false): Collection
+    public function filesList(string $dir_path, bool $recursive = false, array $settings = []): Collection
     {
         $files = $recursive ? File::allFiles($dir_path) : File::files($dir_path);
         $output = [];
+        $excluded_patterns = $settings['excluded'] ?? [];
+        $allowed_extensions = $settings['allowed_extensions'] ?? [];
+
         foreach ($files as $file) {
+            try {
+                if ($file->isLink() || !file_exists($file->getRealPath())) {
+                    $size = 0;
+                } else {
+                    $size = $file->getSize();
+                }
+            } catch (\Exception $e) {
+                $size = 0;
+            }
+
+            $path = $file->getRealPath();
+            if (empty($path)) continue;
+
+            // Проверка по маскам
+            if ($this->matchesPatterns($path, $excluded_patterns)) {
+                continue;
+            }
+
+            // Проверка расширений, если указаны
+            if (!empty($allowed_extensions) && !in_array($file->getExtension(), $allowed_extensions)) {
+                continue;
+            }
+
             $output[] = [
                 'name' => $file->getFilename(),
                 'extension' => $file->getExtension(),
-                'path' => $file->getRealPath(),
-                'size' => $file->getSize()
+                'path' => $path,
+                'size' => intval($size)
             ];
         }
+
         return collect($output);
+    }
+
+    /**
+     * Вспомогательный метод для this.filesList
+     * Проверяет путь на совпадение с любым паттерном из списка $patterns
+     * @param string $path
+     * @param array $patterns
+     * @return bool
+     */
+    private function matchesPatterns(string $path, array $patterns): bool
+    {
+        foreach ($patterns as $pattern) {
+            // Убираем * для упрощённой логики "начинается с"
+            $prefix = rtrim($pattern, '*');
+
+            if (str_starts_with($path, $prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Метод обработки правил фильтрации файлов для filesList
+     * @param $file
+     * @param $rules
+     * @return bool
+     */
+    private function isSkipped($file, $rules): bool
+    {
+        if ($this->skip('exclude_names', $file->getFilename(), $rules)) {
+            return true;
+        }
+        if ($this->skip('exclude_paths', $file->getRealPath(), $rules)) {
+            return true;
+        }
+        if ($this->skip('allowed_extensions', $file->getExtension(), $rules, true)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Метод обработки одного правила фильтрации файлов для filesList
+     * @param string $rule - Ключ правила
+     * @param string $target - Цель фильтрации
+     * @param array $settings - Настройки
+     * @param bool $inversive - Инверсия фильтрации
+     * @return bool - true = Правило нарушено
+     */
+    private function skip(
+        string $rule,
+        string $target,
+        array $settings = [],
+        bool $inversive = false
+    ): bool {
+        if (isset($settings[$rule]) && $settings[$rule]) {
+            $found = in_array($target, $settings[$rule], true);
+            return $inversive ? !$found : $found;
+        }
+        return false;
     }
 
     /**
@@ -2150,6 +2341,28 @@ trait Strings
     {
         return Str::camel($value);
     }
+
+    /**
+     * Форматирует вывод байт в человекопонятную строку
+     * @param int $bytes
+     * @return string
+     */
+    public function formatSizeUnits(int $bytes): string
+    {
+        if ($bytes >= 1073741824) {
+            return number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            return number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            return number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes === 1) {
+            return '1 byte';
+        } elseif ($bytes > 1) {
+            return $bytes . ' bytes';
+        } else {
+            return '0 bytes';
+        }
+    }
 }
 
 ```
@@ -2387,6 +2600,130 @@ class Document
 }
 
 ```
+`plugins/zen/threes/classes/types/Elements.php`
+```<?php
+
+namespace Zen\Threes\Classes\Types;
+
+class Elements
+{
+    public function template(?array $data = []): array
+    {
+
+        if ($data) {
+            $type = $data['type'];
+            $data = [
+                'content' => "Заголовок $type",
+                'settings' => [
+                    'type' => $type
+                ]
+            ];
+        }
+
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/elements.svg'),
+            'name' => "Элементы",
+            'description' => '',
+            'type' => 'Threes.Elements',
+            'data' => $data,
+            'props' => [
+                'self_content' => true,
+                'show_children' => false,
+                'tree' => true,
+                'tree_children' => false,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["text", "document"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function ui(): string
+    {
+        return 'Threes.Elements';
+    }
+
+    public function getData($data)
+    {
+        if (!$data) {
+            $data = [
+                'content' => 'Заголовок h1',
+                'settings' => [
+                    'type' => 'h1'
+                ]
+            ];
+        }
+        return $data;
+    }
+
+    public function setData($data)
+    {
+        return $data;
+    }
+}
+
+```
+`plugins/zen/threes/classes/types/Method.php`
+```<?php
+
+namespace Zen\Threes\Classes\Types;
+
+class Method
+{
+    public function template(): array
+    {
+        return [
+            'icon' => base_path('plugins/zen/threes/src/images/icons/api.svg'),
+            'name' => "Блок метод",
+            'type' => 'Threes.Method',
+            'data' => [
+                'enabled' => true,
+                'name' => 'Программный блок',
+                'show_name' => true,
+                'desc' => '',
+                'show_desc' => false,
+                'code' => '',
+                'show_code' => false,
+            ],
+            'props' => [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'tree_children' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Документы',
+                    'author' => 'Threes',
+                    'tags' => ["text", "document"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ]
+        ];
+    }
+
+    public function ui(): string
+    {
+        return 'Threes.Method';
+    }
+
+    public function getData(?array $data = null)
+    {
+        return $data;
+    }
+
+    public function setData($data)
+    {
+        return $data;
+    }
+}
+
+```
 `plugins/zen/threes/classes/types/NodeBuilder.php`
 ```<?php
 
@@ -2580,81 +2917,79 @@ class Gen extends Command
 ```<?php namespace Zen\Threes\Console;
 
 use Illuminate\Console\Command;
+use Closure;
 
 class Vector extends Command
 {
     protected $signature = 'threes:vector';
     protected $description = 'Generate vector.md for ai';
+    private ?Closure $outputCallback = null;
 
-    public function handle()
+    public function handle(): void
     {
-        $exclude = [
-            '/app/plugins/zen/threes/node_modules',
+        $excluded = [
+            '/app/plugins/zen/threes/assets/*',
+            '/app/plugins/zen/threes/node_modules/*',
+            '/app/plugins/zen/threes/controllers/*',
+            '/app/plugins/zen/threes/src/vue/trash/*',
             '/app/plugins/zen/threes/package-lock.json',
-            '/app/plugins/zen/threes/assets',
-            '/app/plugins/zen/threes/controllers',
-            '/app/plugins/zen/threes/src/vue/trash',
         ];
 
-        // Файлы, которые нужно включить в любом случае
-        $force_include = [
-            '/app/plugins/zen/threes/README.md',
-            '/app/plugins/zen/threes/plugin.yaml',
-        ];
-
-        $allow_extensions = [
+        # Разрешённые расширения
+        $allowed_extensions = [
             'php', 'yaml', 'json', 'js', 'css', 'html', 'htm', 'txt'
         ];
 
-        $this->output->writeln("Scanning directory...");
+        $this->log("Scanning directory...");
         $files = ths()->filesList(
             base_path('plugins/zen/threes'),
-            true
+            true,
+            [
+                'excluded' => $excluded,
+                'allowed_extensions' => $allowed_extensions
+            ]
         );
 
         $output = [];
         foreach ($files as $file) {
-            $path = $file['path'];
-            $ext = $file['extension'];
-
-            // Принудительное включение файлов из белого списка
-            if (in_array($path, $force_include)) {
-                $this->processFile($path, $output);
-                continue;
-            }
-
-            // Проверка расширения файла
-            if (!in_array($ext, $allow_extensions)) {
-                continue;
-            }
-
-            // Проверка на исключенные пути
-            $excluded = false;
-            foreach ($exclude as $item) {
-                if (str_starts_with($path, $item)) {
-                    $excluded = true;
-                    break;
-                }
-            }
-            if ($excluded) {
-                continue;
-            }
-
-            $this->processFile($path, $output);
+            $this->processFile($file, $output);
         }
-
         $markdown = join(PHP_EOL, $output);
         $output_path = storage_path('threes_vector.md');
         file_put_contents($output_path, $markdown);
-        $this->output->writeln("Output: $output_path");
+        $this->log("Output: $output_path");
     }
 
-    protected function processFile(string $path, array &$output)
+    /**
+     * Добавить запись в общий .md
+     * @param array $file
+     * @param array $output
+     * @param int $file_size
+     * @return void
+     */
+    protected function processFile(array $file, array &$output): void
     {
-        $this->output->writeln("Render file: $path");
+        $path = $file['path'];
+        $size = $file['size'];
+        $size = ths()->formatSizeUnits($size);
         $code = file_get_contents($path);
         $cleanPath = preg_replace('/^\/app\//', '', $path);
         $output[] = "`$cleanPath`" . PHP_EOL . '```' . $code . PHP_EOL . '```';
+        $this->log("Render file: $path [$size]");
+    }
+
+    public function setOutputCallback(?Closure $callback): void
+    {
+        $this->outputCallback = $callback;
+    }
+
+    protected function log(string $message): void
+    {
+        if ($this->outputCallback instanceof Closure) {
+            call_user_func($this->outputCallback, $message);
+        } else {
+            $this->output->writeln($message);
+        }
     }
 }
 
@@ -2709,8 +3044,7 @@ class FeatureExport implements FromCollection, WithHeadings
 ```<?php
 
 if (!function_exists('ths')) {
-    ### Threes entry point for Fluent API
-    function ths(): \Zen\Threes\Threes
+    function ths(): \Zen\Threes\Threes # Threes entry point for Fluent API
     {
         return \Zen\Threes\Threes::getInstance();
     }
@@ -3077,6 +3411,17 @@ class Node
         $ref = $value;
     }
 
+//    public function getPropsAttribute(?array $props = null): ?array
+//    {
+//        if (!$props) {
+//            $props = [
+//                'self_content' => true
+//            ];
+//        }
+//
+//        return $props;
+//    }
+
     /**
      * Получить экземпляр нода
      * @param string $nid
@@ -3292,6 +3637,7 @@ class Node
                     'self_content' => true,
                     'show_children' => true,
                     'tree' => true,
+                    'tree_children' => true,
                     'schema' => true,
                     'store' => false,
                     'store_data' => [
@@ -3302,6 +3648,8 @@ class Node
                     ]
                 ]
             ];
+        } else {
+            $this->props = $data['props'];
         }
 
         $this->save();
@@ -3311,18 +3659,15 @@ class Node
     /**
      * Создание нода по шаблону типа
      * @param string $type
+     * @param array|null $data
      * @return $this
-     * @throws Exception
+     * @throws \ReflectionException
      */
-    public function create(string $type = 'Threes.NodeText'): self
+    public function create(string $type = 'Threes.NodeText', ?array $data = null): self
     {
-        try {
-            return $this->fill(
-                ths()->exe(Types::getType($type)['class'] . '.template')
-            );
-        } catch (\ReflectionException $exception) {
-            throw new Exception($exception);
-        }
+        return $this->fill(
+            ths()->exe(Types::getType($type)['class'] . '.template', null, $data)
+        );
     }
 
     /**
@@ -3993,7 +4338,14 @@ fields:
     "description": "Threes — это революционная платформа для рекурсивно-модульного программирования смыслов, разработанная человеком (Zenc0dr) и ai (ChatGPT) для людей и ai, для облегчения и ускорения процесса разработки и взаимодействия с информацией.",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production"
     },
     "author": "Alex Blaze",
     "license": "MIT",
@@ -13713,12 +14065,12 @@ snapshots:
 }
 
 ```
-`plugins/zen/threes/resources/default_types/Threes.NodeBuilder.json`
+`plugins/zen/threes/resources/default_types/Threes.Elements.json`
 ```{
-    "class": "Zen.Threes.Classes.Types.NodeBuilder",
+    "class": "Zen.Threes.Classes.Types.Elements",
     "files": [
-        "plugins/zen/threes/classes/types/NodeBuilder.php",
-        "plugins/zen/threes/src/vue/components/types/Threes.NodeBuilder.vue"
+        "plugins/zen/threes/classes/types/Elements.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.Elements.vue"
     ],
     "store": {
         "group": "Документы",
@@ -13729,12 +14081,28 @@ snapshots:
 }
 
 ```
-`plugins/zen/threes/resources/default_types/Threes.NodeCode.json`
+`plugins/zen/threes/resources/default_types/Threes.Method.json`
 ```{
-    "class": "Zen.Threes.Classes.Types.NodeCode",
+    "class": "Zen.Threes.Classes.Types.Method",
     "files": [
-        "plugins/zen/threes/classes/types/NodeCode.php",
-        "plugins/zen/threes/src/vue/components/types/Threes.NodeCode.vue"
+        "plugins/zen/threes/classes/types/Method.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.Method.vue"
+    ],
+    "store": {
+        "group": "Документы",
+        "author": "Threes",
+        "tags": ["text", "document"],
+        "created_at": "2025-06-17 08:43"
+    }
+}
+
+```
+`plugins/zen/threes/resources/default_types/Threes.NodeBuilder.json`
+```{
+    "class": "Zen.Threes.Classes.Types.NodeBuilder",
+    "files": [
+        "plugins/zen/threes/classes/types/NodeBuilder.php",
+        "plugins/zen/threes/src/vue/components/types/Threes.NodeBuilder.vue"
     ],
     "store": {
         "group": "Документы",
@@ -13832,6 +14200,7 @@ export default {
     number: FormInputNumber,
     switcher: FormInputSwitcher,
     select: FormInputSelect,
+    dropdown: FormInputSelect,
     repeater: FormInputRepeater,
     textarea: FormInputTextArea,
     settings_switcher: FormSettingsSwitcher,
