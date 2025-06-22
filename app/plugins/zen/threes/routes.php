@@ -49,3 +49,5 @@ Route::match(
         return handleResponse($response);
     }
 );
+
+Route::view('/app/node/{nid?}', 'zen.threes::threes');

@@ -7,11 +7,12 @@
         @input="onInput"
         @blur="stopEditing"
         @keyup.enter="stopEditing"
+        @keydown="onKeydown"
     />
 </template>
 
 <script>
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce';
 
 export default {
     name: 'EditableText',
@@ -25,10 +26,7 @@ export default {
             default: 1000
         }
     },
-    emits: ['update:modelValue', 'save'],
-    mounted() {
-        this.debounced_save = debounce(this.triggerSave, this.debounceDelay)
-    },
+    emits: ['update:modelValue', 'save', 'remove'],
     data() {
         return {
             is_editing: false,
@@ -38,19 +36,27 @@ export default {
     },
     watch: {
         modelValue(val) {
-            this.model_value = val
+            this.model_value = val;
         }
+    },
+    mounted() {
+        this.debounced_save = debounce(this.triggerSave, this.debounceDelay);
     },
     methods: {
         onInput() {
-            this.$emit('update:modelValue', this.model_value)
-            this.debounced_save()
+            this.$emit('update:modelValue', this.model_value);
+            this.debounced_save();
         },
         stopEditing() {
-            this.is_editing = false
+            this.is_editing = false;
         },
         triggerSave() {
-            this.$emit('save', this.model_value)
+            this.$emit('save', this.model_value);
+        },
+        onKeydown(e) {
+            if (e.key === 'Backspace' && this.model_value === '') {
+                this.$emit('remove');
+            }
         }
     }
 }

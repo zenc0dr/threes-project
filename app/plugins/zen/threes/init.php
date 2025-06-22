@@ -1,8 +1,7 @@
 <?php
 
 if (!function_exists('ths')) {
-    ### Threes entry point for Fluent API
-    function ths(): \Zen\Threes\Threes
+    function ths(): \Zen\Threes\Threes # Threes entry point for Fluent API
     {
         return \Zen\Threes\Threes::getInstance();
     }

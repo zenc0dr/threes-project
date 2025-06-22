@@ -34,7 +34,7 @@ navigation:
                 icon: icon-star-o
             nodes:
                 label: Ноды
-                url: zen/threes/nodecontroller
+                url: zen/threes/nodecontroller/node
                 icon: icon-square
                 permissions:
                     - zen.threes.main

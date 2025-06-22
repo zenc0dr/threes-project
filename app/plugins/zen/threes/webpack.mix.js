@@ -36,6 +36,11 @@ mix.sass('src/scss/threes.scss', 'css')
                 __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
             }),
         ],
+        resolve: {
+            alias: {
+                '@nodes': path.resolve(__dirname, 'plugins/zen/threes/nodes'),
+            }
+        }
     });
 
 mix.js('src/js/threes.js', 'js').vue();
@@ -51,3 +56,4 @@ mix.alias({ '@': path.join(__dirname, 'src/js') });
 // Копирование дополнительных ресурсов
 mix.copyDirectory(path.join(__dirname, 'src/images'), 'assets/images');
 mix.copyDirectory('node_modules/primeicons/fonts', 'assets/fonts/vendor/primeicons');
+mix.copyDirectory('node_modules/@fontsource/exo-2/files', 'assets/css/files');

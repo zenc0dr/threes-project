@@ -4,7 +4,14 @@
     "description": "Threes — это революционная платформа для рекурсивно-модульного программирования смыслов, разработанная человеком (Zenc0dr) и ai (ChatGPT) для людей и ai, для облегчения и ускорения процесса разработки и взаимодействия с информацией.",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production"
     },
     "author": "Alex Blaze",
     "license": "MIT",
@@ -18,6 +25,19 @@
         "vue-loader": "^16.8.3"
     },
     "dependencies": {
+        "@fontsource/exo-2": "^5.2.6",
+        "@milkdown/core": "^7.13.1",
+        "@milkdown/plugin-block": "^7.13.1",
+        "@milkdown/plugin-clipboard": "^7.13.1",
+        "@milkdown/plugin-cursor": "^7.13.1",
+        "@milkdown/plugin-history": "^7.13.1",
+        "@milkdown/plugin-indent": "^7.13.1",
+        "@milkdown/plugin-listener": "^7.13.1",
+        "@milkdown/plugin-prism": "^7.13.1",
+        "@milkdown/plugin-slash": "^7.13.1",
+        "@milkdown/plugin-tooltip": "^7.13.1",
+        "@milkdown/preset-gfm": "^7.13.1",
+        "@milkdown/vue": "^7.13.1",
         "autoprefixer": "^10.4.20",
         "axios": "^1.9.0",
         "grapesjs": "^0.22.6",

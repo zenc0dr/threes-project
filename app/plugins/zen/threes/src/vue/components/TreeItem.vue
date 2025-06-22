@@ -18,7 +18,7 @@
                 <span class="tree-name">{{ node.name }}</span>
 
                 <div class="tree-item__mover">
-                    <div v-if="!directions_is_open" class="tree-item__btn" title="Настройки">
+                    <div v-if="!directions_is_open && !actions_is_open" class="tree-item__btn" title="Настройки">
                         <div @click.stop="openActions" class="icon-btn">
                             <i class="oc-icon-cog"></i>
                         </div>
@@ -65,6 +65,7 @@
                 :key="child.nid"
                 :node="child"
                 :depth="depth + 1"
+                :nodes-to-open="nodesToOpen"
                 @move="$emit('move', $event)"
             />
         </div>
@@ -80,10 +81,19 @@ export default {
     props: {
         node: Object,
         depth: Number,
+        nodesToOpen: {
+            type: Array,
+            default: () => []
+        }
     },
     data() {
         return {
             open: false
+        }
+    },
+    created() {
+        if (this.nodesToOpen.includes(this.node.nid)) {
+            this.open = true
         }
     },
     computed: {
@@ -110,7 +120,11 @@ export default {
         },
         // Выбрать нод
         select() {
-            ths.data.node_selected_nid = this.node.nid
+            if (ths.data.node_selected_nid === this.node.nid) {
+                ths.data.node_selected_nid = null
+            } else {
+                ths.data.node_selected_nid = this.node.nid
+            }
         },
         // Открыть действия
         openActions() {
@@ -122,15 +136,13 @@ export default {
                 ths.data.node_action = action
             }
             if (action === 'delete') {
-                ths.enqueue({
-                    exec: () => ths.api({
-                        api: 'nodes.node:delete-node',
-                        data: {
-                            nid: this.node.nid
-                        }
-                    }),
-                    then: () => {
-                        console.log('Нод удалён')
+                ths.api({
+                    api: 'nodes.node:delete-node',
+                    data: {
+                        nid: this.node.nid
+                    },
+                    then: response => {
+                        ths.exe('Tree', 'getTree')
                     }
                 })
             }
@@ -141,8 +153,7 @@ export default {
         },
         // Очистить действие
         clearActions() {
-            ths.data.node_action = null
-            ths.data.node_actions_nid = null
+            ths.clearNodeActions()
         }
     }
 }
@@ -158,10 +169,11 @@ export default {
     }
 
     &__menu {
-        height: 0;
+        //height: 0;
+
         &__body {
             display: flex;
-            position: absolute;
+            //position: absolute;
             padding: 5px 6px;
             background: #fff;
             border-radius: 4px;
