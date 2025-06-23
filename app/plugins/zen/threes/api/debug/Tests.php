@@ -24,6 +24,12 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+        // y6tppa2zu2eq
+        dd(
+            ths()->nodes()->node('y6tppa2zu2eq')->props['self_content']
+        );
+
+
         echo 'Тут я обрезал -----> ' . mb_substr(ths()->nodes()->node('9rec8sdhuerr')->data, 0, 500);
 //        $command = new Vector();
 //        $command->setOutputCallback(function ($message) {
