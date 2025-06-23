@@ -1,5 +1,5 @@
 <template>
-    <div v-if="show" class="threes-modal" @keydown.esc="close" @click="close">
+    <div v-if="show" class="threes-modal" @keydown.esc="close" @mousedown.self="close">
         <div :style="style" class="threes-modal__body" ref="modalBody" @click.stop>
             <div v-if="loading" class="threes-modal__loading">
                 Загрузка...

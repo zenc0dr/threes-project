@@ -76,4 +76,7 @@ export default {
     outline: none;
     border: none;
 }
+.threes-schema > .node-text__content{
+    overflow-y: auto;
+}
 </style>

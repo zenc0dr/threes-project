@@ -1,0 +1,16 @@
+{
+    "schema_name": "Схема проекта",
+    "schema_nodes": [
+        {
+            "nid": "ubm4qbwbx75t",
+            "nodes": [
+                {
+                    "nid": "fkr2s9d6fpfm"
+                },
+                {
+                    "nid": "qu5awb5jt67b"
+                }
+            ]
+        }
+    ]
+}
