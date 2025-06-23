@@ -41,7 +41,6 @@ class Node
     public string $schema = 'default';
     public ?string $scope = 'self_content';
 
-    // Runtime caches
     protected ?Node $_parentCache = null;
     protected ?array $_childrenCache = null;
     protected ?array $_siblingsCache = null;
@@ -139,8 +138,6 @@ class Node
         return $direction . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method))) . $postfix;
     }
 
-    // ✅ РОДИТЕЛЬ, ДЕТИ, СИБЛИНГИ: Lazy-load + runtime cache
-
     public function getParentAttribute(): ?Node
     {
         if ($this->_parentCache !== null) return $this->_parentCache;
@@ -173,8 +170,6 @@ class Node
             : [];
     }
 
-    // plugins/zen/threes/models/Node.php
-
     public function getSiblingsAttribute(): array
     {
         if ($this->_siblingsCache !== null) return $this->_siblingsCache;
@@ -184,7 +179,6 @@ class Node
             ? array_filter($parent->children, fn($sibling) => $sibling->nid !== $this->nid)
             : [];
 
-        // Переиндексируем массив, чтобы ключи были последовательными
         return $this->_siblingsCache = array_values($siblings);
     }
 
@@ -206,7 +200,7 @@ class Node
             $this->attributes['nid'] = ths()->createShortId();
         }
 
-        // Сброс кешей при изменении нода
+        // Обнуляем кеши при изменении
         $this->_parentCache = null;
         $this->_childrenCache = null;
         $this->_siblingsCache = null;
@@ -286,6 +280,11 @@ class Node
         return $this->attributes['data'][0] ?? null;
     }
 
+    public function getDescriptionAttribute(?string $description = null): string
+    {
+        return $description ?: '';
+    }
+
     public function fill(array $data): self
     {
         $this->icon = $data['icon'] ?? null;
@@ -311,5 +310,53 @@ class Node
         ];
         $this->save();
         return $this;
+    }
+
+    public function create(string $type = 'Threes.NodeText', ?array $data = null): self
+    {
+        return $this->fill(
+            ths()->exe(Types::getType($type)['class'] . '.template', null, $data)
+        );
+    }
+
+    public function copy(?string $target_nid = null): Node
+    {
+        $clone = new self();
+        $clone->icon = $this->icon;
+        $clone->name = $this->name . ' (копия)';
+        $clone->description = $this->description;
+        $clone->type = $this->type;
+        $clone->setDataAttribute($this->getDataAttribute());
+        $clone->props = $this->props;
+        $clone->save();
+
+        $schema = ths()->getSchema($this->schema);
+        $nodes = &$schema['schema_nodes'];
+        $new_branch = ['nid' => $clone->nid];
+
+        $insert_after = function (&$nodes) use (&$insert_after, $target_nid, $new_branch) {
+            foreach ($nodes as $i => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    array_splice($nodes, $i + 1, 0, [$new_branch]);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_after($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        if ($target_nid) {
+            if (!$insert_after($nodes)) {
+                $nodes[] = $new_branch;
+            }
+        } else {
+            $nodes[] = $new_branch;
+        }
+
+        ths()->setSchema($schema, $this->schema);
+        ths()->messages()->addMessage("Создан клон {$this->nid} → {$clone->nid}");
+        return $clone;
     }
 }
