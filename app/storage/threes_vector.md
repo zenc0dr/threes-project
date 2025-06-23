@@ -200,6 +200,7 @@ use Zen\Threes\Models\Node;
 use Zen\Threes\Models\Feature;
 use Zen\Threes\Classes\Nodes;
 use Zen\Threes\Console\Vector;
+use Zen\Threes\Traits\DebugLogTrait;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -207,14 +208,17 @@ use Zen\Threes\Console\Vector;
  */
 class Tests
 {
+    use DebugLogTrait;
+
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $command = new Vector();
-        $command->setOutputCallback(function ($message) {
-            echo $message . '<br>';
-        });
-        $command->handle();
+        echo 'Тут я обрезал -----> ' . mb_substr(ths()->nodes()->node('9rec8sdhuerr')->data, 0, 500);
+//        $command = new Vector();
+//        $command->setOutputCallback(function ($message) {
+//            echo $message . '<br>';
+//        });
+//        $command->handle();
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -317,6 +321,67 @@ class Tests
     {
         dd('Threes api works!');
     }
+
+    # http://threes.dc/threes.api/debug.Tests:testNodeRelations
+    public function testNodeRelations(): void
+    {
+        try {
+            // Чистим схему test
+            $test_scheme_path = ths()->env('SCHEMES_STORAGE') . '/test.yaml';
+            if (file_exists($test_scheme_path)) {
+                unlink($test_scheme_path);
+            }
+
+            // Создаём ноды с test-схемой
+            $root = new \Zen\Threes\Models\Node(null, 'test');
+            $root->name = 'Root';
+            $root->type = 'Threes.NodeText';
+            $root->save();
+
+            $child1 = new \Zen\Threes\Models\Node(null, 'test');
+            $child1->name = 'Child1';
+            $child1->type = 'Threes.NodeText';
+            $child1->save();
+
+            $child2 = new \Zen\Threes\Models\Node(null, 'test');
+            $child2->name = 'Child2';
+            $child2->type = 'Threes.NodeText';
+            $child2->save();
+
+            // Формируем дерево и сохраняем схему 'test'
+            $schema = [
+                'schema_nodes' => [
+                    [
+                        'nid' => $root->nid,
+                        'nodes' => [
+                            ['nid' => $child1->nid],
+                            ['nid' => $child2->nid],
+                        ],
+                    ],
+                ],
+            ];
+
+            ths()->setSchema($schema['schema_nodes'], 'test');
+
+            // Теперь проверки — ноды сами читают актуальную схему без пересоздания!
+            assert($child1->parent !== null, 'Parent of Child1 must not be null');
+            assert($child1->parent->nid === $root->nid, 'Parent of Child1 must be Root');
+            assert($child2->parent->nid === $root->nid, 'Parent of Child2 must be Root');
+
+            assert(count($root->children) === 2, 'Root must have 2 children');
+
+            assert(count($child1->siblings) === 1, 'Child1 must have 1 sibling');
+            assert($child1->siblings[0]->nid === $child2->nid, 'Sibling of Child1 must be Child2');
+
+            assert(count($child2->siblings) === 1, 'Child2 must have 1 sibling');
+            assert($child2->siblings[0]->nid === $child1->nid, 'Sibling of Child2 must be Child1');
+
+            echo "✅ testNodeRelations OK\n";
+        } catch (\Throwable $e) {
+            $this->logError($e);
+        }
+    }
+
 }
 
 ```
@@ -326,6 +391,7 @@ class Tests
 namespace Zen\Threes\Api\Nodes;
 
 use Zen\Threes\Traits\QueryLogTrait;
+use Zen\Threes\Traits\DebugLogTrait;
 
 class Node
 {
@@ -2717,7 +2783,7 @@ class Method
         return $data;
     }
 
-    public function setData($data)
+    public function setData($data, $scope, $node)
     {
         return $data;
     }
@@ -3272,27 +3338,30 @@ use Zen\Threes\Classes\Types;
 use Exception;
 
 /**
- * @property string $nid - Уникальный идентификатор нода
- * @property string $icon - Иконка
- * @property string $name - Имя нода
- * @property string $description - Описание нода
- * @property string $type - Тип нода
- * @property array $data - Данные нода
- * @property array $props - Настройки нода
- * @property string $scope - Область действия нода (виртуальное поле)
+ * @property string $nid
+ * @property string $icon
+ * @property string $name
+ * @property string $description
+ * @property string $type
+ * @property array|string|null $data
+ * @property array $props
+ * @property string $schema
+ * @property string $scope
+ * @property Node|null $parent
+ * @property Node[] $children
+ * @property Node[] $siblings
  */
 class Node
 {
     protected array $attributes = [];
 
-    # Базовые поля
     protected static array $fields = [
-        'icon'=> 'string', // Иконка
-        'name' => 'string', // Название нода
-        'description' => 'string', // Описание нода
-        'type' => 'string', // Тип нода
-        'data' => 'array', // Данные нода
-        'props' => 'array' // Свойства нода
+        'icon' => 'string',
+        'name' => 'string',
+        'description' => 'string',
+        'type' => 'string',
+        'data' => 'array',
+        'props' => 'array',
     ];
 
     protected static array $extensions = [
@@ -3301,13 +3370,20 @@ class Node
         'object' => 'object',
     ];
 
-    public ?string $scope = 'self_content'; // Дополнительная метка окружения нода
+    public string $schema = 'default';
+    public ?string $scope = 'self_content';
 
-    public function __construct(string $nid = null)
+    // Runtime caches
+    protected ?Node $_parentCache = null;
+    protected ?array $_childrenCache = null;
+    protected ?array $_siblingsCache = null;
+
+    public function __construct(string $nid = null, string $schema = 'default')
     {
         if ($nid) {
             $this->attributes['nid'] = $nid;
         }
+        $this->schema = $schema;
     }
 
     public function __get($key)
@@ -3317,7 +3393,6 @@ class Node
         if (method_exists($this, $method)) {
             return $this->$method($data);
         }
-
         return $data;
     }
 
@@ -3331,52 +3406,26 @@ class Node
         }
     }
 
-    /**
-     * Сеттер иконки
-     * @param string $svg
-     * @return void
-     */
     public function setIconAttribute(string $svg): void
     {
         $this->attributes['icon'] = ths()->setIcon($svg);
     }
 
-    /**
-     * Геттер иконки
-     * @param string $hash
-     * @return string|null
-     */
     public function getIconAttribute(string $hash): ?string
     {
-        if (!$hash) {
-            return null;
-        }
-        return ths()->getIcon($hash);
+        return $hash ? ths()->getIcon($hash) : null;
     }
 
-    /**
-     * Вызов метода класса нода
-     * @param string $method
-     * @return mixed
-     * @throws \ReflectionException
-     */
     public function exe(string $method, string $scope = 'self_content', mixed $data = null): mixed
     {
         $type = Types::getType($this->type)['class'];
         return ths()->exe("$type.$method", null, $data, $scope, $this);
     }
 
-    /**
-     * Получить атрибут используя dotted path
-     * @param string $path
-     * @param mixed|null $default
-     * @return mixed
-     */
     public function getAttr(string $path, mixed $default = null): mixed
     {
         $segments = explode('.', $path);
         $value = $this->attributes;
-
         foreach ($segments as $segment) {
             if (is_array($value) && array_key_exists($segment, $value)) {
                 $value = $value[$segment];
@@ -3387,50 +3436,21 @@ class Node
         return $value;
     }
 
-    /**
-     * Установить атрибут используя dotted path
-     * @param string $path
-     * @param mixed $value
-     * @return void
-     */
     public function setAttr(string $path, mixed $value): void
     {
         $segments = explode('.', $path);
         $ref = &$this->attributes;
-
         foreach ($segments as $segment) {
-            if (!is_array($ref)) {
-                $ref = [];
-            }
-            if (!array_key_exists($segment, $ref)) {
-                $ref[$segment] = [];
-            }
+            if (!is_array($ref)) $ref = [];
+            if (!array_key_exists($segment, $ref)) $ref[$segment] = [];
             $ref = &$ref[$segment];
         }
-
         $ref = $value;
     }
 
-//    public function getPropsAttribute(?array $props = null): ?array
-//    {
-//        if (!$props) {
-//            $props = [
-//                'self_content' => true
-//            ];
-//        }
-//
-//        return $props;
-//    }
-
-    /**
-     * Получить экземпляр нода
-     * @param string $nid
-     * @param array|null $fields - Если указано, будут загружаться только эти поля
-     * @return Node
-     */
-    public static function find(string $nid, ?array $fields = null): ?Node
+    public static function find(string $nid, ?array $fields = null, string $schema = 'default'): ?Node
     {
-        $node = new self($nid);
+        $node = new self($nid, $schema);
         $nodes_storage_path = ths()->env('NODES_STORAGE');
         $node_path = "$nodes_storage_path/$nid";
         if (file_exists($node_path)) {
@@ -3446,149 +3466,134 @@ class Node
         return $node;
     }
 
-    /**
-     * Метод преобразования строк вида string_name в StringName
-     * @param string $direction
-     * @param string $method
-     * @param string $postfix
-     * @return string
-     */
-    private function studlyCaser(
-        string $direction,
-        string $method,
-        string $postfix = 'Attribute'
-    ): string {
-        return $direction
-            . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method)))
-            . $postfix;
+    private function studlyCaser(string $direction, string $method, string $postfix = 'Attribute'): string
+    {
+        return $direction . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method))) . $postfix;
     }
 
-    /**
-     * Сохранить данные экземпляра
-     * @return void
-     * @throws Exception
-     */
+    // ✅ РОДИТЕЛЬ, ДЕТИ, СИБЛИНГИ: Lazy-load + runtime cache
+
+    public function getParentAttribute(): ?Node
+    {
+        if ($this->_parentCache !== null) return $this->_parentCache;
+
+        $schema = ths()->getSchema($this->schema);
+        $parentNid = $this->findParentInSchema($schema['schema_nodes'] ?? []);
+        return $this->_parentCache = $parentNid ? new Node($parentNid, $this->schema) : null;
+    }
+
+    protected function findParentInSchema(array $nodes, ?string $parentNid = null): ?string
+    {
+        foreach ($nodes as $node) {
+            if (($node['nid'] ?? null) === $this->nid) return $parentNid;
+            if (!empty($node['nodes'])) {
+                $found = $this->findParentInSchema($node['nodes'], $node['nid'] ?? null);
+                if ($found) return $found;
+            }
+        }
+        return null;
+    }
+
+    public function getChildrenAttribute(): array
+    {
+        if ($this->_childrenCache !== null) return $this->_childrenCache;
+
+        $schema = ths()->getSchema($this->schema);
+        $branch = $this->findBranch($schema['schema_nodes'] ?? [], $this->nid);
+        return $this->_childrenCache = $branch && !empty($branch['nodes'])
+            ? array_map(fn($child) => self::find($child['nid'], null, $this->schema), $branch['nodes'])
+            : [];
+    }
+
+    public function getSiblingsAttribute(): array
+    {
+        if ($this->_siblingsCache !== null) return $this->_siblingsCache;
+
+        $parent = $this->parent;
+        return $this->_siblingsCache = $parent
+            ? array_filter($parent->children, fn($sibling) => $sibling->nid !== $this->nid)
+            : [];
+    }
+
+    private function findBranch(array $nodes, string $nid): ?array
+    {
+        foreach ($nodes as $node) {
+            if ($node['nid'] === $nid) return $node;
+            if (!empty($node['nodes'])) {
+                $found = $this->findBranch($node['nodes'], $nid);
+                if ($found) return $found;
+            }
+        }
+        return null;
+    }
+
     public function save(): void
     {
         if (empty($this->attributes['nid'])) {
             $this->attributes['nid'] = ths()->createShortId();
         }
+
+        // Сброс кешей при изменении нода
+        $this->_parentCache = null;
+        $this->_childrenCache = null;
+        $this->_siblingsCache = null;
+
         foreach ($this->attributes as $key => $value) {
-            if ($key === 'nid') {
-                continue;
-            }
+            if ($key === 'nid') continue;
             $this->saveField($key, $value);
         }
     }
 
-    /**
-     * Сохранение значения указанного поля
-     * @param string $field_name Название поля, значение которого необходимо сохранить
-     * @param string|object|array|int|bool|null $value Значение для сохранения. В зависимости от формата поля может быть преобразовано
-     * @return void
-     */
-    private function saveField(string $field_name, string | object | array | int | bool | null $value): void
+    private function saveField(string $field_name, mixed $value): void
     {
         $field_format = self::$fields[$field_name];
         $field_extension = self::$extensions[$field_format];
         $nodes_storage_path = ths()->env('NODES_STORAGE');
-        $field_path = ths()->checkDir(
-            "$nodes_storage_path/$this->nid/$field_name.$field_extension"
-        );
+        $field_path = ths()->checkDir("$nodes_storage_path/{$this->nid}/$field_name.$field_extension");
 
         if ($value === null) {
-            unlink($field_path);
+            if (file_exists($field_path)) unlink($field_path);
             return;
         }
 
-        if ($field_format === 'object') {
-            $value = serialize($value);
-        }
+        if ($field_format === 'object') $value = serialize($value);
+        if ($field_format === 'array') $value = ths()->toJson($value);
 
-        if ($field_format === 'array') {
-            $value = ths()->toJson($value);
-        }
-
-        $value = (string) $value;
-        $value = trim($value);
-
-        file_put_contents(
-            $field_path,
-            $value,
-            LOCK_EX
-        );
+        file_put_contents($field_path, trim((string)$value), LOCK_EX);
     }
 
-    /**
-     * Загружает поле нода из хранилища и декодирует его в соответствующем формате.
-     * @param string $field_name - Имя поля, которое необходимо загрузить.
-     * @return void
-     */
     private function loadField(string $field_name): void
     {
         $field_format = self::$fields[$field_name];
         $field_extension = self::$extensions[$field_format];
         $nodes_storage_path = ths()->env('NODES_STORAGE');
-
-        $field_path = "$nodes_storage_path/$this->nid/$field_name.$field_extension";
-        if (!file_exists($field_path)) {
-            return;
-        }
-
+        $field_path = "$nodes_storage_path/{$this->nid}/$field_name.$field_extension";
+        if (!file_exists($field_path)) return;
         $field_data = file_get_contents($field_path);
-        if ($field_format === 'object') {
-            $this->attributes[$field_name] = unserialize($field_data);
-        }
 
-        if ($field_format === 'array') {
-            $this->attributes[$field_name] = ths()->fromJson($field_data);
-        }
-
-        if ($field_format === 'bool') {
-            $this->attributes[$field_name] = (bool) $field_data;
-        }
-
-        if ($field_format === 'int') {
-            $this->attributes[$field_name] = (int) $field_data;
-        }
-
-        if ($field_format === 'string') {
-            $this->attributes[$field_name] = $field_data;
-        }
+        $this->attributes[$field_name] = match ($field_format) {
+            'object' => unserialize($field_data),
+            'array' => ths()->fromJson($field_data),
+            'bool' => (bool)$field_data,
+            'int' => (int)$field_data,
+            'string' => $field_data,
+            default => null
+        };
     }
 
-    /**
-     * Удаляет нод, если он существует
-     * @return void
-     */
     public function delete(): void
     {
-        if (empty($this->attributes['nid'])) {
-            return;
-        }
-
-        $nodes_storage_path = ths()->env('NODES_STORAGE');
-        $path = "$nodes_storage_path/{$this->attributes['nid']}";
-
-        if (!is_dir($path)) {
-            return;
-        }
-
-        $escaped_path = escapeshellarg($path);
-        shell_exec("rm -rf $escaped_path");
+        if (empty($this->attributes['nid'])) return;
+        $path = ths()->env('NODES_STORAGE') . '/' . $this->attributes['nid'];
+        if (is_dir($path)) shell_exec("rm -rf " . escapeshellarg($path));
     }
 
-    /**
-     * Удаляет все данные из хранилища нодов.
-     * Позволяет безопасно очистить директорию, содержащую данные нодов.
-     * Если директория хранилища отсутствует или не является директорией, метод завершает выполнение.
-     */
     public static function truncate(): void
     {
         $paths = [
-            ths()->env('NODES_STORAGE'), # Хранилище нод
-            ths()->env('SCHEMES_STORAGE'), # Хранилище схем
-            ths()->env('TYPES_STORAGE') # Хранилище типов
+            ths()->env('NODES_STORAGE'),
+            ths()->env('SCHEMES_STORAGE'),
+            ths()->env('TYPES_STORAGE')
         ];
         foreach ($paths as $path) {
             ths()->shellRemoveDir($path);
@@ -3596,12 +3601,6 @@ class Node
         ths()->store()->createDefaultNodeTypes();
     }
 
-    /**
-     * Устанавливает значение атрибута 'data'.
-     * @param array|string|null $data .
-     * @return void
-     * @throws \ReflectionException
-     */
     public function setDataAttribute(array|string|null $data = null): void
     {
         $this->attributes['data'] = [
@@ -3609,20 +3608,11 @@ class Node
         ];
     }
 
-    /**
-     * Получить значение атрибута data.
-     * @return array|string|null
-     */
     public function getDataAttribute(): array|string|null
     {
         return $this->attributes['data'][0] ?? null;
     }
 
-    /**
-     * @param array $data
-     * @return $this
-     * @throws Exception
-     */
     public function fill(array $data): self
     {
         $this->icon = $data['icon'] ?? null;
@@ -3630,105 +3620,24 @@ class Node
         $this->type = $data['type'] ?? 'Threes.NodeText';
         $this->description = $data['description'] ?? '';
         $this->data = $data['data'] ?? null;
-
-        if (!$this->props && !isset($data['props'])) {
-            $this->props = [
-                [
-                    'self_content' => true,
-                    'show_children' => true,
-                    'tree' => true,
-                    'tree_children' => true,
-                    'schema' => true,
-                    'store' => false,
-                    'store_data' => [
-                        'group' => 'Created',
-                        'author' => 'Threes',
-                        'tags' => ["node"],
-                        'created_at' => now()->toDateTimeString(),
-                    ]
+        $this->props = $data['props'] ?? [
+            [
+                'self_content' => true,
+                'show_children' => true,
+                'tree' => true,
+                'tree_children' => true,
+                'schema' => true,
+                'store' => false,
+                'store_data' => [
+                    'group' => 'Created',
+                    'author' => 'Threes',
+                    'tags' => ["node"],
+                    'created_at' => now()->toDateTimeString(),
                 ]
-            ];
-        } else {
-            $this->props = $data['props'];
-        }
-
+            ]
+        ];
         $this->save();
         return $this;
-    }
-
-    /**
-     * Создание нода по шаблону типа
-     * @param string $type
-     * @param array|null $data
-     * @return $this
-     * @throws \ReflectionException
-     */
-    public function create(string $type = 'Threes.NodeText', ?array $data = null): self
-    {
-        return $this->fill(
-            ths()->exe(Types::getType($type)['class'] . '.template', null, $data)
-        );
-    }
-
-    /**
-     * Геттер для описания нода
-     * @param string|null $description
-     * @return string
-     */
-    public function getDescriptionAttribute(?string $description = null): string
-    {
-        if (!$description) {
-            return '';
-        }
-        return $description;
-    }
-
-    /**
-     * Клонирует текущий нод
-     * @param string|null $target_nid - Если задан, клон будет вставлен после этого нода в схеме
-     * @return Node
-     * @throws Exception
-     */
-    public function copy(?string $target_nid = null): Node
-    {
-        $clone = new self();
-        $clone->attributes['icon'] = $this->attributes['icon'];
-        $clone->name = $this->name . ' (копия)';
-        $clone->description = $this->description;
-        $clone->type = $this->type;
-        $clone->data = $this->getDataAttribute();
-        $clone->props = $this->props;
-        $clone->save();
-
-        // Вставка в схему
-        $schema = ths()->getSchema();
-        $nodes = &$schema['schema_nodes'];
-
-        $new_branch = ['nid' => $clone->nid];
-
-        if ($target_nid) {
-            $insert_after = function (&$nodes) use (&$insert_after, $target_nid, $new_branch) {
-                foreach ($nodes as $i => &$node) {
-                    if ($node['nid'] === $target_nid) {
-                        array_splice($nodes, $i + 1, 0, [$new_branch]);
-                        return true;
-                    }
-                    if (!empty($node['nodes'])) {
-                        if ($insert_after($node['nodes'])) return true;
-                    }
-                }
-                return false;
-            };
-
-            if (!$insert_after($nodes)) {
-                $nodes[] = $new_branch;
-            }
-        } else {
-            $nodes[] = $new_branch;
-        }
-        ths()->setSchema($nodes);
-        ths()->messages()->addMessage("Создан клон нода {$this->nid} → {$clone->nid}");
-        return $clone;
     }
 }
 
@@ -14185,6 +14094,20 @@ Route::match(
 Route::view('/app/node/{nid?}', 'zen.threes::threes');
 
 ```
+`plugins/zen/threes/src/js/auto-register-mixin.js`
+```export default {
+    mounted() {
+        if (this.$options.name) {
+            ths.data.components[this.$options.name] = this
+        }
+    },
+    unmounted() {
+        if (this.$options.name && ths.data.components[this.$options.name] === this) {
+            delete ths.data.components[this.$options.name]
+        }
+    }
+}
+```
 `plugins/zen/threes/src/js/components-map.js`
 ```import FormInputText from '../vue/components/FormInputText.vue';
 import FormInputNumber from "../vue/components/FormInputNumber.vue";
@@ -14419,6 +14342,51 @@ app.mount("#threes");
 }
 
 ```
+`plugins/zen/threes/traits/DebugLogTrait.php`
+```<?php
+
+namespace Zen\Threes\Traits;
+
+use Throwable;
+
+trait DebugLogTrait
+{
+    /**
+     * Красиво выводит Throwable как страницу с кнопкой копирования
+     */
+    protected function logError(Throwable $e): void
+    {
+        // Составляем trace строкой
+        $traceLines = [];
+        foreach ($e->getTrace() as $i => $frame) {
+            if (isset($frame['file'])) {
+                $traceLines[] = sprintf(
+                    "#%d %s:%d %s%s()",
+                    $i,
+                    $frame['file'],
+                    $frame['line'],
+                    $frame['class'] ?? '',
+                    $frame['function']
+                );
+            }
+        }
+
+        $traceString = implode("\n", $traceLines);
+
+        // Отправляем данные в Blade
+        echo view('zen.threes::threes_ai_error', [
+            'errorClass'   => get_class($e),
+            'errorMessage' => $e->getMessage(),
+            'errorFile'    => $e->getFile(),
+            'errorLine'    => $e->getLine(),
+            'errorTrace'   => $traceString,
+        ])->render();
+
+        exit; // чтобы Laravel не добавлял лишние ошибки поверх
+    }
+}
+
+```
 `plugins/zen/threes/traits/QueryLogTrait.php`
 ```<?php
 
@@ -14607,6 +14575,70 @@ class Frame_{{ frame_id }}
 <script src="/modules/backend/assets/js/october-min.js"></script>
 <script src="/modules/system/assets/js/lang/lang.ru.js"></script>
 <script src="{{ mix('js/threes.js', 'plugins/zen/threes/assets') }}" defer></script>
+</body>
+</html>
+
+```
+`plugins/zen/threes/views/threes_ai_error.blade.php`
+```<!DOCTYPE html>
+<html lang="en" class="bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <title>Threes Debug Error</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+<div class="bg-white shadow-lg rounded-lg p-8 max-w-3xl w-full">
+    <h1 class="text-2xl font-bold text-red-600 mb-4">🚨 Ошибка Threes</h1>
+    <p class="text-gray-800 mb-2"><strong>{{ $errorClass }}</strong>: {{ $errorMessage }}</p>
+    <p class="text-gray-600 mb-4">В файле: <code class="bg-gray-200 p-1 rounded">{{ $errorFile }}:{{ $errorLine }}</code></p>
+
+    <h2 class="text-lg font-semibold mb-2">Trace:</h2>
+    <pre class="bg-gray-900 text-green-400 p-4 rounded mb-4 overflow-x-auto text-sm">{{ $errorTrace }}</pre>
+
+    <button id="copyBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+        📋 Скопировать в буфер
+    </button>
+</div>
+
+<script>
+    document.getElementById('copyBtn').addEventListener('click', function () {
+        const text = `{{ $errorClass }}: {{ $errorMessage }}\nIn: {{ $errorFile }}:{{ $errorLine }}\nTrace:\n{{ $errorTrace }}`;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                alert('✅ Скопировано в буфер обмена!');
+            }).catch(function (err) {
+                fallbackCopyTextToClipboard(text);
+            });
+        } else {
+            fallbackCopyTextToClipboard(text);
+        }
+    });
+
+    function fallbackCopyTextToClipboard(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                alert('✅ Скопировано в буфер обмена!');
+            } else {
+                alert('❌ Не удалось скопировать!');
+            }
+        } catch (err) {
+            alert('❌ Ошибка копирования: ' + err);
+        }
+
+        document.body.removeChild(textarea);
+    }
+</script>
+
 </body>
 </html>
 

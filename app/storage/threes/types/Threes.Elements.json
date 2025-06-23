@@ -2,7 +2,7 @@
     "class": "Zen.Threes.Classes.Types.Elements",
     "files": [
         "plugins/zen/threes/classes/types/Elements.php",
-        "plugins/zen/threes/src/vue/components/types/Elements.vue"
+        "plugins/zen/threes/src/vue/components/types/Threes.Elements.vue"
     ],
     "store": {
         "group": "Документы",

@@ -2,70 +2,24 @@
     "schema_name": "Схема проекта",
     "schema_nodes": [
         {
-            "nid": "kaj4eyfwg4mb",
+            "nid": "5kwbzqr6hyjm",
             "nodes": [
                 {
-                    "nid": "cqh8esgkddfx",
-                    "nodes": [
-                        {
-                            "nid": "zfu7kewwak7w"
-                        },
-                        {
-                            "nid": "qsuad2z5dnrm"
-                        },
-                        {
-                            "nid": "jnrwp95uqwkz"
-                        },
-                        {
-                            "nid": "cds5eucyx2r8"
-                        },
-                        {
-                            "nid": "k6fh82wufk3m"
-                        },
-                        {
-                            "nid": "cs7wuefq8qw4"
-                        },
-                        {
-                            "nid": "9ue44ntr7hmz",
-                            "nodes": [
-                                {
-                                    "nid": "8mmufqswa9mf"
-                                }
-                            ]
-                        }
-                    ]
+                    "nid": "y6tppa2zu2eq"
                 }
             ]
         },
         {
-            "nid": "xjjhasds6y84",
+            "nid": "cs77ys3z2cj5",
             "nodes": [
                 {
-                    "nid": "96y9semgchdf",
-                    "nodes": [
-                        {
-                            "nid": "a8kby8arvsyt"
-                        }
-                    ]
+                    "nid": "svuvg979qx62"
                 },
                 {
-                    "nid": "a4bgwt4ygt3x",
-                    "nodes": [
-                        {
-                            "nid": "9bwzsf9z4a5p"
-                        }
-                    ]
+                    "nid": "hn3fjn4rhs6r"
                 },
                 {
-                    "nid": "8hdh6m6y4m48"
-                }
-            ]
-        },
-        {
-            "nid": "e2tshvbsm59c",
-            "nodes": [
-                {
-                    "nid": "fd6peqb994ae"
+                    "nid": "3kv4587j7fur"
                 }
             ]
         }

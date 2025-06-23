@@ -46,7 +46,7 @@ class Method
         return $data;
     }
 
-    public function setData($data)
+    public function setData($data, $scope, $node)
     {
         return $data;
     }

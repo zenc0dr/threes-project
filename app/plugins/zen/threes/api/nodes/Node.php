@@ -3,6 +3,7 @@
 namespace Zen\Threes\Api\Nodes;
 
 use Zen\Threes\Traits\QueryLogTrait;
+use Zen\Threes\Traits\DebugLogTrait;
 
 class Node
 {
