@@ -1,11 +1,12 @@
 [
     {
         "enabled": true,
-        "name": "Программный блок",
+        "name": "Депо",
+        "call": "Zen.Threes.Classes.Methods.node_cs77ys3z2cj5.getText",
         "show_name": true,
         "desc": "",
-        "show_desc": false,
-        "code": "Привет\n\n",
-        "show_code": true
+        "show_desc": true,
+        "code": "public function getText()\n{\n    #sleep(5);  # Сон три секунда для проверки\n\n    \/\/\/$text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода\n\n     $text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода\n     $text = $text . ' - вагон';\n\n    $target = ths()->nodes()->node('hq45skan7gp7');  # <-- Вставляем сюда\n    $target->data = $text;\n    $target->save();\n}",
+        "show_code": false
     }
 ]

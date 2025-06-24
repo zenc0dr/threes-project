@@ -1,10 +1,18 @@
 <template>
     <div class="code-block">
         <div class="code-block__body" :class="{ disabled: !data.enabled }">
-            <div v-if="data.show_name" class="code-block__slug">
+            <div class="code-block__slug">
+                <div @click="runMethod" class="code-block__btn">
+                    <i v-if="process" class="pi pi-cog pi-spin"></i>
+                    <template v-else>
+                        <span>▸</span>
+                    </template>
+                </div>
+            </div>
+            <div v-if="data.show_name" class="code-block__slug code-block__name">
                 {{ data.name }}
             </div>
-            <div class="code-block__slug">
+            <div class="code-block__slug" style="margin-left: auto">
                 <i @click="settings_open = true" class="oc-icon-cog code-block__settings"></i>
             </div>
         </div>
@@ -27,6 +35,7 @@ import debounce from 'lodash/debounce';
 import modal from '../modal.vue';
 import Textarea from '../Textarea.vue';
 import CodeEditor from '../CodeEditor.vue';
+
 export default {
     name: "Method",
 
@@ -53,11 +62,17 @@ export default {
             ths: window.ths,
             settings_open: false,
             updateDataDebounced: null,
+            process: false,
             settings_scheme: [
                 {
                     type: 'string',
                     field: 'name',
                     label: 'Название блока'
+                },
+                {
+                    type: 'string',
+                    field: 'call',
+                    label: 'Вызов'
                 },
                 {
                     type: 'settings_switcher',
@@ -79,24 +94,6 @@ export default {
                     field: 'show_code',
                     label: 'Показывать код'
                 },
-                // {
-                //     type: 'dropdown',
-                //     field: 'language',
-                //     label: 'Язык программирования',
-                //     options: [
-                //         { id: 'javascript', name: 'JavaScript' },
-                //         { id: 'php', name: 'PHP' },
-                //         { id: 'python', name: 'Python' },
-                //         { id: 'html', name: 'HTML' },
-                //         { id: 'css', name: 'CSS' },
-                //         { id: 'sql', name: 'SQL' },
-                //         { id: 'json', name: 'JSON' },
-                //         { id: 'xml', name: 'XML' },
-                //         { id: 'yaml', name: 'YAML' },
-                //         { id: 'markdown', name: 'Markdown' },
-                //         { id: 'typescript', name: 'TypeScript' }
-                //     ]
-                // },
             ],
         };
     },
@@ -124,6 +121,19 @@ export default {
                 },
             });
         },
+        runMethod() {
+            this.process = true
+            ths.api({
+                api: 'nodes.node:run-method',
+                data: {
+                    call: this.data.call
+                },
+                then: response => {
+                    this.process = false
+                    ths.exe('Schema', 'getSchema')
+                }
+            })
+        }
     },
 };
 </script>
@@ -131,6 +141,36 @@ export default {
 <style lang="scss">
 .code-block {
     background: #fff;
+
+    &__name {
+        font-weight: bold;
+    }
+
+    &__btn {
+        font-size: 16px;
+        padding: 2px 14px 0px;
+        line-height: 22px;
+        margin-top: -2px;
+        margin-bottom: -2px;
+        border-radius: 7px;
+        margin-right: 10px;
+        background: #66766b;
+        color: #fff;
+        cursor: pointer;
+        transition: 300ms;
+
+        & > span {
+            padding-bottom: 2px;
+            padding-left: 3px;
+            padding-right: 3px;
+            display: block;
+            margin-top: -2px;
+        }
+
+        &:hover {
+            background: #75977f;
+        }
+    }
 
     &__body {
         display: flex;
@@ -154,6 +194,20 @@ export default {
 
     &__settings {
         cursor: pointer;
+    }
+
+    &__code > .node-text__content {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 20px 20px;
+        font-size: 16px;
+        resize: none;
+        overflow: hidden;
+        outline: none;
+        border: none;
+        color: #2e7d32;
+        background: #eafff5;
+        font-family: "Exo 2", sans-serif;
     }
 }
 </style>

@@ -18,6 +18,8 @@ use Exception;
  * @property Node|null $parent
  * @property Node[] $children
  * @property Node[] $siblings
+ * @property-read Node|null $prev
+ * @property-read Node|null $next
  */
 class Node
 {
@@ -358,5 +360,67 @@ class Node
         ths()->setSchema($schema, $this->schema);
         ths()->messages()->addMessage("Создан клон {$this->nid} → {$clone->nid}");
         return $clone;
+    }
+
+    /**
+     * Возвращает предыдущий узел на том же уровне вложенности.
+     * @return Node|null
+     */
+    public function getPrevAttribute(): ?Node
+    {
+        $position = $this->_findPositionInSiblings();
+
+        // Если узел не найден или он первый в списке, предыдущего нет.
+        if (!$position || $position['index'] === 0) {
+            return null;
+        }
+
+        return $position['children'][$position['index'] - 1] ?? null;
+    }
+
+    /**
+     * Возвращает следующий узел на том же уровне вложенности.
+     * @return Node|null
+     */
+    public function getNextAttribute(): ?Node
+    {
+        $position = $this->_findPositionInSiblings();
+
+        if (!$position) {
+            return null;
+        }
+
+        $childCount = count($position['children']);
+
+        if ($position['index'] >= ($childCount - 1)) {
+            return null;
+        }
+
+        return $position['children'][$position['index'] + 1] ?? null;
+    }
+
+    /**
+     * Вспомогательный метод для поиска позиции узла среди его "соседей".
+     * @return array|null ['children' => Node[], 'index' => int]
+     */
+    private function _findPositionInSiblings(): ?array
+    {
+        $parent = $this->parent;
+        if (!$parent) {
+            return null;
+        }
+
+        $children = $parent->children;
+        $nids = array_column($children, 'nid');
+        $currentIndex = array_search($this->nid, $nids);
+
+        if ($currentIndex === false) {
+            return null;
+        }
+
+        return [
+            'children' => $children,
+            'index' => $currentIndex,
+        ];
     }
 }
