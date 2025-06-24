@@ -2,6 +2,8 @@
 
 namespace Zen\Threes\Classes\Types;
 
+use Zen\Threes\Models\Node;
+
 class Method
 {
     public function template(): array
@@ -13,6 +15,7 @@ class Method
             'data' => [
                 'enabled' => true,
                 'name' => 'Программный блок',
+                'call' => '',
                 'show_name' => true,
                 'desc' => '',
                 'show_desc' => false,
@@ -46,8 +49,39 @@ class Method
         return $data;
     }
 
-    public function setData($data, $scope, $node)
+    public function setData($data, $scope, Node $node)
     {
+        $parent = $node->parent;
+        if ($parent) {
+            $this->writeCode($node, $data);
+        }
+
         return $data;
+    }
+
+    public function writeCode(Node $node, $data): void
+    {
+        $class_name = 'node_' . $node->parent->nid;
+        $class_file = base_path("plugins/zen/threes/classes/methods/$class_name.php");
+
+        if (!$node->prev) {
+            if (file_exists($class_file)) {
+                unlink($class_file);
+            }
+            file_put_contents($class_file, join("\n", [
+                "<?php\n\n",
+                "namespace Zen\Threes\Classes\Methods;",
+                "class $class_name",
+                "{\n",
+            ]));
+        }
+
+        $code_lines = explode("\n", $data['code']);
+        $indented_code = implode("\n", array_map(fn($line) => '    ' . $line, $code_lines));
+        file_put_contents($class_file, $indented_code . "\n", FILE_APPEND);
+
+        if (!$node->next) {
+            file_put_contents($class_file, "}\n", FILE_APPEND);
+        }
     }
 }

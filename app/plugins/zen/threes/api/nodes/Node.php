@@ -105,4 +105,11 @@ class Node
 
         return [];
     }
+
+    # http://threes.dc/threes.api/nodes.node:run-method?call=Zen.Threes.Classes.Methods.node_cs77ys3z2cj5.getText
+    protected function runMethod(): mixed
+    {
+        $call = request('call');
+        return ths()->exe($call);
+    }
 }

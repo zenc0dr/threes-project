@@ -24,13 +24,21 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
+
+        ths()->exe('Zen.Threes.Classes.Methods.cs77ys3z2cj5.getText');
+
+//        $text = ths()->nodes()->node('ary37nyreqga')->data;
+//        $target = ths()->nodes()->node('ur2wm69s2n4t');
+//        $target->data = $text;
+//        $target->save();
+
         // y6tppa2zu2eq
         dd(
-            ths()->nodes()->node('y6tppa2zu2eq')->props['self_content']
+            ths()->nodes()->node('ary37nyreqga')->data
         );
 
 
-        echo 'Тут я обрезал -----> ' . mb_substr(ths()->nodes()->node('9rec8sdhuerr')->data, 0, 500);
+        echo 'Тут я обрезал -----> ' . mb_substr(ths()->nodes()->node('ary37nyreqga')->data, 0, 500);
 //        $command = new Vector();
 //        $command->setOutputCallback(function ($message) {
 //            echo $message . '<br>';

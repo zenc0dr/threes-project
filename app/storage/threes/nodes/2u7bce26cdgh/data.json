@@ -1,0 +1,12 @@
+[
+    {
+        "enabled": true,
+        "name": "добавить вагон ресторан",
+        "call": "Zen.Threes.Classes.Methods.node_cs77ys3z2cj5.addRest",
+        "show_name": true,
+        "desc": "",
+        "show_desc": false,
+        "code": "public function addRest()\n{\n     $vagon_text = ths()->nodes()->node('sqtyyesgac7n')->data;\n     $text = ths()->nodes()->node('hq45skan7gp7')->data;\n     $text = $text . $vagon_text;\n    $target = ths()->nodes()->node('hq45skan7gp7'); \n    $target->data = $text;\n    $target->save();\n}",
+        "show_code": true
+    }
+]
