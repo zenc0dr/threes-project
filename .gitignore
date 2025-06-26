@@ -2,3 +2,4 @@
 /mongo
 .pnpm-store
 .idea
+/*.zip
