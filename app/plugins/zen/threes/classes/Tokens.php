@@ -76,11 +76,24 @@ class Tokens
         }
 
         $data = self::get($uuid);
+
+        // Если токен уже заблокирован для записи — запрещаем любые обновления
+        if (!($data['write'] ?? false)) {
+            return null;
+        }
+
+        // Запрещаем установить write обратно в true
+        if (isset($updates['write']) && $updates['write'] === true) {
+            unset($updates['write']);
+        }
+
+        // Обновляем только разрешённые поля
         $data = array_merge($data, $updates);
 
         ths()->toJsonFile(self::file($uuid), $data);
         return $data;
     }
+
 
     /**
      * Удаляет токен
