@@ -23,7 +23,7 @@ class TokensTests
 
             // Тест 1: Создание токена
             $token_data = \Zen\Threes\Classes\Tokens::create();
-            
+
             assert(isset($token_data['uuid']), 'Token must have UUID');
             assert(strlen($token_data['uuid']) === 32, 'Token UUID must be 32 characters long');
             assert($token_data['write'] === true, 'Token must have write permission');
@@ -48,7 +48,7 @@ class TokensTests
                 'storage_at' => now()->toISOString(),
                 'write' => false
             ];
-            
+
             $updated_data = \Zen\Threes\Classes\Tokens::update($uuid, $update_data);
             assert($updated_data !== null, 'Updated token data must not be null');
             assert($updated_data['data']['test'] === 'value', 'Token data must be updated');
@@ -96,6 +96,13 @@ class TokensTests
             \Zen\Threes\Classes\Tokens::remove($token1['uuid']);
             \Zen\Threes\Classes\Tokens::remove($token2['uuid']);
             \Zen\Threes\Classes\Tokens::remove($token3['uuid']);
+
+            // Тест 13: Попытка повторного обновления после write=false
+            $locked_token = \Zen\Threes\Classes\Tokens::create();
+            \Zen\Threes\Classes\Tokens::update($locked_token['uuid'], ['write' => false]);
+
+            $attempt_update = \Zen\Threes\Classes\Tokens::update($locked_token['uuid'], ['data' => ['should_not' => 'work']]);
+            assert($attempt_update === null, 'Locked token must not be updatable');
 
             echo "✅ testTokenOperations OK\n";
         } catch (\Throwable $e) {
