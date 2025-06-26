@@ -25,7 +25,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $token = Tokens::create();
+        $token = Tokens::create('test');
         dd($token);
     }
 
