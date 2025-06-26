@@ -12,6 +12,7 @@ use Zen\Threes\Models\Feature;
 use Zen\Threes\Classes\Nodes;
 use Zen\Threes\Console\Vector;
 use Zen\Threes\Traits\DebugLogTrait;
+use Zen\Threes\Classes\Tokens;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -24,7 +25,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        //ths()->exe('Zen.Threes.Classes.Methods.cs77ys3z2cj5.getText');
+        $token = Tokens::create();
+        dd($token);
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector

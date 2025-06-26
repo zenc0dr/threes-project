@@ -92,11 +92,6 @@ class Helpers
         return Backlog::getInstance();
     }
 
-    public function tokens(): Tokens
-    {
-        return Tokens::getInstance();
-    }
-
     public function ai(
         string $prompt,
         string $system_prompt = null,
