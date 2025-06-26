@@ -2,8 +2,12 @@
 
 namespace Zen\Threes\Api\Tests;
 
+use Zen\Threes\Traits\DebugLogTrait;
+
 class NodesRelationsTests
 {
+    use DebugLogTrait;
+
     # http://threes.dc/threes.api/tests.NodesRelationsTests:testNodeRelations
     public function testNodeRelations(): void
     {
