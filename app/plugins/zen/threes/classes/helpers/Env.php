@@ -13,7 +13,10 @@ trait Env
         ],
         'SCHEMES_STORAGE' => [
             'default' => 'storage/threes/schemes',
-        ]
+        ],
+        'TOKENS_STORAGE' => [
+            'default' => 'storage/threes/tokens',
+        ],
     ];
 
     public function env(string $key): ?string

@@ -92,6 +92,11 @@ class Helpers
         return Backlog::getInstance();
     }
 
+    public function tokens(): Tokens
+    {
+        return Tokens::getInstance();
+    }
+
     public function ai(
         string $prompt,
         string $system_prompt = null,
@@ -103,7 +108,7 @@ class Helpers
                 $system_prompt = ths()->getSetting('default_prompt');
             }
             if (!$model) {
-                $model = 'gpt-4.1';
+                $model = 'gpt-4.1-nano'; // gpt-4o-mini
             }
             return \Zen\Threes\Classes\Services\OpenAiService::query($prompt, $system_prompt, $model);
         }

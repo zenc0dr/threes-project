@@ -213,12 +213,7 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        echo 'Тут я обрезал -----> ' . mb_substr(ths()->nodes()->node('9rec8sdhuerr')->data, 0, 500);
-//        $command = new Vector();
-//        $command->setOutputCallback(function ($message) {
-//            echo $message . '<br>';
-//        });
-//        $command->handle();
+        //ths()->exe('Zen.Threes.Classes.Methods.cs77ys3z2cj5.getText');
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -235,153 +230,11 @@ class Tests
         dd($items);
     }
 
-    # http://threes.dc/threes.api/debug.Tests:nodeTest?nid=xxxxxxxxxxxx
-    public function nodeTest()
-    {
-        $nid = request('nid');
-
-        if ($nid) {
-            $node = Node::find($nid);
-        } else {
-            $node = ths()->nodes()->createNode();
-        }
-
-        dd($node->icon);
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:truncateNodes
-    public function truncateNodes()
-    {
-        Node::truncate();
-    }
-
-    # http://threes.dc/threes.api/debug.Tests:backlogToNodes
-    public function backlogToNodes(): string
-    {
-        $features = Feature::all();
-
-        // Очистим все ноды
-        Node::truncate();
-
-        $structure = [];
-        $featureToNode = [];
-
-        foreach ($features as $feature) {
-            $node = new Node('node' . $feature->id);
-            $node->name = $feature->name ?? 'Без названия';
-            $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
-            $node->description = $feature->description ?? '';
-            $node->data = $feature->description ?? '';
-            $node->props = [
-                'tree' => true,
-                'schema' => true,
-                'store' => false,
-                'self_content' => true,
-                'show_children' => true,
-                'store_data' => [
-                    'group' => 'Features',
-                    'author' => 'Migration',
-                    'tags' => ["feature", "imported"],
-                    'created_at' => now()->toDateTimeString(),
-                ]
-            ];
-            $node->save();
-            $featureToNode[$feature->id] = $node;
-            $structure[$feature->id] = [];
-        }
-
-        // Заполняем карту детей
-        foreach ($features as $feature) {
-            if ($feature->parent_id && isset($structure[$feature->parent_id])) {
-                $structure[$feature->parent_id][] = $feature->id;
-            }
-        }
-
-        // Рекурсивно строим дерево
-        $buildTree = function ($id) use (&$buildTree, $structure, $featureToNode) {
-            $node = $featureToNode[$id];
-            $item = ['nid' => $node->nid];
-            if (!empty($structure[$id])) {
-                $item['nodes'] = array_map($buildTree, $structure[$id]);
-            }
-            return $item;
-        };
-
-        // Найдём корневые элементы (без parent_id)
-        $rootNodes = $features->filter(fn($f) => !$f->parent_id);
-        ths()->setSchema(
-            $rootNodes->map(fn($feature) => $buildTree($feature->id))->values()->all()
-        );
-
-        return 'Features успешно перенесены в файловые ноды';
-    }
-
     # http://threes.dc/threes.api/debug.Tests:test
     public function test()
     {
         dd('Threes api works!');
     }
-
-    # http://threes.dc/threes.api/debug.Tests:testNodeRelations
-    public function testNodeRelations(): void
-    {
-        try {
-            // Чистим схему test
-            $test_scheme_path = ths()->env('SCHEMES_STORAGE') . '/test.yaml';
-            if (file_exists($test_scheme_path)) {
-                unlink($test_scheme_path);
-            }
-
-            // Создаём ноды с test-схемой
-            $root = new \Zen\Threes\Models\Node(null, 'test');
-            $root->name = 'Root';
-            $root->type = 'Threes.NodeText';
-            $root->save();
-
-            $child1 = new \Zen\Threes\Models\Node(null, 'test');
-            $child1->name = 'Child1';
-            $child1->type = 'Threes.NodeText';
-            $child1->save();
-
-            $child2 = new \Zen\Threes\Models\Node(null, 'test');
-            $child2->name = 'Child2';
-            $child2->type = 'Threes.NodeText';
-            $child2->save();
-
-            // Формируем дерево и сохраняем схему 'test'
-            $schema = [
-                'schema_nodes' => [
-                    [
-                        'nid' => $root->nid,
-                        'nodes' => [
-                            ['nid' => $child1->nid],
-                            ['nid' => $child2->nid],
-                        ],
-                    ],
-                ],
-            ];
-
-            ths()->setSchema($schema['schema_nodes'], 'test');
-
-            // Теперь проверки — ноды сами читают актуальную схему без пересоздания!
-            assert($child1->parent !== null, 'Parent of Child1 must not be null');
-            assert($child1->parent->nid === $root->nid, 'Parent of Child1 must be Root');
-            assert($child2->parent->nid === $root->nid, 'Parent of Child2 must be Root');
-
-            assert(count($root->children) === 2, 'Root must have 2 children');
-
-            assert(count($child1->siblings) === 1, 'Child1 must have 1 sibling');
-            assert($child1->siblings[0]->nid === $child2->nid, 'Sibling of Child1 must be Child2');
-
-            assert(count($child2->siblings) === 1, 'Child2 must have 1 sibling');
-            assert($child2->siblings[0]->nid === $child1->nid, 'Sibling of Child2 must be Child1');
-
-            echo "✅ testNodeRelations OK\n";
-        } catch (\Throwable $e) {
-            $this->logError($e);
-        }
-    }
-
 }
 
 ```
@@ -492,6 +345,205 @@ class Node
         }
 
         return [];
+    }
+
+    # http://threes.dc/threes.api/nodes.node:run-method?call=Zen.Threes.Classes.Methods.node_cs77ys3z2cj5.getText
+    protected function runMethod(): mixed
+    {
+        $call = request('call');
+        return ths()->exe($call);
+    }
+}
+
+```
+`plugins/zen/threes/api/tests/NodesBacklogTests.php`
+```<?php
+
+namespace Zen\Threes\Api\Tests;
+
+use Zen\Threes\Models\Feature;
+use Zen\Threes\Models\Node;
+
+class NodesBacklogTests
+{
+    # http://threes.dc/threes.api/tests.NodesBacklogTests:backlogToNodes
+    public function backlogToNodes(): string
+    {
+        $features = Feature::all();
+
+        // Очистим все ноды
+        Node::truncate();
+
+        $structure = [];
+        $featureToNode = [];
+
+        foreach ($features as $feature) {
+            $node = new Node('node' . $feature->id);
+            $node->name = $feature->name ?? 'Без названия';
+            $node->class = 'Zen.Threes.Classes.Nodes.NodeText';
+            $node->description = $feature->description ?? '';
+            $node->data = $feature->description ?? '';
+            $node->props = [
+                'tree' => true,
+                'schema' => true,
+                'store' => false,
+                'self_content' => true,
+                'show_children' => true,
+                'store_data' => [
+                    'group' => 'Features',
+                    'author' => 'Migration',
+                    'tags' => ["feature", "imported"],
+                    'created_at' => now()->toDateTimeString(),
+                ]
+            ];
+            $node->save();
+            $featureToNode[$feature->id] = $node;
+            $structure[$feature->id] = [];
+        }
+
+        // Заполняем карту детей
+        foreach ($features as $feature) {
+            if ($feature->parent_id && isset($structure[$feature->parent_id])) {
+                $structure[$feature->parent_id][] = $feature->id;
+            }
+        }
+
+        // Рекурсивно строим дерево
+        $buildTree = function ($id) use (&$buildTree, $structure, $featureToNode) {
+            $node = $featureToNode[$id];
+            $item = ['nid' => $node->nid];
+            if (!empty($structure[$id])) {
+                $item['nodes'] = array_map($buildTree, $structure[$id]);
+            }
+            return $item;
+        };
+
+        // Найдём корневые элементы (без parent_id)
+        $rootNodes = $features->filter(fn($f) => !$f->parent_id);
+        ths()->setSchema(
+            $rootNodes->map(fn($feature) => $buildTree($feature->id))->values()->all()
+        );
+
+        return 'Features успешно перенесены в файловые ноды';
+    }
+}
+
+```
+`plugins/zen/threes/api/tests/NodesRelationsTests.php`
+```<?php
+
+namespace Zen\Threes\Api\Tests;
+
+class NodesRelationsTests
+{
+    # http://threes.dc/threes.api/tests.NodesRelationsTests:testNodeRelations
+    public function testNodeRelations(): void
+    {
+        try {
+            // Чистим схему test
+            $test_scheme_path = ths()->env('SCHEMES_STORAGE') . '/test.yaml';
+            if (file_exists($test_scheme_path)) {
+                unlink($test_scheme_path);
+            }
+
+            // Создаём ноды с test-схемой
+            $root = new \Zen\Threes\Models\Node(null, 'test');
+            $root->name = 'Root';
+            $root->type = 'Threes.NodeText';
+            $root->save();
+
+            $child1 = new \Zen\Threes\Models\Node(null, 'test');
+            $child1->name = 'Child1';
+            $child1->type = 'Threes.NodeText';
+            $child1->save();
+
+            $child2 = new \Zen\Threes\Models\Node(null, 'test');
+            $child2->name = 'Child2';
+            $child2->type = 'Threes.NodeText';
+            $child2->save();
+
+            // Формируем дерево и сохраняем схему 'test'
+            $schema = [
+                'schema_nodes' => [
+                    [
+                        'nid' => $root->nid,
+                        'nodes' => [
+                            ['nid' => $child1->nid],
+                            ['nid' => $child2->nid],
+                        ],
+                    ],
+                ],
+            ];
+
+            ths()->setSchema($schema['schema_nodes'], 'test');
+
+            // Теперь проверки — ноды сами читают актуальную схему без пересоздания!
+            assert($child1->parent !== null, 'Parent of Child1 must not be null');
+            assert($child1->parent->nid === $root->nid, 'Parent of Child1 must be Root');
+            assert($child2->parent->nid === $root->nid, 'Parent of Child2 must be Root');
+
+            assert(count($root->children) === 2, 'Root must have 2 children');
+
+            assert(count($child1->siblings) === 1, 'Child1 must have 1 sibling');
+            assert($child1->siblings[0]->nid === $child2->nid, 'Sibling of Child1 must be Child2');
+
+            assert(count($child2->siblings) === 1, 'Child2 must have 1 sibling');
+            assert($child2->siblings[0]->nid === $child1->nid, 'Sibling of Child2 must be Child1');
+
+            echo "✅ testNodeRelations OK\n";
+        } catch (\Throwable $e) {
+            $this->logError($e);
+        }
+    }
+}
+
+```
+`plugins/zen/threes/api/tests/NodesTests.php`
+```<?php
+
+namespace Zen\Threes\Api\Tests;
+
+use Zen\Threes\Models\Node;
+
+class NodesTests
+{
+    # http://threes.dc/threes.api/tests.NodesTests:truncateNodes
+    public function truncateNodes()
+    {
+        Node::truncate();
+    }
+
+    # http://threes.dc/threes.api/tests.NodesTests:nodeTest?nid=xxxxxxxxxxxx
+    public function nodeTest()
+    {
+        $nid = request('nid');
+
+        if ($nid) {
+            $node = Node::find($nid);
+        } else {
+            $node = ths()->nodes()->createNode();
+        }
+
+        dd($node->icon);
+    }
+}
+
+```
+`plugins/zen/threes/api/tests/TokensTests.php`
+```<?php
+
+namespace Zen\Threes\Api\Tests;
+
+
+
+class TokensTests
+{
+    # http://threes.dc/threes.api/tests.TokensTests:makeTokenTest
+    public function makeTokenTest()
+    {
+        $token = ths()->tokens()->createToken();
+
+        dd($token);
     }
 }
 
@@ -780,6 +832,11 @@ class Helpers
         return Backlog::getInstance();
     }
 
+    public function tokens(): Tokens
+    {
+        return Tokens::getInstance();
+    }
+
     public function ai(
         string $prompt,
         string $system_prompt = null,
@@ -791,7 +848,7 @@ class Helpers
                 $system_prompt = ths()->getSetting('default_prompt');
             }
             if (!$model) {
-                $model = 'gpt-4.1';
+                $model = 'gpt-4.1-nano'; // gpt-4o-mini
             }
             return \Zen\Threes\Classes\Services\OpenAiService::query($prompt, $system_prompt, $model);
         }
@@ -1713,6 +1770,82 @@ class Store
 }
 
 ```
+`plugins/zen/threes/classes/Tokens.php`
+```<?php
+
+namespace Zen\Threes\Classes;
+
+class Tokens
+{
+    protected static ?string $storage_path = null;
+
+    protected static function path(): string
+    {
+        if (!self::$storage_path) {
+            self::$storage_path = rtrim(ths()->env('TOKENS_STORAGE'), '/');
+        }
+
+        return self::$storage_path;
+    }
+
+    protected static function file(string $uuid): string
+    {
+        return self::path() . '/' . $uuid . '.json';
+    }
+
+    public static function create(): array
+    {
+        $uuid = ths()->createToken(32);
+
+        $data = [
+            'uuid' => $uuid,
+            'write' => true,
+            'data' => null,
+            'created_at' => now()->toISOString(),
+            'storage_at' => null,
+        ];
+
+        file_put_contents(self::file($uuid), json_encode($data, JSON_PRETTY_PRINT));
+        return $data;
+    }
+
+    public static function update(string $uuid, array $updates): ?array
+    {
+        if (!self::exists($uuid)) {
+            return null;
+        }
+
+        $file = self::file($uuid);
+        $data = json_decode(file_get_contents($file), true);
+
+        $data = array_merge($data, $updates);
+        file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+
+        return $data;
+    }
+
+    public static function remove(string $uuid): bool
+    {
+        $file = self::file($uuid);
+        return file_exists($file) ? unlink($file) : false;
+    }
+
+    public static function exists(string $uuid): bool
+    {
+        return file_exists(self::file($uuid));
+    }
+
+    public static function get(string $uuid): ?array
+    {
+        if (!self::exists($uuid)) {
+            return null;
+        }
+
+        return json_decode(file_get_contents(self::file($uuid)), true);
+    }
+}
+
+```
 `plugins/zen/threes/classes/Types.php`
 ```<?php
 
@@ -1916,7 +2049,10 @@ trait Env
         ],
         'SCHEMES_STORAGE' => [
             'default' => 'storage/threes/schemes',
-        ]
+        ],
+        'TOKENS_STORAGE' => [
+            'default' => 'storage/threes/tokens',
+        ],
     ];
 
     public function env(string $key): ?string
@@ -2501,6 +2637,29 @@ trait Yaml
 }
 
 ```
+`plugins/zen/threes/classes/methods/node_cs77ys3z2cj5.php`
+```<?php
+
+
+namespace Zen\Threes\Classes\Methods;
+class node_cs77ys3z2cj5
+{
+    public function getText()
+    {
+        #sleep(5);  # Сон три секунда для проверки
+    
+        ///$text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода
+    
+         $text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода
+         $text = $text . ' - вагон';
+    
+        $target = ths()->nodes()->node('hq45skan7gp7');  # <-- Вставляем сюда
+        $target->data = $text;
+        $target->save();
+    }
+}
+
+```
 `plugins/zen/threes/classes/services/OllamaService.php`
 ```<?php
 
@@ -2739,6 +2898,8 @@ class Elements
 
 namespace Zen\Threes\Classes\Types;
 
+use Zen\Threes\Models\Node;
+
 class Method
 {
     public function template(): array
@@ -2750,6 +2911,7 @@ class Method
             'data' => [
                 'enabled' => true,
                 'name' => 'Программный блок',
+                'call' => '',
                 'show_name' => true,
                 'desc' => '',
                 'show_desc' => false,
@@ -2783,9 +2945,40 @@ class Method
         return $data;
     }
 
-    public function setData($data, $scope, $node)
+    public function setData($data, $scope, Node $node)
     {
+        $parent = $node->parent;
+        if ($parent) {
+            $this->writeCode($node, $data);
+        }
+
         return $data;
+    }
+
+    public function writeCode(Node $node, $data): void
+    {
+        $class_name = 'node_' . $node->parent->nid;
+        $class_file = base_path("plugins/zen/threes/classes/methods/$class_name.php");
+
+        if (!$node->prev) {
+            if (file_exists($class_file)) {
+                unlink($class_file);
+            }
+            file_put_contents($class_file, join("\n", [
+                "<?php\n\n",
+                "namespace Zen\Threes\Classes\Methods;",
+                "class $class_name",
+                "{\n",
+            ]));
+        }
+
+        $code_lines = explode("\n", $data['code']);
+        $indented_code = implode("\n", array_map(fn($line) => '    ' . $line, $code_lines));
+        file_put_contents($class_file, $indented_code . "\n", FILE_APPEND);
+
+        if (!$node->next) {
+            file_put_contents($class_file, "}\n", FILE_APPEND);
+        }
     }
 }
 
@@ -2831,57 +3024,6 @@ class NodeBuilder
     }
 
     public function setData($data)
-    {
-        return $data;
-    }
-}
-
-```
-`plugins/zen/threes/classes/types/NodeCode.php`
-```<?php
-
-namespace Zen\Threes\Classes\Types;
-
-class NodeCode
-{
-    public function template(): array
-    {
-        return [
-            'icon' => base_path('plugins/zen/threes/src/images/icons/codebase.svg'),
-            'name' => "Генератор кода",
-            'description' => 'Генерирует код на основе инструкций',
-            'type' => 'Threes.NodeCode',
-            'data' => '#',
-            'props' => [
-                'self_content' => true,
-                'show_children' => true,
-                'tree' => true,
-                'schema' => true,
-                'store' => false,
-                'store_data' => [
-                    'group' => 'Документы',
-                    'author' => 'Threes',
-                    'tags' => ["code"],
-                    'created_at' => now()->toDateTimeString(),
-                ]
-            ]
-        ];
-    }
-
-    public function ui(): string
-    {
-        return 'Threes.NodeCode';
-    }
-
-    public function getData($data, $scope, $node)
-    {
-        if (!is_array($data)) {
-            $data = [];
-        }
-        return $data;
-    }
-
-    public function setData($data, $scope, $node)
     {
         return $data;
     }
@@ -3350,6 +3492,8 @@ use Exception;
  * @property Node|null $parent
  * @property Node[] $children
  * @property Node[] $siblings
+ * @property-read Node|null $prev
+ * @property-read Node|null $next
  */
 class Node
 {
@@ -3373,7 +3517,6 @@ class Node
     public string $schema = 'default';
     public ?string $scope = 'self_content';
 
-    // Runtime caches
     protected ?Node $_parentCache = null;
     protected ?array $_childrenCache = null;
     protected ?array $_siblingsCache = null;
@@ -3471,8 +3614,6 @@ class Node
         return $direction . str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $method))) . $postfix;
     }
 
-    // ✅ РОДИТЕЛЬ, ДЕТИ, СИБЛИНГИ: Lazy-load + runtime cache
-
     public function getParentAttribute(): ?Node
     {
         if ($this->_parentCache !== null) return $this->_parentCache;
@@ -3510,9 +3651,11 @@ class Node
         if ($this->_siblingsCache !== null) return $this->_siblingsCache;
 
         $parent = $this->parent;
-        return $this->_siblingsCache = $parent
+        $siblings = $parent
             ? array_filter($parent->children, fn($sibling) => $sibling->nid !== $this->nid)
             : [];
+
+        return $this->_siblingsCache = array_values($siblings);
     }
 
     private function findBranch(array $nodes, string $nid): ?array
@@ -3533,7 +3676,7 @@ class Node
             $this->attributes['nid'] = ths()->createShortId();
         }
 
-        // Сброс кешей при изменении нода
+        // Обнуляем кеши при изменении
         $this->_parentCache = null;
         $this->_childrenCache = null;
         $this->_siblingsCache = null;
@@ -3613,6 +3756,11 @@ class Node
         return $this->attributes['data'][0] ?? null;
     }
 
+    public function getDescriptionAttribute(?string $description = null): string
+    {
+        return $description ?: '';
+    }
+
     public function fill(array $data): self
     {
         $this->icon = $data['icon'] ?? null;
@@ -3638,6 +3786,116 @@ class Node
         ];
         $this->save();
         return $this;
+    }
+
+    public function create(string $type = 'Threes.NodeText', ?array $data = null): self
+    {
+        return $this->fill(
+            ths()->exe(Types::getType($type)['class'] . '.template', null, $data)
+        );
+    }
+
+    public function copy(?string $target_nid = null): Node
+    {
+        $clone = new self();
+        $clone->icon = $this->icon;
+        $clone->name = $this->name . ' (копия)';
+        $clone->description = $this->description;
+        $clone->type = $this->type;
+        $clone->setDataAttribute($this->getDataAttribute());
+        $clone->props = $this->props;
+        $clone->save();
+
+        $schema = ths()->getSchema($this->schema);
+        $nodes = &$schema['schema_nodes'];
+        $new_branch = ['nid' => $clone->nid];
+
+        $insert_after = function (&$nodes) use (&$insert_after, $target_nid, $new_branch) {
+            foreach ($nodes as $i => &$node) {
+                if ($node['nid'] === $target_nid) {
+                    array_splice($nodes, $i + 1, 0, [$new_branch]);
+                    return true;
+                }
+                if (!empty($node['nodes'])) {
+                    if ($insert_after($node['nodes'])) return true;
+                }
+            }
+            return false;
+        };
+
+        if ($target_nid) {
+            if (!$insert_after($nodes)) {
+                $nodes[] = $new_branch;
+            }
+        } else {
+            $nodes[] = $new_branch;
+        }
+
+        ths()->setSchema($schema, $this->schema);
+        ths()->messages()->addMessage("Создан клон {$this->nid} → {$clone->nid}");
+        return $clone;
+    }
+
+    /**
+     * Возвращает предыдущий узел на том же уровне вложенности.
+     * @return Node|null
+     */
+    public function getPrevAttribute(): ?Node
+    {
+        $position = $this->_findPositionInSiblings();
+
+        // Если узел не найден или он первый в списке, предыдущего нет.
+        if (!$position || $position['index'] === 0) {
+            return null;
+        }
+
+        return $position['children'][$position['index'] - 1] ?? null;
+    }
+
+    /**
+     * Возвращает следующий узел на том же уровне вложенности.
+     * @return Node|null
+     */
+    public function getNextAttribute(): ?Node
+    {
+        $position = $this->_findPositionInSiblings();
+
+        if (!$position) {
+            return null;
+        }
+
+        $childCount = count($position['children']);
+
+        if ($position['index'] >= ($childCount - 1)) {
+            return null;
+        }
+
+        return $position['children'][$position['index'] + 1] ?? null;
+    }
+
+    /**
+     * Вспомогательный метод для поиска позиции узла среди его "соседей".
+     * @return array|null ['children' => Node[], 'index' => int]
+     */
+    private function _findPositionInSiblings(): ?array
+    {
+        $parent = $this->parent;
+        if (!$parent) {
+            return null;
+        }
+
+        $children = $parent->children;
+        $nids = array_column($children, 'nid');
+        $currentIndex = array_search($this->nid, $nids);
+
+        if ($currentIndex === false) {
+            return null;
+        }
+
+        return [
+            'children' => $children,
+            'index' => $currentIndex,
+        ];
     }
 }
 
