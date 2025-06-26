@@ -42,6 +42,15 @@ class Helpers
     }
 
     /**
+     * Сервис шифрования
+     * @return Crypt
+     */
+    public function crypt()
+    {
+        return Crypt::getInstance();
+    }
+
+    /**
      * Хранилище нод
      * @return Store
      */
