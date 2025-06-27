@@ -47,7 +47,7 @@ class Tokens
 
     public static function create(string $subtype, array $payload = []): array
     {
-        $uuid = ths()->createToken(32);
+        $uuid = $payload['uuid'] ??= ths()->createToken(32);
         $token = "{$subtype}.{$uuid}";
 
         $data = array_merge([

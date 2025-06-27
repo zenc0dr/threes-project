@@ -3,13 +3,13 @@
     "subtype": "user",
     "write": true,
     "data": {
-        "password": "$2y$10$BPqB5OBelj0VGiq8E8cWD.JICjBHhdKLwYtL5duB0zLPuV.llIW6O",
+        "password": "$2y$10$WKTy.KlIOHaX.LBDKutU9.mvFTAEUu7k2NbAYN68Txx0nciN.8qH.",
         "email": null,
         "telegram_id": null,
         "name": null,
         "data": []
     },
-    "created_at": "2025-06-27T07:23:15.516738Z",
+    "created_at": "2025-06-27T07:49:37.230983Z",
     "storage_at": null,
-    "last_call_at": "2025-06-27T07:23:15.516599Z"
+    "last_call_at": "2025-06-27T07:49:37.230856Z"
 }
