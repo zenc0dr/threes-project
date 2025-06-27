@@ -27,7 +27,7 @@ class AuthTests
             $test_name = 'Тестовый пользователь';
 
             echo "1. Тест регистрации пользователя...\n";
-            
+
             // Регистрация через curl
             $register_data = http_build_query([
                 'login' => $test_login,
@@ -70,7 +70,7 @@ class AuthTests
             // Проверяем, что токен создан с правильным UUID (md5 от логина)
             $expected_uuid = md5($test_login);
             $expected_token = "user.{$expected_uuid}";
-            
+
             if ($register_result['token'] !== $expected_token) {
                 throw new \Exception("Неверный токен. Ожидалось: {$expected_token}, получено: {$register_result['token']}");
             }
@@ -166,8 +166,8 @@ class AuthTests
 
             // Симулируем заголовок авторизации
             $_SERVER['HTTP_THREESAUTH'] = $expected_token;
-            
-            $auth_data = \Zen\Threes\Classes\AuthMiddleware::checkAuth();
+
+            $auth_data = \Zen\Threes\Classes\Auth::checkAuth();
             if (!$auth_data) {
                 throw new \Exception("AuthMiddleware не смог проверить авторизацию");
             }

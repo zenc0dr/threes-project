@@ -2,7 +2,7 @@
 
 /**
  * Тестовый скрипт для проверки системы аутентификации Threes
- * 
+ *
  * Запуск: php test_auth.php
  */
 
@@ -13,7 +13,7 @@ $app = require_once __DIR__ . '/../../../bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
 use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
+use Zen\Threes\Classes\Auth;
 
 echo "=== Тест системы аутентификации Threes ===\n\n";
 
@@ -114,8 +114,8 @@ echo "\n6. Тест AuthMiddleware...\n";
 try {
     // Симулируем заголовок авторизации
     $_SERVER['HTTP_THREESAUTH'] = $token_id;
-    
-    $auth_data = AuthMiddleware::checkAuth();
+
+    $auth_data = Auth::checkAuth();
     if ($auth_data) {
         echo "✓ AuthMiddleware работает\n";
         echo "  - Login: {$auth_data['login']}\n";
@@ -153,4 +153,4 @@ if (!Tokens::exists($token_id)) {
 }
 
 echo "\n=== Все тесты пройдены успешно! ===\n";
-echo "Система аутентификации Threes работает корректно.\n"; 
+echo "Система аутентификации Threes работает корректно.\n";

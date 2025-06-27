@@ -3,14 +3,13 @@
 namespace Zen\Threes\Api\User;
 
 use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
 
 class Update
 {
     # http://threes.dc/threes.api/user.update:update
     public function update(): array
     {
-        $auth_data = AuthMiddleware::requireAuth();
+        $auth_data = ths()->auth()::requireAuth();
         if (isset($auth_data['success']) && !$auth_data['success']) {
             return $auth_data;
         }
@@ -34,7 +33,7 @@ class Update
                 ];
             }
 
-            if (!AuthMiddleware::verifyPassword($auth_data, $current_password)) {
+            if (!ths()->auth()::verifyPassword($auth_data, $current_password)) {
                 return [
                     'success' => false,
                     'messages' => [
@@ -97,4 +96,4 @@ class Update
             ]
         ];
     }
-} 
+}
