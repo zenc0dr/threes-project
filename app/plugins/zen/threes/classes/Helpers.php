@@ -41,6 +41,11 @@ class Helpers
         return Nodes::getInstance();
     }
 
+    public function auth()
+    {
+        return Auth::getInstance();
+    }
+
     /**
      * Сервис шифрования
      * @return Crypt

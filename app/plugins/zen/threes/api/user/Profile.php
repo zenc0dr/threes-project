@@ -2,14 +2,13 @@
 
 namespace Zen\Threes\Api\User;
 
-use Zen\Threes\Classes\AuthMiddleware;
 
 class Profile
 {
     # http://threes.dc/threes.api/user.profile:get
     public function get(): array
     {
-        $auth_data = AuthMiddleware::requireAuth();
+        $auth_data = ths()->auth()::requireAuth();
         if (isset($auth_data['success']) && !$auth_data['success']) {
             return $auth_data;
         }
@@ -28,4 +27,4 @@ class Profile
             ]
         ];
     }
-} 
+}

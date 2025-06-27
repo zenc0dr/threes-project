@@ -2,19 +2,21 @@
 
 namespace Zen\Threes\Classes;
 
-use Zen\Threes\Classes\Tokens;
+use Zen\Threes\Traits\SingletonTrait;
 
-class AuthMiddleware
+class Auth
 {
+    use SingletonTrait;
+
     /**
      * Проверяет авторизацию пользователя
-     * 
+     *
      * @return array|null Возвращает данные пользователя или null если не авторизован
      */
     public static function checkAuth(): ?array
     {
         $auth_token = request()->header('ThreesAuth');
-        
+
         if (!$auth_token) {
             return null;
         }
@@ -35,13 +37,13 @@ class AuthMiddleware
 
     /**
      * Проверяет авторизацию и возвращает ошибку если не авторизован
-     * 
+     *
      * @return array|null Возвращает данные пользователя или массив с ошибкой
      */
     public static function requireAuth(): ?array
     {
         $auth_data = self::checkAuth();
-        
+
         if (!$auth_data) {
             return [
                 'success' => false,
@@ -56,7 +58,7 @@ class AuthMiddleware
 
     /**
      * Проверяет пароль пользователя
-     * 
+     *
      * @param array $auth_data Данные авторизации
      * @param string $password Пароль для проверки
      * @return bool
@@ -65,7 +67,7 @@ class AuthMiddleware
     {
         $user_data = $auth_data['user'] ?? [];
         $hashed_password = $user_data['password'] ?? '';
-        
+
         return password_verify($password, $hashed_password);
     }
-} 
+}

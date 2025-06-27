@@ -3,7 +3,7 @@
 namespace Zen\Threes\Api\Auth;
 
 use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
+use Zen\Threes\Classes\Auth;
 
 class Test
 {
@@ -22,7 +22,7 @@ class Test
     {
         $login = 'test_user_' . time();
         $password = 'test123';
-        
+
         // Проверка, что пользователь не существует
         $token_id = "user.{$login}";
         if (Tokens::exists($token_id)) {
@@ -68,8 +68,8 @@ class Test
     # http://threes.dc/threes.api/auth.test:check-auth
     public function checkAuth(): array
     {
-        $auth_data = AuthMiddleware::checkAuth();
-        
+        $auth_data = Auth::checkAuth();
+
         if (!$auth_data) {
             return [
                 'success' => false,
@@ -92,4 +92,4 @@ class Test
             ]
         ];
     }
-} 
+}
