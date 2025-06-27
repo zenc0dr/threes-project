@@ -47,9 +47,7 @@ class Tokens
 
     public static function create(string $subtype, array $payload = []): array
     {
-        $uuid = $payload['uuid'] ??= ths()->createToken(32);
-        $token = "{$subtype}.{$uuid}";
-
+        $uuid = $payload['uuid'] ??= "$subtype." . ths()->createToken(32);
         $data = array_merge([
             'uuid' => $uuid,
             'subtype' => $subtype,
@@ -63,7 +61,7 @@ class Tokens
             $data = $handler->onCreate($data);
         }
 
-        ths()->toJsonFile(self::file($token), $data);
+        ths()->toJsonFile(self::file($uuid), $data);
         return $data;
     }
 
