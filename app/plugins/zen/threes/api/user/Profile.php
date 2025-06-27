@@ -8,9 +8,12 @@ class Profile
     # http://threes.dc/threes.api/user.profile:get
     public function get(): array
     {
-        $auth_data = ths()->auth()::requireAuth();
-        if (isset($auth_data['success']) && !$auth_data['success']) {
-            return $auth_data;
+        $auth_data = ths()->auth()::checkAuth();
+        if (!$auth_data) {
+            ths()->messages()->addMessage('Требуется авторизация', 'error');
+            return [
+                'success' => false
+            ];
         }
 
         $user_data = $auth_data['user'] ?? [];

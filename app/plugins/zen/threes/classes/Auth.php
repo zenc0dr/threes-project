@@ -2,12 +2,12 @@
 
 namespace Zen\Threes\Classes;
 
-use Zen\Threes\Traits\SingletonTrait;
-
+/**
+ * Класс аутентификации
+ * разрешены только статические методы
+ */
 class Auth
 {
-    use SingletonTrait;
-
     /**
      * Проверяет авторизацию пользователя
      *
@@ -35,26 +35,26 @@ class Auth
         ];
     }
 
-    /**
-     * Проверяет авторизацию и возвращает ошибку если не авторизован
-     *
-     * @return array|null Возвращает данные пользователя или массив с ошибкой
-     */
-    public static function requireAuth(): ?array
-    {
-        $auth_data = self::checkAuth();
-
-        if (!$auth_data) {
-            return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Требуется авторизация']
-                ]
-            ];
-        }
-
-        return $auth_data;
-    }
+//    /**
+//     * Проверяет авторизацию и возвращает ошибку если не авторизован
+//     *
+//     * @return array|null Возвращает данные пользователя или массив с ошибкой
+//     */
+//    public static function requireAuth(): ?array
+//    {
+//        $auth_data = self::checkAuth();
+//
+//        if (!$auth_data) {
+//            return [
+//                'success' => false,
+//                'messages' => [
+//                    ['type' => 'error', 'text' => 'Требуется авторизация']
+//                ]
+//            ];
+//        }
+//
+//        return $auth_data;
+//    }
 
     /**
      * Проверяет пароль пользователя

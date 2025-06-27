@@ -41,9 +41,9 @@ class Helpers
         return Nodes::getInstance();
     }
 
-    public function auth()
+    public function auth(): Auth
     {
-        return Auth::getInstance();
+        return app(Auth::class);
     }
 
     /**
