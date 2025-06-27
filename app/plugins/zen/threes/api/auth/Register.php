@@ -28,7 +28,7 @@ class Register
         $name = request('name');
         $data = request('data', []);
 
-        // Валидация обязательных полей
+        # Валидация обязательных полей
         if (!$login || !$password) {
             return [
                 'success' => false,
@@ -38,7 +38,7 @@ class Register
             ];
         }
 
-        // Проверка формата логина
+        # Проверка формата логина
         if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $login)) {
             return [
                 'success' => false,
@@ -48,7 +48,7 @@ class Register
             ];
         }
 
-        // Проверка длины пароля
+        # Проверка длины пароля
         if (strlen($password) < 6) {
             return [
                 'success' => false,
@@ -61,7 +61,7 @@ class Register
         $login_hash = md5($login);
         $token_uuid = "user.$login_hash";
 
-        // Проверка, что пользователь не существует
+        # Проверка, что пользователь не существует
         if (Tokens::exists($token_uuid)) {
             return [
                 'success' => false,
@@ -71,10 +71,10 @@ class Register
             ];
         }
 
-        // Хэширование пароля
+        # Хэширование пароля
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-        // Создание токена пользователя
+        # Создание токена пользователя
         $user_data = [
             'password' => $hashed_password,
             'email' => $email,
@@ -83,7 +83,7 @@ class Register
             'data' => $data,
         ];
 
-        $token = Tokens::create(
+        Tokens::create(
             'user',
             [
                 'uuid' => $token_uuid,

@@ -12,7 +12,7 @@ class Login
         $login = request('login');
         $password = request('password');
 
-        // Валидация обязательных полей
+        # Валидация обязательных полей
         if (!$login || !$password) {
             return [
                 'success' => false,
@@ -22,12 +22,7 @@ class Login
             ];
         }
 
-
-
-
-
-
-        // Проверка существования пользователя
+        # Проверка существования пользователя
         $login_hash = md5($login);
         $token_uuid = 'user.' . $login_hash;
         $token_data = Tokens::get($token_uuid);
@@ -41,7 +36,7 @@ class Login
             ];
         }
 
-        // Проверка пароля
+        # Проверка пароля
         $user_data = $token_data['data'] ?? [];
         if (!isset($user_data['password']) || !password_verify($password, $user_data['password'])) {
             return [
@@ -52,7 +47,7 @@ class Login
             ];
         }
 
-        // Обновление времени последнего входа
+        # Обновление времени последнего входа
         Tokens::update($token_uuid, [
             'last_call_at' => now()->toISOString(),
         ]);

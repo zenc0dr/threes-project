@@ -115,7 +115,7 @@ try {
     // Симулируем заголовок авторизации
     $_SERVER['HTTP_THREESAUTH'] = $token_id;
 
-    $auth_data = Auth::checkAuth();
+    $auth_data = Auth::getAuthData();
     if ($auth_data) {
         echo "✓ AuthMiddleware работает\n";
         echo "  - Login: {$auth_data['login']}\n";

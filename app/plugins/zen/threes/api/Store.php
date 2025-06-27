@@ -2,13 +2,15 @@
 
 namespace Zen\Threes\Api;
 
-class Store
+class Store extends ThreesApi
 {
     # http://threes.dc/threes.api/store:get
     public function get(): array
     {
-        return [
-            'nodes' => ths()->store()->getStoreNodes()
-        ];
+        return $this->requireAuth(function () {
+            return [
+                'nodes' => ths()->store()->getStoreNodes()
+            ];
+        });
     }
 }

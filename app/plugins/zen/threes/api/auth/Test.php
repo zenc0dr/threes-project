@@ -68,7 +68,7 @@ class Test
     # http://threes.dc/threes.api/auth.test:check-auth
     public function checkAuth(): array
     {
-        $auth_data = Auth::checkAuth();
+        $auth_data = Auth::getAuthData();
 
         if (!$auth_data) {
             return [
