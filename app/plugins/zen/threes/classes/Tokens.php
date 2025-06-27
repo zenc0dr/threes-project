@@ -10,7 +10,7 @@ class Tokens
 
     protected static array $handlers_map = [
         'auth' => \Zen\Threes\Handlers\TokensAuthHandler::class,
-        'session' => \Zen\Threes\Handlers\TokensSessionHandler::class,
+        //'session' => \Zen\Threes\Handlers\TokensSessionHandler::class,
     ];
 
     protected static array $handlers = [];

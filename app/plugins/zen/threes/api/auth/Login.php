@@ -1,0 +1,68 @@
+<?php
+
+namespace Zen\Threes\Api\Auth;
+
+use Zen\Threes\Classes\Tokens;
+
+class Login
+{
+    # http://threes.dc/threes.api/auth.login:login
+    public function login(): array
+    {
+        $login = request('login');
+        $password = request('password');
+
+        // Валидация обязательных полей
+        if (!$login || !$password) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Логин и пароль обязательны']
+                ]
+            ];
+        }
+
+        // Проверка существования пользователя
+        $token_id = "user.{$login}";
+        $token_data = Tokens::get($token_id);
+
+        if (!$token_data) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Пользователь не найден']
+                ]
+            ];
+        }
+
+        // Проверка пароля
+        $user_data = $token_data['data'] ?? [];
+        if (!isset($user_data['password']) || !password_verify($password, $user_data['password'])) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Неверный пароль']
+                ]
+            ];
+        }
+
+        // Обновление времени последнего входа
+        Tokens::update($token_id, [
+            'last_call_at' => now()->toISOString(),
+        ]);
+
+        return [
+            'success' => true,
+            'messages' => [
+                ['type' => 'success', 'text' => 'Успешная авторизация']
+            ],
+            'token' => $token_id,
+            'user' => [
+                'login' => $login,
+                'email' => $user_data['email'] ?? null,
+                'name' => $user_data['name'] ?? null,
+                'telegram_id' => $user_data['telegram_id'] ?? null,
+            ]
+        ];
+    }
+} 

@@ -8,14 +8,14 @@ export function createApi() {
         const data = opts.data || null;
         const ths = window.ths
 
-        // const axios_options = authToken() ? {
-        //         withCredentials: true,
-        //         headers: {
-        //             ThreesAuth: authToken()
-        //         },
-        //     } : null
-
-        const axios_options = null
+        // Получение токена из localStorage
+        const authToken = localStorage.getItem('ths_token');
+        
+        const axios_options = authToken ? {
+            headers: {
+                'ThreesAuth': authToken
+            }
+        } : null
 
         const api_url = opts.api ? `/threes.api/${opts.api}` : opts.url
         const request_key = md5(api_url + JSON.stringify(data))
@@ -34,7 +34,7 @@ export function createApi() {
 
         const handleResponse = (response) => {
             delete requests_register[request_key];
-            ths.data.process = true
+            ths.data.process = false
 
             console.log(`Threes response [${request_key}]: ${api_url}`, response)
 
