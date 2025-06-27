@@ -22,9 +22,15 @@ class Login
             ];
         }
 
+
+
+
+
+
         // Проверка существования пользователя
-        $token_id = "user.{$login}";
-        $token_data = Tokens::get($token_id);
+        $login_hash = md5($login);
+        $token_uuid = 'user.' . $login_hash;
+        $token_data = Tokens::get($token_uuid);
 
         if (!$token_data) {
             return [
@@ -47,7 +53,7 @@ class Login
         }
 
         // Обновление времени последнего входа
-        Tokens::update($token_id, [
+        Tokens::update($token_uuid, [
             'last_call_at' => now()->toISOString(),
         ]);
 
@@ -56,7 +62,7 @@ class Login
             'messages' => [
                 ['type' => 'success', 'text' => 'Успешная авторизация']
             ],
-            'token' => $token_id,
+            'token' => $token_uuid,
             'user' => [
                 'login' => $login,
                 'email' => $user_data['email'] ?? null,
@@ -65,4 +71,4 @@ class Login
             ]
         ];
     }
-} 
+}

@@ -16,7 +16,7 @@ class Register
     # http://threes.dc/threes.api/auth.register:register
     /**
      * Регистрация нового пользователя
-     * 
+     *
      * @return array
      */
     public function register(): array
@@ -58,9 +58,11 @@ class Register
             ];
         }
 
+        $login_hash = md5($login);
+        $token_uuid = "user.$login_hash";
+
         // Проверка, что пользователь не существует
-        $token_id = "user.{$login}";
-        if (Tokens::exists($token_id)) {
+        if (Tokens::exists($token_uuid)) {
             return [
                 'success' => false,
                 'messages' => [
@@ -84,7 +86,7 @@ class Register
         $token = Tokens::create(
             'user',
             [
-                'uuid' => $login,
+                'uuid' => $token_uuid,
                 'data' => $user_data,
                 'last_call_at' => now()->toISOString(),
             ]
@@ -95,7 +97,7 @@ class Register
             'messages' => [
                 ['type' => 'success', 'text' => 'Пользователь успешно зарегистрирован']
             ],
-            'token' => $token_id
+            'token' => $token_uuid
         ];
     }
-} 
+}
