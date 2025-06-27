@@ -133,16 +133,19 @@ export default {
     },
     methods: {
         getSchema() {
-            this.ths.api({
-                api: 'ui:get-schema-nodes',
-                data: {
-                    nid: this.nid
-                },
-                then: response => {
-                    this.$router.push(ths.getNodeUrl(this.nid))
-                    this.schema = response.schema
-                }
-            })
+            // todo: Вот тут можно прочитать настройку и не показываться содержимое
+            if (this.nid) {
+                this.ths.api({
+                    api: 'ui:get-schema-nodes',
+                    data: {
+                        nid: this.nid
+                    },
+                    then: response => {
+                        this.$router.push(ths.getNodeUrl(this.nid))
+                        this.schema = response.schema
+                    }
+                })
+            }
         },
         saveName(name) {
             if (!this.nid) {

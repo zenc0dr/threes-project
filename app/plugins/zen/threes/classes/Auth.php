@@ -2,6 +2,8 @@
 
 namespace Zen\Threes\Classes;
 
+use Zen\Threes\Exceptions\AuthException;
+
 /**
  * Класс аутентификации
  * разрешены только статические методы
@@ -13,7 +15,7 @@ class Auth
      *
      * @return array|null Возвращает данные пользователя или null если не авторизован
      */
-    public static function checkAuth(): ?array
+    public static function getAuthData(): ?array
     {
         $auth_token = request()->header('ThreesAuth');
 
@@ -35,26 +37,14 @@ class Auth
         ];
     }
 
-//    /**
-//     * Проверяет авторизацию и возвращает ошибку если не авторизован
-//     *
-//     * @return array|null Возвращает данные пользователя или массив с ошибкой
-//     */
-//    public static function requireAuth(): ?array
-//    {
-//        $auth_data = self::checkAuth();
-//
-//        if (!$auth_data) {
-//            return [
-//                'success' => false,
-//                'messages' => [
-//                    ['type' => 'error', 'text' => 'Требуется авторизация']
-//                ]
-//            ];
-//        }
-//
-//        return $auth_data;
-//    }
+    public static function check(): array
+    {
+        $auth = self::getAuthData();
+        if (!$auth) {
+            throw new AuthException();
+        }
+        return $auth;
+    }
 
     /**
      * Проверяет пароль пользователя

@@ -167,7 +167,7 @@ class AuthTests
             // Симулируем заголовок авторизации
             $_SERVER['HTTP_THREESAUTH'] = $expected_token;
 
-            $auth_data = \Zen\Threes\Classes\Auth::checkAuth();
+            $auth_data = \Zen\Threes\Classes\Auth::getAuthData();
             if (!$auth_data) {
                 throw new \Exception("AuthMiddleware не смог проверить авторизацию");
             }
