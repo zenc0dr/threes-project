@@ -142,12 +142,12 @@ export default {
 
 <style lang="scss">
 .threes-nt {
-    min-height: 100%;
-    min-width: max-content;
-    overflow: visible;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
 
     .tree-list {
         display: flex;
@@ -155,6 +155,7 @@ export default {
         gap: 0.25rem;
         flex: 1;
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .tree-list__menu {

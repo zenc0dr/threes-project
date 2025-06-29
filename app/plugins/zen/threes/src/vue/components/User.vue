@@ -34,15 +34,11 @@ export default {
 </script>
 <style lang="scss">
 .threes-user {
-    position: absolute;
-    height: 50px;
-    bottom: 0;
+    flex-shrink: 0;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
 
     .tree-user-info {
-        position: sticky;
-        bottom: 0;
-        background: #f8f9fa;
-        border-top: 1px solid #e9ecef;
         padding: 12px 16px;
         display: flex;
         align-items: center;
