@@ -92,16 +92,36 @@ class AuthTests
 
             echo "✓ Данные токена получены\n";
             echo "  - UUID: {$token_data['uuid']}\n";
+            echo "  - Subtype: {$token_data['subtype']}\n";
+            echo "  - Write: " . ($token_data['write'] ? 'true' : 'false') . "\n";
             echo "  - Email: {$token_data['data']['email']}\n";
             echo "  - Name: {$token_data['data']['name']}\n";
-            echo "  - Login: {$token_data['data']['login']}\n";
 
-            // Проверяем, что логин сохранен в данных токена
-            if ($token_data['data']['login'] !== $test_login) {
-                throw new \Exception("Логин в данных токена не совпадает. Ожидалось: {$test_login}, получено: {$token_data['data']['login']}");
+            // Проверяем структуру токена
+            if ($token_data['subtype'] !== 'user') {
+                throw new \Exception("Неверный subtype токена. Ожидалось: user, получено: {$token_data['subtype']}");
             }
 
-            echo "✓ Логин сохранен в данных токена\n";
+            if (!$token_data['write']) {
+                throw new \Exception("Токен должен иметь write: true после создания");
+            }
+
+            echo "✓ Структура токена корректна\n";
+
+            // Проверяем, что данные пользователя сохранены корректно
+            if ($token_data['data']['email'] !== $test_email) {
+                throw new \Exception("Email в данных токена не совпадает. Ожидалось: {$test_email}, получено: {$token_data['data']['email']}");
+            }
+
+            if ($token_data['data']['name'] !== $test_name) {
+                throw new \Exception("Name в данных токена не совпадает. Ожидалось: {$test_name}, получено: {$token_data['data']['name']}");
+            }
+
+            if ($token_data['data']['telegram_id'] !== '123456789') {
+                throw new \Exception("Telegram ID в данных токена не совпадает");
+            }
+
+            echo "✓ Данные пользователя сохранены корректно\n";
 
             echo "\n2. Тест входа пользователя...\n";
 
@@ -147,7 +167,7 @@ class AuthTests
 
             echo "✓ Токен входа совпадает с токеном регистрации\n";
 
-            // Проверяем данные пользователя
+            // Проверяем данные пользователя в ответе
             if ($login_result['user']['login'] !== $test_login) {
                 throw new \Exception("Логин в ответе не совпадает");
             }
@@ -162,26 +182,67 @@ class AuthTests
 
             echo "✓ Данные пользователя корректны\n";
 
-            echo "\n3. Тест AuthMiddleware...\n";
+            // Проверяем, что last_call_at обновился
+            $updated_token_data = Tokens::get($expected_token);
+            if (!$updated_token_data['last_call_at']) {
+                throw new \Exception("last_call_at не обновился после входа");
+            }
+
+            echo "✓ Время последнего входа обновлено\n";
+
+            echo "\n3. Тест класса Auth...\n";
 
             // Симулируем заголовок авторизации
             $_SERVER['HTTP_THREESAUTH'] = $expected_token;
 
             $auth_data = \Zen\Threes\Classes\Auth::getAuthData();
             if (!$auth_data) {
-                throw new \Exception("AuthMiddleware не смог проверить авторизацию");
+                throw new \Exception("Auth::getAuthData() не смог проверить авторизацию");
             }
 
-            echo "✓ AuthMiddleware работает\n";
+            echo "✓ Auth::getAuthData() работает\n";
+            echo "  - Token: {$auth_data['token']}\n";
             echo "  - Login: {$auth_data['login']}\n";
             echo "  - Email: {$auth_data['user']['email']}\n";
 
-            // Проверяем, что логин получен из данных токена
-            if ($auth_data['login'] !== $test_login) {
-                throw new \Exception("AuthMiddleware вернул неверный логин. Ожидалось: {$test_login}, получено: {$auth_data['login']}");
+            // Проверяем структуру данных авторизации
+            if ($auth_data['token'] !== $expected_token) {
+                throw new \Exception("Токен в данных авторизации не совпадает");
             }
 
-            echo "✓ Логин получен из данных токена\n";
+            if ($auth_data['login'] !== $expected_token) {
+                throw new \Exception("Login в данных авторизации не совпадает с UUID токена");
+            }
+
+            if ($auth_data['user']['email'] !== $test_email) {
+                throw new \Exception("Email в данных авторизации не совпадает");
+            }
+
+            echo "✓ Структура данных авторизации корректна\n";
+
+            // Тест метода check()
+            try {
+                $auth_check = \Zen\Threes\Classes\Auth::check();
+                echo "✓ Auth::check() работает\n";
+            } catch (\Exception $e) {
+                throw new \Exception("Auth::check() должен работать с валидным токеном");
+            }
+
+            // Тест проверки пароля
+            $password_valid = \Zen\Threes\Classes\Auth::verifyPassword($auth_data, $test_password);
+            if (!$password_valid) {
+                throw new \Exception("Auth::verifyPassword() не смог проверить пароль");
+            }
+
+            echo "✓ Auth::verifyPassword() работает\n";
+
+            // Тест с неверным паролем
+            $password_invalid = \Zen\Threes\Classes\Auth::verifyPassword($auth_data, 'wrong_password');
+            if ($password_invalid) {
+                throw new \Exception("Auth::verifyPassword() должен возвращать false для неверного пароля");
+            }
+
+            echo "✓ Проверка неверного пароля работает\n";
 
             echo "\n4. Тест API профиля...\n";
 
@@ -214,10 +275,12 @@ class AuthTests
             echo "  - Login: {$profile_result['user']['login']}\n";
             echo "  - Email: {$profile_result['user']['email']}\n";
             echo "  - Name: {$profile_result['user']['name']}\n";
+            echo "  - Created at: {$profile_result['user']['created_at']}\n";
+            echo "  - Last call at: {$profile_result['user']['last_call_at']}\n";
 
             // Проверяем данные профиля
-            if ($profile_result['user']['login'] !== $test_login) {
-                throw new \Exception("Логин в профиле не совпадает");
+            if ($profile_result['user']['login'] !== $expected_token) {
+                throw new \Exception("Login в профиле должен быть UUID токена");
             }
 
             if ($profile_result['user']['email'] !== $test_email) {
@@ -230,11 +293,254 @@ class AuthTests
 
             echo "✓ Данные профиля корректны\n";
 
+            echo "\n5. Тест ошибок аутентификации...\n";
+
+            // Тест входа с неверным паролем
+            $wrong_password_data = http_build_query([
+                'login' => $test_login,
+                'password' => 'wrong_password'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.login:login');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $wrong_password_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $wrong_password_result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($wrong_password_result['success']) {
+                throw new \Exception("Вход с неверным паролем должен завершиться ошибкой");
+            }
+
+            echo "✓ Вход с неверным паролем корректно отклонен\n";
+
+            // Тест входа несуществующего пользователя
+            $wrong_login_data = http_build_query([
+                'login' => 'nonexistent_user',
+                'password' => 'any_password'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.login:login');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $wrong_login_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $wrong_login_result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($wrong_login_result['success']) {
+                throw new \Exception("Вход несуществующего пользователя должен завершиться ошибкой");
+            }
+
+            echo "✓ Вход несуществующего пользователя корректно отклонен\n";
+
+            // Тест без заголовка авторизации
+            unset($_SERVER['HTTP_THREESAUTH']);
+            $no_auth_data = \Zen\Threes\Classes\Auth::getAuthData();
+            if ($no_auth_data !== null) {
+                throw new \Exception("Auth::getAuthData() должен возвращать null без заголовка");
+            }
+
+            echo "✓ Проверка без заголовка авторизации работает\n";
+
+            // Тест с неверным токеном
+            $_SERVER['HTTP_THREESAUTH'] = 'user.invalid_token';
+            $invalid_auth_data = \Zen\Threes\Classes\Auth::getAuthData();
+            if ($invalid_auth_data !== null) {
+                throw new \Exception("Auth::getAuthData() должен возвращать null для неверного токена");
+            }
+
+            echo "✓ Проверка неверного токена работает\n";
+
             // Очистка
             Tokens::remove($expected_token);
 
             echo "\n=== Все тесты пройдены успешно! ===\n";
             echo "Система аутентификации работает корректно.\n";
+
+        } catch (\Throwable $e) {
+            $this->logError($e);
+        }
+    }
+
+    # http://threes.dc/threes.api/tests.AuthTests:testValidation
+    public function testValidation(): void
+    {
+        try {
+            echo "=== Тест валидации ===\n\n";
+
+            // Очистка папки токенов
+            $path = ths()->env('TOKENS_STORAGE');
+            foreach (glob($path . '/user.*.json') as $file) {
+                unlink($file);
+            }
+
+            echo "1. Тест валидации логина...\n";
+
+            // Тест короткого логина
+            $short_login_data = http_build_query([
+                'login' => 'ab',
+                'password' => 'test123456'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.register:register');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $short_login_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с коротким логином должна завершиться ошибкой");
+            }
+
+            echo "✓ Короткий логин отклонен\n";
+
+            // Тест длинного логина
+            $long_login_data = http_build_query([
+                'login' => 'very_long_login_name_that_exceeds_limit',
+                'password' => 'test123456'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.register:register');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $long_login_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с длинным логином должна завершиться ошибкой");
+            }
+
+            echo "✓ Длинный логин отклонен\n";
+
+            // Тест логина с недопустимыми символами
+            $invalid_login_data = http_build_query([
+                'login' => 'test-user',
+                'password' => 'test123456'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.register:register');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $invalid_login_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с недопустимыми символами должна завершиться ошибкой");
+            }
+
+            echo "✓ Логин с недопустимыми символами отклонен\n";
+
+            echo "\n2. Тест валидации пароля...\n";
+
+            // Тест короткого пароля
+            $short_password_data = http_build_query([
+                'login' => 'testuser',
+                'password' => '123'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.register:register');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $short_password_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с коротким паролем должна завершиться ошибкой");
+            }
+
+            echo "✓ Короткий пароль отклонен\n";
+
+            echo "\n3. Тест обязательных полей...\n";
+
+            // Тест без логина
+            $no_login_data = http_build_query([
+                'password' => 'test123456'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.register:register');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $no_login_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация без логина должна завершиться ошибкой");
+            }
+
+            echo "✓ Регистрация без логина отклонена\n";
+
+            // Тест без пароля
+            $no_password_data = http_build_query([
+                'login' => 'testuser'
+            ]);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://threes.dc/threes.api/auth.register:register');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $no_password_data);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded'
+            ]);
+
+            $response = curl_exec($ch);
+            $result = json_decode($response, true);
+            curl_close($ch);
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация без пароля должна завершиться ошибкой");
+            }
+
+            echo "✓ Регистрация без пароля отклонена\n";
+
+            echo "\n=== Все тесты валидации пройдены успешно! ===\n";
 
         } catch (\Throwable $e) {
             $this->logError($e);
