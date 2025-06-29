@@ -3,12 +3,6 @@
         <div v-if="isAuthenticated" class="threes-header">
             <div class="header-content">
                 <h1>Threes</h1>
-                <div class="user-info">
-                    <span v-if="user" @click="$router.push('/profile')" style="cursor: pointer;">
-                        {{ user.name || user.login }}
-                    </span>
-                    <Logout />
-                </div>
             </div>
         </div>
 
@@ -21,14 +15,12 @@
 <script>
 import ThreesAlerts from "./components/ThreesAlerts.vue";
 import ThreesSubmit from "./components/ThreesSubmit.vue";
-import Logout from "./components/Logout.vue";
 
 export default {
     name: "Threes",
     components: {
         ThreesAlerts,
-        ThreesSubmit,
-        Logout
+        ThreesSubmit
     },
     data() {
         return {
@@ -93,17 +85,6 @@ export default {
                 margin: 0;
                 color: #333;
                 font-size: 1.5rem;
-            }
-
-            .user-info {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-
-                span {
-                    color: #666;
-                    font-size: 0.9rem;
-                }
             }
         }
     }
