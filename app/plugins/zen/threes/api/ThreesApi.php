@@ -8,7 +8,7 @@ abstract class ThreesApi
 {
     protected array $auth = [];
 
-    protected function requireAuth(callable $callback): array
+    protected function requireAuth(callable $callback): ?array
     {
         # TODO: Потенциально опасный метод, требуется доработка
         if (request()->has('debug')) {
