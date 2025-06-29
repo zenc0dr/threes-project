@@ -30,14 +30,24 @@
                 />
             </template>
         </div>
+        
+        <!-- Блок пользователя внизу -->
+        <div class="tree-user-info">
+            <div v-if="user" class="user-name" @click="$router.push('/profile')">
+                {{ user.name || user.login }}
+            </div>
+            <Logout />
+        </div>
     </div>
 </template>
 
 <script>
 import TreeItem from './TreeItem.vue'
+import Logout from './Logout.vue'
+
 export default {
     name: 'Tree',
-    components: { TreeItem },
+    components: { TreeItem, Logout },
     data() {
         return {
             ths: window.ths,
@@ -46,6 +56,7 @@ export default {
             tree: [],
             searchTimer: null,
             nodesToOpen: [],
+            user: null,
         }
     },
     watch: {
@@ -56,6 +67,7 @@ export default {
     },
     created() {
         this.ths.mountComponent('Tree', this)
+        this.loadUserInfo()
     },
     mounted() {
         this.getTree()
@@ -65,6 +77,17 @@ export default {
         clearTimeout(this.searchTimer)
     },
     methods: {
+        loadUserInfo() {
+            // Получаем информацию о пользователе
+            this.ths.api({
+                api: 'user.profile:get',
+                then: (response) => {
+                    if (response.success) {
+                        this.user = response.user
+                    }
+                }
+            });
+        },
         getTree() {
             this.ths.api({
                 api: 'ui:get-tree-nodes',
@@ -145,11 +168,16 @@ export default {
     min-height: 100%;
     min-width: max-content;
     overflow: visible;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 
     .tree-list {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
+        flex: 1;
+        overflow-y: auto;
     }
 
     .tree-list__menu {
@@ -199,6 +227,36 @@ export default {
             padding-bottom: 2px;
             font-size: 13px;
             color: #333;
+        }
+    }
+
+    .tree-user-info {
+        position: sticky;
+        bottom: 0;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 60px;
+        box-sizing: border-box;
+
+        .user-name {
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            &:hover {
+                color: #007acc;
+            }
         }
     }
 }

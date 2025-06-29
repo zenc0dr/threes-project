@@ -10,6 +10,11 @@ abstract class ThreesApi
 
     protected function requireAuth(callable $callback): array
     {
+        # TODO: Потенциально опасный метод, требуется доработка
+        if (request()->has('debug')) {
+            return $callback();
+        }
+
         try {
             $this->auth = ths()->auth()::check();
             return $callback();

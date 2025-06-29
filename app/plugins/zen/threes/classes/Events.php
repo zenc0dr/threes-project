@@ -3,51 +3,51 @@
 namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
+use Closure;
+use Illuminate\Support\Collection;
 
 /**
  * Система внутренних событий Threes
- * Возможно не понадобиться
  */
 class Events
 {
     use SingletonTrait;
 
+    /**
+     * @var array[] Список событий
+     */
     private array $events = [];
 
     /**
      * Добавляет событие в систему событий
      *
      * @param string $hook_name Имя хука
-     * @param string $call Имя вызываемого метода
-     * @param mixed ...$arguments Аргументы для вызываемого метода
+     * @param string|Closure $call Метод или замыкание
+     * @param mixed ...$arguments Аргументы метода
      * @return void
      */
-    public function addEvent(string $hook_name, string $call, ...$arguments): void
+    public function addEvent(string $hook_name, string|Closure $call, ...$arguments): void
     {
-        $this->events[] = [
-            'hook_name' => $hook_name,
-            'call' => $call,
-            'arguments' => $arguments
-        ];
+        $this->events[] = compact('hook_name', 'call', 'arguments');
     }
 
     /**
      * Добавляет одно неповторяемое событие
-     * @param string $hook_name
-     * @param string $call
-     * @param ...$arguments
+     *
+     * @param string $hook_name Имя хука
+     * @param string|Closure $call Метод или замыкание
+     * @param mixed ...$arguments Аргументы метода
      * @return void
      */
-    public function addEventOnce(string $hook_name, string $call, ...$arguments): void
+    public function addEventOnce(string $hook_name, string|Closure $call, ...$arguments): void
     {
-        if (isset($this->events[$hook_name])) {
-            return;
+        foreach ($this->events as $event) {
+            if ($event['hook_name'] === $hook_name) {
+                return;
+            }
         }
-        $this->events[$hook_name] = [
-            'hook_name' => $hook_name,
-            'call' => $call,
-            'arguments' => $arguments
-        ];
+
+        $this->events[] = compact('hook_name', 'call', 'arguments');
     }
 
     /**
@@ -57,15 +57,14 @@ class Events
      */
     public function terminating(): void
     {
-        collect($this->events)
+        Collection::make($this->events)
             ->where('hook_name', 'terminating')
-            ->each(function($event) {
-                $this->runEvent($event);
-            });
+            ->each(fn($event) => $this->runEvent($event));
     }
 
     /**
      * Выполняет событие
+     *
      * @param array $event
      * @return void
      * @throws \ReflectionException
@@ -74,6 +73,11 @@ class Events
     {
         $call = $event['call'];
         $arguments = $event['arguments'];
-        ths()->exe($call, null, $arguments);
+
+        if (is_string($call)) {
+            ths()->exe($call, null, $arguments);
+        } elseif ($call instanceof Closure) {
+            $call(...$arguments);
+        }
     }
 }
