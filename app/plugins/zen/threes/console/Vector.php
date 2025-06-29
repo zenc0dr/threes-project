@@ -41,7 +41,13 @@ class Vector extends Command
         $markdown = join(PHP_EOL, $output);
         $output_path = storage_path('threes_vector.md');
         file_put_contents($output_path, $markdown);
+        
+        // Получаем размер созданного файла
+        $file_size = filesize($output_path);
+        $formatted_size = ths()->formatSizeUnits($file_size);
+        
         $this->log("Output: $output_path");
+        $this->log("File size: $formatted_size");
     }
 
     /**
