@@ -51,3 +51,5 @@ Route::match(
 );
 
 Route::view('/app/node/{nid?}', 'zen.threes::threes');
+Route::view('/login', 'zen.threes::threes');
+Route::view('/profile', 'zen.threes::threes');

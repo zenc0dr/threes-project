@@ -9,6 +9,7 @@
                 <input v-model="name" type="text" placeholder="Имя (необязательно)" />
                 <input v-model="telegram_id" type="text" placeholder="Telegram ID (необязательно)" />
             </div>
+
             <div v-else>
                 <input v-model="login" type="text" placeholder="Логин" />
             </div>

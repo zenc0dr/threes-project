@@ -128,14 +128,43 @@ class Threes extends Helpers
 
 namespace Zen\Threes\Api;
 
-class Store
+class Store extends ThreesApi
 {
     # http://threes.dc/threes.api/store:get
     public function get(): array
     {
-        return [
-            'nodes' => ths()->store()->getStoreNodes()
-        ];
+        return $this->requireAuth(function () {
+            return [
+                'nodes' => ths()->store()->getStoreNodes()
+            ];
+        });
+    }
+}
+
+```
+`plugins/zen/threes/api/ThreesApi.php`
+```<?php
+
+namespace Zen\Threes\Api;
+
+use Zen\Threes\Exceptions\AuthException;
+
+abstract class ThreesApi
+{
+    protected array $auth = [];
+
+    protected function requireAuth(callable $callback): array
+    {
+        try {
+            $this->auth = ths()->auth()::check();
+            return $callback();
+        } catch (AuthException $e) {
+            ths()->messages()->addMessage($e->getMessage(), 'error');
+            return ['success' => false];
+        } catch (\Throwable $e) {
+            ths()->messages()->addMessage("Ошибка: " . $e->getMessage(), 'error');
+            return ['success' => false];
+        }
     }
 }
 
@@ -145,24 +174,28 @@ class Store
 
 namespace Zen\Threes\Api;
 
-class Ui
+class Ui extends ThreesApi
 {
     # http://threes.dc/threes.api/ui:get-tree-nodes
     public function getTreeNodes(): array
     {
-        return [
-            'tree' => ths()->nodes()->getNodesTree(
-                search: request('search'),
-            )
-        ];
+        return $this->requireAuth(function () {
+            return [
+                'tree' => ths()->nodes()->getNodesTree(
+                    search: request('search'),
+                )
+            ];
+        });
     }
 
     # http://threes.dc/threes.api/ui:get-schema-nodes?nid=node1
     public function getSchemaNodes(): array
     {
-        return [
-            'schema' => ths()->nodes()->getNodesSchema(request('nid'))
-        ];
+        return $this->requireAuth(function () {
+            return [
+                'schema' => ths()->nodes()->getNodesSchema(request('nid'))
+            ];
+        });
     }
 }
 
@@ -182,7 +215,7 @@ class Login
         $login = request('login');
         $password = request('password');
 
-        // Валидация обязательных полей
+        # Валидация обязательных полей
         if (!$login || !$password) {
             return [
                 'success' => false,
@@ -192,9 +225,10 @@ class Login
             ];
         }
 
-        // Проверка существования пользователя
-        $token_id = "user.{$login}";
-        $token_data = Tokens::get($token_id);
+        # Проверка существования пользователя
+        $login_hash = md5($login);
+        $token_uuid = 'user.' . $login_hash;
+        $token_data = Tokens::get($token_uuid);
 
         if (!$token_data) {
             return [
@@ -205,7 +239,7 @@ class Login
             ];
         }
 
-        // Проверка пароля
+        # Проверка пароля
         $user_data = $token_data['data'] ?? [];
         if (!isset($user_data['password']) || !password_verify($password, $user_data['password'])) {
             return [
@@ -216,8 +250,8 @@ class Login
             ];
         }
 
-        // Обновление времени последнего входа
-        Tokens::update($token_id, [
+        # Обновление времени последнего входа
+        Tokens::update($token_uuid, [
             'last_call_at' => now()->toISOString(),
         ]);
 
@@ -226,7 +260,7 @@ class Login
             'messages' => [
                 ['type' => 'success', 'text' => 'Успешная авторизация']
             ],
-            'token' => $token_id,
+            'token' => $token_uuid,
             'user' => [
                 'login' => $login,
                 'email' => $user_data['email'] ?? null,
@@ -235,7 +269,8 @@ class Login
             ]
         ];
     }
-} 
+}
+
 ```
 `plugins/zen/threes/api/auth/Register.php`
 ```<?php
@@ -256,7 +291,7 @@ class Register
     # http://threes.dc/threes.api/auth.register:register
     /**
      * Регистрация нового пользователя
-     * 
+     *
      * @return array
      */
     public function register(): array
@@ -268,7 +303,7 @@ class Register
         $name = request('name');
         $data = request('data', []);
 
-        // Валидация обязательных полей
+        # Валидация обязательных полей
         if (!$login || !$password) {
             return [
                 'success' => false,
@@ -278,7 +313,7 @@ class Register
             ];
         }
 
-        // Проверка формата логина
+        # Проверка формата логина
         if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $login)) {
             return [
                 'success' => false,
@@ -288,7 +323,7 @@ class Register
             ];
         }
 
-        // Проверка длины пароля
+        # Проверка длины пароля
         if (strlen($password) < 6) {
             return [
                 'success' => false,
@@ -298,9 +333,11 @@ class Register
             ];
         }
 
-        // Проверка, что пользователь не существует
-        $token_id = "user.{$login}";
-        if (Tokens::exists($token_id)) {
+        $login_hash = md5($login);
+        $token_uuid = "user.$login_hash";
+
+        # Проверка, что пользователь не существует
+        if (Tokens::exists($token_uuid)) {
             return [
                 'success' => false,
                 'messages' => [
@@ -309,10 +346,10 @@ class Register
             ];
         }
 
-        // Хэширование пароля
+        # Хэширование пароля
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-        // Создание токена пользователя
+        # Создание токена пользователя
         $user_data = [
             'password' => $hashed_password,
             'email' => $email,
@@ -321,10 +358,10 @@ class Register
             'data' => $data,
         ];
 
-        $token = Tokens::create(
+        Tokens::create(
             'user',
             [
-                'uuid' => $login,
+                'uuid' => $token_uuid,
                 'data' => $user_data,
                 'last_call_at' => now()->toISOString(),
             ]
@@ -335,107 +372,11 @@ class Register
             'messages' => [
                 ['type' => 'success', 'text' => 'Пользователь успешно зарегистрирован']
             ],
-            'token' => $token_id
+            'token' => $token_uuid
         ];
     }
-} 
-```
-`plugins/zen/threes/api/auth/Test.php`
-```<?php
+}
 
-namespace Zen\Threes\Api\Auth;
-
-use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
-
-class Test
-{
-    # http://threes.dc/threes.api/auth.test:test
-    public function test(): array
-    {
-        return [
-            'success' => true,
-            'message' => 'Auth API работает!',
-            'timestamp' => now()->toISOString()
-        ];
-    }
-
-    # http://threes.dc/threes.api/auth.test:create-test-user
-    public function createTestUser(): array
-    {
-        $login = 'test_user_' . time();
-        $password = 'test123';
-        
-        // Проверка, что пользователь не существует
-        $token_id = "user.{$login}";
-        if (Tokens::exists($token_id)) {
-            return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Тестовый пользователь уже существует']
-                ]
-            ];
-        }
-
-        // Хэширование пароля
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-
-        // Создание токена пользователя
-        $user_data = [
-            'password' => $hashed_password,
-            'email' => 'test@example.com',
-            'name' => 'Тестовый пользователь',
-            'telegram_id' => '123456789',
-            'data' => ['test' => true],
-        ];
-
-        $token = Tokens::create('user', [
-            'uuid' => $login,
-            'data' => $user_data,
-            'last_call_at' => now()->toISOString(),
-        ]);
-
-        return [
-            'success' => true,
-            'messages' => [
-                ['type' => 'success', 'text' => 'Тестовый пользователь создан']
-            ],
-            'test_user' => [
-                'login' => $login,
-                'password' => $password,
-                'token' => $token_id
-            ]
-        ];
-    }
-
-    # http://threes.dc/threes.api/auth.test:check-auth
-    public function checkAuth(): array
-    {
-        $auth_data = AuthMiddleware::checkAuth();
-        
-        if (!$auth_data) {
-            return [
-                'success' => false,
-                'authenticated' => false,
-                'messages' => [
-                    ['type' => 'info', 'text' => 'Пользователь не авторизован']
-                ]
-            ];
-        }
-
-        return [
-            'success' => true,
-            'authenticated' => true,
-            'user' => [
-                'login' => $auth_data['login'],
-                'email' => $auth_data['user']['email'] ?? null,
-                'name' => $auth_data['user']['name'] ?? null,
-                'created_at' => $auth_data['created_at'],
-                'last_call_at' => $auth_data['last_call_at'],
-            ]
-        ];
-    }
-} 
 ```
 `plugins/zen/threes/api/backlog/Export.php`
 ```<?php
@@ -485,10 +426,6 @@ class Tests
     public function debug()
     {
 
-
-
-        $token = Tokens::create('test');
-        dd($token);
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -518,115 +455,728 @@ class Tests
 
 namespace Zen\Threes\Api\Nodes;
 
+use Zen\Threes\Api\ThreesApi;
 use Zen\Threes\Traits\QueryLogTrait;
-use Zen\Threes\Traits\DebugLogTrait;
-
-class Node
+class Node extends ThreesApi
 {
     use QueryLogTrait;
 
     # http://threes.dc/threes.api/nodes.node:setNodeIcon?debug
     protected function setNodeIcon(): array
     {
-        ths()->nodes()->setNodeIcon(
-            request('nid'),
-            request('svg')
-        );
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->setNodeIcon(
+                request('nid'),
+                request('svg')
+            );
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:set-node-settings?debug
     protected function setNodeSettings(): array
     {
-        ths()->nodes()->setNodeSettings(
-            request('nid'),
-            request('settings')
-        );
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->setNodeSettings(
+                request('nid'),
+                request('settings')
+            );
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:set-node-name?debug
     protected function setNodeName(): array
     {
-        ths()->nodes()->setNodeName(
-            request('nid'),
-            request('name')
-        );
-        //ths()->messages()->addMessage('Имя нода обновлено');
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->setNodeName(
+                request('nid'),
+                request('name')
+            );
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:set-node-description?debug
     protected function setNodeDescription(): array
     {
-        ths()->nodes()->setNodeDescription(
-            request('nid'),
-            request('description')
-        );
-        //ths()->messages()->addMessage('Описание нода обновлено');
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->setNodeDescription(
+                request('nid'),
+                request('description')
+            );
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:update-data?debug
     protected function updateData(): array
     {
-        ths()->nodes()->updateNodeData(
-            request('nid'),
-            request('data'),
-            request('scope', 'self_content')
-        );
-        //ths()->messages()->addMessage('Данные нод обновлены');
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->updateNodeData(
+                request('nid'),
+                request('data'),
+                request('scope', 'self_content')
+            );
+
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:add-node?debug
     protected function addNode(): array
     {
-        ths()->nodes()->addNode(
-            source_nid: request('nid'),
-            type: request('type'),
-            target_nid: request('target_nid'),
-            data: request('data'),
-            direction: request('direction'),
-        );
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->addNode(
+                source_nid: request('nid'),
+                type: request('type'),
+                target_nid: request('target_nid'),
+                data: request('data'),
+                direction: request('direction'),
+            );
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:move-node?debug
     protected function moveNode(): array
     {
-        ths()->nodes()->moveNode(
-            request('nid'),
-            request('target_nid'),
-            request('direction')
-        );
-        return [];
+        return $this->requireAuth(function () {
+            ths()->nodes()->moveNode(
+                request('nid'),
+                request('target_nid'),
+                request('direction')
+            );
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:delete-node?debug
     protected function deleteNode(): array
     {
-        if (!request()->has('without_submit')) {
-            if ($submit = ths()->submit()) {
-                return $submit;
+        return $this->requireAuth(function () {
+            if (!request()->has('without_submit')) {
+                if ($submit = ths()->submit()) {
+                    return $submit;
+                }
             }
-        }
-        $removed_nids = ths()->nodes()->deleteNode(
-            nid: request('nid')
-        );
+            $removed_nids = ths()->nodes()->deleteNode(
+                nid: request('nid')
+            );
 
-        if (!request()->has('without_submit')) {
-            ths()->messages()->addMessage('Удалены ноды: ' . join(', ', $removed_nids));
-        }
+            if (!request()->has('without_submit')) {
+                ths()->messages()->addMessage('Удалены ноды: ' . join(', ', $removed_nids));
+            }
 
-        return [];
+            return [];
+        });
     }
 
     # http://threes.dc/threes.api/nodes.node:run-method?call=Zen.Threes.Classes.Methods.node_cs77ys3z2cj5.getText
     protected function runMethod(): mixed
     {
-        $call = request('call');
-        return ths()->exe($call);
+        return $this->requireAuth(function () {
+            $call = request('call');
+            return ths()->exe($call);
+        });
+    }
+}
+
+```
+`plugins/zen/threes/api/tests/AuthTests.php`
+```<?php
+
+namespace Zen\Threes\Api\Tests;
+
+use Zen\Threes\Traits\DebugLogTrait;
+use Zen\Threes\Classes\Tokens;
+
+class AuthTests
+{
+    use DebugLogTrait;
+
+    /**
+     * Тестовая версия метода регистрации
+     */
+    private function testRegister(string $login, string $password, ?string $email = null, ?string $name = null, ?string $telegram_id = null, array $data = []): array
+    {
+        // Валидация обязательных полей
+        if (!$login || !$password) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Логин и пароль обязательны']
+                ]
+            ];
+        }
+
+        // Проверка формата логина
+        if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $login)) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Логин должен содержать 3-20 символов (буквы, цифры, подчеркивания)']
+                ]
+            ];
+        }
+
+        // Проверка длины пароля
+        if (strlen($password) < 6) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Пароль должен содержать минимум 6 символов']
+                ]
+            ];
+        }
+
+        $login_hash = md5($login);
+        $token_uuid = "user.$login_hash";
+
+        // Проверка, что пользователь не существует
+        if (Tokens::exists($token_uuid)) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Пользователь с таким логином уже существует']
+                ]
+            ];
+        }
+
+        // Хэширование пароля
+        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+        // Создание токена пользователя
+        $user_data = [
+            'password' => $hashed_password,
+            'email' => $email,
+            'telegram_id' => $telegram_id,
+            'name' => $name,
+            'data' => $data,
+        ];
+
+        Tokens::create(
+            'user',
+            [
+                'uuid' => $token_uuid,
+                'data' => $user_data,
+                'last_call_at' => now()->toISOString(),
+            ]
+        );
+
+        return [
+            'success' => true,
+            'messages' => [
+                ['type' => 'success', 'text' => 'Пользователь успешно зарегистрирован']
+            ],
+            'token' => $token_uuid
+        ];
+    }
+
+    /**
+     * Тестовая версия метода входа
+     */
+    private function testLogin(string $login, string $password): array
+    {
+        // Валидация обязательных полей
+        if (!$login || !$password) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Логин и пароль обязательны']
+                ]
+            ];
+        }
+
+        // Проверка существования пользователя
+        $login_hash = md5($login);
+        $token_uuid = 'user.' . $login_hash;
+        $token_data = Tokens::get($token_uuid);
+
+        if (!$token_data) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Пользователь не найден']
+                ]
+            ];
+        }
+
+        // Проверка пароля
+        $user_data = $token_data['data'] ?? [];
+        if (!isset($user_data['password']) || !password_verify($password, $user_data['password'])) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Неверный пароль']
+                ]
+            ];
+        }
+
+        // Обновление времени последнего входа
+        Tokens::update($token_uuid, [
+            'last_call_at' => now()->toISOString(),
+        ]);
+
+        return [
+            'success' => true,
+            'messages' => [
+                ['type' => 'success', 'text' => 'Успешная авторизация']
+            ],
+            'token' => $token_uuid,
+            'user' => [
+                'login' => $login,
+                'email' => $user_data['email'] ?? null,
+                'name' => $user_data['name'] ?? null,
+                'telegram_id' => $user_data['telegram_id'] ?? null,
+            ]
+        ];
+    }
+
+    /**
+     * Эмуляция HTTP заголовка авторизации
+     */
+    private function simulateAuthHeader(string $token): void
+    {
+        // Эмулируем заголовок ThreesAuth
+        $_SERVER['HTTP_THREESAUTH'] = $token;
+        
+        // Также устанавливаем для Laravel request()
+        if (function_exists('request')) {
+            try {
+                $request = request();
+                if (method_exists($request, 'headers')) {
+                    $request->headers->set('ThreesAuth', $token);
+                }
+            } catch (\Exception $e) {
+                // Игнорируем ошибки, если request() не доступен
+            }
+        }
+        
+        // Альтернативный способ для October CMS
+        if (isset($_SERVER['HTTP_THREESAUTH'])) {
+            // Убеждаемся, что заголовок установлен
+            $_SERVER['HTTP_THREESAUTH'] = $token;
+        }
+    }
+
+    /**
+     * Очистка HTTP данных
+     */
+    private function clearHttpData(): void
+    {
+        unset($_SERVER['HTTP_THREESAUTH']);
+        unset($_POST);
+    }
+
+    /**
+     * Тестовая версия Auth::getAuthData()
+     */
+    private function testGetAuthData(string $token): ?array
+    {
+        if (!$token) {
+            return null;
+        }
+
+        $token_data = Tokens::get($token);
+        if (!$token_data) {
+            return null;
+        }
+
+        return [
+            'token' => $token,
+            'user' => $token_data['data'] ?? [],
+            'login' => $token_data['uuid'],
+            'created_at' => $token_data['created_at'] ?? null,
+            'last_call_at' => $token_data['last_call_at'] ?? null,
+        ];
+    }
+
+    /**
+     * Тестовая версия метода получения профиля
+     */
+    private function testGetProfile(string $token): array
+    {
+        // Используем тестовую версию getAuthData
+        $auth_data = $this->testGetAuthData($token);
+        
+        if (!$auth_data) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Необходима авторизация']
+                ]
+            ];
+        }
+
+        $user_data = $auth_data['user'] ?? [];
+        return [
+            'success' => true,
+            'user' => [
+                'login' => $auth_data['login'],
+                'email' => $user_data['email'] ?? null,
+                'name' => $user_data['name'] ?? null,
+                'telegram_id' => $user_data['telegram_id'] ?? null,
+                'created_at' => $auth_data['created_at'] ?? null,
+                'last_call_at' => $auth_data['last_call_at'] ?? null,
+            ]
+        ];
+    }
+
+    /**
+     * Тестовая версия Auth::check()
+     */
+    private function testCheck(string $token): array
+    {
+        $auth = $this->testGetAuthData($token);
+        if (!$auth) {
+            throw new \Zen\Threes\Exceptions\AuthException();
+        }
+        return $auth;
+    }
+
+    # http://threes.dc/threes.api/tests.AuthTests:testRegistrationAndLogin
+    public function testRegistrationAndLogin(): void
+    {
+        try {
+            echo "=== Тест регистрации и входа ===\n\n";
+
+            // Очистка папки токенов
+            $path = ths()->env('TOKENS_STORAGE');
+            foreach (glob($path . '/user.*.json') as $file) {
+                unlink($file);
+            }
+
+            $test_login = 'test_user_' . time();
+            $test_password = 'test123456';
+            $test_email = 'test@example.com';
+            $test_name = 'Тестовый пользователь';
+
+            echo "1. Тест регистрации пользователя...\n";
+
+            // Регистрация через тестовый метод
+            $register_result = $this->testRegister(
+                $test_login,
+                $test_password,
+                $test_email,
+                $test_name,
+                '123456789'
+            );
+
+            if (!$register_result['success']) {
+                throw new \Exception('Ошибка регистрации: ' . ($register_result['messages'][0]['text'] ?? 'Неизвестная ошибка'));
+            }
+
+            echo "✓ Пользователь зарегистрирован\n";
+            echo "  - Логин: {$test_login}\n";
+            echo "  - Токен: {$register_result['token']}\n";
+
+            // Проверяем, что токен создан с правильным UUID (md5 от логина)
+            $expected_uuid = md5($test_login);
+            $expected_token = "user.{$expected_uuid}";
+
+            if ($register_result['token'] !== $expected_token) {
+                throw new \Exception("Неверный токен. Ожидалось: {$expected_token}, получено: {$register_result['token']}");
+            }
+
+            echo "✓ Токен создан с правильным UUID\n";
+
+            // Проверяем, что файл токена существует
+            if (!Tokens::exists($expected_token)) {
+                throw new \Exception("Файл токена не найден: {$expected_token}");
+            }
+
+            echo "✓ Файл токена создан\n";
+
+            // Получаем данные токена
+            $token_data = Tokens::get($expected_token);
+            if (!$token_data) {
+                throw new \Exception("Не удалось получить данные токена");
+            }
+
+            echo "✓ Данные токена получены\n";
+            echo "  - UUID: {$token_data['uuid']}\n";
+            echo "  - Subtype: {$token_data['subtype']}\n";
+            echo "  - Write: " . ($token_data['write'] ? 'true' : 'false') . "\n";
+            echo "  - Email: {$token_data['data']['email']}\n";
+            echo "  - Name: {$token_data['data']['name']}\n";
+
+            // Проверяем структуру токена
+            if ($token_data['subtype'] !== 'user') {
+                throw new \Exception("Неверный subtype токена. Ожидалось: user, получено: {$token_data['subtype']}");
+            }
+
+            if (!$token_data['write']) {
+                throw new \Exception("Токен должен иметь write: true после создания");
+            }
+
+            echo "✓ Структура токена корректна\n";
+
+            // Проверяем, что данные пользователя сохранены корректно
+            if ($token_data['data']['email'] !== $test_email) {
+                throw new \Exception("Email в данных токена не совпадает. Ожидалось: {$test_email}, получено: {$token_data['data']['email']}");
+            }
+
+            if ($token_data['data']['name'] !== $test_name) {
+                throw new \Exception("Name в данных токена не совпадает. Ожидалось: {$test_name}, получено: {$token_data['data']['name']}");
+            }
+
+            if ($token_data['data']['telegram_id'] !== '123456789') {
+                throw new \Exception("Telegram ID в данных токена не совпадает");
+            }
+
+            echo "✓ Данные пользователя сохранены корректно\n";
+
+            echo "\n2. Тест входа пользователя...\n";
+
+            // Вход через тестовый метод
+            $login_result = $this->testLogin($test_login, $test_password);
+
+            if (!$login_result['success']) {
+                throw new \Exception('Ошибка входа: ' . ($login_result['messages'][0]['text'] ?? 'Неизвестная ошибка'));
+            }
+
+            echo "✓ Пользователь вошел в систему\n";
+            echo "  - Токен: {$login_result['token']}\n";
+
+            // Проверяем, что токен совпадает
+            if ($login_result['token'] !== $expected_token) {
+                throw new \Exception("Токен входа не совпадает с токеном регистрации");
+            }
+
+            echo "✓ Токен входа совпадает с токеном регистрации\n";
+
+            // Проверяем данные пользователя в ответе
+            if ($login_result['user']['login'] !== $test_login) {
+                throw new \Exception("Логин в ответе не совпадает");
+            }
+
+            if ($login_result['user']['email'] !== $test_email) {
+                throw new \Exception("Email в ответе не совпадает");
+            }
+
+            if ($login_result['user']['name'] !== $test_name) {
+                throw new \Exception("Имя в ответе не совпадает");
+            }
+
+            echo "✓ Данные пользователя корректны\n";
+
+            // Проверяем, что last_call_at обновился
+            $updated_token_data = Tokens::get($expected_token);
+            if (!$updated_token_data['last_call_at']) {
+                throw new \Exception("last_call_at не обновился после входа");
+            }
+
+            echo "✓ Время последнего входа обновлено\n";
+
+            echo "\n3. Тест класса Auth...\n";
+
+            // Используем тестовую версию getAuthData
+            $auth_data = $this->testGetAuthData($expected_token);
+            if (!$auth_data) {
+                throw new \Exception("Auth::getAuthData() не смог проверить авторизацию");
+            }
+
+            echo "✓ Auth::getAuthData() работает\n";
+            echo "  - Token: {$auth_data['token']}\n";
+            echo "  - Login: {$auth_data['login']}\n";
+            echo "  - Email: {$auth_data['user']['email']}\n";
+
+            // Проверяем структуру данных авторизации
+            if ($auth_data['token'] !== $expected_token) {
+                throw new \Exception("Токен в данных авторизации не совпадает");
+            }
+
+            if ($auth_data['login'] !== $expected_token) {
+                throw new \Exception("Login в данных авторизации не совпадает с UUID токена");
+            }
+
+            if ($auth_data['user']['email'] !== $test_email) {
+                throw new \Exception("Email в данных авторизации не совпадает");
+            }
+
+            echo "✓ Структура данных авторизации корректна\n";
+
+            // Тест метода check()
+            try {
+                $auth_check = $this->testCheck($expected_token);
+                echo "✓ Auth::check() работает\n";
+            } catch (\Exception $e) {
+                throw new \Exception("Auth::check() должен работать с валидным токеном");
+            }
+
+            // Тест проверки пароля
+            $password_valid = \Zen\Threes\Classes\Auth::verifyPassword($auth_data, $test_password);
+            if (!$password_valid) {
+                throw new \Exception("Auth::verifyPassword() не смог проверить пароль");
+            }
+
+            echo "✓ Auth::verifyPassword() работает\n";
+
+            // Тест с неверным паролем
+            $password_invalid = \Zen\Threes\Classes\Auth::verifyPassword($auth_data, 'wrong_password');
+            if ($password_invalid) {
+                throw new \Exception("Auth::verifyPassword() должен возвращать false для неверного пароля");
+            }
+
+            echo "✓ Проверка неверного пароля работает\n";
+
+            echo "\n4. Тест API профиля...\n";
+
+            // Тест API профиля через тестовый метод
+            $profile_result = $this->testGetProfile($expected_token);
+
+            if (!$profile_result['success']) {
+                throw new \Exception('Ошибка получения профиля: ' . ($profile_result['messages'][0]['text'] ?? 'Неизвестная ошибка'));
+            }
+
+            echo "✓ Профиль получен\n";
+            echo "  - Login: {$profile_result['user']['login']}\n";
+            echo "  - Email: {$profile_result['user']['email']}\n";
+            echo "  - Name: {$profile_result['user']['name']}\n";
+            echo "  - Created at: {$profile_result['user']['created_at']}\n";
+            echo "  - Last call at: {$profile_result['user']['last_call_at']}\n";
+
+            // Проверяем данные профиля
+            if ($profile_result['user']['login'] !== $expected_token) {
+                throw new \Exception("Login в профиле должен быть UUID токена");
+            }
+
+            if ($profile_result['user']['email'] !== $test_email) {
+                throw new \Exception("Email в профиле не совпадает");
+            }
+
+            if ($profile_result['user']['name'] !== $test_name) {
+                throw new \Exception("Имя в профиле не совпадает");
+            }
+
+            echo "✓ Данные профиля корректны\n";
+
+            echo "\n5. Тест ошибок аутентификации...\n";
+
+            // Тест входа с неверным паролем
+            $wrong_password_result = $this->testLogin($test_login, 'wrong_password');
+
+            if ($wrong_password_result['success']) {
+                throw new \Exception("Вход с неверным паролем должен завершиться ошибкой");
+            }
+
+            echo "✓ Вход с неверным паролем корректно отклонен\n";
+
+            // Тест входа несуществующего пользователя
+            $wrong_login_result = $this->testLogin('nonexistent_user', 'any_password');
+
+            if ($wrong_login_result['success']) {
+                throw new \Exception("Вход несуществующего пользователя должен завершиться ошибкой");
+            }
+
+            echo "✓ Вход несуществующего пользователя корректно отклонен\n";
+
+            // Тест без заголовка авторизации
+            $no_auth_data = $this->testGetAuthData('');
+            if ($no_auth_data !== null) {
+                throw new \Exception("Auth::getAuthData() должен возвращать null без заголовка");
+            }
+
+            echo "✓ Проверка без заголовка авторизации работает\n";
+
+            // Тест с неверным токеном
+            $invalid_auth_data = $this->testGetAuthData('user.invalid_token');
+            if ($invalid_auth_data !== null) {
+                throw new \Exception("Auth::getAuthData() должен возвращать null для неверного токена");
+            }
+
+            echo "✓ Проверка неверного токена работает\n";
+
+            // Очистка
+            Tokens::remove($expected_token);
+            $this->clearHttpData();
+
+            echo "\n=== Все тесты пройдены успешно! ===\n";
+            echo "Система аутентификации работает корректно.\n";
+
+        } catch (\Throwable $e) {
+            $this->logError($e);
+        }
+    }
+
+    # http://threes.dc/threes.api/tests.AuthTests:testValidation
+    public function testValidation(): void
+    {
+        try {
+            echo "=== Тест валидации ===\n\n";
+
+            // Очистка папки токенов
+            $path = ths()->env('TOKENS_STORAGE');
+            foreach (glob($path . '/user.*.json') as $file) {
+                unlink($file);
+            }
+
+            echo "1. Тест валидации логина...\n";
+
+            // Тест короткого логина
+            $result = $this->testRegister('ab', 'test123456');
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с коротким логином должна завершиться ошибкой");
+            }
+
+            echo "✓ Короткий логин отклонен\n";
+
+            // Тест длинного логина
+            $result = $this->testRegister('very_long_login_name_that_exceeds_limit', 'test123456');
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с длинным логином должна завершиться ошибкой");
+            }
+
+            echo "✓ Длинный логин отклонен\n";
+
+            // Тест логина с недопустимыми символами
+            $result = $this->testRegister('test-user', 'test123456');
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с недопустимыми символами должна завершиться ошибкой");
+            }
+
+            echo "✓ Логин с недопустимыми символами отклонен\n";
+
+            echo "\n2. Тест валидации пароля...\n";
+
+            // Тест короткого пароля
+            $result = $this->testRegister('testuser', '123');
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация с коротким паролем должна завершиться ошибкой");
+            }
+
+            echo "✓ Короткий пароль отклонен\n";
+
+            echo "\n3. Тест обязательных полей...\n";
+
+            // Тест без логина
+            $result = $this->testRegister('', 'test123456');
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация без логина должна завершиться ошибкой");
+            }
+
+            echo "✓ Регистрация без логина отклонена\n";
+
+            // Тест без пароля
+            $result = $this->testRegister('testuser', '');
+
+            if ($result['success']) {
+                throw new \Exception("Регистрация без пароля должна завершиться ошибкой");
+            }
+
+            echo "✓ Регистрация без пароля отклонена\n";
+
+            echo "\n=== Все тесты валидации пройдены успешно! ===\n";
+
+        } catch (\Throwable $e) {
+            $this->logError($e);
+        }
     }
 }
 
@@ -1216,212 +1766,197 @@ class TokensTests
 
 namespace Zen\Threes\Api\User;
 
+use Zen\Threes\Api\ThreesApi;
 use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
 
-class Delete
+class Delete extends ThreesApi
 {
     # http://threes.dc/threes.api/user.delete:delete
     public function delete(): array
     {
-        $auth_data = AuthMiddleware::requireAuth();
-        if (isset($auth_data['success']) && !$auth_data['success']) {
-            return $auth_data;
-        }
+        return $this->requireAuth(function () {
+            $auth_data = ths()->auth()::getAuthData();
 
-        $password = request('password');
-        if (!$password) {
+            $password = request('password');
+            if (!$password) {
+                ths()->messages()->addMessage('Для удаления аккаунта требуется указать пароль', 'error');
+                return [
+                    'success' => false
+                ];
+            }
+
+            # Проверка пароля
+            if (!ths()->auth()->verifyPassword($auth_data, $password)) {
+                ths()->messages()->addMessage('Неверный пароль', 'error');
+                return [
+                    'success' => false
+                ];
+            }
+
+            # Удаление токена
+            $deleted = Tokens::remove($auth_data['token']);
+            if (!$deleted) {
+                ths()->messages()->addMessage('Ошибка удаления аккаунта', 'error');
+                return [
+                    'success' => false,
+                ];
+            }
+
+            ths()->messages()->addMessage('Аккаунт успешно удален');
             return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Для удаления аккаунта требуется указать пароль']
-                ]
+                'success' => true,
             ];
-        }
-
-        // Проверка пароля
-        if (!AuthMiddleware::verifyPassword($auth_data, $password)) {
-            return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Неверный пароль']
-                ]
-            ];
-        }
-
-        // Удаление токена
-        $deleted = Tokens::remove($auth_data['token']);
-        if (!$deleted) {
-            return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Ошибка удаления аккаунта']
-                ]
-            ];
-        }
-
-        return [
-            'success' => true,
-            'messages' => [
-                ['type' => 'success', 'text' => 'Аккаунт успешно удален']
-            ]
-        ];
+        });
     }
-} 
+}
+
 ```
 `plugins/zen/threes/api/user/Profile.php`
 ```<?php
 
 namespace Zen\Threes\Api\User;
 
-use Zen\Threes\Classes\AuthMiddleware;
 
-class Profile
+use Zen\Threes\Api\ThreesApi;
+
+class Profile extends ThreesApi
 {
     # http://threes.dc/threes.api/user.profile:get
     public function get(): array
     {
-        $auth_data = AuthMiddleware::requireAuth();
-        if (isset($auth_data['success']) && !$auth_data['success']) {
-            return $auth_data;
-        }
-
-        $user_data = $auth_data['user'] ?? [];
-
-        return [
-            'success' => true,
-            'user' => [
-                'login' => $auth_data['login'],
-                'email' => $user_data['email'] ?? null,
-                'name' => $user_data['name'] ?? null,
-                'telegram_id' => $user_data['telegram_id'] ?? null,
-                'created_at' => $auth_data['created_at'] ?? null,
-                'last_call_at' => $auth_data['last_call_at'] ?? null,
-            ]
-        ];
+        return $this->requireAuth(function () {
+            $auth_data = ths()->auth()::getAuthData();
+            $user_data = $auth_data['user'] ?? [];
+            return [
+                'success' => true,
+                'user' => [
+                    'login' => $auth_data['login'],
+                    'email' => $user_data['email'] ?? null,
+                    'name' => $user_data['name'] ?? null,
+                    'telegram_id' => $user_data['telegram_id'] ?? null,
+                    'created_at' => $auth_data['created_at'] ?? null,
+                    'last_call_at' => $auth_data['last_call_at'] ?? null,
+                ]
+            ];
+        });
     }
-} 
+}
+
 ```
 `plugins/zen/threes/api/user/Update.php`
 ```<?php
 
 namespace Zen\Threes\Api\User;
 
+use Zen\Threes\Api\ThreesApi;
 use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
 
-class Update
+class Update extends ThreesApi
 {
     # http://threes.dc/threes.api/user.update:update
     public function update(): array
     {
-        $auth_data = AuthMiddleware::requireAuth();
-        if (isset($auth_data['success']) && !$auth_data['success']) {
-            return $auth_data;
-        }
+        return $this->requireAuth(function () {
+            $auth_data = ths()->auth()::getAuthData();
+            $user_data = $auth_data['user'] ?? [];
+            $current_password = request('current_password');
+            $new_password = request('new_password');
+            $email = request('email');
+            $name = request('name');
+            $telegram_id = request('telegram_id');
+            $data = request('data');
 
-        $user_data = $auth_data['user'] ?? [];
-        $current_password = request('current_password');
-        $new_password = request('new_password');
-        $email = request('email');
-        $name = request('name');
-        $telegram_id = request('telegram_id');
-        $data = request('data');
+            # Если передается новый пароль, проверяем текущий
+            if ($new_password) {
+                if (!$current_password) {
+                    ths()->messages()->addMessage('Для смены пароля требуется указать текущий пароль', 'error');
+                    return [
+                        'success' => false
+                    ];
+                }
 
-        // Если передается новый пароль, проверяем текущий
-        if ($new_password) {
-            if (!$current_password) {
+                if (!ths()->auth()->verifyPassword($auth_data, $current_password)) {
+                    ths()->messages()->addMessage('Неверный текущий пароль', 'error');
+                    return [
+                        'success' => false
+                    ];
+                }
+
+                if (strlen($new_password) < 6) {
+                    ths()->messages()->addMessage('Новый пароль должен содержать минимум 6 символов', 'error');
+                    return [
+                        'success' => false
+                    ];
+                }
+
+                $user_data['password'] = password_hash($new_password, PASSWORD_BCRYPT);
+            }
+
+            # Обновление других полей
+            if ($email !== null) {
+                $user_data['email'] = $email;
+            }
+            if ($name !== null) {
+                $user_data['name'] = $name;
+            }
+            if ($telegram_id !== null) {
+                $user_data['telegram_id'] = $telegram_id;
+            }
+            if ($data !== null) {
+                $user_data['data'] = $data;
+            }
+
+            # Обновление токена
+            $updated_token = Tokens::update($auth_data['token'], [
+                'data' => $user_data,
+                'last_call_at' => now()->toISOString(),
+            ]);
+
+            if (!$updated_token) {
+                ths()->messages()->addMessage('Ошибка обновления данных', 'error');
                 return [
-                    'success' => false,
-                    'messages' => [
-                        ['type' => 'error', 'text' => 'Для смены пароля требуется указать текущий пароль']
-                    ]
+                    'success' => false
                 ];
             }
 
-            if (!AuthMiddleware::verifyPassword($auth_data, $current_password)) {
-                return [
-                    'success' => false,
-                    'messages' => [
-                        ['type' => 'error', 'text' => 'Неверный текущий пароль']
-                    ]
-                ];
-            }
+            ths()->messages()->addMessage('Данные пользователя обновлены');
 
-            if (strlen($new_password) < 6) {
-                return [
-                    'success' => false,
-                    'messages' => [
-                        ['type' => 'error', 'text' => 'Новый пароль должен содержать минимум 6 символов']
-                    ]
-                ];
-            }
-
-            $user_data['password'] = password_hash($new_password, PASSWORD_BCRYPT);
-        }
-
-        // Обновление других полей
-        if ($email !== null) {
-            $user_data['email'] = $email;
-        }
-        if ($name !== null) {
-            $user_data['name'] = $name;
-        }
-        if ($telegram_id !== null) {
-            $user_data['telegram_id'] = $telegram_id;
-        }
-        if ($data !== null) {
-            $user_data['data'] = $data;
-        }
-
-        // Обновление токена
-        $updated_token = Tokens::update($auth_data['token'], [
-            'data' => $user_data,
-            'last_call_at' => now()->toISOString(),
-        ]);
-
-        if (!$updated_token) {
             return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Ошибка обновления данных']
+                'success' => true,
+                'user' => [
+                    'login' => $auth_data['login'],
+                    'email' => $user_data['email'] ?? null,
+                    'name' => $user_data['name'] ?? null,
+                    'telegram_id' => $user_data['telegram_id'] ?? null,
                 ]
             ];
-        }
-
-        return [
-            'success' => true,
-            'messages' => [
-                ['type' => 'success', 'text' => 'Данные пользователя обновлены']
-            ],
-            'user' => [
-                'login' => $auth_data['login'],
-                'email' => $user_data['email'] ?? null,
-                'name' => $user_data['name'] ?? null,
-                'telegram_id' => $user_data['telegram_id'] ?? null,
-            ]
-        ];
+        });
     }
-} 
+}
+
 ```
-`plugins/zen/threes/classes/AuthMiddleware.php`
+`plugins/zen/threes/classes/Auth.php`
 ```<?php
 
 namespace Zen\Threes\Classes;
 
-use Zen\Threes\Classes\Tokens;
+use Zen\Threes\Exceptions\AuthException;
 
-class AuthMiddleware
+/**
+ * Класс аутентификации
+ * разрешены только статические методы
+ */
+class Auth
 {
     /**
      * Проверяет авторизацию пользователя
-     * 
+     *
      * @return array|null Возвращает данные пользователя или null если не авторизован
      */
-    public static function checkAuth(): ?array
+    public static function getAuthData(): ?array
     {
         $auth_token = request()->header('ThreesAuth');
-        
+
         if (!$auth_token) {
             return null;
         }
@@ -1440,30 +1975,18 @@ class AuthMiddleware
         ];
     }
 
-    /**
-     * Проверяет авторизацию и возвращает ошибку если не авторизован
-     * 
-     * @return array|null Возвращает данные пользователя или массив с ошибкой
-     */
-    public static function requireAuth(): ?array
+    public static function check(): array
     {
-        $auth_data = self::checkAuth();
-        
-        if (!$auth_data) {
-            return [
-                'success' => false,
-                'messages' => [
-                    ['type' => 'error', 'text' => 'Требуется авторизация']
-                ]
-            ];
+        $auth = self::getAuthData();
+        if (!$auth) {
+            throw new AuthException();
         }
-
-        return $auth_data;
+        return $auth;
     }
 
     /**
      * Проверяет пароль пользователя
-     * 
+     *
      * @param array $auth_data Данные авторизации
      * @param string $password Пароль для проверки
      * @return bool
@@ -1472,10 +1995,11 @@ class AuthMiddleware
     {
         $user_data = $auth_data['user'] ?? [];
         $hashed_password = $user_data['password'] ?? '';
-        
+
         return password_verify($password, $hashed_password);
     }
-} 
+}
+
 ```
 `plugins/zen/threes/classes/Backlog.php`
 ```<?php
@@ -1799,6 +2323,11 @@ class Helpers
     public function nodes(): Nodes
     {
         return Nodes::getInstance();
+    }
+
+    public function auth(): Auth
+    {
+        return app(Auth::class);
     }
 
     /**
@@ -2801,27 +3330,59 @@ namespace Zen\Threes\Classes;
 
 use Zen\Threes\Handlers\TokensHandlerInterface;
 
+/**
+ * Класс для управления токенами (создание, получение, обновление, удаление).
+ * Токены хранятся в виде JSON-файлов в директории, заданной переменной окружения TOKENS_STORAGE.
+ * Поддерживает обработчики для разных подтипов токенов (auth, session и др.).
+ */
 class Tokens
 {
+    /**
+     * Путь к директории хранения токенов
+     * @var string|null
+     */
     protected static ?string $storage_path = null;
 
+    /**
+     * Карта обработчиков токенов по подтипу
+     * @var array<string, class-string<TokensHandlerInterface>>
+     */
     protected static array $handlers_map = [
         'auth' => \Zen\Threes\Handlers\TokensAuthHandler::class,
-        //'session' => \Zen\Threes\Handlers\TokensSessionHandler::class,
+        //'session' => \Zen\Threes\Handlers\TokensSessionHandler::class, # for example
     ];
 
+    /**
+     * Кеш обработчиков токенов
+     * @var array<string, TokensHandlerInterface|null>
+     */
     protected static array $handlers = [];
 
+    /**
+     * Получить путь к директории хранения токенов
+     * @return string
+     */
     protected static function path(): string
     {
         return self::$storage_path ??= rtrim(ths()->env('TOKENS_STORAGE'), '/');
     }
 
+    /**
+     * Получить путь к файлу токена по его идентификатору
+     * @param string $token
+     * @return string
+     */
     protected static function file(string $token): string
     {
         return self::path() . '/' . $token . '.json';
     }
 
+    /**
+     * Разобрать идентификатор токена на подтип и уникальную часть
+     * @param string $token
+     * @return array{0: string, 1: string} [subtype, id]
+     * @throws \InvalidArgumentException
+     */
     protected static function parseTokenId(string $token): array
     {
         $parts = explode('.', $token, 2);
@@ -2831,6 +3392,11 @@ class Tokens
         return [$parts[0], $parts[1]];
     }
 
+    /**
+     * Получить обработчик для подтипа токена
+     * @param string $subtype
+     * @return TokensHandlerInterface|null
+     */
     protected static function handler(string $subtype): ?TokensHandlerInterface
     {
         if (!isset(self::$handlers[$subtype])) {
@@ -2842,11 +3408,15 @@ class Tokens
         return self::$handlers[$subtype];
     }
 
+    /**
+     * Создать новый токен
+     * @param string $subtype Подтип токена (например, 'auth')
+     * @param array $payload Данные токена (uuid, data, ...)
+     * @return array Данные созданного токена
+     */
     public static function create(string $subtype, array $payload = []): array
     {
-        $uuid = ths()->createToken(32);
-        $token = "{$subtype}.{$uuid}";
-
+        $uuid = $payload['uuid'] ??= "$subtype." . ths()->createToken(32);
         $data = array_merge([
             'uuid' => $uuid,
             'subtype' => $subtype,
@@ -2860,10 +3430,15 @@ class Tokens
             $data = $handler->onCreate($data);
         }
 
-        ths()->toJsonFile(self::file($token), $data);
+        ths()->toJsonFile(self::file($uuid), $data);
         return $data;
     }
 
+    /**
+     * Получить данные токена по идентификатору
+     * @param string $token
+     * @return array|null Данные токена или null, если не найден
+     */
     public static function get(string $token): ?array
     {
         if (!file_exists(self::file($token))) {
@@ -2880,11 +3455,21 @@ class Tokens
         return $data;
     }
 
+    /**
+     * Проверить существование токена
+     * @param string $token
+     * @return bool
+     */
     public static function exists(string $token): bool
     {
         return file_exists(self::file($token));
     }
 
+    /**
+     * Удалить токен
+     * @param string $token
+     * @return bool true, если токен был удалён, иначе false
+     */
     public static function remove(string $token): bool
     {
         if (!file_exists(self::file($token))) {
@@ -2901,6 +3486,12 @@ class Tokens
         return unlink(self::file($token));
     }
 
+    /**
+     * Обновить данные токена
+     * @param string $token
+     * @param array $updates Массив обновляемых данных
+     * @return array|null Обновлённые данные токена или null, если токен не найден или не разрешено обновление
+     */
     public static function update(string $token, array $updates): ?array
     {
         if (!self::exists($token)) {
@@ -4281,6 +4872,22 @@ class Vector extends Command
         } else {
             $this->output->writeln($message);
         }
+    }
+}
+
+```
+`plugins/zen/threes/exceptions/AuthException.php`
+```<?php
+
+namespace Zen\Threes\Exceptions;
+
+use Exception;
+
+class AuthException extends Exception
+{
+    public function __construct(string $message = 'Необходима авторизация')
+    {
+        parent::__construct($message, 401);
     }
 }
 
@@ -15799,7 +16406,7 @@ app.mount("#threes");
 
 /**
  * Тестовый скрипт для проверки системы аутентификации Threes
- * 
+ *
  * Запуск: php test_auth.php
  */
 
@@ -15810,7 +16417,7 @@ $app = require_once __DIR__ . '/../../../bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
 use Zen\Threes\Classes\Tokens;
-use Zen\Threes\Classes\AuthMiddleware;
+use Zen\Threes\Classes\Auth;
 
 echo "=== Тест системы аутентификации Threes ===\n\n";
 
@@ -15911,8 +16518,8 @@ echo "\n6. Тест AuthMiddleware...\n";
 try {
     // Симулируем заголовок авторизации
     $_SERVER['HTTP_THREESAUTH'] = $token_id;
-    
-    $auth_data = AuthMiddleware::checkAuth();
+
+    $auth_data = Auth::getAuthData();
     if ($auth_data) {
         echo "✓ AuthMiddleware работает\n";
         echo "  - Login: {$auth_data['login']}\n";
@@ -15950,7 +16557,8 @@ if (!Tokens::exists($token_id)) {
 }
 
 echo "\n=== Все тесты пройдены успешно! ===\n";
-echo "Система аутентификации Threes работает корректно.\n"; 
+echo "Система аутентификации Threes работает корректно.\n";
+
 ```
 `plugins/zen/threes/traits/DebugLogTrait.php`
 ```<?php
