@@ -53,34 +53,36 @@ class Method
     {
         $parent = $node->parent;
         if ($parent) {
-            $this->writeCode($node, $data);
+            $this->generateClass($node->parent->nid);
         }
 
         return $data;
     }
 
-    public function writeCode(Node $node, $data): void
+    private function generateClass(string $nid): void
     {
-        $class_name = 'node_' . $node->parent->nid;
+        $node = ths()->nodes()->node($nid);
+        $class_name = 'node_' . $node->nid;
         $class_file = base_path("plugins/zen/threes/classes/methods/$class_name.php");
+        $nodes = $node->childrenOfType('Threes.Method');
 
-        # Если состояние не задано, создаём файл класса генератора и сразу подписываемся на закрытие скобкой
-        if (!ths()->getState("generation.$class_name")) {
-            file_put_contents($class_file, join("\n", [
-                "<?php\n\n",
-                "namespace Zen\Threes\Classes\Methods;",
-                "class $class_name",
-                "{\n",
-            ]));
-            ths()->setState("generation.$class_name", true);
-            ths()->events()->addEvent('terminating', function () use ($class_file) {
-                file_put_contents($class_file, "}\n", FILE_APPEND);
-            });
+        # Инициируем начало класса
+        file_put_contents($class_file, join("\n", [
+            "<?php\n\n",
+            "namespace Zen\Threes\Classes\Methods;",
+            "class $class_name",
+            "{\n",
+        ]));
+
+        # Пишем код в середину
+        foreach ($nodes as $node) {
+            $data = $node->data;
+            $code_lines = explode("\n", $data['code']);
+            $indented_code = implode("\n", array_map(fn($line) => '    ' . $line, $code_lines));
+            file_put_contents($class_file, $indented_code . "\n", FILE_APPEND);
         }
 
-
-        $code_lines = explode("\n", $data['code']);
-        $indented_code = implode("\n", array_map(fn($line) => '    ' . $line, $code_lines));
-        file_put_contents($class_file, $indented_code . "\n", FILE_APPEND);
+        # Закрываем класс скобкой
+        file_put_contents($class_file, "}\n", FILE_APPEND);
     }
 }

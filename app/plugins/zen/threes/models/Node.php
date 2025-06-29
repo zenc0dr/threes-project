@@ -172,6 +172,11 @@ class Node
             : [];
     }
 
+    public function childrenOfType(string $type): array
+    {
+        return array_filter($this->children, fn(Node $child) => $child->type === $type);
+    }
+
     public function getSiblingsAttribute(): array
     {
         if ($this->_siblingsCache !== null) return $this->_siblingsCache;
