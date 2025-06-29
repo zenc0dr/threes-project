@@ -4,7 +4,9 @@
             <div class="header-content">
                 <h1>Threes</h1>
                 <div class="user-info">
-                    <span v-if="user">{{ user.name || user.login }}</span>
+                    <span v-if="user" @click="$router.push('/profile')" style="cursor: pointer;">
+                        {{ user.name || user.login }}
+                    </span>
                     <Logout />
                 </div>
             </div>
