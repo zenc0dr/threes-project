@@ -155,6 +155,11 @@ abstract class ThreesApi
 
     protected function requireAuth(callable $callback): array
     {
+        # TODO: Потенциально опасный метод, требуется доработка
+        if (request()->has('debug')) {
+            return $callback();
+        }
+
         try {
             $this->auth = ths()->auth()::check();
             return $callback();
@@ -2205,51 +2210,51 @@ class Crypt
 namespace Zen\Threes\Classes;
 
 use Zen\Threes\Traits\SingletonTrait;
+use Closure;
+use Illuminate\Support\Collection;
 
 /**
  * Система внутренних событий Threes
- * Возможно не понадобиться
  */
 class Events
 {
     use SingletonTrait;
 
+    /**
+     * @var array[] Список событий
+     */
     private array $events = [];
 
     /**
      * Добавляет событие в систему событий
      *
      * @param string $hook_name Имя хука
-     * @param string $call Имя вызываемого метода
-     * @param mixed ...$arguments Аргументы для вызываемого метода
+     * @param string|Closure $call Метод или замыкание
+     * @param mixed ...$arguments Аргументы метода
      * @return void
      */
-    public function addEvent(string $hook_name, string $call, ...$arguments): void
+    public function addEvent(string $hook_name, string|Closure $call, ...$arguments): void
     {
-        $this->events[] = [
-            'hook_name' => $hook_name,
-            'call' => $call,
-            'arguments' => $arguments
-        ];
+        $this->events[] = compact('hook_name', 'call', 'arguments');
     }
 
     /**
      * Добавляет одно неповторяемое событие
-     * @param string $hook_name
-     * @param string $call
-     * @param ...$arguments
+     *
+     * @param string $hook_name Имя хука
+     * @param string|Closure $call Метод или замыкание
+     * @param mixed ...$arguments Аргументы метода
      * @return void
      */
-    public function addEventOnce(string $hook_name, string $call, ...$arguments): void
+    public function addEventOnce(string $hook_name, string|Closure $call, ...$arguments): void
     {
-        if (isset($this->events[$hook_name])) {
-            return;
+        foreach ($this->events as $event) {
+            if ($event['hook_name'] === $hook_name) {
+                return;
+            }
         }
-        $this->events[$hook_name] = [
-            'hook_name' => $hook_name,
-            'call' => $call,
-            'arguments' => $arguments
-        ];
+
+        $this->events[] = compact('hook_name', 'call', 'arguments');
     }
 
     /**
@@ -2259,15 +2264,14 @@ class Events
      */
     public function terminating(): void
     {
-        collect($this->events)
+        Collection::make($this->events)
             ->where('hook_name', 'terminating')
-            ->each(function($event) {
-                $this->runEvent($event);
-            });
+            ->each(fn($event) => $this->runEvent($event));
     }
 
     /**
      * Выполняет событие
+     *
      * @param array $event
      * @return void
      * @throws \ReflectionException
@@ -2276,7 +2280,12 @@ class Events
     {
         $call = $event['call'];
         $arguments = $event['arguments'];
-        ths()->exe($call, null, $arguments);
+
+        if (is_string($call)) {
+            ths()->exe($call, null, $arguments);
+        } elseif ($call instanceof Closure) {
+            $call(...$arguments);
+        }
     }
 }
 
@@ -4318,19 +4327,7 @@ trait Yaml
 namespace Zen\Threes\Classes\Methods;
 class node_cs77ys3z2cj5
 {
-    public function getText()
-    {
-        #sleep(5);  # Сон три секунда для проверки
     
-        ///$text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода
-    
-         $text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода
-         $text = $text . ' - вагон';
-    
-        $target = ths()->nodes()->node('hq45skan7gp7');  # <-- Вставляем сюда
-        $target->data = $text;
-        $target->save();
-    }
 }
 
 ```
@@ -4839,7 +4836,13 @@ class Vector extends Command
         $markdown = join(PHP_EOL, $output);
         $output_path = storage_path('threes_vector.md');
         file_put_contents($output_path, $markdown);
+        
+        // Получаем размер созданного файла
+        $file_size = filesize($output_path);
+        $formatted_size = ths()->formatSizeUnits($file_size);
+        
         $this->log("Output: $output_path");
+        $this->log("File size: $formatted_size");
     }
 
     /**
@@ -16110,6 +16113,8 @@ Route::match(
 );
 
 Route::view('/app/node/{nid?}', 'zen.threes::threes');
+Route::view('/login', 'zen.threes::threes');
+Route::view('/profile', 'zen.threes::threes');
 
 ```
 `plugins/zen/threes/src/js/auto-register-mixin.js`
