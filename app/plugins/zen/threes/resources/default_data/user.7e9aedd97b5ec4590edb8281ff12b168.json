@@ -1,0 +1,15 @@
+{
+    "uuid": "user.7e9aedd97b5ec4590edb8281ff12b168",
+    "subtype": "user",
+    "write": true,
+    "data": {
+        "password": "$2y$10$Bq\/YkRbPtbSCSDSaQeHd5er2MJvMC\/f41RfEOFj3gTYz6m9GyjmAC",
+        "email": "zen@8ber.ru",
+        "telegram_id": "zenc0dr",
+        "name": "Alex Blaze",
+        "data": []
+    },
+    "created_at": "2025-06-29T18:32:46.033264Z",
+    "storage_at": null,
+    "last_call_at": "2025-06-29T18:32:46.033138Z"
+}

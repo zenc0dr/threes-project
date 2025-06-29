@@ -10,18 +10,13 @@
                 />
             </div>
         </div>
-        <div class="threes-top">
-            <div class="tree-container">
+        <div class="threes-layout">
+            <div class="threes-sidebar">
                 <Tree />
                 <User />
             </div>
-            <div class="schema-container">
+            <div class="threes-main">
                 <Schema />
-            </div>
-        </div>
-        <div class="threes-bottom">
-            <div class="store-container">
-                <Store />
             </div>
         </div>
     </div>
@@ -91,42 +86,29 @@ export default {
     }
 }
 
-.threes-top {
+.threes-layout {
     display: flex;
-    flex: 1 1 auto; // занимать всё оставшееся пространство
+    flex: 1 1 auto;
     overflow: hidden;
 }
 
-.tree-container {
-    height: 100%;
-    overflow: auto;
+.threes-sidebar {
+    display: flex;
+    flex-direction: column;
     background: #ffffff;
     border-right: 1px solid #e2e2e2;
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
+    min-width: 250px;
+    max-width: 400px;
+    width: 300px;
+    height: 100%;
+    overflow: hidden;
 }
 
-.schema-container {
+.threes-main {
     flex: 1 1 auto;
     height: 100%;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
     background: #f4f4f4;
 }
-
-.threes-bottom {
-    flex-shrink: 0;
-    background: #fafafa;
-    border-top: 1px solid #ddd;
-}
-
-.store-container {
-    padding: 10px;
-}
-
-/* Полноэкранный режим */
-//.fullscreen {
-//}
 </style>

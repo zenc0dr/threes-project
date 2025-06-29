@@ -22,6 +22,15 @@ class Login
             ];
         }
 
+        if (!$this->checkWhiteList($login)) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Ваш логин должен быть активирован администратором']
+                ]
+            ];
+        }
+
         # Проверка существования пользователя
         $login_hash = md5($login);
         $token_uuid = 'user.' . $login_hash;
@@ -65,5 +74,12 @@ class Login
                 'telegram_id' => $user_data['telegram_id'] ?? null,
             ]
         ];
+    }
+
+    private function checkWhiteList(string $login): bool
+    {
+        $white_list = ths()->env('THREES_WHITE_LIST', '');
+        $white_list = array_map('trim', explode(',', $white_list));
+        return in_array($login, $white_list);
     }
 }
