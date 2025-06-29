@@ -13,6 +13,7 @@
         <div class="threes-top">
             <div class="tree-container">
                 <Tree />
+                <User />
             </div>
             <div class="schema-container">
                 <Schema />
@@ -29,6 +30,8 @@
 import Tree from '../components/Tree.vue'
 import Schema from '../components/Schema.vue'
 import Store from '../components/Store.vue'
+import User from '../components/User.vue'
+
 export default {
     name: 'Stand',
     props: {
@@ -49,7 +52,8 @@ export default {
     components: {
         Tree,
         Schema,
-        Store
+        Store,
+        User
     },
     mounted() {
         if (this.nid) {
@@ -100,6 +104,7 @@ export default {
     border-right: 1px solid #e2e2e2;
     flex-shrink: 0;
     display: flex;
+    flex-direction: column;
 }
 
 .schema-container {

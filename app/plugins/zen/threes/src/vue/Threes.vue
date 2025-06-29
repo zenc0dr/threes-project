@@ -1,11 +1,5 @@
 <template>
     <div class="threes">
-        <div v-if="isAuthenticated" class="threes-header">
-            <div class="header-content">
-                <h1>Threes</h1>
-            </div>
-        </div>
-
         <router-view />
         <threes-alerts />
         <threes-submit />
@@ -24,17 +18,11 @@ export default {
     },
     data() {
         return {
-            user: null,
             checkingAuth: true
         };
     },
     mounted() {
         this.checkAuth()
-    },
-    computed: {
-        isAuthenticated() {
-            return !this.checkingAuth && !!localStorage.getItem('ths_token')
-        },
     },
     methods: {
         checkAuth() {
@@ -51,7 +39,8 @@ export default {
                 then: (response) => {
                     this.checkingAuth = false
                     if (response.success) {
-                        this.user = response.user
+                        console.log('Записываю ',response.user)
+                        ths.data.user = response.user
                     } else {
                         // Токен недействителен
                         localStorage.removeItem('ths_token')

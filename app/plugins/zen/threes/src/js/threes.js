@@ -23,6 +23,9 @@ window.ths = {
     // Реактивные данные
     data: reactive({
 
+        // Пользователь Threes
+        user: null,
+
         // Компоненты Threes
         components: {},
 
