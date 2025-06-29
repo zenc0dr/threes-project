@@ -4,6 +4,7 @@ use System\Classes\PluginBase;
 use Zen\Threes\Console\Vector;
 use Zen\Threes\Console\BacklogFill;
 use Zen\Threes\Console\Gen;
+use Zen\Threes\Console\Restore;
 use Log;
 
 class Plugin extends PluginBase
@@ -14,6 +15,7 @@ class Plugin extends PluginBase
         $this->registerConsoleCommand('threes:vector', Vector::class);
         $this->registerConsoleCommand('threes:backlog_fill', BacklogFill::class);
         $this->registerConsoleCommand('threes:gen', Gen::class);
+        $this->registerConsoleCommand('threes:restore', Restore::class);
     }
 
     public function boot()
