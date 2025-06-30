@@ -1,24 +1,6 @@
 <template>
     <div class="threes-nt">
         <div class="tree-list">
-            <div class="tree-list__menu">
-                <div @click="show = !show"
-                     class="tree-list__menu__button"
-                     :title="show ? 'Скрыть меню' : 'Показать меню'"
-                >
-                    <i :class="show ? 'oc-icon-caret-left' : 'oc-icon-caret-right'"></i>
-                </div>
-                <div v-if="show" class="tree-list__search">
-                    <i class="oc-icon-search"></i>
-                    <input
-                        type="text"
-                        v-model="search"
-                        class="tree-list__search-input"
-                        placeholder="Поиск..."
-                        @keydown.enter="submitSearch"
-                    />
-                </div>
-            </div>
             <template v-if="show">
                 <tree-item
                     v-for="item in tree"
@@ -38,20 +20,23 @@ import TreeItem from './TreeItem.vue'
 export default {
     name: 'Tree',
     components: { TreeItem },
+    props: {
+        search: {
+            type: String,
+            default: ''
+        }
+    },
     data() {
         return {
             ths: window.ths,
             show: true,
-            search: '',
             tree: [],
-            searchTimer: null,
             nodesToOpen: [],
         }
     },
     watch: {
         search() {
-            clearTimeout(this.searchTimer)
-            this.searchTimer = setTimeout(this.getTree, 400)
+            this.getTree()
         }
     },
     created() {
@@ -62,7 +47,6 @@ export default {
     },
     unmounted() {
         this.ths.unmountComponent('Tree')
-        clearTimeout(this.searchTimer)
     },
     methods: {
         getTree() {
@@ -117,10 +101,6 @@ export default {
             // Путь не найден в этой ветке
             return null;
         },
-        submitSearch() {
-            clearTimeout(this.searchTimer)
-            this.getTree()
-        },
         moveAction({nid, direction}) {
             this.ths.api({
                 api: 'nodes.node:move-node',
@@ -158,59 +138,6 @@ export default {
         overflow-y: auto;
         overflow-x: hidden;
         width: 100%;
-    }
-
-    .tree-list__menu {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px;
-        padding-bottom: 5px;
-        width: 100%;
-
-        &__button {
-            background: #f7f7f7;
-            border-radius: 4px;
-            padding: 4px 8px;
-            color: #b4b4b4;
-            cursor: pointer;
-            transition: 200ms;
-            flex-shrink: 0;
-
-            &:hover {
-                background: #e7e7e7;
-            }
-        }
-    }
-
-    .tree-list__search {
-        position: relative;
-        display: flex;
-        align-items: center;
-        background: white;
-        border-radius: 4px;
-        flex-grow: 1;
-        padding-left: 24px;
-        min-width: 0;
-
-        i {
-            position: absolute;
-            left: 8px;
-            color: #aaa;
-            font-size: 14px;
-        }
-
-        &-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            padding: 5px 8px;
-            padding-top: 7px;
-            padding-bottom: 2px;
-            font-size: 13px;
-            color: #333;
-        }
     }
 }
 </style>

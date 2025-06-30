@@ -11,10 +11,17 @@
             </div>
         </div>
         <div class="threes-layout">
-            <div class="threes-sidebar" :style="{ width: sidebarWidth + 'px' }">
-                <Tree />
-                <User />
+            <div class="threes-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
+                <TreeHeader 
+                    :collapsed="sidebarCollapsed"
+                    @toggle="toggleSidebar"
+                    @search="handleSearch"
+                    @add-node="handleAddNode"
+                />
+                <Tree v-if="!sidebarCollapsed" :search="treeSearch" />
+                <User v-if="!sidebarCollapsed" />
                 <div 
+                    v-if="!sidebarCollapsed"
                     class="threes-sidebar__resizer"
                     @mousedown="startResize"
                     title="Изменить ширину"
@@ -31,6 +38,7 @@ import Tree from '../components/Tree.vue'
 import Schema from '../components/Schema.vue'
 import Store from '../components/Store.vue'
 import User from '../components/User.vue'
+import TreeHeader from '../components/TreeHeader.vue'
 
 export default {
     name: 'Stand',
@@ -48,17 +56,28 @@ export default {
         return {
             fullscreen: false,
             sidebarWidth: 300,
+            sidebarCollapsed: false,
             isResizing: false,
             minWidth: 200,
             maxWidth: 600,
-            resizeThrottle: null
+            resizeThrottle: null,
+            treeSearch: ''
+        }
+    },
+    computed: {
+        sidebarStyle() {
+            if (this.sidebarCollapsed) {
+                return { width: '40px' }
+            }
+            return { width: this.sidebarWidth + 'px' }
         }
     },
     components: {
         Tree,
         Schema,
         Store,
-        User
+        User,
+        TreeHeader
     },
     mounted() {
         if (this.nid) {
@@ -71,6 +90,7 @@ export default {
         
         // Загружаем сохраненную ширину из localStorage
         this.loadSidebarWidth()
+        this.loadSidebarCollapsed()
         
         // Добавляем глобальные обработчики событий мыши
         document.addEventListener('mousemove', this.handleMouseMove)
@@ -96,8 +116,33 @@ export default {
             }
         },
         
+        loadSidebarCollapsed() {
+            const saved = localStorage.getItem('threes_sidebar_collapsed')
+            if (saved) {
+                this.sidebarCollapsed = saved === 'true'
+            }
+        },
+        
         saveSidebarWidth() {
             localStorage.setItem('threes_sidebar_width', this.sidebarWidth.toString())
+        },
+        
+        saveSidebarCollapsed() {
+            localStorage.setItem('threes_sidebar_collapsed', this.sidebarCollapsed.toString())
+        },
+        
+        toggleSidebar() {
+            this.sidebarCollapsed = !this.sidebarCollapsed
+            this.saveSidebarCollapsed()
+        },
+        
+        handleSearch(search) {
+            this.treeSearch = search
+        },
+        
+        handleAddNode() {
+            // TODO: Реализовать добавление нода
+            console.log('Add node clicked')
         },
         
         startResize(event) {
@@ -127,13 +172,6 @@ export default {
                 this.isResizing = false
                 document.body.style.cursor = ''
                 document.body.style.userSelect = ''
-                
-                // Очищаем throttle
-                if (this.resizeThrottle) {
-                    cancelAnimationFrame(this.resizeThrottle)
-                    this.resizeThrottle = null
-                }
-                
                 this.saveSidebarWidth()
             }
         }
@@ -172,11 +210,17 @@ export default {
     background: #ffffff;
     border-right: 1px solid #e2e2e2;
     flex-shrink: 0;
-    min-width: 200px;
+    min-width: 40px;
     max-width: 600px;
     height: 100%;
     overflow: hidden;
     position: relative;
+    transition: width 0.2s ease;
+    
+    &.collapsed {
+        width: 40px !important;
+        min-width: 40px;
+    }
     
     &__resizer {
         position: absolute;
