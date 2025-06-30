@@ -26,8 +26,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $method = new Method();
-        $method->generateClass('cs77ys3z2cj5');
+        $auth_data = ths()->auth()::getAuthData();
+        dd($auth_data);
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector

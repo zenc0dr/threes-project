@@ -76,6 +76,7 @@ class Register
 
         # Создание токена пользователя
         $user_data = [
+            'login' => $login,
             'password' => $hashed_password,
             'email' => $email,
             'telegram_id' => $telegram_id,
