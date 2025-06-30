@@ -9,7 +9,7 @@
                 <i :class="collapsed ? 'oc-icon-caret-right' : 'oc-icon-caret-left'"></i>
             </div>
 
-            <div v-if="!collapsed" class="tree-header__search">
+            <div v-if="!collapsed" class="tree-header__search" @click.stop>
                 <i class="oc-icon-search"></i>
                 <input
                     type="text"
@@ -17,10 +17,16 @@
                     class="tree-header__search-input"
                     placeholder="Поиск..."
                     @keydown.enter="submitSearch"
+                    @click.stop
+                    @focus.stop
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                 />
             </div>
 
-            <div v-if="!collapsed" class="tree-header__add-btn">
+            <div v-if="!collapsed" class="tree-header__add-btn" @click.stop>
                 <i
                     class="oc-icon-plus"
                     title="Добавить нод"
