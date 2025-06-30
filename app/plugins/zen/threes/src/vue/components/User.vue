@@ -20,23 +20,28 @@ export default {
             user: ths.data.user || null,
         };
     },
-    mounted() {
-        // Если `ths.data` — Vue reactive, то это будет работать.
-        // Проверяем наличие Vue 3 реактивности
-        if (window.ths && window.ths.data) {
-            this.unwatch = this.$watch(
-                () => ths.data.user,
-                (newVal) => {
-                    this.user = newVal;
-                },
-                { immediate: true, deep: false }
-            );
+    watch: {
+        'ths.data.user'(user) {
+            if (user) {
+                this.user = user
+            }
         }
+    },
+    mounted() {
+        this.getUser()
     },
     beforeUnmount() {
         if (this.unwatch) this.unwatch();
     },
     methods: {
+        getUser() {
+            if (!this.user) {
+                this.user = this.ths.data.user
+                setTimeout(() => {
+                    this.checkUser()
+                }, 1000)
+            }
+        },
         logout() {
             localStorage.removeItem('ths_token');
             this.$router.push('/login');
