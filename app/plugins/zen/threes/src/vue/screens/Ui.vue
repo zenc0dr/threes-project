@@ -50,7 +50,8 @@ export default {
             sidebarWidth: 300,
             isResizing: false,
             minWidth: 200,
-            maxWidth: 600
+            maxWidth: 600,
+            resizeThrottle: null
         }
     },
     components: {
@@ -109,10 +110,16 @@ export default {
         handleMouseMove(event) {
             if (!this.isResizing) return
             
-            const newWidth = event.clientX
-            if (newWidth >= this.minWidth && newWidth <= this.maxWidth) {
-                this.sidebarWidth = newWidth
-            }
+            // Throttling для оптимизации производительности
+            if (this.resizeThrottle) return
+            
+            this.resizeThrottle = requestAnimationFrame(() => {
+                const newWidth = event.clientX
+                if (newWidth >= this.minWidth && newWidth <= this.maxWidth) {
+                    this.sidebarWidth = newWidth
+                }
+                this.resizeThrottle = null
+            })
         },
         
         handleMouseUp() {
@@ -120,6 +127,13 @@ export default {
                 this.isResizing = false
                 document.body.style.cursor = ''
                 document.body.style.userSelect = ''
+                
+                // Очищаем throttle
+                if (this.resizeThrottle) {
+                    cancelAnimationFrame(this.resizeThrottle)
+                    this.resizeThrottle = null
+                }
+                
                 this.saveSidebarWidth()
             }
         }
