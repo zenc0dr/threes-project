@@ -41,6 +41,12 @@ window.ths = {
         node_action: null,
     }),
 
+    // Определение мобильного устройства
+    isMobile() {
+        return window.innerWidth <= 768 || 
+               /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    },
+
     getNodeUrl(nid) {
         if (this.data.backend) {
             return `/${this.data.backend}/zen/threes/nodecontroller/node/${nid}`

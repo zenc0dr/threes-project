@@ -1,5 +1,5 @@
 <template>
-    <div class="threes-ui" :class="{ fullscreen: fullscreen }">
+    <div class="threes-ui" :class="{ fullscreen: fullscreen, mobile: isMobile }">
         <div v-if="backend" class="threes-settings">
             <div class="threes-settings__button">
                 <i
@@ -11,7 +11,10 @@
             </div>
         </div>
         <div class="threes-layout">
-            <div class="threes-sidebar" :class="{ collapsed: sidebarCollapsed }" :style="sidebarStyle">
+            <!-- Мобильное меню overlay -->
+            <div v-if="isMobile" class="threes-mobile-overlay" :class="{ active: mobileMenuOpen }" @click="closeMobileMenu"></div>
+            
+            <div class="threes-sidebar" :class="{ collapsed: sidebarCollapsed, 'mobile-open': mobileMenuOpen }" :style="sidebarStyle">
                 <TreeHeader 
                     :collapsed="sidebarCollapsed"
                     @toggle="toggleSidebar"
@@ -19,9 +22,9 @@
                     @add-node="handleAddNode"
                 />
                 <Tree v-if="!sidebarCollapsed" :search="treeSearch" />
-                <User v-if="!sidebarCollapsed" />
+                <User v-if="!sidebarCollapsed && !isMobile" />
                 <div 
-                    v-if="!sidebarCollapsed"
+                    v-if="!sidebarCollapsed && !isMobile"
                     class="threes-sidebar__resizer"
                     @mousedown="startResize"
                     title="Изменить ширину"
@@ -30,6 +33,11 @@
             <div class="threes-main">
                 <Schema />
             </div>
+        </div>
+        
+        <!-- Мобильная bottom navigation -->
+        <div v-if="isMobile" class="threes-mobile-nav">
+            <User @toggle-mobile-menu="toggleMobileMenu" />
         </div>
     </div>
 </template>
@@ -61,11 +69,16 @@ export default {
             minWidth: 200,
             maxWidth: 600,
             resizeThrottle: null,
-            treeSearch: ''
+            treeSearch: '',
+            isMobile: false,
+            mobileMenuOpen: false
         }
     },
     computed: {
         sidebarStyle() {
+            if (this.isMobile) {
+                return { width: '280px' }
+            }
             if (this.sidebarCollapsed) {
                 return { width: '40px' }
             }
@@ -88,6 +101,10 @@ export default {
             this.fullscreen = true
         }
         
+        // Определяем мобильное устройство
+        this.checkMobile()
+        window.addEventListener('resize', this.checkMobile)
+        
         // Загружаем сохраненную ширину из localStorage
         this.loadSidebarWidth()
         this.loadSidebarCollapsed()
@@ -98,10 +115,18 @@ export default {
     },
     beforeUnmount() {
         // Удаляем глобальные обработчики
+        window.removeEventListener('resize', this.checkMobile)
         document.removeEventListener('mousemove', this.handleMouseMove)
         document.removeEventListener('mouseup', this.handleMouseUp)
     },
     methods: {
+        checkMobile() {
+            this.isMobile = ths.isMobile()
+            if (this.isMobile && this.mobileMenuOpen) {
+                this.closeMobileMenu()
+            }
+        },
+        
         goToApp() {
             window.location.href = '/app/node'
         },
@@ -132,8 +157,20 @@ export default {
         },
         
         toggleSidebar() {
-            this.sidebarCollapsed = !this.sidebarCollapsed
-            this.saveSidebarCollapsed()
+            if (this.isMobile) {
+                this.toggleMobileMenu()
+            } else {
+                this.sidebarCollapsed = !this.sidebarCollapsed
+                this.saveSidebarCollapsed()
+            }
+        },
+        
+        toggleMobileMenu() {
+            this.mobileMenuOpen = !this.mobileMenuOpen
+        },
+        
+        closeMobileMenu() {
+            this.mobileMenuOpen = false
         },
         
         handleSearch(search) {
@@ -146,6 +183,7 @@ export default {
         },
         
         startResize(event) {
+            if (this.isMobile) return
             event.preventDefault()
             this.isResizing = true
             document.body.style.cursor = 'col-resize'
@@ -153,7 +191,7 @@ export default {
         },
         
         handleMouseMove(event) {
-            if (!this.isResizing) return
+            if (!this.isResizing || this.isMobile) return
             
             // Throttling для оптимизации производительности
             if (this.resizeThrottle) return
@@ -184,6 +222,18 @@ export default {
     flex-direction: column;
     height: 100vh;
     background: #f5f5f5;
+    
+    &.mobile {
+        .threes-layout {
+            flex: 1;
+            position: relative;
+        }
+        
+        .threes-main {
+            width: 100%;
+            height: 100%;
+        }
+    }
 }
 
 .threes-settings {
@@ -204,6 +254,24 @@ export default {
     overflow: hidden;
 }
 
+.threes-mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
 .threes-sidebar {
     display: flex;
     flex-direction: column;
@@ -220,6 +288,21 @@ export default {
     &.collapsed {
         width: 40px !important;
         min-width: 40px;
+    }
+    
+    // Мобильные стили
+    .mobile & {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px !important;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        
+        &.mobile-open {
+            left: 0;
+        }
     }
     
     &__resizer {
@@ -247,5 +330,16 @@ export default {
     height: 100%;
     overflow-y: auto;
     background: #f4f4f4;
+}
+
+.threes-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 1px solid #e2e2e2;
+    z-index: 1001;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 </style>
