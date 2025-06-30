@@ -13,24 +13,36 @@
     </div>
 </template>
 <script>
-
 export default {
     name: 'User',
     data() {
         return {
-            user: ths.data.user
+            user: ths.data.user || null,
+        };
+    },
+    mounted() {
+        // Если `ths.data` — Vue reactive, то это будет работать.
+        // Проверяем наличие Vue 3 реактивности
+        if (window.ths && window.ths.data) {
+            this.unwatch = this.$watch(
+                () => ths.data.user,
+                (newVal) => {
+                    this.user = newVal;
+                },
+                { immediate: true, deep: false }
+            );
         }
+    },
+    beforeUnmount() {
+        if (this.unwatch) this.unwatch();
     },
     methods: {
         logout() {
-            // Удаляем токен из localStorage
             localStorage.removeItem('ths_token');
-
-            // Перенаправляем на страницу входа
             this.$router.push('/login');
-        }
-    }
-}
+        },
+    },
+};
 </script>
 <style lang="scss">
 .threes-user {

@@ -13,10 +13,11 @@ class Profile extends ThreesApi
         return $this->requireAuth(function () {
             $auth_data = ths()->auth()::getAuthData();
             $user_data = $auth_data['user'] ?? [];
+
             return [
                 'success' => true,
                 'user' => [
-                    'login' => $auth_data['login'],
+                    'login' => $user_data['login'] ?? ' -- ',
                     'email' => $user_data['email'] ?? null,
                     'name' => $user_data['name'] ?? null,
                     'telegram_id' => $user_data['telegram_id'] ?? null,

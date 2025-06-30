@@ -19,11 +19,16 @@ class Auth
     {
         $auth_token = request()->header('ThreesAuth');
 
+        if (request()->has('debug')) {
+            $auth_token = request('auth_token');
+        }
+
         if (!$auth_token) {
             return null;
         }
 
         $token_data = Tokens::get($auth_token);
+
         if (!$token_data) {
             return null;
         }
@@ -31,7 +36,6 @@ class Auth
         return [
             'token' => $auth_token,
             'user' => $token_data['data'] ?? [],
-            'login' => $token_data['uuid'],
             'created_at' => $token_data['created_at'] ?? null,
             'last_call_at' => $token_data['last_call_at'] ?? null,
         ];
