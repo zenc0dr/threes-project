@@ -26,8 +26,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-        $auth_data = ths()->auth()::getAuthData();
-        dd($auth_data);
+        ths()->notice()->telegramSendMessage("📦 Import nodes started...");
+        //ths()->notice()->telegramSendMessage("🐞 ErrorException\n Illuminate\Foundation\Bootstrap\HandleExceptions->Illuminate\Foundation\Bootstrap\{closure}(…)");
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
