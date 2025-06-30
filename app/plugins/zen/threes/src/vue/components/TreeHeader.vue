@@ -1,14 +1,14 @@
 <template>
     <div class="threes-tree-header">
         <div class="tree-header__controls">
-            <div 
+            <div
                 @click="$emit('toggle')"
                 class="tree-header__toggle-btn"
                 :title="collapsed ? 'Раскрыть меню' : 'Свернуть меню'"
             >
                 <i :class="collapsed ? 'oc-icon-caret-right' : 'oc-icon-caret-left'"></i>
             </div>
-            
+
             <div v-if="!collapsed" class="tree-header__search">
                 <i class="oc-icon-search"></i>
                 <input
@@ -19,9 +19,9 @@
                     @keydown.enter="submitSearch"
                 />
             </div>
-            
+
             <div v-if="!collapsed" class="tree-header__add-btn">
-                <i 
+                <i
                     class="oc-icon-plus"
                     title="Добавить нод"
                     @click="addNode"
@@ -75,7 +75,7 @@ export default {
     background: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
     min-width: 40px;
-    
+
     .tree-header__controls {
         display: flex;
         align-items: center;
@@ -83,7 +83,10 @@ export default {
         padding: 4px;
         min-height: 40px;
         width: 100%;
-        
+        overflow: hidden;
+        white-space: nowrap;
+        justify-content: space-between;
+
         &__toggle-btn {
             background: #f7f7f7;
             border-radius: 4px;
@@ -101,22 +104,24 @@ export default {
                 background: #e7e7e7;
             }
         }
-        
+
         &__search {
             position: relative;
             display: flex;
             align-items: center;
             background: white;
             border-radius: 4px;
-            flex-grow: 1;
-            padding-left: 24px;
+            flex: 1;
             min-width: 0;
+            padding-left: 24px;
+            overflow: hidden;
 
             i {
                 position: absolute;
                 left: 8px;
                 color: #aaa;
                 font-size: 14px;
+                flex-shrink: 0;
             }
 
             &-input {
@@ -129,10 +134,13 @@ export default {
                 padding-bottom: 2px;
                 font-size: 13px;
                 color: #333;
+                min-width: 0;
             }
         }
-        
+
         &__add-btn {
+            flex-shrink: 0;
+
             i {
                 padding: 4px 8px;
                 background: #28a745;
@@ -140,12 +148,22 @@ export default {
                 border-radius: 4px;
                 cursor: pointer;
                 transition: 200ms;
-                
+
                 &:hover {
                     background: #218838;
                 }
             }
         }
+
+        .tree-header__search {
+            margin-right: auto;
+        }
+
+        .tree-header__search-input {
+            border: none;
+            outline: none;
+            padding: 2px 6px;
+        }
     }
 }
-</style> 
+</style>
