@@ -148,6 +148,7 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%;
 
     .tree-list {
         display: flex;
@@ -156,6 +157,7 @@ export default {
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
+        width: 100%;
     }
 
     .tree-list__menu {
@@ -164,6 +166,7 @@ export default {
         gap: 6px;
         padding: 4px;
         padding-bottom: 5px;
+        width: 100%;
 
         &__button {
             background: #f7f7f7;
@@ -172,6 +175,7 @@ export default {
             color: #b4b4b4;
             cursor: pointer;
             transition: 200ms;
+            flex-shrink: 0;
 
             &:hover {
                 background: #e7e7e7;
@@ -187,6 +191,7 @@ export default {
         border-radius: 4px;
         flex-grow: 1;
         padding-left: 24px;
+        min-width: 0;
 
         i {
             position: absolute;

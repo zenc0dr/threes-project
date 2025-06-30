@@ -5,6 +5,7 @@ use System\Classes\PluginBase;
 use Zen\Threes\Console\Vector;
 use Zen\Threes\Console\BacklogFill;
 use Zen\Threes\Console\Gen;
+use Zen\Threes\Console\Restore;
 use Log;
 
 class Plugin extends PluginBase
@@ -15,6 +16,7 @@ class Plugin extends PluginBase
         $this->registerConsoleCommand('threes:vector', Vector::class);
         $this->registerConsoleCommand('threes:backlog_fill', BacklogFill::class);
         $this->registerConsoleCommand('threes:gen', Gen::class);
+        $this->registerConsoleCommand('threes:restore', Restore::class);
     }
 
     public function boot()
@@ -153,7 +155,7 @@ abstract class ThreesApi
 {
     protected array $auth = [];
 
-    protected function requireAuth(callable $callback): array
+    protected function requireAuth(callable $callback): ?array
     {
         # TODO: Потенциально опасный метод, требуется доработка
         if (request()->has('debug')) {
@@ -230,6 +232,15 @@ class Login
             ];
         }
 
+        if (!$this->checkWhiteList($login)) {
+            return [
+                'success' => false,
+                'messages' => [
+                    ['type' => 'error', 'text' => 'Ваш логин должен быть активирован администратором']
+                ]
+            ];
+        }
+
         # Проверка существования пользователя
         $login_hash = md5($login);
         $token_uuid = 'user.' . $login_hash;
@@ -273,6 +284,13 @@ class Login
                 'telegram_id' => $user_data['telegram_id'] ?? null,
             ]
         ];
+    }
+
+    private function checkWhiteList(string $login): bool
+    {
+        $white_list = ths()->env('THREES_WHITE_LIST', '');
+        $white_list = array_map('trim', explode(',', $white_list));
+        return in_array($login, $white_list);
     }
 }
 
@@ -356,6 +374,7 @@ class Register
 
         # Создание токена пользователя
         $user_data = [
+            'login' => $login,
             'password' => $hashed_password,
             'email' => $email,
             'telegram_id' => $telegram_id,
@@ -418,6 +437,7 @@ use Zen\Threes\Classes\Nodes;
 use Zen\Threes\Console\Vector;
 use Zen\Threes\Traits\DebugLogTrait;
 use Zen\Threes\Classes\Tokens;
+use Zen\Threes\Classes\Types\Method;
 
 /**
  * Данный класс существует для отладки и экспериментов
@@ -430,7 +450,8 @@ class Tests
     # http://threes.dc/threes.api/debug.Tests:debug
     public function debug()
     {
-
+        ths()->notice()->telegramSendMessage("📦 Import nodes started...");
+        //ths()->notice()->telegramSendMessage("🐞 ErrorException\n Illuminate\Foundation\Bootstrap\HandleExceptions->Illuminate\Foundation\Bootstrap\{closure}(…)");
     }
 
     # http://threes.dc/threes.api/debug.Tests:testConnector
@@ -1832,10 +1853,11 @@ class Profile extends ThreesApi
         return $this->requireAuth(function () {
             $auth_data = ths()->auth()::getAuthData();
             $user_data = $auth_data['user'] ?? [];
+
             return [
                 'success' => true,
                 'user' => [
-                    'login' => $auth_data['login'],
+                    'login' => $user_data['login'] ?? ' -- ',
                     'email' => $user_data['email'] ?? null,
                     'name' => $user_data['name'] ?? null,
                     'telegram_id' => $user_data['telegram_id'] ?? null,
@@ -1962,11 +1984,16 @@ class Auth
     {
         $auth_token = request()->header('ThreesAuth');
 
+        if (request()->has('debug')) {
+            $auth_token = request('auth_token');
+        }
+
         if (!$auth_token) {
             return null;
         }
 
         $token_data = Tokens::get($auth_token);
+
         if (!$token_data) {
             return null;
         }
@@ -1974,7 +2001,6 @@ class Auth
         return [
             'token' => $auth_token,
             'user' => $token_data['data'] ?? [],
-            'login' => $token_data['uuid'],
             'created_at' => $token_data['created_at'] ?? null,
             'last_call_at' => $token_data['last_call_at'] ?? null,
         ];
@@ -3738,13 +3764,14 @@ trait Env
         ],
     ];
 
-    public function env(string $key): ?string
+    public function env(string $key, $default = null): ?string
     {
+        self::$env[$key] ??= [];
         if (isset(self::$env[$key]['value'])) {
             return self::$env[$key]['value'];
         }
-
-        return self::$env[$key]['value'] = base_path(env($key, self::$env[$key]['default']));
+        self::$env[$key]['default'] ??= $default;
+        return self::$env[$key]['value'] = env($key, self::$env[$key]['default']);
     }
 }
 
@@ -4327,7 +4354,29 @@ trait Yaml
 namespace Zen\Threes\Classes\Methods;
 class node_cs77ys3z2cj5
 {
+    public function getText()
+    {
+        #sleep(5);  # Сон три секунда для проверки
     
+    
+        //$text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода
+    
+         $text = ths()->nodes()->node('hq45skan7gp7')->data; # <-- Берём данные из этого нода
+         $text = $text . ' - вагон';
+    
+        $target = ths()->nodes()->node('hq45skan7gp7');  # <-- Вставляем сюда
+        $target->data = $text;
+        $target->save();
+    }
+    public function addRest()
+    {
+         $vagon_text = ths()->nodes()->node('sqtyyesgac7n')->data;
+         $text = ths()->nodes()->node('hq45skan7gp7')->data;
+         $text = $text . $vagon_text;
+        $target = ths()->nodes()->node('hq45skan7gp7'); 
+        $target->data = $text;
+        $target->save();
+    }
 }
 
 ```
@@ -4620,36 +4669,37 @@ class Method
     {
         $parent = $node->parent;
         if ($parent) {
-            $this->writeCode($node, $data);
+            $this->generateClass($node->parent->nid);
         }
 
         return $data;
     }
 
-    public function writeCode(Node $node, $data): void
+    private function generateClass(string $nid): void
     {
-        $class_name = 'node_' . $node->parent->nid;
+        $node = ths()->nodes()->node($nid);
+        $class_name = 'node_' . $node->nid;
         $class_file = base_path("plugins/zen/threes/classes/methods/$class_name.php");
+        $nodes = $node->childrenOfType('Threes.Method');
 
-        if (!$node->prev) {
-            if (file_exists($class_file)) {
-                unlink($class_file);
-            }
-            file_put_contents($class_file, join("\n", [
-                "<?php\n\n",
-                "namespace Zen\Threes\Classes\Methods;",
-                "class $class_name",
-                "{\n",
-            ]));
+        # Инициируем начало класса
+        file_put_contents($class_file, join("\n", [
+            "<?php\n\n",
+            "namespace Zen\Threes\Classes\Methods;",
+            "class $class_name",
+            "{\n",
+        ]));
+
+        # Пишем код в середину
+        foreach ($nodes as $node) {
+            $data = $node->data;
+            $code_lines = explode("\n", $data['code']);
+            $indented_code = implode("\n", array_map(fn($line) => '    ' . $line, $code_lines));
+            file_put_contents($class_file, $indented_code . "\n", FILE_APPEND);
         }
 
-        $code_lines = explode("\n", $data['code']);
-        $indented_code = implode("\n", array_map(fn($line) => '    ' . $line, $code_lines));
-        file_put_contents($class_file, $indented_code . "\n", FILE_APPEND);
-
-        if (!$node->next) {
-            file_put_contents($class_file, "}\n", FILE_APPEND);
-        }
+        # Закрываем класс скобкой
+        file_put_contents($class_file, "}\n", FILE_APPEND);
     }
 }
 
@@ -4791,6 +4841,33 @@ class Gen extends Command
     }
 }
 
+```
+`plugins/zen/threes/console/Restore.php`
+```<?php namespace Zen\Threes\Console;
+
+use Illuminate\Console\Command;
+
+/**
+ * Restore Command
+ *
+ * Копирует файл пользователя в хранилище токенов
+ * @link https://docs.octobercms.com/3.x/extend/console-commands.html
+ */
+class Restore extends Command
+{
+    protected $signature = 'threes:restore';
+    protected $description = 'Восстановить токен пользователя из резервной копии';
+
+    public function handle()
+    {
+        $source = base_path('plugins/zen/threes/resources/default_data/user.7e9aedd97b5ec4590edb8281ff12b168.json');
+        $destination = storage_path('threes/tokens/user.7e9aedd97b5ec4590edb8281ff12b168.json');
+        
+        copy($source, $destination);
+        
+        $this->output->writeln("Файл скопирован: {$destination}");
+    }
+} 
 ```
 `plugins/zen/threes/console/Vector.php`
 ```<?php namespace Zen\Threes\Console;
@@ -5407,6 +5484,11 @@ class Node
         return $this->_childrenCache = $branch && !empty($branch['nodes'])
             ? array_map(fn($child) => self::find($child['nid'], null, $this->schema), $branch['nodes'])
             : [];
+    }
+
+    public function childrenOfType(string $type): array
+    {
+        return array_filter($this->children, fn(Node $child) => $child->type === $type);
     }
 
     public function getSiblingsAttribute(): array
@@ -15979,6 +16061,23 @@ snapshots:
   zwitch@2.0.4: {}
 
 ```
+`plugins/zen/threes/resources/default_data/user.7e9aedd97b5ec4590edb8281ff12b168.json`
+```{
+    "uuid": "user.7e9aedd97b5ec4590edb8281ff12b168",
+    "subtype": "user",
+    "write": true,
+    "data": {
+        "password": "$2y$10$Bq\/YkRbPtbSCSDSaQeHd5er2MJvMC\/f41RfEOFj3gTYz6m9GyjmAC",
+        "email": "zen@8ber.ru",
+        "telegram_id": "zenc0dr",
+        "name": "Alex Blaze",
+        "data": []
+    },
+    "created_at": "2025-06-29T18:32:46.033264Z",
+    "storage_at": null,
+    "last_call_at": "2025-06-29T18:32:46.033138Z"
+}
+```
 `plugins/zen/threes/resources/default_types/Threes.Document.json`
 ```{
     "class": "Zen.Threes.Classes.Types.Document",
@@ -16319,6 +16418,9 @@ window.ths = {
 
     // Реактивные данные
     data: reactive({
+
+        // Пользователь Threes
+        user: null,
 
         // Компоненты Threes
         components: {},

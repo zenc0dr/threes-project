@@ -17,7 +17,8 @@ export default {
     name: 'User',
     data() {
         return {
-            user: ths.data.user || null,
+            ths: window.ths,
+            user: null,
         };
     },
     watch: {
@@ -30,16 +31,20 @@ export default {
     mounted() {
         this.getUser()
     },
-    beforeUnmount() {
-        if (this.unwatch) this.unwatch();
-    },
     methods: {
         getUser() {
-            if (!this.user) {
+            if (this.ths && this.ths.data && this.ths.data.user) {
                 this.user = this.ths.data.user
+            } else {
+                // Если пользователь еще не загружен, ждем немного
                 setTimeout(() => {
                     this.checkUser()
                 }, 1000)
+            }
+        },
+        checkUser() {
+            if (this.ths && this.ths.data && this.ths.data.user) {
+                this.user = this.ths.data.user
             }
         },
         logout() {
