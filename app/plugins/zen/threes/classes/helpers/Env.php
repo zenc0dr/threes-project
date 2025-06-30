@@ -21,14 +21,11 @@ trait Env
 
     public function env(string $key, $default = null): ?string
     {
+        self::$env[$key] ??= [];
         if (isset(self::$env[$key]['value'])) {
             return self::$env[$key]['value'];
         }
-
-        if ($default !== null) {
-            return $default;
-        }
-
-        return self::$env[$key]['value'] = base_path(env($key, self::$env[$key]['default']));
+        self::$env[$key]['default'] ??= $default;
+        return self::$env[$key]['value'] = env($key, self::$env[$key]['default']);
     }
 }
