@@ -1,0 +1,14 @@
+# dev-Сборка проекта
+dev() {
+    cd /app/plugins/zen/threes && pnpm exec mix watch
+}
+
+# Сборка проекта
+build() {
+    cd /app/plugins/zen/threes && pnpm exec mix --production
+}
+
+# Artisan - команды
+artisan() {
+    cd /app && php artisan "$@"
+}
