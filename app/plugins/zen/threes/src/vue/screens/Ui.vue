@@ -13,9 +13,9 @@
         <div class="threes-layout">
             <!-- Мобильное меню overlay -->
             <div v-if="isMobile" class="threes-mobile-overlay" :class="{ active: mobileMenuOpen }" @click="closeMobileMenu"></div>
-            
+
             <div class="threes-sidebar" :class="{ collapsed: sidebarCollapsed, 'mobile-open': mobileMenuOpen }" :style="sidebarStyle">
-                <TreeHeader 
+                <TreeHeader
                     :collapsed="sidebarCollapsed"
                     @toggle="toggleSidebar"
                     @search="handleSearch"
@@ -23,7 +23,7 @@
                 />
                 <Tree v-if="!sidebarCollapsed" :search="treeSearch" />
                 <User v-if="!sidebarCollapsed && !isMobile" />
-                <div 
+                <div
                     v-if="!sidebarCollapsed && !isMobile"
                     class="threes-sidebar__resizer"
                     @mousedown="startResize"
@@ -34,11 +34,14 @@
                 <Schema />
             </div>
         </div>
-        
+
         <!-- Мобильная bottom navigation -->
         <div v-if="isMobile" class="threes-mobile-nav">
             <User @toggle-mobile-menu="toggleMobileMenu" />
         </div>
+        <modal :show="store_opened" @close="store_opened = false">
+            <Store />
+        </modal>
     </div>
 </template>
 <script>
@@ -47,6 +50,7 @@ import Schema from '../components/Schema.vue'
 import Store from '../components/Store.vue'
 import User from '../components/User.vue'
 import TreeHeader from '../components/TreeHeader.vue'
+import modal from '../components/modal.vue'
 
 export default {
     name: 'Stand',
@@ -71,7 +75,8 @@ export default {
             resizeThrottle: null,
             treeSearch: '',
             isMobile: false,
-            mobileMenuOpen: false
+            mobileMenuOpen: false,
+            store_opened: false,
         }
     },
     computed: {
@@ -90,7 +95,8 @@ export default {
         Schema,
         Store,
         User,
-        TreeHeader
+        TreeHeader,
+        modal
     },
     mounted() {
         if (this.nid) {
@@ -100,15 +106,15 @@ export default {
         if (!this.backend) {
             this.fullscreen = true
         }
-        
+
         // Определяем мобильное устройство
         this.checkMobile()
         window.addEventListener('resize', this.checkMobile)
-        
+
         // Загружаем сохраненную ширину из localStorage
         this.loadSidebarWidth()
         this.loadSidebarCollapsed()
-        
+
         // Добавляем глобальные обработчики событий мыши
         document.addEventListener('mousemove', this.handleMouseMove)
         document.addEventListener('mouseup', this.handleMouseUp)
@@ -126,11 +132,11 @@ export default {
                 this.closeMobileMenu()
             }
         },
-        
+
         goToApp() {
             window.location.href = '/app/node'
         },
-        
+
         loadSidebarWidth() {
             const saved = localStorage.getItem('threes_sidebar_width')
             if (saved) {
@@ -140,22 +146,22 @@ export default {
                 }
             }
         },
-        
+
         loadSidebarCollapsed() {
             const saved = localStorage.getItem('threes_sidebar_collapsed')
             if (saved) {
                 this.sidebarCollapsed = saved === 'true'
             }
         },
-        
+
         saveSidebarWidth() {
             localStorage.setItem('threes_sidebar_width', this.sidebarWidth.toString())
         },
-        
+
         saveSidebarCollapsed() {
             localStorage.setItem('threes_sidebar_collapsed', this.sidebarCollapsed.toString())
         },
-        
+
         toggleSidebar() {
             if (this.isMobile) {
                 this.toggleMobileMenu()
@@ -164,24 +170,23 @@ export default {
                 this.saveSidebarCollapsed()
             }
         },
-        
+
         toggleMobileMenu() {
             this.mobileMenuOpen = !this.mobileMenuOpen
         },
-        
+
         closeMobileMenu() {
             this.mobileMenuOpen = false
         },
-        
+
         handleSearch(search) {
             this.treeSearch = search
         },
-        
+
         handleAddNode() {
-            // TODO: Реализовать добавление нода
-            console.log('Add node clicked')
+            this.store_opened = true
         },
-        
+
         startResize(event) {
             if (this.isMobile) return
             event.preventDefault()
@@ -192,10 +197,10 @@ export default {
         
         handleMouseMove(event) {
             if (!this.isResizing || this.isMobile) return
-            
+
             // Throttling для оптимизации производительности
             if (this.resizeThrottle) return
-            
+
             this.resizeThrottle = requestAnimationFrame(() => {
                 const newWidth = event.clientX
                 if (newWidth >= this.minWidth && newWidth <= this.maxWidth) {
@@ -204,7 +209,7 @@ export default {
                 this.resizeThrottle = null
             })
         },
-        
+
         handleMouseUp() {
             if (this.isResizing) {
                 this.isResizing = false
@@ -222,13 +227,13 @@ export default {
     flex-direction: column;
     height: 100vh;
     background: #f5f5f5;
-    
+
     &.mobile {
         .threes-layout {
             flex: 1;
             position: relative;
         }
-        
+
         .threes-main {
             width: 100%;
             height: 100%;
@@ -265,7 +270,7 @@ export default {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    
+
     &.active {
         opacity: 1;
         visibility: visible;
@@ -284,12 +289,12 @@ export default {
     overflow: hidden;
     position: relative;
     transition: width 0.2s ease;
-    
+
     &.collapsed {
         width: 40px !important;
         min-width: 40px;
     }
-    
+
     // Мобильные стили
     .mobile & {
         position: fixed;
@@ -299,12 +304,12 @@ export default {
         height: 100vh;
         z-index: 1000;
         transition: left 0.3s ease;
-        
+
         &.mobile-open {
             left: 0;
         }
     }
-    
+
     &__resizer {
         position: absolute;
         top: 0;
@@ -314,11 +319,11 @@ export default {
         cursor: col-resize;
         background: transparent;
         z-index: 10;
-        
+
         &:hover {
             background: rgba(0, 0, 0, 0.1);
         }
-        
+
         &:active {
             background: rgba(0, 0, 0, 0.2);
         }
