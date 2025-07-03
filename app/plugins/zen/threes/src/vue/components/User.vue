@@ -5,7 +5,7 @@
             <div v-if="isMobile" class="mobile-menu-btn" @click="$emit('toggle-mobile-menu')">
                 <i class="oc-icon-bars" title="Открыть меню"></i>
             </div>
-            
+
             <div v-if="user" class="user-name" @click="$router.push('/profile')">
                 {{ user.name || user.login }}
             </div>
@@ -72,7 +72,7 @@ export default {
     &.mobile {
         border-top: none;
         background: #ffffff;
-        
+
         .tree-user-info {
             padding: 8px 16px;
             min-height: 50px;
@@ -90,7 +90,7 @@ export default {
 
         .mobile-menu-btn {
             flex-shrink: 0;
-            
+
             i {
                 padding: 8px;
                 background: #f7f7f7;
@@ -99,7 +99,7 @@ export default {
                 cursor: pointer;
                 transition: 200ms;
                 font-size: 16px;
-                
+
                 &:hover {
                     background: #e7e7e7;
                 }

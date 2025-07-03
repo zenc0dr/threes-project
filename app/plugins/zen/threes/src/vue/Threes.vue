@@ -39,7 +39,7 @@ export default {
                 then: (response) => {
                     this.checkingAuth = false
                     if (response.success) {
-                        console.log('Записываю ',response.user)
+                        console.log('Записываю user',response.user)
                         ths.data.user = response.user
                     } else {
                         // Токен недействителен

@@ -10,7 +10,6 @@ window._ = _;
 
 import vueClickOutsideElement from 'vue-click-outside-element';
 import FormFitter from './../vue/components/FormFitter.vue';
-import FormSection from "../vue/trash/v2/FormSection.vue";
 import FormTabs from "../vue/components/FormTabs.vue";
 import ClickOutside from '../vue/directives/ClickOutside';
 
@@ -43,7 +42,7 @@ window.ths = {
 
     // Определение мобильного устройства
     isMobile() {
-        return window.innerWidth <= 768 || 
+        return window.innerWidth <= 768 ||
                /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     },
 
@@ -85,7 +84,6 @@ app.use(PrimeVue, { ripple: true });
 app.use(vueClickOutsideElement);
 
 app.component('FormFitter', FormFitter);
-app.component('FormSection', FormSection);
 app.component('FormTabs', FormTabs);
 
 app.directive('click-outside', ClickOutside);
