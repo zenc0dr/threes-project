@@ -1,0 +1,17 @@
+{
+  "accentColor": "#166f17",
+  "cssTheme": "",
+  "enabledCssSnippets": [
+    "code-view",
+    "code-clocks-style",
+    "full-width-pages",
+    "quote",
+    "file-manager-style",
+    "code-line",
+    "hr-line"
+  ],
+  "interfaceFontFamily": "",
+  "monospaceFontFamily": "ZenCode Mono",
+  "baseFontSize": 18,
+  "showRibbon": true
+}

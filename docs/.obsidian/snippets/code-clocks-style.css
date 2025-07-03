@@ -1,0 +1,12 @@
+.HyperMD-codeblock {
+	color: #ccffb4!important;
+	background-color: #0d1a07!important;
+	caret-color: #fff!important;
+}
+.markdown-rendered pre {
+	background-color: #0d1a07!important;
+	caret-color: #fff!important;
+}
+.markdown-rendered pre code {
+	color: #ccffb4!important;
+}

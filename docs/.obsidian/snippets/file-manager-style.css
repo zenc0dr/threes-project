@@ -1,0 +1,7 @@
+.workspace-leaf-content[data-type="file-explorer"] * {
+    font-size: 18px;
+}
+.workspace-leaf-content .tree-item-self {
+    padding-top: 2px!important;
+    padding-bottom: 2px!important;
+}

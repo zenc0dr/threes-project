@@ -1,0 +1,1312 @@
+{
+  "settings": {
+    "migrated": 6,
+    "iconPacksPath": ".obsidian/icons",
+    "fontSize": 16,
+    "emojiStyle": "native",
+    "iconColor": null,
+    "recentlyUsedIcons": [
+      "🍯",
+      "ZeBugFix",
+      "SiGooglemeet",
+      "ZeApplication",
+      "ZeZenBash",
+      "LiTerminalSquare",
+      "ZeDoc",
+      "SiPnpm",
+      "🏛",
+      "LiFan",
+      "ZeAxis",
+      "SiGnubash",
+      "⭐",
+      "🥷",
+      "LiArchive",
+      "LiSquareKanban",
+      "LiKanbanSquare",
+      "ZeWoman",
+      "ZeOmSvgrepoCom",
+      "ℹ",
+      "ZeFolder",
+      "💖",
+      "LiHeart",
+      "SiOrigin",
+      "😜"
+    ],
+    "recentlyUsedIconsSize": 25,
+    "rules": [],
+    "extraMargin": {
+      "top": 0,
+      "right": 4,
+      "bottom": 0,
+      "left": 0
+    },
+    "iconInTabsEnabled": true,
+    "iconInTitleEnabled": false,
+    "iconInFrontmatterEnabled": false,
+    "iconInFrontmatterFieldName": "icon",
+    "iconColorInFrontmatterFieldName": "iconColor",
+    "iconsBackgroundCheckEnabled": false,
+    "iconsInNotesEnabled": true,
+    "iconsInLinksEnabled": true,
+    "iconIdentifier": ":",
+    "debugMode": false,
+    "iconInTitlePosition": "above",
+    "lucideIconPackType": "native",
+    "useInternalPlugins": false
+  },
+  "Linux": "SiLinux",
+  "Заметки": "ZeBookClosedSvgrepoCom",
+  "Проекты": {
+    "iconName": "SiPreact",
+    "iconColor": "#ff622e"
+  },
+  "Assets": {
+    "iconName": "LiBox",
+    "iconColor": "#b5b5b5"
+  },
+  "Заметки/Youtube": {
+    "iconName": "LiYoutube",
+    "iconColor": "#ff0000"
+  },
+  "Заметки/Private": "🔒",
+  "Проекты/OctoberStudio": {
+    "iconName": "SiLeaflet",
+    "iconColor": "#36990f"
+  },
+  "Ежедневник": {
+    "iconName": "LiBookUser",
+    "iconColor": "#398717"
+  },
+  "Хранилище ссылок": {
+    "iconName": "SiGooglecloudstorage",
+    "iconColor": "#128fc4"
+  },
+  "Программирование": {
+    "iconName": "LiCode",
+    "iconColor": "#cb00e6"
+  },
+  "Программирование/PHP": {
+    "iconName": "SiPhp",
+    "iconColor": "#1e4d8a"
+  },
+  "Программирование/PHP/phpDoc.md": "ZeBookClosedSvgrepoCom",
+  "Программирование/JavaScript": "ZeJavascript",
+  "Программирование/JavaScript/Библиотеки": {
+    "iconName": "LiCpu",
+    "iconColor": "#005aad"
+  },
+  "Программирование/Vue": "ZeVue",
+  "Soft": {
+    "iconName": "SiShopee",
+    "iconColor": "#439400"
+  },
+  "Программирование/Laravel": "ZeLaravelLogo",
+  "Программирование/Laravel/Архитектура": "ZeSchemeSvgrepoCom",
+  "Программирование/Laravel/Старт": {
+    "iconName": "LiCircleChevronRight",
+    "iconColor": "#5c710e"
+  },
+  "Программирование/Laravel/Laravel docs": "LiDock",
+  "Программирование/MySQL": {
+    "iconName": "SiMysql",
+    "iconColor": "#2166c0"
+  },
+  "Программирование/Laravel/Инструменты": "🛠",
+  "Программирование/Laravel/Тестирование": {
+    "iconName": "SiYoutubestudio",
+    "iconColor": "#d40808"
+  },
+  "Программирование/Laravel/Тестирование/Тестирование в Laravel.md": "LiHammer",
+  "Программирование/Laravel/База данных": "LiDatabase",
+  "Программирование/Laravel/Тестирование/Фабрики.md": "LiCog",
+  "Программирование/Laravel/Библиотеки": {
+    "iconName": "SiBookstack",
+    "iconColor": "#1d96d3"
+  },
+  "Программирование/PHP/Zen - Рефакторинг.md": "ZeBookClosedSvgrepoCom",
+  "Шаблоны": {
+    "iconName": "LiLayoutTemplate",
+    "iconColor": "#8a56bd"
+  },
+  "Хранилище ссылок/Хостинги": {
+    "iconName": "LiServer",
+    "iconColor": "#2e6ba3"
+  },
+  "Хранилище ссылок/Хостинги/Beget.md": "LiServerCog",
+  "Хранилище ссылок/Хостинги/Jino.md": "LiServerCog",
+  "Хранилище ссылок/Хостинги/SmartApe.md": "LiServerCog",
+  "Хранилище ссылок/Хостинги/Timeweb.md": "LiServerCog",
+  "Планирование": {
+    "iconName": "SiGoogletasks",
+    "iconColor": "#ae6bff"
+  },
+  "Linux/Обслуживание": "🛠",
+  "Программирование/Laravel/База данных/Наполнители.md": "LiHardDriveUpload",
+  "Программирование/Laravel/База данных/Фабрики.md": "LiCog",
+  "Проекты/KTnG/Gitlab wiki": {
+    "iconName": "SiWikipedia",
+    "iconColor": "#ff5900"
+  },
+  "Проекты/nopreset": "ZeNopreset",
+  "Проекты/nopreset/Организация": "LiBriefcaseBusiness",
+  "Проекты/nopreset/Организация/События": "LiCalendarClock",
+  "Проекты/nopreset/Организация/Тех.собесы": "🕵️‍♂️",
+  "Хранилище ссылок/Виртуальные карты": "LiCreditCard",
+  "Хранилище ссылок/Сервисы регистрации временной почты.md": "LiMailCheck",
+  "Хранилище ссылок/Цифровая безопасность.md": {
+    "iconName": "LiShieldCheck",
+    "iconColor": "#378632"
+  },
+  "Хранилище ссылок/Иконки": "SiIconify",
+  "Программирование/Bash": "SiGnubash",
+  "Программирование/PHP/Проектирование/Паттерны проектирования.md": "SiTextpattern",
+  "Программирование/PHP/Проектирование": "ZeSchemeSvgrepoCom",
+  "Программирование/PHP/Функционал php/Implements.md": "📄",
+  "Программирование/PHP/Функционал php/Enum (Класс перечисление).md": "📄",
+  "Программирование/PHP/Функционал php": "ZeBookClosedSvgrepoCom",
+  "Программирование/PHP/Функционал php/Spread operator.md": "📄",
+  "Проекты/nopreset/Организация/Дейли стендапы": {
+    "iconName": "SiGooglemeet",
+    "iconColor": "#2858c8"
+  },
+  "Linux/Приёмы": "ZeBookClosedSvgrepoCom",
+  "Заметки/Живые страницы": "🫒",
+  "Заметки/Живые страницы/Скорость интернета.md": {
+    "iconName": "SiSpeedtest",
+    "iconColor": "#ba2ebd"
+  },
+  "Linux/Обслуживание/Web Server/1. Первоначальная настройка.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/2. Установка Apache2.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/3. Установка php 8.1.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/4. Установка MySQL.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/Настройка прав на папки.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/Установка Postfix.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/Установка SSL (cerbot).md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/Установка node.js.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server/Установка sqlite3.md": "ZeZenBash",
+  "Linux/Обслуживание/Web Server": "LiServerCog",
+  "Linux/Обслуживание/Управление/Контроль портов.md": "SiGnubash",
+  "Linux/Обслуживание/Управление": "LiSettings2",
+  "Linux/Обслуживание/Управление/Управление репозиториями.md": "SiGnubash",
+  "Linux/Обслуживание/Управление/Ярлыки приложений.md": "SiGnubash",
+  "Linux/Обслуживание/Управление/KILL - Убить процесс.md": "SiGnubash",
+  "Linux/Обслуживание/Управление/Screen - Удержание сессии.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки/Настройка панели запуска.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки": "LiSettings",
+  "Linux/Обслуживание/Слежение": "LiEye",
+  "Linux/Обслуживание/Слежение/Просмотр логов.md": "SiGnubash",
+  "Linux/Обслуживание/Слежение/Узнать свободное место.md": "SiGnubash",
+  "Linux/Обслуживание/Хранение": "LiHardDrive",
+  "Linux/Обслуживание/Хранение/Backup Debian.md": "SiGnubash",
+  "Заметки/Изучить": {
+    "iconName": "LiZoomIn",
+    "iconColor": "#2a5e7e"
+  },
+  "Шаблоны/Контакт.md": "LiUser",
+  "Linux/Обслуживание/Управление/Управление сервисами.md": "SiGnubash",
+  "Программирование/OctoberCMS": {
+    "iconName": "ZeBrandOctobercmsSvgrepoCom",
+    "iconColor": "#eb6300"
+  },
+  "Программирование/OctoberCMS/Обновление.md": {
+    "iconName": "LiRefreshCw",
+    "iconColor": "#1f7db7"
+  },
+  "Программирование/OctoberCMS/Рецепты": "ZeBookClosedSvgrepoCom",
+  "Программирование/OctoberCMS/Рецепты/Активность в колонке.md": "SiGoogledocs",
+  "Программирование/OctoberCMS/Рецепты/Как оформить обновление плагина.md": {
+    "iconName": "SiGoogledocs",
+    "iconColor": "#4c87e6"
+  },
+  "Проекты/OctoberStudio/Доступы": "🔒",
+  "Linux/Обслуживание/Слежение/Сколько файлов в папке (рекурсивно).md": "SiGnubash",
+  "Linux/Обслуживание/Управление/Удалить пустые папки.md": "SiGnubash",
+  "Хранилище ссылок/Сервисы": "SiWasmer",
+  "Хранилище ссылок/Библиотеки": "SiBookstack",
+  "Хранилище ссылок/Библиотеки/JS": "SiJavascript",
+  "Linux/Обслуживание/Скрипты": "SiGnubash",
+  "Хранилище ссылок/Работа с видео": "LiVideo",
+  "Программирование/Laravel/Сервисы": "SiWasmer",
+  "Хранилище ссылок/Self-hosted": {
+    "iconName": "SiSemanticuireact",
+    "iconColor": "#128c8a"
+  },
+  "Linux/Софт": "SiBoxysvg",
+  "Linux/Софт/Медиа": {
+    "iconName": "SiApplemusic",
+    "iconColor": "#2a90cf"
+  },
+  "Linux/Софт/Медиа/Clementine - Аудиоплеер.md": "ZeApplication",
+  "Linux/Софт/DevOps": {
+    "iconName": "LiCloudCog",
+    "iconColor": "#f06c00"
+  },
+  "Linux/Софт/DevOps/Docker": "ZeDocker",
+  "Linux/Софт/DevOps/Docker/Docker - база.md": "ZeDocker",
+  "Linux/Софт/DevOps/Kubernetes": "SiKubernetes",
+  "Linux/Софт/DevOps/Ajenti.md": "ZeApplication",
+  "Linux/Софт/DevOps/Webmin.md": "ZeApplication",
+  "Linux/Софт/DevOps/Yandex disk.md": {
+    "iconName": "LiCloudUpload",
+    "iconColor": "#113d5f"
+  },
+  "Linux/Софт/DevOps/Portainer.md": "ZeApplication",
+  "Linux/Софт/DevOps/Weaviate.io.md": "ZeApplication",
+  "Linux/Софт/Утилиты": {
+    "iconName": "SiGooglecloudspanner",
+    "iconColor": "#316781"
+  },
+  "Linux/Софт/Утилиты/Balena Etcher - Записать iso-образ на usb-флешку.md": "ZeUsbFlashColor",
+  "Linux/Обслуживание/Скрипты/yt-dlp - Скачать с Youtube.md": "ZeZenBash",
+  "Linux/Обслуживание/Слежение/Узнать занят ли порт.md": "SiGnubash",
+  "Проекты/nopreset/Организация/Задачи": "SiGoogletasks",
+  "Проекты/nopreset/Организация/Задачи/Архив": "LiArchive",
+  "Linux/Софт/Пакеты": "LiBoxes",
+  "Linux/Софт/Пакеты/Flatpak.md": "ZeZenBash",
+  "Linux/Софт/Пакеты/RabbitMQ.md": {
+    "iconName": "SiRabbitmq",
+    "iconColor": "#ff7e05"
+  },
+  "Linux/Софт/Пакеты/Y PPA Manager - Управление репозиториями.md": "ZeZenBash",
+  "Linux/Софт/Пакеты/ffmpeg.md": "ZeZenBash",
+  "Linux/Софт/Пакеты/Планировщик CRON.md": "ZeZenBash",
+  "Linux/Софт/Пакеты/Парсеры/CURL.md": "ZeZenBash",
+  "Linux/Софт/Пакеты/Парсеры/WGET.md": "ZeZenBash",
+  "Linux/Софт/Утилиты/Syncthing.md": "ZeApplication",
+  "Linux/Обслуживание/Слежение/Мониторинг системы.md": "SiGnubash",
+  "Linux/Обслуживание/Слежение/Узнать сколько весит директория.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки/Ubuntu 24.04 - Пост настройка.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки/Установить кириллицу.md": "SiGnubash",
+  "Linux/Софт/DevOps/TightVNC.md": "ZeApplication",
+  "Linux/Софт/Утилиты/sysbench - Тест производительности.md": "ZeApplication",
+  "Linux/Софт/Утилиты/BleachBit.md": "ZeApplication",
+  "Linux/Обслуживание/Скрипты/sshpass - Подключение по ssh.md": "ZeZenBash",
+  "Linux/Обслуживание/Управление/Удалить файлы старше недели.md": "SiGnubash",
+  "Linux/Обслуживание/Управление/rsync - Копировать.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки/Настройка драйверов nvidia.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки/Настройка репозиториев apt.md": "SiGnubash",
+  "Linux/Обслуживание/Внешние ресурсы": "LiCloud",
+  "Linux/Обслуживание/Документация": "LiBookText",
+  "Заметки/1. Идеи": "💡",
+  "Ежедневник/Архив": {
+    "iconName": "LiArchive",
+    "iconColor": "#9513ae"
+  },
+  "Linux/Обслуживание/Документация/DKMS (Управление ядрами).md": "ZeDocument",
+  "Linux/Обслуживание/Слежение/Тест производительности.md": "SiGnubash",
+  "Проекты/nopreset/Организация/Задачи/Архив/54989 - ООО Джомин техническая поддержка, анализ проекта.md": "LiSearchCode",
+  "Проекты/nopreset/Организация/Оценки": "LiSearch",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив": "LiArchive",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/09.2024 - Сентябрь (Дейли).md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/10.2024 - Октябрь (Дейли).md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/07.2024 - Июль (Дейли).md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/08.2024 - Август (Дейли).md": "SiGooglemeet",
+  "Хранилище ссылок/Digital агентства/cpeople.ru.md": "LiGlobe",
+  "Хранилище ссылок/Digital агентства": "🤖",
+  "Linux/Софт/DevOps/Docker/Контейнера": "LiContainer",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив": "LiArchive",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Павлов Александр (21).md": "LiUser",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Виктор Смагин (26).md": "LiUser",
+  "Проекты/nopreset/Идеи": "💡",
+  "Проекты/nopreset/Проекты": "LiGem",
+  "Проекты/nopreset/Организация/Тех.собесы/Новые": "LiAsteriskSquare",
+  "Linux/Софт/DevOps/Docker/Docker шпаргалка.md": "ZeDocker",
+  "Заметки/0. Сток": "LiPenSquare",
+  "Soft/Игры": {
+    "iconName": "LiGamepad2",
+    "iconColor": "#328228"
+  },
+  "Soft/Игры/SCFA": "🤖",
+  "Soft/Медиа": {
+    "iconName": "SiMediamarkt",
+    "iconColor": "#328228"
+  },
+  "Soft/Медиа/Blender": {
+    "iconName": "SiBlender",
+    "iconColor": "#eb5e00"
+  },
+  "Soft/Игры/Minecraft": "ZeMinecraftIcon",
+  "Soft/Игры/Minecraft/Белый список.md": "SiGnubash",
+  "Soft/Игры/Minecraft/Зельеварение.md": {
+    "iconName": "LiFlaskRound",
+    "iconColor": "#1d6e1c"
+  },
+  "Soft/Игры/Minecraft/Команды сервера.md": "SiGnubash",
+  "Soft/Разработка": {
+    "iconName": "SiNintendogamecube",
+    "iconColor": "#328228"
+  },
+  "Soft/Разработка/phpStorm": "ZePhpstormSvgrepoCom",
+  "Soft/Разработка/Zed": "SiZedindustries",
+  "Soft/Интернет": {
+    "iconName": "SiWebpack",
+    "iconColor": "#328228"
+  },
+  "Soft/Интернет/Chrome": "SiGooglechrome",
+  "Soft/Разработка/Git": "ZeGitIcon",
+  "Soft/Разработка/Git/Branch.md": {
+    "iconName": "LiGitBranch",
+    "iconColor": "#192252"
+  },
+  "Soft/Разработка/Git/Commit.md": {
+    "iconName": "LiGitCommitVertical",
+    "iconColor": "#fb00ff"
+  },
+  "Soft/Разработка/Git/Remote.md": {
+    "iconName": "LiCloudCog",
+    "iconColor": "#2f5f93"
+  },
+  "Soft/Разработка/Git/SSL.md": "ZeCertificate",
+  "Soft/Разработка/Git/Stash.md": {
+    "iconName": "LiWalletMinimal",
+    "iconColor": "#aa0841"
+  },
+  "Soft/Разработка/Git/Заметки": "LiNotebookPen",
+  "Soft/Разработка/Git/Инструменты": "SiGooglecloudspanner",
+  "Soft/Менеджмент": {
+    "iconName": "LiCalendarClock",
+    "iconColor": "#328228"
+  },
+  "Soft/Менеджмент/Obsidian": {
+    "iconName": "SiObsidian",
+    "iconColor": "#d345c8"
+  },
+  "Soft/Менеджмент/Obsidian/Обучение": "ZeBookClosedSvgrepoCom",
+  "Soft/Менеджмент/Obsidian/Шпаргалка по Obsidian.md": "ZeBookClosedSvgrepoCom",
+  "Soft/Менеджмент/Obsidian/Обучение/Обучение Obsidian - Материалы.md": "SiGoogledocs",
+  "Soft/Менеджмент/Obsidian/Обучение/Первое знакомство.md": "SiGoogledocs",
+  "Soft/Менеджмент/Obsidian/Обучение/Шаблонизация.md": "SiGoogledocs",
+  "Soft/Разработка/Ollama Ai": "🦙",
+  "Soft/Интернет/Tor.md": {
+    "iconName": "SiTorbrowser",
+    "iconColor": "#932a90"
+  },
+  "Программирование/OctoberCMS/Документация/Модель": "LiFolder",
+  "Программирование/OctoberCMS/Документация/Модель/Настройка модели, фабрики и наполнителя.md": "💎",
+  "Программирование/OctoberCMS/Документация/Модель/Настройка RelationController.md": "💎",
+  "Программирование/OctoberCMS/Документация/Фильтрация": "LiFolder",
+  "Программирование/OctoberCMS/Документация/Система доступа OCMS.md": "💎",
+  "Программирование/OctoberCMS/Документация/Счётчики-бэйджи в главном меню.md": "💎",
+  "Программирование/OctoberCMS/Документация/Фильтрация/Выпадающий список фильтра.md": "💎",
+  "Программирование/OctoberCMS/Документация/Модель/Связи.md": "💎",
+  "Программирование/OctoberCMS/Документация/Контроллер": "LiFolder",
+  "Программирование/OctoberCMS/Документация/Контроллер/Счётчик позиций в списке (с сортировкой).md": "💎",
+  "Программирование/OctoberCMS/Документация/Компоненты/Создание компонента.md": "💎",
+  "Программирование/OctoberCMS/Документация/Компоненты": "LiFolder",
+  "Программирование/OctoberCMS/Документация/Модель/События модели.md": "💎",
+  "Программирование/OctoberCMS/Документация/Модель/Scope.md": "💎",
+  "Программирование/OctoberCMS/Документация/Модель/Сервис-провайдер и события модели.md": "💎",
+  "Программирование/OctoberCMS/Документация/Темы": "LiFolder",
+  "Программирование/OctoberCMS/Документация/Темы/Добавить настройки к теме.md": "💎",
+  "Программирование/OctoberCMS/Документация/Формы - fields.yaml.md": "💎",
+  "Проекты/nopreset/Доступы": "LiShield",
+  "Linux/Обслуживание/Управление/Zip - Архивирование.md": "SiGnubash",
+  "Программирование/OctoberCMS/Документация/Модель/Сортировка модели.md": "💎",
+  "Программирование/OctoberCMS/Документация/Шаблонизация": "LiFolder",
+  "Программирование/OctoberCMS/Документация/Шаблонизация/Ссылка на cms-страницу.md": "💎",
+  "Программирование/OctoberCMS/Документация": "LiFolder",
+  "Программирование/OctoberCMS/Обслуживание": "LiFolder",
+  "Программирование/OctoberCMS/Последняя версия": "LiFolder",
+  "Программирование/OctoberCMS/Запросы GPT": "LiFolder",
+  "Программирование/OctoberCMS/Запросы GPT/Динамическая форма модели.md": "ZeChatgptIcon",
+  "Программирование/OctoberCMS/Проекты/Zen.Control.md": "💎",
+  "Программирование/OctoberCMS/Проекты": "LiFolder",
+  "Linux/Приёмы/Basicauth - базовая аутентификация.md": "LiShield",
+  "Linux/Софт/DevOps/Docker/Контейнера/Gogs.md": "LiContainer",
+  "Linux/Софт/DevOps/Docker/Контейнера/Traefik.md": "LiContainer",
+  "Программирование/OctoberCMS/Документация/Шаблонизация/Static меню.md": "💎",
+  "Программирование/OctoberCMS/Рецепты/Yaml.md": "ZeDocument",
+  "Проекты/nopreset/Проекты/KTnG": "🚀",
+  "Проекты/nopreset/Проекты/KTnG/KTnG.md": "ZeProject",
+  "Проекты/nopreset/Проекты/KTnG/Архив": "SiEbox",
+  "Проекты/nopreset/Проекты/KTnG/Бэклог": "SiJetpackcompose",
+  "Проекты/nopreset/Проекты/KTnG/Задачи": {
+    "iconName": "SiGoogletasks",
+    "iconColor": "#385aa8"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Команды artisan": "SiGnubash",
+  "Проекты/nopreset/Проекты/KTnG/Материалы": "ZeBookClosedSvgrepoCom",
+  "Проекты/nopreset/Проекты/KTnG/Скрипты поддержки": {
+    "iconName": "LiShieldPlus",
+    "iconColor": "#114f0d"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/KTnG Канбан.md": "LiTrello",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер": {
+    "iconName": "LiBug",
+    "iconColor": "#f50000"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Глобальные задачи": "🌏",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки": {
+    "iconName": "LiGitBranchPlus",
+    "iconColor": "#cb18e2"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание": {
+    "iconName": "LiUserRoundCog",
+    "iconColor": "#135007"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Оценки": {
+    "iconName": "LiZoomIn",
+    "iconColor": "#3089c0"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка": {
+    "iconName": "SiDevdotto",
+    "iconColor": "#449720"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Команды artisan/Отчет General Task Report.md": "SiGnubash",
+  "Проекты/nopreset/Проекты/KTnG/Команды artisan/Стартовые наполнители.md": "SiGnubash",
+  "Проекты/nopreset/Проекты/KTnG/Команды artisan/Экспорт схемы БД.md": "SiGnubash",
+  "Проекты/nopreset/Проекты/KTnG/Скрипты поддержки/PG Prod key.md": "🔑",
+  "Проекты/nopreset/Проекты/KTnG/Скрипты поддержки/Вывести таблицу торговых точек с группами.md": "LiCircleArrowRight",
+  "Проекты/nopreset/Проекты/KTnG/Скрипты поддержки/Разблокировать ТТ.md": "LiCircleArrowRight",
+  "Проекты/nopreset/Проекты/KTnG/Скрипты поддержки/Разблокировать пользователя.md": "LiCircleArrowRight",
+  "Проекты/nopreset/Проекты/KTnG/Скрипты поддержки/Сменить владельца Торговой точки.md": "LiCircleArrowRight",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив": "LiArchiveRestore",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Оценки/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/38435 - Невозможно создать задание без фотографий через конструктор заданий (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/49137 - Награда за прохождение УП распределилась на Заблокированного пользователя (test1).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/49535 - В разделе Задания у администратора не отображается задание Опрос.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50155 - При открытии задания УП в МП отображается бесконечная загрузка (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50173 - Тестирование Удаление паспортных данных.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50189 - Продавцу приходит лишний пуш о том, что задание в процессе скоро закончится (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50295 - Невозможно добавить КА на точку.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50297 - При открытии задания УП в МП отображается ошибка (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50305 - Не работает импорт КА.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50399 - В УП у продавца в статусе Выполнено неверно отображается информация по бонусу, участникам и продажам (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50485 - Блок Выполните план продаж и Получить бонус закрыт, когда УП в статусе В процессе (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50495 - Неверный приоритет в МП у задания УП на главном экране (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50501 - Не отображается модальное окно Открыто новое подзадание у нового подзадания (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50581 - При наступлении start_date_sale шкала Продажи продолжает отображаться с замочком (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/50673 - Продавец не получил награду за перевыполнение плана (test 1).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/51415 - Не работают логи.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/52337 - KPP Part 1.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/52337 - KPP Part 2.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/52461 - В колонке Total tasks у группы RU00256860 (id 1151) неверное значение (демо).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/52879 (kpp) - Зависает отчёт KPP в статусе в 'Обработке' (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/52933 (kpp) - Не корректное вывода значения tasks отчёта K.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53033 - Не корректный вывод значений по пройденным заданиям в отчёте KPP (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53117 - Проверка условия с date_start отчёта KPP (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53303 - В отчете kpp в столбцах TSM phone number и TSM Name указаны данные контрагента (Demo).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53325 - В отчете kpp неверно отображается информация в блоке Quiz (Квиз) в колонке tasks. Учитываются подзадания из УП. (DEMO).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53407 - К отчете kpp не выводится задание Квиз направленное на ТТ на всех пользователей (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53591 - У задания в МП не отображается информация о том, что срок выполнения задания подходит к концу (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53631 - Статус код 500 при попытки одобрить заявку по заданию со стороны администратора (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53697 - Не приходит пуш уведомление о начислении награды за выполненное задание НП (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53745 - Поступил пуш о начислении награды за выполненное задание Квиз (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53799 - У задания в статусе На проверке отображается информация о том, что срок выполнения задания подходит к концу (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53821 - конструктор опроса в списке конструкторов на проде.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53897 - Пуш уведомление из админпанели отправляется только части пользователям (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53901 - Решить проблемы МП с обработкой и выводом реального текста ошибок из ответов АПИ.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53923 - Уведомления не отправляются пользователям (DEMO).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/54015 - Пользователям не приходят пуши отправленные с админпанели.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/54041 - Пуш о начислении награды приходит продавцу в количестве 2 шт.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/54451 - Не происходит автоудаление паспортных данных в разделе Модерация пользователей (PROD).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55047 - В импорте контрагентов отчет скачивается в формате htm (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55063 - Отсутствует валидация в поле Код ТТ в импорте контрагентов.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55065 - В разделе ТТ не отображается ТТ в статусе Подтвержденная после успешного импорта в модальном окне Импорт контрагента (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55083 - Номер телефона, который начинается на 8 не преобразовался в единый формат в системе.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55089 - Успешная загрузка xlsx файла в Импорте контрагентов, когда в поле Номер владельца присутствуют символы или буквы.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55091 - Успешный импорт xlsx файла, в котором 2 владельца имеют одинаковый номер телефона (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55093 - Продавец не добавляется в систему при импорте с валидными данными (test 2).md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/55099 - Успешная загрузка xlsx файла в Импорте контрагентов, когда в поле ФИО владельца присутствуют символы-цифры-латиница.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57521 - В задании отображается не выбранная при создании позиция.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57631 - Баг на прод. Импорт файла КА не срабатывает для большинства точек.md": "LiBug",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/Баги ReportGenerator.md": "LiBug",
+  "Проекты/OctoberStudio/Проекты": "💎",
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti": {
+    "iconName": "ZeOmSvgrepoCom",
+    "iconColor": "#197a05"
+  },
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti/Идеи.md": {
+    "iconName": "LiSquareKanban",
+    "iconColor": "#09950b"
+  },
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti/Схема данных kriti.canvas": "ZeSchemeSvgrepoCom",
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti/Старт/1 Start kriti.PRO.md": "🚀",
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti/Старт/2 Как быстро влетать в Pro Kriti.md": "🐵",
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti/Старт/Архитектурная логика.md": "LiLayoutPanelLeft",
+  "Проекты/OctoberStudio/Проекты/Pro.Kriti/Старт/Цветовая схема.md": {
+    "iconName": "LiPaintBucket",
+    "iconColor": "#019303"
+  },
+  "Проекты/OctoberStudio/Проекты/ZipGSM": {
+    "iconName": "LiMicrochip",
+    "iconColor": "#e00000"
+  },
+  "Проекты/OctoberStudio/Проекты/Checkinside": {
+    "iconName": "LiSearchCheck",
+    "iconColor": "#851e7c"
+  },
+  "Проекты/OctoberStudio/Проекты/Bauer": "SiNintendogamecube",
+  "Проекты/OctoberStudio/Проекты/Бэбилон": {
+    "iconName": "LiBaby",
+    "iconColor": "#ff1aec"
+  },
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Задачи": {
+    "iconName": "SiGoogletasks",
+    "iconColor": "#b1a02f"
+  },
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Материалы": "SiBookstack",
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Задачи/Багтрекер": {
+    "iconName": "LiBug",
+    "iconColor": "#ff0000"
+  },
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Задачи/Бэбилон канбан.md": "LiSquareKanban",
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Задачи/Обслуживание": "SiGooglecloudspanner",
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Материалы/Дампы БД": "LiDatabase",
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Задачи/Багтрекер/Сбой Corello.md": "SiTask",
+  "Проекты/Азимут-Тур": {
+    "iconName": "LiShipWheel",
+    "iconColor": "#2764a5"
+  },
+  "Проекты/Азимут-Тур/Азимут-тур канбан.md": {
+    "iconName": "LiSquareKanban",
+    "iconColor": "#0091ff"
+  },
+  "Проекты/Азимут-Тур/Брэндбук": "ZeCertificate",
+  "Проекты/Азимут-Тур/Бэкапы БД": "LiBackpack",
+  "Проекты/Азимут-Тур/Бэклог": "LiLayoutList",
+  "Проекты/Азимут-Тур/Внешние источники": {
+    "iconName": "SiGooglecloudspanner",
+    "iconColor": "#b540b1"
+  },
+  "Проекты/Азимут-Тур/Доступы": {
+    "iconName": "LiLockKeyhole",
+    "iconColor": "#012160"
+  },
+  "Проекты/Азимут-Тур/Карточки": "LiWalletCards",
+  "Проекты/Азимут-Тур/Обслуживание": {
+    "iconName": "LiShieldPlus",
+    "iconColor": "#205b21"
+  },
+  "Проекты/Азимут-Тур/Проекты Azimut": {
+    "iconName": "SiEbox",
+    "iconColor": "#143866"
+  },
+  "Проекты/Азимут-Тур/Внешние источники/Водоход": "🛳",
+  "Проекты/Азимут-Тур/Внешние источники/ВолгаWolga": "🛳",
+  "Проекты/Азимут-Тур/Внешние источники/Инфофлот": "🛳",
+  "Проекты/Азимут-Тур/Внешние источники/Мостурфлот": "🛳",
+  "Проекты/Азимут-Тур/Доступы/Админпанель.md": "SiGnubash",
+  "Проекты/Азимут-Тур/Доступы/Домен.md": {
+    "iconName": "SiInternetexplorer",
+    "iconColor": "#3181bf"
+  },
+  "Проекты/Азимут-Тур/Доступы/Сервера": "LiServerCog",
+  "Проекты/Азимут-Тур/Карточки/Багтрекер": {
+    "iconName": "LiBug",
+    "iconColor": "#ff0000"
+  },
+  "Проекты/Азимут-Тур/Карточки/Задачи": {
+    "iconName": "SiGoogletasks",
+    "iconColor": "#23279a"
+  },
+  "Проекты/Азимут-Тур/Обслуживание/SSL - Сертификаты.md": "ZeCertificate",
+  "Проекты/Азимут-Тур/Проекты Azimut/Azimut74.md": "🛳",
+  "Проекты/Азимут-Тур/Внешние источники/ВолгаWolga/ВолгаWolga - Описание.md": "LiFileText",
+  "Проекты/Азимут-Тур/Доступы/Сервера/Azimut-VPS.md": {
+    "iconName": "LiServer",
+    "iconColor": "#2666ab"
+  },
+  "Проекты/Азимут-Тур/Доступы/Сервера/Storage.md": "SiGooglecloudstorage",
+  "Проекты/Азимут-Тур/Карточки/Багтрекер/Архив": "LiArchive",
+  "Проекты/Азимут-Тур/Карточки/Багтрекер/Спутник-Гермес некорректная дата.md": "ZeBugFix",
+  "Проекты/Азимут-Тур/Обслуживание/Azimut74/Azimut74 (v1).md": {
+    "iconName": "SiCodeship",
+    "iconColor": "#2f77e9"
+  },
+  "Проекты/Азимут-Тур/Карточки/Багтрекер/Архив/На работает Exist для Volga.md": "LiBug",
+  "Проекты/Азимут-Тур/Карточки/Багтрекер/Архив/Не отображаются свободные каюты.md": "LiBug",
+  "Проекты/Азимут-Тур/Карточки/Багтрекер/Архив/Парсер Волга-Wolga падает.md": "LiBug",
+  "Проекты/nopreset/Организация/Презентации": {
+    "iconName": "LiBookImage",
+    "iconColor": "#b016bb"
+  },
+  "Проекты/nopreset/Организация/Презентации/OctoberCMS": {
+    "iconName": "SiOctobercms",
+    "iconColor": "#ff8800"
+  },
+  "Проекты/nopreset/Доступы/Сервера": {
+    "iconName": "LiServerCog",
+    "iconColor": "#22458c"
+  },
+  "Проекты/nopreset/Доступы/Сервера/DEMO.md": {
+    "iconName": "LiServerCrash",
+    "iconColor": "#1f13c9"
+  },
+  "Проекты/nopreset/Доступы/Сервера/Test1.md": {
+    "iconName": "LiServerCrash",
+    "iconColor": "#ff00ea"
+  },
+  "Проекты/nopreset/Доступы/Private": {
+    "iconName": "LiLock",
+    "iconColor": "#ea2a2a"
+  },
+  "Проекты/nopreset/Доступы/Private/OneSignal ключи.md": "LiKeyRound",
+  "Проекты/nopreset/Доступы/Private/MySQL": "LiDatabase",
+  "Проекты/nopreset/Доступы/Private/PlayGround ключи.md": "LiKeyRound",
+  "Проекты/nopreset/Доступы/Private/MySQL/DEMO - MySQL.md": "LiDatabaseZap",
+  "Проекты/nopreset/Доступы/Сервера/0. NP-DOCKER.md": {
+    "iconName": "LiServer",
+    "iconColor": "#2d90a4"
+  },
+  "Проекты/nopreset/Доступы/Сервера/1. PROD.md": {
+    "iconName": "LiServerCrash",
+    "iconColor": "#ff0000"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57631 - Баг на прод. Импорт файла КА не срабатывает....md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57721 - Поля GPS.md": "ZeBugFix",
+  "Заметки/Типы документов": "LiClipboardType",
+  "Заметки/Типы документов/Проект.md": "SiNintendogamecube",
+  "Программирование/PostgreSQL": {
+    "iconName": "SiPostgresql",
+    "iconColor": "#122264"
+  },
+  "Программирование/PostgreSQL/Обслуживание": "LiFolder",
+  "Программирование/PostgreSQL/Обслуживание/Исправление ошибок.md": "LiHammer",
+  "Проекты/Азимут-Тур/Азимут-Тур.md": "ZeProject",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59113 - Невозможно создать PUSH уведомления на все ТТ.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59115 - Отсутствует поле дата.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59127 - При открытии раздела PUSH уведомления отображается ошибка 405.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59163 - Пользователи не получают пуши созданные через конструктор.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/WinlineHR": "ZeProject",
+  "Проекты/nopreset/Проекты/WinlineHR/WinlineHR.md": "ZeProject",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив": "LiArchive",
+  "Программирование/OctoberCMS/Документация/Модель/Пример хранения с uuid.md": "🔶",
+  "Заметки/Типы документов/Задача.md": "SiTask",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив/57763 - Winline-HR.md": "SiTask",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив/59811 - В форму не приходит файл.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив/Ошибка при отправке формы.md": "ZeBugFix",
+  "Заметки/Типы документов/Оценка.md": "LiScanSearch",
+  "Проекты/nopreset/nopreset.md": "ZeNopreset",
+  "Linux/Софт/Пакеты/Nautilus.md": "ZeZenBash",
+  "Заметки/Типы документов/Модуль.md": "LiCpu",
+  "Программирование/OctoberCMS/Документация/Фасады/Media.md": "💎",
+  "Программирование/OctoberCMS/Документация/Фасады": "LiFolder",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/11.2024 - Ноябрь (Дейли).md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/12.2024 - Декабрь (Дейли).md": "SiGooglemeet",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59457 - Неверное значение Группы точек.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59461 - Ошибка при обновлении.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59473 - Меняется дата и время.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59881 - При открытии раздела pushes 500 ошибка.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59937 - При создании пуша на все ТТ отображается ошибка.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/59941 - Пользователи конкретной ТТ не получают пуши.md": "ZeBugFix",
+  "Проекты/OctoberStudio/OctoberStudio.md": {
+    "iconName": "SiOctobercms",
+    "iconColor": "#5ea914"
+  },
+  "Шаблоны/Ежедневная заметка.md": "LiAlarmPlus",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60513 - Копия задания создается при отмене копирования (test1).md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60515 - При копировании задания ДМЦ появляется ошибка сервера 500.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60623 - При копировании УП происходит переход в конструктор Наличие продукта.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60809 - УП не переходит в статус На проверке после наступления end_data УП.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/51123 - Отправляется пуш об окончании УП пользователям, которые его не принимали.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/53355 - В отчете kpp не отображаются данные по контрагенту.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57717 - Успешный импорт xlsx файла в импорте контрагентов когда в поле ИНН количество символов 31.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57725 - Успешный импорт xsls файла в Импорте контрагента, когда в поле Широта и Долгота введено более 20 символов.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/57801 - Неверный статус у ТТ в разделе Торговые точки на странице владельца.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60575 - Отображается ошибка при попытке загрузить файл в модальное окно Импорт контрагента, которое содержит символы в поле KTNG Branches.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60577 - Успешная загрузка xlsx файла в Импорте контрагентов, когда в поле TSM Code содержит символы.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60579 - Отображается ошибка при попытке загрузить файл с валидными данными в поле Адрес из УС в модальное окно Импорт контрагента.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60581 - Отображается неверный текст ошибки при попытке загрузить файл с не валидными данными в поле RP HS Evotor KPP.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60583 - Успешная загрузка xlsx файла в модальном окне Импорт контрагентов, когда в поле City присутствуют цифры и латиница.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60609 - Успешная загрузка xlsx файла в модальном окне Импорт контрагентов, когда в поле Industry Grade присутствуют символы и кириллица.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60613 - Успешная загрузка xlsx файла в модальном окне Импорт контрагентов когда в поле Industry Vol pack per day присутствуют символы кириллица  латиница.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60615 - Отображается неверный текст ошибки при попытке загрузить файл с не валидными данными в поле POS Status.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60617 - Успешная загрузка xlsx файла в модальном окне Импорт контрагентов когда в поле Код присутствуют символы.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60655 - Отображается ошибка при попытке загрузить файл с доступными символами для email в поле E-mail в модальное окно Импорт контрагента.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60659 - Бесконечная загрузка при импорте владельца с такой же эл.почтой как у существующего владельца в системе.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60661 - Успешная импорт контрагента, когда в поле Email присутствует кириллица.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60669 - Отображается бесконечная загрузка при импорте продавца когда в поле ФИО Продавца указана только фамилия.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/60735 - УП переходит в статус На проверке до наступления end_data УП.md": "ZeBugFix",
+  "Linux/Лаборатория": {
+    "iconName": "LiFlaskConical",
+    "iconColor": "#247c13"
+  },
+  "Linux/Лаборатория/Управление закладками nautilus.md": "ZeDoc",
+  "Soft/Разработка/Git/Tags.md": "LiTag",
+  "Программирование/OctoberCMS/Статьи": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка/Архив/57581 - Необходимо расширение роута.md": "SiTask",
+  "Linux/Софт/Планинг": "⏲",
+  "Linux/Софт/Планинг/Taskwarrior.md": "ZeApplication",
+  "Linux/Софт/Планинг/Orage.md": "ZeApplication",
+  "Linux/Софт/Настройки": "LiSettings2",
+  "Заметки/Типы документов/Приложение.md": "ZeApplication",
+  "Linux/Софт/Настройки/Dconf - Редактор настроек.md": "ZeApplication",
+  "Linux/Приёмы/Генерация токенов.md": "SiIterm2",
+  "Linux/Приёмы/Генерация SSL.md": "SiIterm2",
+  "Linux/Приёмы/Горячие клавиши Ubuntu 20.04.md": "LiKeyboard",
+  "Linux/Приёмы/Поиск файлов по тексту.md": "SiIterm2",
+  "Linux/Софт/Пакеты/which.md": "ZeZenBash",
+  "Заметки/Web": "🕸",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/01.2025 - Январь (дейли).md": "SiGooglemeet",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/61291 - Некорректное уведомление.md": "ZeBugFix",
+  "Заметки/Типы документов/Баг.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Оценки/61647 - Данные ТСМ на странице продавца.md": "LiSearchCode",
+  "Проекты/nopreset/Доступы/Сервера/Test2.md": "LiServerCrash",
+  "Заметки/Типы документов/Инструкция.md": "🗒",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/61373 - Не работает фильтр по модератору в разделе Модерация.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/61671 - При импорте некорректного файла в УП не отображается ошибка.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62113 - Статус код 500 при нажатии на кнопку Создать первую группу.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62135 - Ошибка при удалении группы ассортимента.md": "ZeBugFix",
+  "Проекты/Азимут-Тур/azimu81/azimuth.os3.pro.md": {
+    "iconName": "SiLightning",
+    "iconColor": "#2a6dc6"
+  },
+  "Проекты/Азимут-Тур/azimu81/Ключи SSL": "🔑",
+  "Проекты/Азимут-Тур/azimu81": {
+    "iconName": "SiLightning",
+    "iconColor": "#386aff"
+  },
+  "Linux/Софт/Утилиты/at - Планировщик линукс.md": "ZeApplication",
+  "Проекты/Азимут-Тур/azimu81/readme.md": "ZeDoc",
+  "Проекты/Азимут-Тур/azimu81/Заметки": "LiNotepadText",
+  "Проекты/OS3": "ZeOmSvgrepoCom",
+  "Проекты/OS3/port.OS3.md": "LiAppWindowMac",
+  "Программирование/Принципы/SOLID.md": "SiPrivatedivision",
+  "Заметки/Типы документов/Статья.md": "LiLetterText",
+  "Программирование/Принципы/DRY.md": "SiPrivatedivision",
+  "Программирование/Принципы/YAGNI.md": "SiPrivatedivision",
+  "Программирование/Принципы/BDUF.md": "SiPrivatedivision",
+  "Заметки/Типы документов/Устройство.md": "ZeDevicesSvgrepoCom",
+  "Программирование/OctoberCMS/Документация/NestedTree.md": "💎",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62231 - В квизе нет кнопки.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62355 - При копировании УП и последующего копирования подзадания - оригинал копируемого подзадания удаляется.md": "ZeBugFix",
+  "Проекты/nopreset/Организация/Оценки/Готово/Оценка разработки сайта на Laravel.md": "LiSearchCode",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-02 (четверг).md": "ZeThrees",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-06 (понедельник).md": "ZeThrees",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-07 (вторник).md": "ZeThrees",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-08 (среда).md": "ZeThrees",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-09 (четверг).md": "ZeThrees",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-10 (пятница).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-11 (суббота).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-12 (воскресенье).md": "👑",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-13 (понедельник).md": "💎",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-14 (вторник).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-15 (среда).md": "💰",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-16 (четверг).md": {
+    "iconName": "SiLightning",
+    "iconColor": "#a51fff"
+  },
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-17 (пятница).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-18 (суббота).md": "👑",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-19 (воскресенье).md": "🛠",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-20 (понедельник).md": "🛠",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-21 (вторник).md": "🛠",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-22 (среда).md": "💎",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-23 (четверг).md": {
+    "iconName": "ZeOmSvgrepoCom",
+    "iconColor": "#ffea00"
+  },
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-24 (пятница).md": "LiCrown",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-26 (воскресенье).md": {
+    "iconName": "SiLightning",
+    "iconColor": "#ff0000"
+  },
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-27 (понедельник).md": {
+    "iconName": "LiFlaskConical",
+    "iconColor": "#3d9e51"
+  },
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-28 (вторник).md": "💎",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-29 (среда).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-30 (четверг).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/01.2025 Январь/2025-01-31 (пятница).md": "💎",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-03 (понедельник).md": "💎",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-04 (вторник).md": "ZeCompany",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-05 (среда).md": "🌞",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-06 (четверг).md": "👑",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-02 (понедельник).md": {
+    "iconName": "LiCannabis",
+    "iconColor": "#45a72a"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-03 (вторник).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#ff9500"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-04 (среда).md": "🍀",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-05 (четверг).md": "🚀",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-06 (пятница).md": "🍀",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-08 (воскресенье).md": "🍀",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-09 (понедельник).md": "🍀",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-10 (вторник).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#f0ff24"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-11 (среда).md": "🍀",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-12 (четверг).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#ffc524"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-13 (пятница).md": "💎",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-14 (суббота).md": "💎",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-16 (понедельник).md": "💮",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-17 (вторник).md": {
+    "iconName": "SiOctobercms",
+    "iconColor": "#0dae0a"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-18 (среда).md": {
+    "iconName": "LiCannabis",
+    "iconColor": "#37a319"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-19 (четверг).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#ffa70f"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-20 (пятница).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#bf39d0"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-22 (воскресенье).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-23 (понедельник).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#ff0000"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-24 (вторник).md": {
+    "iconName": "ZeMeditationYoga",
+    "iconColor": "#ff7300"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-25 (среда).md": "⏱",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-26 (четверг).md": {
+    "iconName": "ZeOmSvgrepoCom",
+    "iconColor": "#d6e411"
+  },
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-27 (пятница).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-28 (суббота).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-29 (воскресенье).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2024/12.2024 Декабрь/2024-12-31 (вторник).md": "🎅",
+  "Программирование/OctoberCMS/Документация/Tiler.md": "💎",
+  "Linux/Статьи": "ZeDoc",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/Архив/57775 - Перенос сервисов (KTNG-DOCKER).md": "SiTask",
+  "Проекты/OS3/Threes": "ZeThrees",
+  "Проекты/OS3/Threes/Threes.md": "ZeThrees",
+  "Linux/Обслуживание/Скрипты/docker-run - Запустить Docker-контейнер.md": "ZeZenBash",
+  "Программирование/OctoberCMS/Документация/Модель/Settings Модель настроек.md": "💎",
+  "Заметки/Типы документов/Фича.md": "💎",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62011 - Ошибка данных маршрута.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62257 - Лишние кнопки.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62445 - Проблема нестандартной инструкции.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62701 - Неверный ТСМ после иморта.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62727 - неверный ТСМ.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62843 - Ошибка формата.md": "ZeBugFix",
+  "Заметки/Типы документов/Учение.md": "ZeOmSvgrepoCom",
+  "Заметки/Типы документов/Стендап.md": "SiGooglemeet",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63203 - Ошибка детальной страницы.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63477 - ГУП только у выбравшего.md": "ZeBugFix",
+  "Заметки/Типы документов/Цель.md": "🚩",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-26 (среда).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-27 (четверг).md": "🌞",
+  "Ежедневник/Архив/2025/02.2025 Февраль/2025-02-28 (пятница).md": "🎉",
+  "Ежедневник/Архив/2025/03.2025 Март/2025-03-01 (суббота).md": "ZeMeditationYoga",
+  "Ежедневник/Архив/2025/03.2025 Март/2025-03-06 (четверг).md": "🌞",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63759 - Блок изменения варианта задания УП в ГУП отображается у всех продавцов торговой точки.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63759 2.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63759 3.md": "ZeBugFix",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи": "LiFolderKanban",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Анализ Vue JSON Schema Form.md": "LiSearchCode",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Анализ nuxt для использования в проекте Vue.md": "SiTask",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Анализ системы генерации форм OctoberCMS v3.md": "LiSearchCode",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Интеграция Vite+Vue.md": "SiTask",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Интерфейс спрайтов.md": "SiTask",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Консольный скрипт формирования векторного md.md": "SiTask",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Создания partial с Vue приложением.md": "SiTask",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Задачи/Хранение юнитов с адресаций.md": "SiTask",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Материалы": "LiAlbum",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Материалы/Threes Модели и отношения.md": "💎",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Материалы/Махарефакторинг.md": "ZeOmSvgrepoCom",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Материалы/readme.md": "SiReadme",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Материалы/Концепты/Концепт shadow-dom.md": "LiFlaskConical",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы": "ZeSchemeSvgrepoCom",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Базовая архитектура.canvas": "ZeSchemeSvgrepoCom",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Элементы": "LiAlbum",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Юниты": "🔶",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Элементы/web-приложение.md": "🕸",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Элементы/Микрофронтенд.md": "SiHiveBlockchain",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Элементы/Сборщик форм.md": "LiFormInput",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Элементы/Свойства контрола.md": "LiCpu",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Схемы/Юниты/Математика/Умножение $a x $b.md": "🔶",
+  "Проекты/OS3/Threes/Архив/Итерация 1/Хронология Threes.md": "⏲",
+  "Ai": "ZeAi",
+  "Заметки/Типы документов/Ai.md": "ZeAi",
+  "Ai/Графические ai": "🖼",
+  "Ai/Бизнес": {
+    "iconName": "LiBriefcaseBusiness",
+    "iconColor": "#374db9"
+  },
+  "Ai/Видео ai": {
+    "iconName": "LiVideo",
+    "iconColor": "#1f5dc1"
+  },
+  "Ai/Программирование": "LiCodeXml",
+  "Ai/Программирование/useadrenaline.com.md": "LiBot",
+  "Ai/Звук": {
+    "iconName": "LiAudioLines",
+    "iconColor": "#8564d3"
+  },
+  "Ai/Бизнес/Работа с таблицами.md": {
+    "iconName": "LiTable",
+    "iconColor": "#15931d"
+  },
+  "Ai/Web": {
+    "iconName": "SiWebpack",
+    "iconColor": "#bb51bd"
+  },
+  "Программирование/OctoberCMS/Документация/Кастомные исключения.md": "💎",
+  "Linux/Обслуживание/Слежение/Xorg or Wayland.md": "SiGnubash",
+  "Linux/Обслуживание/Настройки/Переключение раскладки.md": "SiGnubash",
+  "Ежедневник/Архив/2025/03.2025 Март/2025-03-12 (среда).md": "ZeMeditationYoga",
+  "Ежедневник/Архив/2025/03.2025 Март/2025-03-13 (четверг).md": "ZeMeditationYoga",
+  "Linux/Софт/DevOps/Docker/Контейнера/nodered.io.md": "LiContainer",
+  "Linux/Софт/DevOps/n8n": {
+    "iconName": "ZeN8n",
+    "iconColor": "#b93c98"
+  },
+  "Linux/Софт/DevOps/Docker/Контейнера/n8n dc.md": "LiContainer",
+  "Заметки/Типы документов/Docker-контейнер.md": "LiContainer",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Дмитрий Демин (26).md": "🙂",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Николай Немов (23).md": "🙂",
+  "Проекты/nopreset/Организация/Тех.собесы/Технические собеседования.md": "ZeDoc",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Мифтахов Владимир (--).md": "🙎",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Кучкин Андрей.md": "🙎",
+  "Проекты/nopreset/Организация/Тех.собесы/Архив/Прокопенко Владислав.md": "🤦",
+  "Проекты/nopreset/Организация/Тех.собесы/Новые/Лысенко Антон.md": "🙎",
+  "Проекты/nopreset/Организация/Тех.собесы/Новые/Ксель Иван.md": "🙎",
+  "Ai/Lab/Новые технологии.md": "LiSearchCode",
+  "Программирование/OctoberCMS/Tailor - Обучение.md": "LiBookImage",
+  "Проекты/Азимут-Тур/azimu81/План разработки.md": "SiGoogledocs",
+  "Заметки/Типы документов/Область.md": "LiInspectionPanel",
+  "Проекты/Азимут-Тур/Карточки/Задачи/Архив/Аудит системы дубля заявок.md": "SiTask",
+  "Проекты/Азимут-Тур/Карточки/Задачи/Азимут - Трекинг звонков.md": "SiTask",
+  "Ai/LLM": {
+    "iconName": "LiBrainCog",
+    "iconColor": "#3cc8bf"
+  },
+  "Ai/LLM/DeepSeek.md": "🐋",
+  "Ai/LLM/GPT": "ZeChatgptIcon",
+  "Ai/LLM/Gemini.md": {
+    "iconName": "SiGooglegemini",
+    "iconColor": "#3164c9"
+  },
+  "Ai/LLM/rugpt.io.md": {
+    "iconName": "SiJetpackcompose",
+    "iconColor": "#ff0000"
+  },
+  "Ai/LLM/GPT/Бэндер.md": "LiAtom",
+  "Ai/LLM/GPT/Ева (Eva).md": "SiNeutralinojs",
+  "Ai/LLM/GPT/Лина (Lina3000).md": "SiNeutralinojs",
+  "Заметки/Дом": "LiHome",
+  "Проекты/Азимут-Тур/Внешние источники/Гама": "🛳",
+  "Заметки/Типы документов/API.md": "LiCloudCog",
+  "Проекты/Азимут-Тур/Внешние источники/Гама/Гама.md": "🛳",
+  "Проекты/Азимут-Тур/mega": {
+    "iconName": "SiMega",
+    "iconColor": "#ff0000"
+  },
+  "Linux/Софт/DevOps/Proxmox": {
+    "iconName": "SiProxmox",
+    "iconColor": "#ff9b0f"
+  },
+  "Linux/Софт/DevOps/Docker/Контейнера/Adminer.md": "LiContainer",
+  "Linux/Софт/DevOps/Docker/Контейнера/Watchtower.md": "LiContainer",
+  "Хранилище ссылок/Self-hosted/Rocket.Chat.md": {
+    "iconName": "SiRocketdotchat",
+    "iconColor": "#f26363"
+  },
+  "Программирование/phpStorm": {
+    "iconName": "SiPhpstorm",
+    "iconColor": "#c334c5"
+  },
+  "Программирование/phpStorm/PhpStorm 2024.3.5.md": "SiPhpstorm",
+  "Заметки/docs-base": {
+    "iconName": "SiRobloxstudio",
+    "iconColor": "#1b6f20"
+  },
+  "Проекты/Азимут-Тур/azimut74": "🩸",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/02.2025 - Февраль.md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/03.2025 - Март.md": "SiGooglemeet",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка/Архив/62003 - Архивация прошлогодних заданий.md": "SiTask",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив/59873 - Добавление видео в галерею.md": "LiScanSearch",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив/59885 - Уведомление админам по форме.md": "LiScanSearch",
+  "Проекты/nopreset/Проекты/WinlineHR/Задачи/Архив/59939 - Деактивация закрытых задания.md": "LiScanSearch",
+  "Программирование/MongoDB": {
+    "iconName": "SiMongodb",
+    "iconColor": "#4ba838"
+  },
+  "Программирование/MongoDB/MongoDB.md": {
+    "iconName": "SiMongodb",
+    "iconColor": "#2da42f"
+  },
+  "Заметки/Типы документов/Изделие.md": "🔶",
+  "Linux/Обслуживание/Управление/Tar - Архивирование.md": "SiGnubash",
+  "Проекты/nopreset/Организация/Оценки/Готово/Бриксо/62757 - Бриксо, корпоративный сайт с параталом для обучения.md": "LiPackageSearch",
+  "Проекты/nopreset/Организация/Оценки/Готово/Бриксо/63875 - Бриксо и новые вводные.md": "ZeDoc",
+  "Проекты/nopreset/Организация/Оценки/Готово/Carte Blanche/63935 МП Шеф Carte Blanche (NDA) - Functional Specification.md": "LiSearch",
+  "Проекты/nopreset/Проекты/СатисСвязь/СатисСвязь.md": "LiAntenna",
+  "Хранилище ссылок/Сервисы/No code": {
+    "iconName": "LiLayoutPanelLeft",
+    "iconColor": "#086dd9"
+  },
+  "Linux/Софт/Утилиты/Ventoy.md": "ZeUsbFlashColor",
+  "Программирование/OctoberCMS/OctoberCMS.md": {
+    "iconName": "SiOctobercms",
+    "iconColor": "#ff600a"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/62973 - Не отображается ошибка при загрузки плана продажи в формате xlsx, который содержит 2 листа.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63509 - Расхождения в итоговых значениях в отчете KPP Standard.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63919 - После принятия задания УП на экране МП появляется ошибка.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/63987 - При загрузки валидного файла в план продажи отображается ошибка.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/65749 - Успешное создание группы продавцов с файлом не соответствующим шаблону.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/66599 - При удалении пуша появляется ошибка сервера 500 (demo).md": "ZeBugFix",
+  "Linux/Ubuntu": {
+    "iconName": "SiUbuntu",
+    "iconColor": "#ff8800"
+  },
+  "Linux/Manjaro": {
+    "iconName": "SiManjaro",
+    "iconColor": "#228745"
+  },
+  "Ai/Компаньоны": "💌",
+  "Хранилище ссылок/Фотография": {
+    "iconName": "SiGooglephotos",
+    "iconColor": "#4044b5"
+  },
+  "Ai/Промты": "LiBookText",
+  "Заметки/Типы документов/Промт.md": "LiTextSelection",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-21 (среда).md": "💌",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-22 (четверг).md": "🤟",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-23 (пятница).md": "💃",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-24 (суббота).md": "💙",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-25 (воскресенье).md": "💙",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/66547 -  SO 1468 и удалить задания 1432, 1438, 1444.md": "ZeBugFix",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/Архив/66555 - В конструкторе Push при создании рассылки на группу продавцов пуши создаются и на группы точек и ТСМ.md": "ZeBugFix",
+  "Заметки/Типы документов/Документ.md": "ZeDoc",
+  "Linux/Софт/DevOps/AnantaVPS.md": "LiCpu",
+  "Хранилище ссылок/Оплата зарубежом": "LiCreditCard",
+  "Хранилище ссылок/Оплата зарубежом/oplatym.ru.md": "💰",
+  "Проекты/OctoberStudio/Проекты/Бэбилон/b64.md": "LiBaby",
+  "Проекты/nopreset/Организация/Дейли стендапы/06.2025 - Июнь.md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/04.2025 - Апрель.md": "SiGooglemeet",
+  "Проекты/nopreset/Организация/Дейли стендапы/Архив/05.2025 - Май.md": "SiGooglemeet",
+  "Проекты/OctoberStudio/Проекты/Бэбилон/Задачи/Обслуживание/Rant - Новая ссылка.md": "SiTask",
+  "Проекты/nopreset/Проекты/СатисСвязь/Задачи/68001 - Баг на странице Нашим Абонентам.md": "SiTask",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-26 (понедельник).md": "🌞",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-27 (вторник).md": "🌻",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-28 (среда).md": "👁",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-29 (четверг).md": "💓",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-30 (пятница).md": "ZeLips",
+  "Ежедневник/Архив/2025/05.2025 Май/2025-05-31 (суббота).md": "💃",
+  "Программирование/Python": {
+    "iconName": "SiPython",
+    "iconColor": "#3377ff"
+  },
+  "Заметки/Контакты": {
+    "iconName": "LiContact",
+    "iconColor": "#8a54c0"
+  },
+  "Заметки/Контакты/Контакт.md": "SiArtifacthub",
+  "Заметки/Контакты/Организации": "LiFolder",
+  "Заметки/Контакты/Организация.md": "SiArtifacthub",
+  "Заметки/Контакты/Список контактов": "LiFolder",
+  "Заметки/Контакты/Организации/AWG.md": "ZeCompany",
+  "Заметки/Контакты/Список контактов/Аблизин Александр Владимирович.md": "LiUser",
+  "Заметки/Контакты/Список контактов/Андрей Голубев (Тестировщик).md": "LiUser",
+  "Заметки/Контакты/Список контактов/Анна Нартова.md": "LiUser",
+  "Заметки/Контакты/Список контактов/Евгений Викторович Васильев.md": "LiUser",
+  "Заметки/Контакты/Список контактов/Екатерина Казанкина (Тестировщик).md": "LiUser",
+  "Заметки/Контакты/Список контактов/Ирина Сухинина.md": "LiUser",
+  "Заметки/Контакты/Список контактов/Михаил Каргов.md": "LiUser",
+  "Заметки/Контакты/Список контактов/Светлана Сырыгина.md": "LiUser",
+  "Заметки/Хостинги": "LiServerCog",
+  "Заметки/Хостинги/SmartApe": "🐵",
+  "Заметки/Хостинги/SmartApe/shared-29.md": "🐵",
+  "Заметки/Устройства": "ZeDevicesSvgrepoCom",
+  "Заметки/Устройства/SSD JMICRON JMS579 1Tb.md": "LiHardDrive",
+  "Заметки/Устройства/Десктоп Homer.md": "LiComputer",
+  "Заметки/Устройства/Десктоп Lexx.md": "LiAsteriskSquare",
+  "Заметки/Устройства/Кухонные весы Rombica SCL-0103.md": "LiScale",
+  "Заметки/Устройства/Машинка для стрижки Polaris.md": "LiScissorsSquare",
+  "Заметки/Устройства/Наушники Huawei FreeBuds 5i.md": "ZeAirbuds",
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578": "💻",
+  "Заметки/Устройства/Ноутбук MacBook Pro.md": "💻",
+  "Заметки/Устройства/Роутер TP-Link MR105.md": "LiRouter",
+  "Заметки/Устройства/Роутер TP-Link TL-W842N.md": "LiRouter",
+  "Заметки/Устройства/Смартфон Xiaomi Redmi Note 12.md": "LiSmartphone",
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578/DELL Vostro 3578 характеристики.md": "💻",
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578/Ubuntu 20.04": {
+    "iconName": "SiUbuntu",
+    "iconColor": "#ff622e"
+  },
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578/Ubuntu 20.04/Ubuntu 20.04 Управление.md": {
+    "iconName": "SiUbuntu",
+    "iconColor": "#de5317"
+  },
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578/Ubuntu 20.04/Скрипты/Доступ по ssh/azimut-vps.sh.md": "ZeZenBash",
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578/Ubuntu 20.04/Скрипты/Сервисы/DBRestore.sh.md": "ZeZenBash",
+  "Заметки/Устройства/Ноутбук DELL Vostro 3578/Ubuntu 20.04/Скрипты/Сервисы/domain-manager(dm).sh.md": "ZeZenBash",
+  "Заметки/Книги": {
+    "iconName": "LiBookText",
+    "iconColor": "#8b187b"
+  },
+  "Заметки/Om": "ZeOmSvgrepoCom",
+  "Заметки/Om/Материалы/9 аспектов преданности.md": "LiScroll",
+  "Заметки/Хостинги/Beget/Svatantra VPN.md": "LiComputer",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-01 (воскресенье).md": "👁",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-02 (понедельник).md": "SiUbuntu",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-03 (вторник).md": {
+    "iconName": "LiClover",
+    "iconColor": "#23651b"
+  },
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-04 (среда).md": {
+    "iconName": "SiGooglegemini",
+    "iconColor": "#4e81b1"
+  },
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-05 (четверг).md": "❤️‍🔥",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-06 (пятница).md": "💃",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-09 (понедельник).md": "❤️‍🔥",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-10 (вторник).md": "😜",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-11 (среда).md": {
+    "iconName": "SiOrigin",
+    "iconColor": "#2eaab2"
+  },
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-12 (четверг).md": "💓",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-13 (пятница).md": "SiTask",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-14 (суббота).md": "💖",
+  "Программирование/MySQL/Запросы": "ZeFolder",
+  "Программирование/MySQL/Запросы/Список таблиц с количеством записей.md": "LiBookText",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/67181 - Сформировать отчет за год по списку торговых точек.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка/67245 - Программирование (бэк) Онбординг продавца в МП.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка/Архив/RAG - Рефакторинг KTnG.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Разработка/Архив/64937 - Направление активностей F43.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/68293 - Контейнеризация тестовых окружений test1 и test2.md": "SiTask",
+  "Программирование/OctoberCMS/Обслуживание/Типичные баги.md": "ℹ",
+  "Заметки/Om/Матрики/Богиня Дурга.md": "ZeWoman",
+  "Заметки/Om/Матрики/Богиня Сарасвати.md": "ZeWoman",
+  "Заметки/Om/Экадаши/Йогини экадаши.md": "ZeOmSvgrepoCom",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/68739 - Отображается ошибка в pg после повторного использования скрипта по очистке кеша (test 3).md": {
+    "iconName": "SiTask",
+    "iconColor": "#ff0000"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/Архив/67851 - Выгрузка ТСМов.md": "SiTask",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-16 (понедельник).md": "👁",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-17 (вторник).md": "💓",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-18 (среда).md": "ZeLips",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-19 (четверг).md": "❤️‍🔥",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-20 (пятница).md": "💓",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-22 (воскресенье).md": "ZeOmSvgrepoCom",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-23 (понедельник).md": {
+    "iconName": "LiClover",
+    "iconColor": "#236417"
+  },
+  "VPS": "🖥",
+  "VPS/Azimut-VPS.md": {
+    "iconName": "LiServer",
+    "iconColor": "#6292f4"
+  },
+  "VPS/Jino": {
+    "iconName": "LiServer",
+    "iconColor": "#ae00ff"
+  },
+  "VPS/Shukra.md": {
+    "iconName": "LiServer",
+    "iconColor": "#1b570a"
+  },
+  "VPS/Vega.md": {
+    "iconName": "LiServer",
+    "iconColor": "#fb00ff"
+  },
+  "VPS/Jino/kriti.pro.md": "LiFolderCog",
+  "Планирование/Карточки": "ZeFolder",
+  "Планирование/Threes.md": {
+    "iconName": "LiKanbanSquare",
+    "iconColor": "#1e6c13"
+  },
+  "Планирование/KTNG.md": "LiSquareKanban",
+  "Планирование/Карточки/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/Архив/62875 - Тестовое окружение Test3.md": {
+    "iconName": "SiTask",
+    "iconColor": "#1c34b0"
+  },
+  "Планирование/Home.md": {
+    "iconName": "LiSquareKanban",
+    "iconColor": "#9bbbee"
+  },
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Обслуживание/68917 - Реализация SSE сервиса для обслуживания системы уведомлений.md": "SiTask",
+  "Заметки/1. Идеи/Бездна/Сайт с ai-артом где можно зарабатывать токены голосованием.md": "ZeLips",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/68849 - Пагинация заданий в МП.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/61457 - Просмотр раздела Достижения в МП.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов/59769 - Программирование Доработка валидации полей в импорте файла в разделе Контрагенты.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов/Архив/47805 - ТЗ Доработка импорта Контрагенты.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов/Архив/49103 - Оценка Доработка импорта Контрагенты.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов/Архив/49749 - Программирование Доработка импорта Контрагенты.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Импорт контрагентов/Архив/57657 - Написать миграцию для изменения формата хранения gps-координат.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Паспортные данные": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Паспортные данные/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Паспортные данные/Архив/49493 - Оценка Удаление паспортных данных.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Паспортные данные/Архив/50175 - Программирование Удаление паспортных данных.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Система заданий": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Система заданий/58281 - Копирование заданий.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Управление продуктом": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Управление продуктом/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Управление продуктом/Архив/47421- Доработки УП.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Управление продуктом/Архив/53579 - Запустить новый тип УП.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Управление продуктом/Архив/60561 - Доработка УП (статус).md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Управление продуктом/Архив/62615 - Выбор УП.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/F6 News/63461 - Устаревание новости.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/F43 Группы пользователей/64189 DIR": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/F43 Группы пользователей/64189 DIR/64189 - Группы пользователей.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Pushes": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Pushes/Архив": "LiArchive",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Pushes/Архив/57317 - Push на группу точек.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Инфраструктура": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Инфраструктура/50919 - Доработка сервера логирования.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Инфраструктура/65835 - Доступ в плейграунд.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Система отчётов": "LiFolder",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Система отчётов/53193 - Санитизация отчёта kpp standard от пустых строк.md": "SiTask",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Доработки/Архив/Система отчётов/Архив": "LiArchive",
+  "Программирование/Laravel/MongoDB (Laravel)": {
+    "iconName": "SiMongodb",
+    "iconColor": "#4ab04b"
+  },
+  "Программирование/Laravel/Приёмы": "🥷",
+  "Linux/Статьи/BASHDOCS.md": "⭐",
+  "Linux/Обслуживание/Управление/Переменные окружения.md": "SiGnubash",
+  "Проекты/fan-control.md": {
+    "iconName": "LiFan",
+    "iconColor": "#e534cd"
+  },
+  "Проекты/OS3/Axis": "ZeAxis",
+  "Проекты/OS3/Axis/Axis.md": "ZeAxis",
+  "Проекты/OS3/Axis/Задачи/Axis kanban.md": {
+    "iconName": "LiKanbanSquare",
+    "iconColor": "#ca44bf"
+  },
+  "Проекты/OS3/Axis/Материалы/Стайлинг/Axis Логотип.md": "ZeAxis",
+  "Программирование/JavaScript/Системы сборки": "🏛",
+  "Программирование/JavaScript/Системы сборки/pnpm - Современный пакетный менеджер для JavaScript.md": "SiPnpm",
+  "Soft/Разработка/Git/Git - Шпаргалка.md": "ZeDoc",
+  "Ежедневник/2025-06-30 (понедельник).md": "ZeWoman",
+  "Linux/Обслуживание/Скрипты/to_obs - Отправить файлы c кодом в obsidian.md": "ZeZenBash",
+  "Заметки/Типы документов/Скрипт.md": "ZeApplication",
+  "Ежедневник/2025-07-01 (вторник).md": "💖",
+  "Проекты/nopreset/Организация/Дейли стендапы/07.2025 - Июль.md": "SiGooglemeet",
+  "Ежедневник/2025-07-02 (среда).md": "⭐",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-24 (вторник).md": "🌞",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-25 (среда).md": "💓",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-26 (четверг).md": "😜",
+  "Ежедневник/Архив/2025/06.2025 Июнь/2025-06-27 (пятница).md": "❤️‍🔥",
+  "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/67445 - Ошибка импорта контрагентов.md": "ZeBugFix",
+  "Заметки/Om/Пустота": {
+    "iconName": "SiInternetcomputer",
+    "iconColor": "#ff6c0a"
+  },
+  "Заметки/Om/Пустота/Психология": {
+    "iconName": "LiHeartPulse",
+    "iconColor": "#ff2424"
+  },
+  "Заметки/Дом/Готовка": "ZePan",
+  "Заметки/Дом/Готовка/Картошечка с капусткой.md": "🍲",
+  "Ежедневник/2025-07-03 (четверг).md": "🍯"
+}

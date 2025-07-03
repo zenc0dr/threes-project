@@ -1,0 +1,655 @@
+{
+  "workspaces": {
+    "np": {
+      "main": {
+        "id": "bc732fabb17ce3a3",
+        "type": "split",
+        "children": [
+          {
+            "id": "25717fbc5784742e",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "d512b6a294f86fc3",
+                "type": "leaf",
+                "pinned": true,
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Ежедневник/2025-02-18 (вторник).md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "pinned": true,
+                  "icon": "lucide-file",
+                  "title": "2025-02-18 (вторник)"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical"
+      },
+      "left": {
+        "id": "1af1b9d5e536f13a",
+        "type": "split",
+        "children": [
+          {
+            "id": "100de81b2d1f14d6",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "3603a3cf29576536",
+                "type": "leaf",
+                "state": {
+                  "type": "file-explorer",
+                  "state": {
+                    "sortOrder": "alphabetical",
+                    "autoReveal": false
+                  },
+                  "icon": "lucide-folder-closed",
+                  "title": "Файловый менеджер"
+                }
+              },
+              {
+                "id": "faa3018e7b8a3662",
+                "type": "leaf",
+                "state": {
+                  "type": "tag",
+                  "state": {
+                    "sortOrder": "frequency",
+                    "useHierarchy": true,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-tags",
+                  "title": "Теги"
+                }
+              },
+              {
+                "id": "8f0eec2fc18b81e5",
+                "type": "leaf",
+                "state": {
+                  "type": "search",
+                  "state": {
+                    "query": "Tailor",
+                    "matchingCase": false,
+                    "explainSearch": false,
+                    "collapseAll": true,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical"
+                  },
+                  "icon": "lucide-search",
+                  "title": "Поиск"
+                }
+              },
+              {
+                "id": "39d4b0df0b137235",
+                "type": "leaf",
+                "state": {
+                  "type": "recent-files",
+                  "state": {},
+                  "icon": "clock",
+                  "title": "Recent Files"
+                }
+              },
+              {
+                "id": "9b669febbb8a4809",
+                "type": "leaf",
+                "state": {
+                  "type": "bookmarks",
+                  "state": {},
+                  "icon": "lucide-bookmark",
+                  "title": "Закладки"
+                }
+              },
+              {
+                "id": "c2a03ab29a439cce",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Soft/Менеджмент/Obsidian/Горячие клавиши Obsidian.md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "Горячие клавиши Obsidian"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 325.5
+      },
+      "right": {
+        "id": "1357ee01974693df",
+        "type": "split",
+        "children": [
+          {
+            "id": "100607b6841423e8",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "b77ee329fe43f113",
+                "type": "leaf",
+                "state": {
+                  "type": "backlink",
+                  "state": {
+                    "file": "Программирование/OctoberCMS/Документация/Модель/Связи.md",
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical",
+                    "showSearch": false,
+                    "searchQuery": "",
+                    "backlinkCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-coming-in",
+                  "title": "Обратные ссылки для Связи"
+                }
+              },
+              {
+                "id": "ed04a72112e0ba20",
+                "type": "leaf",
+                "state": {
+                  "type": "outgoing-link",
+                  "state": {
+                    "file": "Ежедневник/2024-12-04 (среда).md",
+                    "linksCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-going-out",
+                  "title": "Исходящие ссылки из 2024-12-04 (среда)"
+                }
+              },
+              {
+                "id": "c254d79ef0a75fe4",
+                "type": "leaf",
+                "state": {
+                  "type": "outline",
+                  "state": {
+                    "file": "Проекты/nopreset/Проекты/KTnG/Задачи/Багтрекер/62011 - Ошибка данных маршрута.md",
+                    "followCursor": false,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-list",
+                  "title": "Структура 62011 - Ошибка данных маршрута"
+                }
+              }
+            ],
+            "currentTab": 2
+          }
+        ],
+        "direction": "horizontal",
+        "width": 294.5
+      },
+      "left-ribbon": {
+        "hiddenItems": {
+          "switcher:Меню быстрого перехода": false,
+          "graph:Граф": false,
+          "canvas:Создать новый холст": false,
+          "daily-notes:Сегодняшняя заметка": false,
+          "templates:Вставить шаблон": false,
+          "command-palette:Открыть палитру команд": false,
+          "obsidian-kanban:Создать новую доску": false,
+          "omnisearch:Omnisearch": false,
+          "obsidian-git:Open Git source control": false,
+          "workspaces:Пространства": false
+        }
+      },
+      "active": "3603a3cf29576536",
+      "mtime": "2025-02-18T13:27:50+04:00"
+    },
+    "az": {
+      "main": {
+        "id": "bc732fabb17ce3a3",
+        "type": "split",
+        "children": [
+          {
+            "id": "0a5d73a458c7c542",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "13685b6a80b4246d",
+                "type": "leaf",
+                "pinned": true,
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Проекты/Азимут-Тур/azimu81/Разработка/build_3.md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "pinned": true,
+                  "icon": "lucide-file",
+                  "title": "build_3"
+                }
+              },
+              {
+                "id": "87922cb2a4880274",
+                "type": "leaf",
+                "pinned": true,
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Проекты/Азимут-Тур/azimu81/Заметки/Преобразование городов.md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "pinned": true,
+                  "icon": "lucide-file",
+                  "title": "Преобразование городов"
+                }
+              },
+              {
+                "id": "679e48ad4c599b78",
+                "type": "leaf",
+                "state": {
+                  "type": "canvas",
+                  "state": {
+                    "file": "Проекты/OctoberStudio/Проекты/Threes/Схемы/Юнит вызывающий UI.canvas",
+                    "viewState": {
+                      "x": 1017.222221348375,
+                      "y": 200.203379739701,
+                      "zoom": -5.551115123125783e-16
+                    }
+                  },
+                  "icon": "lucide-layout-dashboard",
+                  "title": "Юнит вызывающий UI"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical"
+      },
+      "left": {
+        "id": "1af1b9d5e536f13a",
+        "type": "split",
+        "children": [
+          {
+            "id": "100de81b2d1f14d6",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "3603a3cf29576536",
+                "type": "leaf",
+                "state": {
+                  "type": "file-explorer",
+                  "state": {
+                    "sortOrder": "alphabetical",
+                    "autoReveal": false
+                  },
+                  "icon": "lucide-folder-closed",
+                  "title": "Файловый менеджер"
+                }
+              },
+              {
+                "id": "faa3018e7b8a3662",
+                "type": "leaf",
+                "state": {
+                  "type": "tag",
+                  "state": {
+                    "sortOrder": "frequency",
+                    "useHierarchy": true,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-tags",
+                  "title": "Теги"
+                }
+              },
+              {
+                "id": "8f0eec2fc18b81e5",
+                "type": "leaf",
+                "state": {
+                  "type": "search",
+                  "state": {
+                    "query": "синхрони",
+                    "matchingCase": false,
+                    "explainSearch": false,
+                    "collapseAll": true,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical"
+                  },
+                  "icon": "lucide-search",
+                  "title": "Поиск"
+                }
+              },
+              {
+                "id": "39d4b0df0b137235",
+                "type": "leaf",
+                "state": {
+                  "type": "recent-files",
+                  "state": {},
+                  "icon": "clock",
+                  "title": "Recent Files"
+                }
+              },
+              {
+                "id": "9b669febbb8a4809",
+                "type": "leaf",
+                "state": {
+                  "type": "bookmarks",
+                  "state": {},
+                  "icon": "lucide-bookmark",
+                  "title": "Закладки"
+                }
+              },
+              {
+                "id": "c2a03ab29a439cce",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Soft/Менеджмент/Obsidian/Горячие клавиши Obsidian.md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "Горячие клавиши Obsidian"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 346.5
+      },
+      "right": {
+        "id": "1357ee01974693df",
+        "type": "split",
+        "children": [
+          {
+            "id": "100607b6841423e8",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "b77ee329fe43f113",
+                "type": "leaf",
+                "state": {
+                  "type": "backlink",
+                  "state": {
+                    "file": "Программирование/OctoberCMS/Документация/Модель/Связи.md",
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical",
+                    "showSearch": false,
+                    "searchQuery": "",
+                    "backlinkCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-coming-in",
+                  "title": "Обратные ссылки для Связи"
+                }
+              },
+              {
+                "id": "ed04a72112e0ba20",
+                "type": "leaf",
+                "state": {
+                  "type": "outgoing-link",
+                  "state": {
+                    "file": "Ежедневник/2024-12-04 (среда).md",
+                    "linksCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-going-out",
+                  "title": "Исходящие ссылки из 2024-12-04 (среда)"
+                }
+              },
+              {
+                "id": "c254d79ef0a75fe4",
+                "type": "leaf",
+                "state": {
+                  "type": "outline",
+                  "state": {
+                    "file": "Проекты/Азимут-Тур/azimu81/Разработка/build_3.md",
+                    "followCursor": false,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-list",
+                  "title": "Структура build_3"
+                }
+              }
+            ],
+            "currentTab": 2
+          }
+        ],
+        "direction": "horizontal",
+        "width": 294.5,
+        "collapsed": true
+      },
+      "left-ribbon": {
+        "hiddenItems": {
+          "switcher:Меню быстрого перехода": false,
+          "graph:Граф": false,
+          "canvas:Создать новый холст": false,
+          "daily-notes:Сегодняшняя заметка": false,
+          "templates:Вставить шаблон": false,
+          "command-palette:Открыть палитру команд": false,
+          "obsidian-kanban:Создать новую доску": false,
+          "omnisearch:Omnisearch": false,
+          "obsidian-git:Open Git source control": false,
+          "workspaces:Пространства": false
+        }
+      },
+      "active": "13685b6a80b4246d",
+      "mtime": "2025-02-18T09:43:00+04:00"
+    },
+    "om": {
+      "main": {
+        "id": "bc732fabb17ce3a3",
+        "type": "split",
+        "children": [
+          {
+            "id": "25717fbc5784742e",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "3220d48c95ecce5d",
+                "type": "leaf",
+                "pinned": true,
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Заметки/OM/OM Контроль цифрового пространства.md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "pinned": true,
+                  "icon": "lucide-file",
+                  "title": "OM Контроль цифрового пространства"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical"
+      },
+      "left": {
+        "id": "1af1b9d5e536f13a",
+        "type": "split",
+        "children": [
+          {
+            "id": "100de81b2d1f14d6",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "3603a3cf29576536",
+                "type": "leaf",
+                "state": {
+                  "type": "file-explorer",
+                  "state": {
+                    "sortOrder": "alphabetical",
+                    "autoReveal": false
+                  },
+                  "icon": "lucide-folder-closed",
+                  "title": "Файловый менеджер"
+                }
+              },
+              {
+                "id": "faa3018e7b8a3662",
+                "type": "leaf",
+                "state": {
+                  "type": "tag",
+                  "state": {
+                    "sortOrder": "frequency",
+                    "useHierarchy": true,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-tags",
+                  "title": "Теги"
+                }
+              },
+              {
+                "id": "8f0eec2fc18b81e5",
+                "type": "leaf",
+                "state": {
+                  "type": "search",
+                  "state": {
+                    "query": "Tailor",
+                    "matchingCase": false,
+                    "explainSearch": false,
+                    "collapseAll": true,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical"
+                  },
+                  "icon": "lucide-search",
+                  "title": "Поиск"
+                }
+              },
+              {
+                "id": "39d4b0df0b137235",
+                "type": "leaf",
+                "state": {
+                  "type": "recent-files",
+                  "state": {},
+                  "icon": "clock",
+                  "title": "Recent Files"
+                }
+              },
+              {
+                "id": "9b669febbb8a4809",
+                "type": "leaf",
+                "state": {
+                  "type": "bookmarks",
+                  "state": {},
+                  "icon": "lucide-bookmark",
+                  "title": "Закладки"
+                }
+              },
+              {
+                "id": "c2a03ab29a439cce",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Soft/Менеджмент/Obsidian/Горячие клавиши Obsidian.md",
+                    "mode": "source",
+                    "source": false,
+                    "backlinks": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "Горячие клавиши Obsidian"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 325.5
+      },
+      "right": {
+        "id": "1357ee01974693df",
+        "type": "split",
+        "children": [
+          {
+            "id": "100607b6841423e8",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "b77ee329fe43f113",
+                "type": "leaf",
+                "state": {
+                  "type": "backlink",
+                  "state": {
+                    "file": "Программирование/OctoberCMS/Документация/Модель/Связи.md",
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical",
+                    "showSearch": false,
+                    "searchQuery": "",
+                    "backlinkCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-coming-in",
+                  "title": "Обратные ссылки для Связи"
+                }
+              },
+              {
+                "id": "ed04a72112e0ba20",
+                "type": "leaf",
+                "state": {
+                  "type": "outgoing-link",
+                  "state": {
+                    "file": "Ежедневник/2024-12-04 (среда).md",
+                    "linksCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-going-out",
+                  "title": "Исходящие ссылки из 2024-12-04 (среда)"
+                }
+              },
+              {
+                "id": "c254d79ef0a75fe4",
+                "type": "leaf",
+                "state": {
+                  "type": "outline",
+                  "state": {
+                    "file": "Заметки/OM/OM Контроль цифрового пространства.md",
+                    "followCursor": false,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-list",
+                  "title": "Структура OM Контроль цифрового пространства"
+                }
+              }
+            ],
+            "currentTab": 2
+          }
+        ],
+        "direction": "horizontal",
+        "width": 294.5
+      },
+      "left-ribbon": {
+        "hiddenItems": {
+          "switcher:Меню быстрого перехода": false,
+          "graph:Граф": false,
+          "canvas:Создать новый холст": false,
+          "daily-notes:Сегодняшняя заметка": false,
+          "templates:Вставить шаблон": false,
+          "command-palette:Открыть палитру команд": false,
+          "obsidian-kanban:Создать новую доску": false,
+          "omnisearch:Omnisearch": false,
+          "obsidian-git:Open Git source control": false,
+          "workspaces:Пространства": false
+        }
+      },
+      "active": "3220d48c95ecce5d",
+      "mtime": "2025-02-18T12:48:22+04:00"
+    }
+  },
+  "active": "np"
+}

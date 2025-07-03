@@ -1,0 +1,17 @@
+/* Унифицированный стиль для inline-code */
+.markdown-rendered code {
+	background-color: #d0fff3 !important; /* нежный мятный, как на твоём примере */
+	color: #168172 !important;
+	padding: 0.1em 0.3em;
+	border-radius: 5px;
+	font-size: 0.95em;
+}
+
+/* Обеспечим такой же стиль и внутри таблиц */
+.markdown-rendered table code {
+	background-color: #d0fff3 !important;
+	color: #168172 !important;
+	padding: 0.1em 0.3em;
+	border-radius: 5px;
+	font-size: 0.95em;
+}

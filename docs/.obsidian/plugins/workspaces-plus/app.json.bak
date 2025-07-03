@@ -1,0 +1,20 @@
+{
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "Assets",
+  "promptDelete": false,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Заметки/0. Сток",
+  "showUnsupportedFiles": true,
+  "pdfExportSettings": {
+    "pageSize": "A4",
+    "landscape": false,
+    "margin": "0",
+    "downscalePercent": 80
+  },
+  "userIgnoreFilters": [
+    "Программирование/Laravel/Laravel docs/",
+    "Assets/"
+  ],
+  "spellcheck": false,
+  "readableLineLength": true
+}

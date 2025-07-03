@@ -1,0 +1,6 @@
+/* Зачёркнутый текст серым цветом */
+.markdown-rendered del,
+.cm-strikethrough {
+	color: #999 !important;
+	text-decoration-color: #666 !important;
+}

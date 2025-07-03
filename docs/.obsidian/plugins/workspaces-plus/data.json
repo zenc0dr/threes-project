@@ -1,0 +1,15 @@
+{
+  "showInstructions": true,
+  "showDeletePrompt": true,
+  "saveOnSwitch": false,
+  "saveOnChange": true,
+  "workspaceSettings": false,
+  "systemDarkMode": false,
+  "globalSettings": {},
+  "activeWorkspaceDesktop": "Nopreset",
+  "activeWorkspaceMobile": "",
+  "reloadLivePreview": false,
+  "workspaceSwitcherRibbon": true,
+  "modeSwitcherRibbon": true,
+  "replaceNativeRibbon": true
+}
