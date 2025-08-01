@@ -124,6 +124,13 @@ class Node extends ThreesApi
     {
         return $this->requireAuth(function () {
             $call = request('call');
+
+            $allowedPrefix = 'Zen.Threes.Classes.Methods.';
+            if (!is_string($call) || !str_starts_with($call, $allowedPrefix)) {
+                ths()->messages()->addMessage('Недопустимый вызов метода', 'error');
+                return ['success' => false];
+            }
+
             return ths()->exe($call);
         });
     }
